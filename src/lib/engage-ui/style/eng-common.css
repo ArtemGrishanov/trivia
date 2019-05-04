@@ -1,0 +1,19 @@
+p {
+    margin: 0;
+    padding: 0;
+}
+
+.eng-app {
+    background-color: #eee;
+}
+
+.eng-screen {
+    min-width: 100px;
+    min-height: 40px;
+    background-color: #eee;
+}
+
+.eng-quiz-slide {
+    width: 100%;
+    border: 1px solid black;
+}
