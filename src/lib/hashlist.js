@@ -312,12 +312,21 @@ class HashList {
     }
 
     /**
-     * 
+     * Create a clone with the same ids and value instances
      */
     shallowClone() {
         const cloned = new HashList();
         cloned._orderedIds = this._orderedIds.slice();
         cloned._value = this._getValuesShallowCopy();
+        return cloned;
+    }
+
+    /**
+     * use different ids for cloning
+     */
+    clone() {
+        const cloned = new HashList();
+        this._orderedIds.forEach( (id) => cloned.addElement( JSON.parse(JSON.stringify(this[id])) ));
         return cloned;
     }
 

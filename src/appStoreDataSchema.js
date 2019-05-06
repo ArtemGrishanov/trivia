@@ -64,6 +64,13 @@ const schema = new DataSchema({
         ]
     },
 
+    "quiz.[questions HashList]./^[0-9a-z]+$/.options./^[0-9a-z]+$/.text": {
+        type: "string",
+        default: "Option text",
+        minLength: 1,
+        maxLength: 256
+    },
+
     "quiz.[results HashList]": {
         type: "hashlist",
         default: new HashList([
@@ -86,6 +93,7 @@ const schema = new DataSchema({
         //
         
         // 2) а можно описать здесь селектор как было в MutApp
+        // так проще добавлять новые стили
         // но не будет событий, подписки на события, общего механизма. как отслеживать и обновлять актуальное значение цвета
         //TODO посмотреть что там было
     }

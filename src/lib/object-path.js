@@ -107,10 +107,37 @@ export class Selector {
         return result;
     }
 
+    /**
+     * 
+     * @param {object} obj 
+     * @param {boolean} resolvedPathesOnly 
+     */
+    getPathes(obj, resolvedPathesOnly) {
+        if (obj === undefined || obj === null) {
+            throw new Error('Object is not specified');
+        }
+        const pathes = [];
+        const clb = (next) => {
+            if (next.done) {
+                pathes.push(next.path)
+            }
+            else if (!resolvedPathesOnly && next.value === undefined) {
+                // if rest does not contain reg exp -> it's not full path, but a path and we may add it to the result
+                const containRegEx = next.restTokens.filter( (t) => this._isRegExpString(t) ).length > 0;
+                if (!containRegEx) {
+                    // this is unresolved path
+                    pathes.push(next.path + "." + next.restTokens.join('.'));
+                }
+            }
+        };
+        this._iterate(obj, clb, this._tokens, '');
+        return pathes;
+    }
+
     assign(obj, value) {
-        // if (!this.canAssign()) {
-        //     throw new Error('Cannot use this selector for assignment');
-        // }
+        if (!this.canAssign()) {
+            throw new Error('Cannot use this selector for assignment');
+        }
         if (obj === undefined || obj === null) {
             throw new Error('Object is not specified');
         }
@@ -130,10 +157,10 @@ export class Selector {
      * Check we may use selector for assignment
      * Obviously I may not use with selectors with regexp? or may we?
      */
-    // canAssign() {
-    //     //TODO check for regexp
-    //     return this._selector.indexOf('/') < 0;
-    // }
+    canAssign() {
+        //TODO check for regexp
+        return this._selector.indexOf('/') < 0;
+    }
 
     _isRegExpString(str) {
         return str.length > 2 && str[0] === "/" && str[str.length-1] === "/";
@@ -168,10 +195,11 @@ export class Selector {
         else if (obj[ti.name] === undefined) {
             func({
                 propName: ti.name,
-                path: actualPath,
+                path: actualPath + (actualPath ? ".": "") + ti.name,
                 value: obj[ti.name],
                 parentObj: obj,
-                done: selectorTokens.length === 1
+                done: selectorTokens.length === 1,
+                restTokens: selectorTokens.slice(1)
             });
             if (obj.hasOwnProperty(ti.name)) {
                 // property was added in client code
@@ -201,7 +229,8 @@ export class Selector {
                 path: candidatePath,
                 value: obj[cname],
                 parentObj: obj,
-                done: selectorTokens.length === 1
+                done: selectorTokens.length === 1,
+                restTokens: selectorTokens.slice(1)
             });
             if (selectorTokens.length > 1 && obj[cname] !== undefined && obj[cname] !== null) {
                 this._iterate(obj[cname], func, selectorTokens.slice(1), candidatePath, throwErrorOnTypeMismatch);
@@ -246,6 +275,19 @@ export class Selector {
 export function getPropertiesBySelector(obj, selector) {
     const s = new Selector(selector);
     return s.fetch(obj);
+}
+
+/**
+ * Convert selector into array of pathes. It might be one path or many if selector contains regular expressions
+ * If obj does not contain full path
+ * 
+ * @param {object} obj
+ * @param {selector} selector
+ * @param {boolean} resolvedPathesOnly
+ */
+export function getPathes(obj, selector, resolvedPathesOnly = false) {
+    const s = new Selector(selector);
+    return s.getPathes(obj, resolvedPathesOnly);
 }
 
 /**

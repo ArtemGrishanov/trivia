@@ -1,4 +1,4 @@
-import { getPropertiesBySelector, assignByPropertyString } from './object-path'
+import { getPropertiesBySelector, assignByPropertyString, getPathes } from './object-path'
 import HashList from "./hashlist";
 
 export default class Normalizer {
@@ -28,28 +28,34 @@ export default class Normalizer {
                     assignByPropertyString(state, res.path, normValue);
                 });
             }
-            else { //if (this.dataSchema.props[selector].createIfNotExist !== false)
+            else {
+                // no properties were found, we must create new pathes and values
 
-                // внутри там селектор понимается как пасс хотя это не так всегда
-                // --
-                // нужно создать по регэкспу сабпроперти ? по идее да
+                // нужно создать по регэкспу сабпроперти ? по идее да это второй вариант ниже который описан
+                // иначе это присвоение одного и тоже значения (а не копий) в разные ветви стейта
                 // создать свойства а потом присвоить?
+                //assignByPropertyString(state, selector, this.processValue(selector, undefined));
 
-                // еще ошибка в матчингом - сначала ее рассмотреть
-                assignByPropertyString(state, selector, this.processValue(selector, undefined));
+                // 2.
+                const pathes = getPathes(state, selector)
+                pathes.forEach((path) => {
+                    const normValue = this.processValue(path, undefined); // важно: делаем это каждый раз, так как нам нужен новый инстанс значения в каждый path стейта
+                    assignByPropertyString(state, path, normValue)
+                });
             }
         });
         return state;
     }
 
+    /**
+     * 
+     * @param {string} path 
+     * @param {*} value 
+     */
     processValue(path, value) {
         const propDescription = this.dataSchema.getDescription(path);
         if (!propDescription) {
             throw new Error('Normalizer: "' + path + '" is not find in dataSchema');
-        }
-
-        if (value === undefined) {
-            return propDescription.default;
         }
 
         switch(propDescription.type.toLowerCase()) {
@@ -59,7 +65,11 @@ export default class Normalizer {
             case "hashlist": {
                 return this.processHashlist(propDescription, value);
             }
-            default:
+            default: {
+                if (value === undefined) {
+                    return propDescription.default;
+                }
+            }
         }
         
         return value;
@@ -70,6 +80,9 @@ export default class Normalizer {
     }
 
     processNumber(info, value) {
+        if (value === undefined) {
+            value = info.default;
+        }
         if (value < info.min) {
             value = info.min;
         }
@@ -86,13 +99,13 @@ export default class Normalizer {
      */
     processHashlist(info, value) {
         if (value instanceof HashList === false) {
-            if (Array.isArray(value._orderedIds)) {
+            if (value && Array.isArray(value._orderedIds)) {
                 // it is maybe a deserialized object
                 // try to convert it to HashList
                 value = new HashList(value);
             }
             else {
-                value = info.default;
+                value = info.default.clone();
             }
         }
         //TODO min, max size of value
