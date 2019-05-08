@@ -1,14 +1,15 @@
-import DataSchema from './schema'
-import Normalizer from './normalizer'
+import DataSchema from './schema.js'
+import Normalizer from './normalizer.js'
 import {
     assignByPropertyString,
     getPropertiesBySelector
-} from './object-path'
+} from './object-path.js'
 
 const LOG = true;
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 export const REMIX_INIT_ACTION = '__Remix_init_action__';
 export const REMIX_HASHLIST_ADD_ACTION = '__Remix_hashlist_update_action__';
+export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_position_action__'
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
 
 const remix = {};
@@ -127,17 +128,50 @@ function addHashlistElement(hashlistPropPath, index, prototypeId) {
         type: REMIX_HASHLIST_ADD_ACTION,
         path: hashlistPropPath,
         index: index
-    })
+    });
 }
 
+/**
+ * 
+ * @param {number} elementIndex 
+ * @param {number} newElementIndex 
+ */
+function changePositionInHashlist(hashlistPropPath, elementIndex, newElementIndex) {
+    if (Number.isInteger(elementIndex) === false || elementIndex < 0) {
+        throw new Error('Remix.changePositionInHashlist: Illegal elementIndex param');
+    }
+    if (Number.isInteger(newElementIndex) === false || newElementIndex < 0) {
+        throw new Error('Remix.changePositionInHashlist: Illegal newElementIndex param');
+    }
+    if (!schema.getDescription(hashlistPropPath)) {
+        throw new Error(`Remix.changePositionInHashlist: ${hashlistPropPath} is not described in schema`);
+    }
+    store.dispatch({
+        type: REMIX_HASHLIST_CHANGE_POSITION_ACTION,
+        path: hashlistPropPath,
+        elementIndex: elementIndex,
+        newElementIndex: newElementIndex
+    });
+}
 
-// container can change size only
-// /**
-// * Set app size
-// */
-// function setSize({width, height}) {
-//     // TODO ...
-// }
+/**
+ * 
+ * @param {string} hashlistPropPath 
+ * @param {number} index 
+ */
+function deleteHashlistElement(hashlistPropPath, index) {
+    if (hashlistPropPath === undefined) {
+        throw new Error('Remix.deleteElement: hashlistPropPath is not specified');
+    }
+    if (!schema.getDescription(hashlistPropPath)) {
+        throw new Error(`Remix.deleteElement: ${hashlistPropPath} is not described in schema`);
+    }
+    store.dispatch({
+        type: REMIX_HASHLIST_DELETE_ACTION,
+        path: hashlistPropPath,
+        index: index
+    });
+}
 
 /**
 * @param {Object} schema
@@ -287,15 +321,38 @@ export function remixReducer(reducer, dataSchema) {
         }
         else if (action.type === REMIX_HASHLIST_ADD_ACTION) {
             nextState = state;
-            const targetHashlist = getPropertiesBySelector(nextState, action.path)[0].value;
+            const targetHashlist = fetchHashlist(nextState, action.path, action.type);
             //TODO how to specify prototype id or index
             const newElement = clone(schema.getDescription(action.path).prototypes[0].data);
             targetHashlist.addElement(newElement, action.index);
+            // we must set a new value for redux
+            //TODO
+            //const newhl = targetHashlist.shallowClone();
             assignByPropertyString(nextState, action.path, targetHashlist);
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
             // - например перераспределить баллы по результатам с появлением нового вопроса
             // - например создать новый экран (хотя это в компонентах может быть)
             nextState = {...reducer(state, {type: "REMIX_HASHLIST_ELEMENT_WAS_ADDED", property: action.path})};
+        }
+        else if (action.type === REMIX_HASHLIST_CHANGE_POSITION_ACTION) {
+            nextState = state;
+            const targetHashlist = fetchHashlist(nextState, action.path, action.type);
+            targetHashlist.changePosition(action.elementIndex, action.newElementIndex);
+            assignByPropertyString(nextState, action.path, targetHashlist);
+            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
+            // - например перераспределить баллы по результатам с появлением нового вопроса
+            // - например создать новый экран (хотя это в компонентах может быть)
+            nextState = {...reducer(state, {type: "REMIX_HASHLIST_ELEMENT_POSITION_WAS_CHANGED", property: action.path})};
+        }
+        else if (action.type === REMIX_HASHLIST_DELETE_ACTION) {
+            nextState = state;
+            const targetHashlist = fetchHashlist(nextState, action.path, action.type);
+            targetHashlist.deleteElement(action.index);
+            assignByPropertyString(nextState, action.path, targetHashlist);
+            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
+            // - например перераспределить баллы по результатам с появлением нового вопроса
+            // - например создать новый экран (хотя это в компонентах может быть)
+            nextState = {...reducer(state, {type: "REMIX_HASHLIST_ELEMENT_WAS_DELETED", property: action.path})};
         }
         else {
             //TODO actions @@redux/INIT come first
@@ -317,6 +374,24 @@ export function remixReducer(reducer, dataSchema) {
 
         //TODO calc diff between states and return "data_create" "data_edit" "data_deleted" events!
     }
+}
+
+/**
+ * Helper function
+ * 
+ * @param {*} path 
+ * @param {*} state 
+ * @param {*} action 
+ */
+function fetchHashlist(state, path, actionType) {
+    const fetchResult = getPropertiesBySelector(state, path);
+    if (fetchResult.length === 0) {
+        throw new Error(`Remix: no properties were found "${path}" for this action "${actionType}"`);
+    }
+    if (fetchResult.length > 1) {
+        throw new Error(`Remix: you may not perform this action "${actionType}" only with one property, but ${fetchResult.length} were found in ${path}`);
+    }
+    return fetchResult[0].value;
 }
 
 function clone(obj) {
@@ -348,6 +423,8 @@ export function serializeStore() {
 remix.init = init;
 remix.setData = setData;
 remix.addHashlistElement = addHashlistElement;
+remix.changePositionInHashlist = changePositionInHashlist;
+remix.deleteHashlistElement = deleteHashlistElement;
 remix.serializeStore = serializeStore;
 
 export default remix

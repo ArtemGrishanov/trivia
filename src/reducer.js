@@ -19,7 +19,8 @@ const initialState = {
         // questions: {
 
         // }
-    }
+    },
+    style: {}
 }
 
 function app(state = initialState.app, action) {
@@ -42,7 +43,14 @@ function quiz(state = initialState.quiz, action) {
     }
 }
 
-const reducer = remixReducer(combineReducers({app, quiz}), schema);
+function style(state = initialState.style, action) {
+    switch(action.type) {
+        default:
+            return state;
+    }
+}
+
+const reducer = remixReducer(combineReducers({app, quiz, style}), schema);
 
 export default reducer
 

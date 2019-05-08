@@ -1,5 +1,5 @@
-import Format from './format'
-import { getTokens, matchPropertyPath } from './object-path';
+import Format from './format.js'
+import { getTokens, matchPropertyPath } from './object-path.js';
 
 export default class DataSchema {
 
