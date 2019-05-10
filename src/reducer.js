@@ -1,7 +1,8 @@
 import { combineReducers } from 'redux'
 import { remixReducer } from './lib/remix'
 import schema from './appStoreDataSchema'
-import HashList from './lib/hashlist'
+import actions from './actions'
+import { getOption, getQuestionIdByOption, calcResult } from './helper'
 
 const initialState = {
     // app specific data tree
@@ -16,11 +17,20 @@ const initialState = {
         // }
     },
     quiz: {
-        // questions: {
-
-        // }
+        // questions: Hashlist,
+        // results: Hashlist,
+        answers: {
+            // <questionId>: <points>,
+            // "werq123": 1,
+            // ""
+            // calc current step
+            // calc result in the end
+        },
+        result: null // result: <resultId>
     },
-    style: {}
+    style: {
+
+    }
 }
 
 function app(state = initialState.app, action) {
@@ -32,10 +42,34 @@ function app(state = initialState.app, action) {
 
 function quiz(state = initialState.quiz, action) {
     switch(action.type) {
-        // add new questions...
-
-        // delete questions...
-
+        // ON add new questions...
+        // ON delete questions...
+        case actions.ANSWER: {
+            // action.optionId
+            const points = getOption(state.questions, action.optionId).points;
+            const questionId = getQuestionIdByOption(state.questions, action.optionId);
+            const answers = {
+                ...state.answers,
+                [questionId]: points
+            };
+            let resultId = null;
+            if (Object.keys(answers).length === state.results.toArray().length) {
+                // ответили на все вопросы, можно подсчитать результат
+                resultId = calcResult(state.questions, state.results, Object.values(answers).reduce((a,b) => a+b) );
+            }
+            return {
+                ...state,
+                answers: answers,
+                result: resultId
+            }
+        }
+        case actions.INIT: {
+            return {
+                ...state,
+                answers: {},
+                result: null
+            }
+        }
         default: {
             console.log('>>>>> Client reducer code for action: ' + action.type);
             return state;
@@ -50,39 +84,15 @@ function style(state = initialState.style, action) {
     }
 }
 
-const reducer = remixReducer(combineReducers({app, quiz, style}), schema);
-
-export default reducer
-
-// const initialState = {
-//     quiz: {
-//         questions: [
-//             {
-//                 options: [
-//                     {text: 'Option1', points: 1},
-//                     {text: 'Option2', points: 0}
-//                 ]
-//             }
-//         ],
-//         randomizeQuestions: false
-//     }
-// };
-
-// function quiz(action) {
-//     switch (action.event) {
-//         case "SET_CORRECT_OPTION": {
-//             // этот экшн разрешен в DataSchema проекта
-//             // action.optionId - передается ид опции, которая считается верным ответом
-
-//             break;
-//         }
-//         case "DELETE_OPTION": {
-//             // action.optionId - передается ид опции, которую необходимо удалить из вопроса
-
-//             //TODO при удалении ответа, если он был корректным, надо сделать верным другой ближайший ответ
-            
-//             //TODO обратно должно инициироваться обновление стейта наружу
-//             break
+// function user(state = initialState.user, action) {
+//     switch(action.type) {
+        
+//         default: {
+//             return state;
 //         }
 //     }
 // }
+
+const reducer = remixReducer(combineReducers({app, quiz, style}), schema);
+
+export default reducer

@@ -54,13 +54,13 @@ const schema = new DataSchema({
     "quiz.[questions HashList]./^[0-9a-z]+$/.options": {
         type: "hashlist",
         default: new HashList([
-            { text: "Option 1"},
-            { text: "Option 2"}
+            { text: "Option 1", points: 1},
+            { text: "Option 2", points: 0}
         ]),
         minLength: 1,
         maxLength: 9,
         prototypes: [
-            {id: "text_option", data: { type: "text_option", text: "New option"}}
+            {id: "text_option", data: { type: "text_option", text: "New option", points: 0}}
         ]
     },
 

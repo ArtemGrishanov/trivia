@@ -9,6 +9,13 @@ export default class QuizSlide extends React.Component {
         this.state = {
 
         };
+        //this.onOptionClick = this.onOptionClick.bind(this);
+    }
+
+    onOptionClick(optionId) {
+        if (this.props.onOptionSelect) {
+            this.props.onOptionSelect(optionId);
+        }
     }
     
     render() {
@@ -24,7 +31,10 @@ export default class QuizSlide extends React.Component {
                 <div>
                     <ul>
                         {
-                            arr.map( (o, i) => <button key={i}>{o.text}</button>)
+                            arr.map( (o, i) => {
+                                const id = this.props.options.getId(i);
+                                return (<button data-oid={id} key={id} onClick={this.onOptionClick.bind(this, id)}>{o.text}</button>)
+                            })
                         }
                     </ul>
                 </div>
@@ -33,19 +43,3 @@ export default class QuizSlide extends React.Component {
     }
 
 }
-
-/**
- * Props schema
- * Which props could be edited and how (types, range and other rules)
- */
-export const QuizSlideSchema = new DataSchema({
-    "text": {
-        type: 'string',
-        default: "Input question text"
-    },
-    "options": {
-        type: 'HashList',
-        default: [],
-        minLength: 1
-    }
-});
