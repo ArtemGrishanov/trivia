@@ -42,8 +42,10 @@ function app(state = initialState.app, action) {
 
 function quiz(state = initialState.quiz, action) {
     switch(action.type) {
-        // ON add new questions...
-        // ON delete questions...
+        //TODO ON add new questions...
+
+        //TODO ON delete questions...
+
         case actions.ANSWER: {
             // action.optionId
             const points = getOption(state.questions, action.optionId).points;
@@ -70,6 +72,18 @@ function quiz(state = initialState.quiz, action) {
                 result: null
             }
         }
+        case actions.SET_CORRECT_OPTION: {
+            // action.questionIndex, action.optionIndex
+            const qid = state.questions.getId(action.questionIndex);
+            const options = state.questions[qid].options;
+            options.toArray().forEach( (o, i) => {
+                // only one option is correct
+                o.points = (i === action.optionIndex) ? 1: 0;
+            });
+            return {
+                ...state
+            }
+        }
         default: {
             console.log('>>>>> Client reducer code for action: ' + action.type);
             return state;
@@ -83,15 +97,6 @@ function style(state = initialState.style, action) {
             return state;
     }
 }
-
-// function user(state = initialState.user, action) {
-//     switch(action.type) {
-        
-//         default: {
-//             return state;
-//         }
-//     }
-// }
 
 const reducer = remixReducer(combineReducers({app, quiz, style}), schema);
 

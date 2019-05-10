@@ -24,6 +24,7 @@ let containerWindow = null;
 let store = null;
 let schema = null;
 let normalizer = null;
+let extActions = null;
 let root = null;
 let initialSize = null;
 let mode = 'none'; // edit | preview | published
@@ -113,6 +114,28 @@ function setData(data) {
 }
 
 /**
+ * Dispatches an action defined in Remix.init
+ * External action can be used for state modification in reducer which can not be descibed in schema
+ * For example: "set quiz correct option"
+ * 
+ * @param {string} type 
+ * @param {object} param 
+ */
+function dispatchAction(type, param) {
+    const actInfo = extActions.find( (act) => type === act.type);
+    if (actInfo) {
+        param = new Normalizer(actInfo.paramSchema).process(param);
+        store.dispatch({
+            ...param,
+            type: type
+        });
+    }
+    else {
+        throw new Error(`Remix: this action ${type} is not defined. Use Remix.init() to define some external actions.`);
+    }
+}
+
+/**
  * 
  * @param {string} hashlistPropPath 
  * @param {number} index 
@@ -176,13 +199,14 @@ function deleteHashlistElement(hashlistPropPath, index) {
 /**
 * @param {Object} schema
 */
-function init({appStore = null, container = null}) {
+function init({appStore = null, externalActions = [], container = null}) {
     store = appStore;
     // if (!dataSchema) {
     //     throw new  Error('Remix: schema is not defined');;
     // }
     //schema = dataSchema;
     root = container;
+    extActions = externalActions || [];
     //normalizer = new Normalizer(schema: schema);
     store.dispatch({
         type: REMIX_INIT_ACTION
@@ -426,6 +450,7 @@ remix.addHashlistElement = addHashlistElement;
 remix.changePositionInHashlist = changePositionInHashlist;
 remix.deleteHashlistElement = deleteHashlistElement;
 remix.serializeStore = serializeStore;
+remix.dispatchAction = dispatchAction;
 
 export default remix
 window.remix = remix; // for debug

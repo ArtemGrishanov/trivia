@@ -16,7 +16,7 @@ export default class Normalizer {
      * 
      * @param {object} state 
      */
-    process(state) {
+    process(state = {}) {
         // check al selectors in application schema
         this.dataSchema.selectorsInProcessOrder.forEach( (selector) => {
             // get all possible pathes in state for this selector

@@ -7,11 +7,27 @@ import App from './App';
 
 import store from './store'
 import Remix from './lib/remix'
-import schema from './appStoreDataSchema'
+import actions from './actions'
+import DataSchema from './lib/schema';
 
 Remix.init({
     appStore: store,
-    dataSchema: schema,
+    externalActions: [{
+        comment: 'Use in to set correct option in quiz. Simpy dispatch this action and code in reducer will do operations.',
+        type: actions.SET_CORRECT_OPTION,
+        paramSchema: new DataSchema({
+            "questionIndex": {
+                type: "number",
+                default: 0,
+                min: 0
+            },
+            "optionIndex": {
+                type: "number",
+                default: 0,
+                min: 0
+            }
+        })
+    }],
     container: document.getElementById('root')
 });
 
