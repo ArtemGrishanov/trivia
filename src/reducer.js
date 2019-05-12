@@ -55,7 +55,7 @@ function quiz(state = initialState.quiz, action) {
                 [questionId]: points
             };
             let resultId = null;
-            if (Object.keys(answers).length === state.results.toArray().length) {
+            if (Object.keys(answers).length === state.questions.toArray().length) {
                 // ответили на все вопросы, можно подсчитать результат
                 resultId = calcResult(state.questions, state.results, Object.values(answers).reduce((a,b) => a+b) );
             }

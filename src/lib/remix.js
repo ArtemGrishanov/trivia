@@ -36,10 +36,12 @@ window.addEventListener("message", receiveMessage, false);
  * @param {Object} event
  */
 function receiveMessage({origin = null, data = {}, source = null}) {
+    if (data.method) {
+        log(data.method + ' message received');
+    }
     if (EXPECTED_CONTAINER_ORIGIN && origin !== EXPECTED_CONTAINER_ORIGIN) {
         return;
     }
-    log(data.method + ' message received');
     if (data.method === 'init') {
         containerOrigin = origin;
         containerWindow = source;
@@ -101,12 +103,9 @@ function receiveMessage({origin = null, data = {}, source = null}) {
 /**
 * Assign new property values to store
 *
-* @param {object | string} data
+* @param {object} data
 */
 function setData(data) {
-    if (typeof data === "string") {
-        data = JSON.parse(data);
-    }
     store.dispatch({
         type: REMIX_UPDATE_ACTION,
         data: data
@@ -289,15 +288,6 @@ function eventEmitterTick() {
 }
 
 /**
-* sync editor data and getState()
-*/
-function syncData() {
-    // compare prevData vs curData
-    // const diff = schema.getDiff(prevStoreState, currentStoreState);
-    // put events in queue based on "diff"
-}
-
-/**
 * High Order Reducer:
 * - data normalization
 */
@@ -311,7 +301,7 @@ export function remixReducer(reducer, dataSchema) {
     }
     schema = dataSchema;
     normalizer = new Normalizer(schema);
-    log('Remix: data schema added: properties count ' + Object.keys(schema).length);
+    log('Remix: data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
         log(`Remix.remixReducer: action.type="${action.type}" state=`, state);
@@ -321,70 +311,53 @@ export function remixReducer(reducer, dataSchema) {
             nextState = {...state};
         }
         else if (action.type === REMIX_UPDATE_ACTION) {
-            // special remix action
             if (!action.data) {
                 throw new Error('Remix: action.data is not specified');
             }
-            nextState = {...state};
-            const pathesArr = Array.isArray(action.data) ? action.data.map((p) => p.path): Object.keys(action.data);
-            const pathesValues = Array.isArray(action.data) ? action.data.reduce((res, elem) => { return {...res, [elem.path]: elem.value} }, {}): action.data;
-            pathesArr.forEach( (path) => {
-                const propDescription = schema.getDescription(path);
-                if (!propDescription) {
-                    throw new Error(`Remix: can not find description for path "${path}" in schema`);
-                }
-                const propResult = getPropertiesBySelector(nextState, path);
-                if (propResult.length === 0) {
-                    throw new Error(`Remix: there is no such property ${path} in state`);
-                }
-                else {
-                    const value = normalizer.processValue(path, pathesValues[path]);
-                    assignByPropertyString(nextState, path, value);
-                }
-            });
+            nextState = _cloneState(state);
+            _doUpdate(nextState, action.data);
         }
         else if (action.type === REMIX_HASHLIST_ADD_ACTION) {
-            nextState = state;
+            nextState = _cloneState(state);
             const targetHashlist = fetchHashlist(nextState, action.path, action.type);
             //TODO how to specify prototype id or index
             const newElement = clone(schema.getDescription(action.path).prototypes[0].data);
             targetHashlist.addElement(newElement, action.index);
-            // we must set a new value for redux
+            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
+            
             //TODO
-            //const newhl = targetHashlist.shallowClone();
-            assignByPropertyString(nextState, action.path, targetHashlist);
+            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_ADDED", property: action.path})};
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
             // - например перераспределить баллы по результатам с появлением нового вопроса
             // - например создать новый экран (хотя это в компонентах может быть)
-            nextState = {...reducer(state, {type: "REMIX_HASHLIST_ELEMENT_WAS_ADDED", property: action.path})};
         }
         else if (action.type === REMIX_HASHLIST_CHANGE_POSITION_ACTION) {
-            nextState = state;
+            nextState = _cloneState(state);
             const targetHashlist = fetchHashlist(nextState, action.path, action.type);
             targetHashlist.changePosition(action.elementIndex, action.newElementIndex);
-            assignByPropertyString(nextState, action.path, targetHashlist);
+            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
+            
+            //TODO
+            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_POSITION_WAS_CHANGED", property: action.path})};
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
             // - например перераспределить баллы по результатам с появлением нового вопроса
             // - например создать новый экран (хотя это в компонентах может быть)
-            nextState = {...reducer(state, {type: "REMIX_HASHLIST_ELEMENT_POSITION_WAS_CHANGED", property: action.path})};
         }
         else if (action.type === REMIX_HASHLIST_DELETE_ACTION) {
-            nextState = state;
+            nextState = _cloneState(state);
             const targetHashlist = fetchHashlist(nextState, action.path, action.type);
             targetHashlist.deleteElement(action.index);
-            assignByPropertyString(nextState, action.path, targetHashlist);
+            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
+            
+            //TODO
+            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_DELETED", property: action.path})};
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
             // - например перераспределить баллы по результатам с появлением нового вопроса
             // - например создать новый экран (хотя это в компонентах может быть)
-            nextState = {...reducer(state, {type: "REMIX_HASHLIST_ELEMENT_WAS_DELETED", property: action.path})};
         }
         else {
-            //TODO actions @@redux/INIT come first
-            // check state, based on schema
-
-            //TODO normalize here too !
-            
-            // regular app action
+            // it maybe @@redux/INITx.x.x.x actions 
+            // it maybe a regular app action
             nextState = reducer(state, action);
         }
         log('Remix.remixReducer: next state: ', nextState);
@@ -394,10 +367,98 @@ export function remixReducer(reducer, dataSchema) {
             nextState = normalizer.process(nextState);
             log('Remix.remixReducer: normalized next state: ', nextState);
         }
+        const d = diff(state, nextState);
+        if (d.added.length > 0 || d.changed.length > 0 || d.deleted.length > 0) {
+            console.log('Diff', d);
+            // history.push(nextState);
+        }
+        //TODO sendEvents(d);
         return nextState;
-
-        //TODO calc diff between states and return "data_create" "data_edit" "data_deleted" events!
     }
+}
+
+/**
+ * 
+ * @param {object} state 
+ * @param {array | object} data 
+ */
+function _doUpdate(state, data) {
+    const pathesArr = Array.isArray(data) ? data.map((p) => p.path): Object.keys(data);
+    const pathesValues = Array.isArray(data) ? data.reduce((res, elem) => { return {...res, [elem.path]: elem.value} }, {}): data;
+    pathesArr.forEach( (path) => {
+        const propDescription = schema.getDescription(path);
+        if (!propDescription) {
+            throw new Error(`Remix: can not find description for path "${path}" in schema`);
+        }
+        const propResult = getPropertiesBySelector(state, path);
+        if (propResult.length === 0) {
+            throw new Error(`Remix: there is no such property ${path} in state`);
+        }
+        else {
+            const value = normalizer.processValue(path, pathesValues[path]);
+            assignByPropertyString(state, path, value);
+        }
+    });
+}
+
+/**
+ * Calc a diff netween states
+ * 
+ * @param {*} prevState
+ * @param {*} nextState
+ */
+function diff(prevState = {}, nextState = {}) {
+    const result = {
+        added: [],
+        changed: [],
+        deleted: []
+    };
+    schema.selectorsInProcessOrder.forEach( (selector) => {
+        // get all possible pathes in state for this selector
+        const psRes = getPropertiesBySelector(prevState, selector);
+        const nsRes = getPropertiesBySelector(nextState, selector);
+        for (let i = 0; i < nsRes.length; i++) {
+            const nsProp = nsRes[i]
+            const psProp = (psRes.length > 0) ? _getPropAndDelete(psRes, nsProp.path): null;
+            if (psProp) {
+                // this property exists in both states, check for modification
+                if (_isHashlistInstance(psProp.value) && _isHashlistInstance(nsProp.value)) {
+                    // hashlist comparison
+                    if (!psProp.value.equal(nsProp.value)) {
+                        result.changed.push(nsProp);
+                    }
+                }
+                else if (psProp.value !== nsProp.value) {
+                    // default comparison
+                    result.changed.push(nsProp);
+                }
+            }
+            else {
+                // new property
+                result.added.push(nsProp);
+            }
+        }
+        for (let i = 0; i < psRes.length; i++) {
+            result.deleted.push(psRes[i]);
+        }
+    });
+    return result;
+}
+
+function _isHashlistInstance(obj) {
+    return obj.constructor && typeof obj.constructor.name === "string" && obj.constructor.name.toLowerCase() === "hashlist";
+}
+
+function _getPropAndDelete(props, propPath) {
+    let index = -1;
+    props.find( (p, i) => {
+        if (p.path === propPath) {
+            index = i;
+            return true;
+        }
+        return false;
+    });
+    return (index >= 0) ? props.splice(index, 1)[0]: null;
 }
 
 /**
@@ -423,24 +484,54 @@ function clone(obj) {
 }
 
 /**
+ * Deep cloning of all dynamic properties
+ * 
+ * @param {object} state 
+ * @return {object} new state
+ */
+function _cloneState(state) {
+    const json = serialize(state);
+    // important to clone all embedded objects in path, ex. "app" and "size" in ""app.size.width"
+    const newState = JSON.parse(JSON.stringify(state));
+    // then assign all dynamic properties. because we must instantiate Hashlist with hashlist func constructor (not "object", when clonning JSON.parse - JSON.stringify)
+    // TODO ideally you may write custom clone algorythm
+    _doUpdate(newState, JSON.parse(json));
+    return newState;
+}
+
+/**
  * Serialize dynamic store properties
- * We use array to order properties. From more common to specific
+ * We use array to order properties. From more common props to specific ones
  * 
  * @returns {string} example - '{"quiz.questions":{"_orderedIds":["54bwai","5lokro"],"54bwai":{"text":"Input your question"},"5lokro":{"text":"Input your question num2"}},"app.size.width":400,"app.size.height":400,"quiz.questions.54bwai.text":"Input your question","quiz.questions.5lokro.text":"Input your question num2"}'
  * You can see duplicate values ('Input your question'), It's OK when hashlist is serilized
  */
-export function serializeStore() {
+export function serialize(state) {
     // по схеме выбрать все пассы и сохранить их в объект
     const res = [];
-    const state = store.getState();
+    const st = state || store.getState();
     schema.selectorsInProcessOrder.forEach((selector) => {
-        const propsToSerialize = getPropertiesBySelector(state, selector);
+        const propsToSerialize = getPropertiesBySelector(st, selector);
         propsToSerialize.forEach((prop) => {
-            console.log('serialize: ', prop.path)
             res.push({path: prop.path, value: prop.value});
         });
     });
     return JSON.stringify(res);
+}
+
+/**
+ * Deserialize dynamic store properties
+ * You can put string got from serialize method
+ * 
+ * @param {string} json 
+ */
+export function deserialize(json) {
+    if (typeof json === "string") {
+        remix.setData(JSON.parse(json));
+    }
+    else {
+        throw new Error('Remix: json string expected')
+    }
 }
 
 // public methods
@@ -449,7 +540,8 @@ remix.setData = setData;
 remix.addHashlistElement = addHashlistElement;
 remix.changePositionInHashlist = changePositionInHashlist;
 remix.deleteHashlistElement = deleteHashlistElement;
-remix.serializeStore = serializeStore;
+remix.serialize = serialize;
+remix.deserialize = deserialize
 remix.dispatchAction = dispatchAction;
 
 export default remix

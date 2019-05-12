@@ -312,6 +312,29 @@ class HashList {
     }
 
     /**
+     * Compares elements count, ids and values
+     * @param {boolean}  
+     */
+    equal(otherHashlist) {
+        if (this.length !== otherHashlist.length) {
+            return false;
+        }
+        const arr = otherHashlist.toArray();
+        for (let i = 0; i < arr.length; i++) {
+            const otid = otherHashlist.getId(i);
+            const id = this.getId(i);
+            if (otid !== id) {
+                // compare id order
+                return false;
+            }
+            // кажется, что достаточно будет сравнить только ids двух hashlists так как они уникальны
+            // и не сравнивать значения внутри списков
+            // сравнение значений внутри будет произведено отдельно в remix.diff()
+        }
+        return true;
+    }
+
+    /**
      * Create a clone with the same ids and value instances
      */
     shallowClone() {
