@@ -5,9 +5,8 @@ import {
     getPropertiesBySelector
 } from './object-path.js'
 
-const LOG = true;
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
-export const REMIX_INIT_ACTION = '__Remix_init_action__';
+//export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
 export const REMIX_HASHLIST_ADD_ACTION = '__Remix_hashlist_update_action__';
 export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_position_action__'
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
@@ -18,7 +17,9 @@ const remix = {};
 //const containerOrigin = "http://localhost:8080";
 const EXPECTED_CONTAINER_ORIGIN = null;
 const MODE_SET = new Set(['edit', 'preview', 'published']);
+const LOG_BY_DEFAULT = false;
 
+let logging = LOG_BY_DEFAULT;
 let containerOrigin = null;
 let containerWindow = null;
 let store = null;
@@ -28,7 +29,10 @@ let extActions = null;
 let root = null;
 let initialSize = null;
 let mode = 'none'; // edit | preview | published
+let _lastUpdDiff = null;
+let _events = [];
 
+// establish communication with RContainer
 window.addEventListener("message", receiveMessage, false);
 
 /**
@@ -48,6 +52,7 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         if (MODE_SET.has(data.mode)) {
             mode = data.mode;
         }
+        logging = typeof data.log === "boolean" ? data.log: LOG_BY_DEFAULT;
         initialSize = data.initialSize;
         if (root) {
             root.style.maxWidth = initialSize.width+'px';
@@ -56,10 +61,9 @@ function receiveMessage({origin = null, data = {}, source = null}) {
             root.style.position = 'relative';
             root.style.overflow = 'hidden';
         }
-        containerWindow.postMessage({
-            schema: schema,
-            method: 'inited'
-        }, containerOrigin);
+        _putEventInQueue('inited', {schema: schema, css: "TODO: pass css string from project to container."}, 0);
+        // before this 'init' we may already have some events in queue
+        _sendEvents();
     }
     else if (data.method === 'run') {
         // Container can set size only
@@ -87,18 +91,26 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     if (data.method === 'setdata') {
         setData(data.data);
     }
+    if (data.method === 'serialize') {
+        _putEventInQueue('serialized', {state: serialize2()});
+        _sendEvents();
+    }
+    if (data.method === 'setsize') {
+        setSize(data.width, data.height);
+    }
+    if (data.method === 'addhashlistelement') {
+        addHashlistElement(data.propertyPath, data.index, data.prototypeId);
+    }
+    if (data.method === 'changepositioninhashlist') {
+        changePositionInHashlist(data.propertyPath, data.elementIndex, data.newElementIndex);
+    }
+    if (data.method === 'deletehashlistelement') {
+        deleteHashlistElement(data.propertyPath, {
+            elementId: data.elementId,
+            index: data.index
+        });
+    }
 }
-
-// containerWindow.postMessage({method: 'app_size_changed'}, containerOrigin);
-// containerWindow.postMessage({method: 'data_created'}, containerOrigin);
-// containerWindow.postMessage({method: 'data_changed'}, containerOrigin);
-// containerWindow.postMessage({method: 'data_deleted'}, containerOrigin);
-
-// view - на основании событий цикла реакт
-// containerWindow.postMessage({method: 'view_created'}, containerOrigin);
-// containerWindow.postMessage({method: 'view_rendered'}, containerOrigin);
-// containerWindow.postMessage({method: 'view_deleted'}, containerOrigin);
-// containerWindow.postMessage({method: 'send_data_state'}, containerOrigin); // on 'request_data_state'
 
 /**
 * Assign new property values to store
@@ -110,6 +122,43 @@ function setData(data) {
         type: REMIX_UPDATE_ACTION,
         data: data
     });
+}
+
+/**
+ * Sets application width and height
+ * Value sill be set if not "undefined"
+ * 
+ * @param {number} width 
+ * @param {number} height 
+ */
+function setSize(width, height) {
+    // find propertes in schema responsible for width and height
+    const data = {};
+    if (width !== undefined) {
+        const wprop = schema.getDescriptionsWithAttribute('appWidthProperty');
+        if (wprop && wprop.length > 0) {
+            if (wprop.length === 1) {
+                data[wprop[0].selector] = width;
+            }
+            else {
+                throw new Error(`Remix: found more than one selectors with "appWidthProperty" attribute`);
+            }
+        }
+    }
+    if (height !== undefined) {
+        const hprop = schema.getDescriptionsWithAttribute('appHeightProperty');
+        if (hprop && hprop.length > 0) {
+            if (hprop.length === 1) {
+                data[hprop[0].selector] = height;
+            }
+            else {
+                throw new Error(`Remix: found more than one selectors with "appHeightProperty" attribute`);
+            }
+        }
+    }
+    if (Object.keys(data).length > 0) {
+        setData(data);
+    }
 }
 
 /**
@@ -138,6 +187,7 @@ function dispatchAction(type, param) {
  * 
  * @param {string} hashlistPropPath 
  * @param {number} index 
+ * @param {string} prototypeId
  */
 function addHashlistElement(hashlistPropPath, index, prototypeId) {
     if (hashlistPropPath === undefined) {
@@ -179,9 +229,9 @@ function changePositionInHashlist(hashlistPropPath, elementIndex, newElementInde
 /**
  * 
  * @param {string} hashlistPropPath 
- * @param {number} index 
+ * @param {object} targetElement - specify targetElement.elementId or targetElement.index
  */
-function deleteHashlistElement(hashlistPropPath, index) {
+function deleteHashlistElement(hashlistPropPath, targetElement) {
     if (hashlistPropPath === undefined) {
         throw new Error('Remix.deleteElement: hashlistPropPath is not specified');
     }
@@ -191,7 +241,7 @@ function deleteHashlistElement(hashlistPropPath, index) {
     store.dispatch({
         type: REMIX_HASHLIST_DELETE_ACTION,
         path: hashlistPropPath,
-        index: index
+        ...targetElement
     });
 }
 
@@ -200,16 +250,11 @@ function deleteHashlistElement(hashlistPropPath, index) {
 */
 function init({appStore = null, externalActions = [], container = null}) {
     store = appStore;
-    // if (!dataSchema) {
-    //     throw new  Error('Remix: schema is not defined');;
-    // }
-    //schema = dataSchema;
     root = container;
     extActions = externalActions || [];
-    //normalizer = new Normalizer(schema: schema);
-    store.dispatch({
-        type: REMIX_INIT_ACTION
-    });
+    // store.dispatch({
+    //     type: REMIX_INIT_ACTION
+    // });
 }
 
 /**
@@ -273,8 +318,8 @@ function isNumeric(n) {
 }
 
 function log(...msg) {
-    if (LOG) {
-        console.log(...msg);
+    if (logging) {
+        console.log('Remix:', ...msg);
     }
 }
 
@@ -301,16 +346,17 @@ export function remixReducer(reducer, dataSchema) {
     }
     schema = dataSchema;
     normalizer = new Normalizer(schema);
-    log('Remix: data schema added. Selectors count ' + Object.keys(schema).length);
+    log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
-        log(`Remix.remixReducer: action.type="${action.type}" state=`, state);
+        log(`remixReducer: action.type="${action.type}" state=`, state);
         let nextState = null;
-        if (action.type === REMIX_INIT_ACTION) {
-            // empty data action, for data normalization
-            nextState = {...state};
-        }
-        else if (action.type === REMIX_UPDATE_ACTION) {
+        // if (action.type === REMIX_INIT_ACTION) {
+        //     // empty data action, for data normalization
+        //     nextState = {...state};
+        // }
+        // else
+        if (action.type === REMIX_UPDATE_ACTION) {
             if (!action.data) {
                 throw new Error('Remix: action.data is not specified');
             }
@@ -346,7 +392,15 @@ export function remixReducer(reducer, dataSchema) {
         else if (action.type === REMIX_HASHLIST_DELETE_ACTION) {
             nextState = _cloneState(state);
             const targetHashlist = fetchHashlist(nextState, action.path, action.type);
-            targetHashlist.deleteElement(action.index);
+            if (action.elementId) {
+                targetHashlist.deleteElementById(action.elementId);
+            }
+            else if (action.index >= 0) {
+                targetHashlist.deleteElement(action.index);
+            }
+            else {
+                throw new Error('Remix: can not delete hashlist element. You must specify "elementId" or "index"');
+            }
             //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
             
             //TODO
@@ -360,19 +414,20 @@ export function remixReducer(reducer, dataSchema) {
             // it maybe a regular app action
             nextState = reducer(state, action);
         }
-        log('Remix.remixReducer: next state: ', nextState);
+        log('remixReducer: next state: ', nextState);
         // normalize data according to schema
         // in first start it's need to be normalized and store filled with default values
         if (normalizer) {
             nextState = normalizer.process(nextState);
-            log('Remix.remixReducer: normalized next state: ', nextState);
+            log('remixReducer: normalized next state: ', nextState);
         }
-        const d = diff(state, nextState);
-        if (d.added.length > 0 || d.changed.length > 0 || d.deleted.length > 0) {
-            console.log('Diff', d);
+        _lastUpdDiff = diff(state, nextState);
+        if (_lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0) {
+            log('Diff', _lastUpdDiff);
+            _putEventInQueue('properties_changed', {..._lastUpdDiff, state: serialize2(nextState)});
             // history.push(nextState);
         }
-        //TODO sendEvents(d);
+        _sendEvents();
         return nextState;
     }
 }
@@ -461,6 +516,36 @@ function _getPropAndDelete(props, propPath) {
     return (index >= 0) ? props.splice(index, 1)[0]: null;
 }
 
+function _putEventInQueue(method, data, eventIndex) {
+    if (eventIndex !== undefined) {
+        _events.splice(eventIndex, 0, {method: method, data: data});
+    }
+    else {
+        _events.push({method: method, data: data});
+    }
+}
+
+//TODO очередь зачем? реализовать отправку по таймеру?
+function _sendEvents() {
+    // containerWindow.postMessage({method: 'app_size_changed'}, containerOrigin); ?
+    // containerWindow.postMessage({method: 'send_data_state'}, containerOrigin); // on 'request_data_state'
+    while (containerWindow && containerOrigin && _events.length > 0) {
+        const e = _events.shift();
+        // in postMessage default serialization algorythm is used https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
+        // hashlist will be serialized as object
+        containerWindow.postMessage({...e.data, method: e.method }, containerOrigin);
+    }
+}
+
+function _getLastUpdateDiff() {
+    return _lastUpdDiff;
+}
+
+function _setScreenEvents(updateData) {
+    _putEventInQueue('screens_update', updateData);
+    _sendEvents();
+}
+
 /**
  * Helper function
  * 
@@ -520,6 +605,62 @@ export function serialize(state) {
 }
 
 /**
+ * 
+ * 
+ * @result {string} json string object, only dynamic properties are included in this tree.
+ * "app": {
+ *      "size": {
+ *          "width": 120,
+ *          "height": 200
+ *      }
+ * },
+ * "quiz": {
+ *      "questions": {
+ *          "54bwai": {
+ *              text: 'Question title'
+ *          },
+ *          "ret67q": {
+ *              
+ *          }
+ *      }
+ * }
+ * 
+ * In this algorithm there is no duplicate values. Good for micro Editor. Moreover it is shorter.
+ */
+export function serialize2(state) {
+    const res = {};
+    const st = state;
+    if (!st) {
+        if (store)
+            st = store.getState();
+        else 
+            return;
+    }
+    schema.selectorsInProcessOrder.forEach((selector) => {
+        const propsToSerialize = getPropertiesBySelector(st, selector);
+        propsToSerialize.forEach((prop) => {
+            if (_isHashlistInstance(prop.value)) {
+                let shallowValue = {};
+                // Prepare hashlist with empty items (only keys and orders)
+                // quiz
+                //  questions:
+                //    "54bwai": {},
+                //    "ret67q": {}
+                Object.keys(prop.value).forEach( (k) => shallowValue[k] = {});
+                assignByPropertyString(res, prop.path, {
+                    ...shallowValue,
+                    _orderedIds: prop.value._orderedIds
+                });
+            }
+            else {
+                assignByPropertyString(res, prop.path, prop.value);
+            }
+        });
+    });
+    return JSON.stringify(res);
+}
+
+/**
  * Deserialize dynamic store properties
  * You can put string got from serialize method
  * 
@@ -537,12 +678,21 @@ export function deserialize(json) {
 // public methods
 remix.init = init;
 remix.setData = setData;
+remix.setSize = setSize;
 remix.addHashlistElement = addHashlistElement;
 remix.changePositionInHashlist = changePositionInHashlist;
 remix.deleteHashlistElement = deleteHashlistElement;
 remix.serialize = serialize;
+remix.serialize2 = serialize2;
 remix.deserialize = deserialize
 remix.dispatchAction = dispatchAction;
+remix._getLastUpdateDiff = _getLastUpdateDiff;
+remix._setScreenEvents = _setScreenEvents;
+remix._getSchema = () => schema;
+remix._setCss = () => {
+    //TODO set project css styles
+    // maybe use to-string-loader https://github.com/webpack-contrib/css-loader#tostring
+};
 
 export default remix
 window.remix = remix; // for debug

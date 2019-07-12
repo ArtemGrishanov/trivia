@@ -4,7 +4,7 @@ import { getTokens, matchPropertyPath } from './object-path.js';
 export default class DataSchema {
 
     constructor(schm) {
-        this.whitelistAttr = new Set(["type","min","max","default","format","enum","minLength","maxLength","elementSchema","prototypes"]);
+        this.whitelistAttr = new Set(["type","min","max","default","format","enum","minLength","maxLength","elementSchema","prototypes","appWidthProperty","appHeightProperty"]);
         this.mandatoryAttrs = ["type","default"];
         this.whitelistTypes = new Set(["number","string","boolean","hashlist","url","color"]); // TODO type Color? Url?
         this._validateSchema(schm);
@@ -24,7 +24,7 @@ export default class DataSchema {
     }
 
     /**
-     * example: path=quiz.questions.ugltc7.text, we must find quiz.[questions HashList].text
+     * example: path=quiz.questions.ugltc7.text, we should find quiz.[questions HashList].text
      * 
      * @param {string} path 
      * @return {string} selector
@@ -109,4 +109,23 @@ export default class DataSchema {
     //     console.log(json)
     //     return json;
     // }
+
+    /**
+     * Gets all descriptions where the attribute presents
+     * 
+     * @param {string} attrName
+     * @returns {Array}
+     */
+    getDescriptionsWithAttribute(attrName) {
+        const result = [];
+        Object.keys(this._schm).forEach( (prop) => {
+            if (this._schm[prop].hasOwnProperty(attrName)) {
+                result.push({
+                    selector: prop,
+                    value: this._schm[prop]
+                });
+            }
+        });
+        return result.length > 0 ? result: null;
+    }
 }

@@ -128,7 +128,7 @@ describe('Remix', function() {
         chai.assert.equal(q[qid].options[oid].text, expectedTitle);
     }
 
-    describe('#addHashlistElement', function() {
+    describe('#remix hashlist actions', function() {
 
         it('store inited successfully by remix', () => {
             checkState({
@@ -136,6 +136,9 @@ describe('Remix', function() {
                 questionsCount: 2,
                 optionsCount: [2,2]
             });
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 9);
+            chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 0);
+            chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 0);
         });
 
         it('addHashlistElement', () => {
@@ -148,6 +151,9 @@ describe('Remix', function() {
             checkQuestionTitle(store.getState(), 2, "New question title");
             checkOptionText(store.getState(), 2, 0, "Option 1")
             checkOptionText(store.getState(), 2, 1, "Option 2")
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 4);
+            chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 1);
+            chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 0);
 
             const newElemId = store.getState().quiz.questions.getId(2);
             Remix.addHashlistElement(`quiz.questions.${newElemId}.options`, 0); // 0 - in the beginning if hashlist
@@ -157,6 +163,9 @@ describe('Remix', function() {
                 optionsCount: [2,2,3] // +1 option
             });
             checkOptionText(store.getState(), 2, 0, "New option")
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 1);
+            chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 1);
+            chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 0);
         });
 
         it('changePositionInHashlist', () => {
@@ -169,6 +178,9 @@ describe('Remix', function() {
             checkQuestionTitle(store.getState(), 0, "New question title");
             checkQuestionTitle(store.getState(), 1, "Input your question 1");
             checkQuestionTitle(store.getState(), 2, "Input your question 2");
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 0);
+            chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 1);
+            chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 0);
         });
 
         it('deleteHashlistElement', () => {
@@ -180,6 +192,9 @@ describe('Remix', function() {
             });
             checkQuestionTitle(store.getState(), 0, "New question title");
             checkQuestionTitle(store.getState(), 1, "Input your question 2");
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 0);
+            chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 1);
+            chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 4);
 
             const lastQuestionId = store.getState().quiz.questions.getId(1);
             Remix.deleteHashlistElement(`quiz.questions.${lastQuestionId}.options`, 0);
@@ -188,6 +203,9 @@ describe('Remix', function() {
                 questionsCount: 2,
                 optionsCount: [3,1]
             });
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 0);
+            chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 1);
+            chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 1);
         });
     })
 });
