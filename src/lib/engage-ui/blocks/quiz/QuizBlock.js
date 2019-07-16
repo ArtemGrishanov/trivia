@@ -1,8 +1,6 @@
 import React from 'react'
-import DataSchema from '../../schema'
-import HashList from '../../hashlist'
 
-export default class QuizSlide extends React.Component {
+export default class QuizBlock extends React.Component {
 
     constructor(props) {
         super(props);
@@ -21,7 +19,7 @@ export default class QuizSlide extends React.Component {
     render() {
         const arr = this.props.options ? this.props.options.toArray(): [];
         return (
-            <div className="eng-quiz-slide">
+            <div className="rmx-quiz_block">
                 <p>{this.props.text}</p>
                 {this.props.imageSrc &&
                     <div>
@@ -33,7 +31,7 @@ export default class QuizSlide extends React.Component {
                         {
                             arr.map( (o, i) => {
                                 const id = this.props.options.getId(i);
-                                return (<button data-oid={id} key={id} onClick={this.onOptionClick.bind(this, id)}>{o.text}</button>)
+                                return (<button className="rmx-quiz_option" data-oid={id} key={id} onClick={this.onOptionClick.bind(this, id)}>{o.text}</button>)
                             })
                         }
                     </ul>

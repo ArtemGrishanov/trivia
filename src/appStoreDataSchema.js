@@ -1,7 +1,6 @@
 // import { RemixFormat } from './lib/remix'
 import { EngageAppSchema } from './lib/engage-ui/EngageApp.js'
 import DataSchema from './lib/schema.js';
-import QuizSlide from './lib/engage-ui/quiz/QuizSlide.js';
 import HashList from './lib/hashlist.js';
 //import { ProgressiveImage } from 'remix-ui'
 
@@ -54,8 +53,8 @@ const schema = new DataSchema({
     "quiz.[questions HashList]./^[0-9a-z]+$/.options": {
         type: "hashlist",
         default: new HashList([
-            { text: "Option 1", points: 1},
-            { text: "Option 2", points: 0}
+            { text: "Option 1", points: 0},
+            { text: "Option 2", points: 1}
         ]),
         minLength: 1,
         maxLength: 9,
@@ -63,12 +62,17 @@ const schema = new DataSchema({
             {id: "text_option", data: { type: "text_option", text: "New option", points: 0}}
         ]
     },
-
     "quiz.[questions HashList]./^[0-9a-z]+$/.options./^[0-9a-z]+$/.text": {
         type: "string",
         default: "Option text",
         minLength: 1,
         maxLength: 256
+    },
+    "quiz.[questions HashList]./^[0-9a-z]+$/.options./^[0-9a-z]+$/.points": {
+        type: "number",
+        default: 0,
+        min: 0,
+        max: 1
     },
 
     "quiz.[results HashList]": {
@@ -82,6 +86,18 @@ const schema = new DataSchema({
         prototypes: [
             {id: "result_with_text", data: { type: "result_with_text", title: "New result", description: "Result description"}}
         ]
+    },
+    "quiz.[results HashList]./^[0-9a-z]+$/.title": {
+        type: "string",
+        default: "Result Title",
+        minLength: 1,
+        maxLength: 256
+    },
+    "quiz.[results HashList]./^[0-9a-z]+$/.description": {
+        type: "string",
+        default: "Result description",
+        minLength: 1,
+        maxLength: 256
     },
 
     "style.startBackgroundColor": {

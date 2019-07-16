@@ -1,7 +1,7 @@
 import store from './store'
 
-export function getOption(questions, optionId) {
-    const qarr = questions.toArray();
+export function getOption(questionsHL, optionId) {
+    var qarr = questionsHL.toArray();
     for (let i = 0; i < qarr.length; i++) {
         if (qarr[i].options.hasOwnProperty(optionId)) {
             return qarr[i].options[optionId];
@@ -10,11 +10,11 @@ export function getOption(questions, optionId) {
     return null;
 }
 
-export function getQuestionIdByOption(questions, optionId) {
-    const qarr = questions.toArray();
+export function getQuestionIdByOption(questionsHL, optionId) {
+    var qarr = questionsHL.toArray();
     for (let i = 0; i < qarr.length; i++) {
         if (qarr[i].options.hasOwnProperty(optionId)) {
-            return questions.getId(i);
+            return questionsHL.getId(i);
         }
     }
     return null;

@@ -83,13 +83,13 @@ function receiveMessage({origin = null, data = {}, source = null}) {
             // }
         // }
 
-        setData(data.properties);
+        setData(data.properties, data.forceFeedback);
 
         //TODO start ?
         //window.start();
     }
     if (data.method === 'setdata') {
-        setData(data.data);
+        setData(data.data, data.forceFeedback);
     }
     if (data.method === 'serialize') {
         _putEventInQueue('serialized', {state: serialize2()});
@@ -117,10 +117,11 @@ function receiveMessage({origin = null, data = {}, source = null}) {
 *
 * @param {object} data
 */
-function setData(data) {
+function setData(data, forceFeedback) {
     store.dispatch({
         type: REMIX_UPDATE_ACTION,
-        data: data
+        data,
+        forceFeedback
     });
 }
 
@@ -190,6 +191,7 @@ function dispatchAction(type, param) {
  * @param {string} prototypeId
  */
 function addHashlistElement(hashlistPropPath, index, prototypeId) {
+    index = parseInt(index);
     if (hashlistPropPath === undefined) {
         throw new Error('Remix.addElement: hashlistPropPath is not specified');
     }
@@ -209,6 +211,8 @@ function addHashlistElement(hashlistPropPath, index, prototypeId) {
  * @param {number} newElementIndex 
  */
 function changePositionInHashlist(hashlistPropPath, elementIndex, newElementIndex) {
+    elementIndex = parseInt(elementIndex);
+    newElementIndex = parseInt(newElementIndex);
     if (Number.isInteger(elementIndex) === false || elementIndex < 0) {
         throw new Error('Remix.changePositionInHashlist: Illegal elementIndex param');
     }
@@ -422,7 +426,7 @@ export function remixReducer(reducer, dataSchema) {
             log('remixReducer: normalized next state: ', nextState);
         }
         _lastUpdDiff = diff(state, nextState);
-        if (_lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0) {
+        if (action.forceFeedback || _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0) {
             log('Diff', _lastUpdDiff);
             _putEventInQueue('properties_changed', {..._lastUpdDiff, state: serialize2(nextState)});
             // history.push(nextState);

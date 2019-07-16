@@ -107,7 +107,8 @@ export default class Normalizer {
     }
 
     processNumber(info, value) {
-        if (value === undefined) {
+        value = parseFloat(value);
+        if (value === undefined || Number.isNaN(value)) {
             value = info.default;
         }
         if (value < info.min) {

@@ -1,6 +1,13 @@
 import React from 'react'
-import './style/eng-common.css';
+import './style/rmx-common.css';
 
+/**
+ * Это контейнер визуальных элементов,
+ * Весь UI приложения разбит на такие вот экраны.
+ * Поддерживает условный показ "if"
+ * Растягивается по всему доступному пространству приложения
+ * Может использоваться анимация для переключения экранов
+ */
 export default class Screen extends React.Component {
     
     static defaultProps = {
@@ -17,8 +24,11 @@ export default class Screen extends React.Component {
     //TODO no content stub in the screen
 
     render() {
+        const s = {
+            backgroundColor: this.props.backgroundColor
+        };
         return (
-            <div className="eng-screen">
+            <div  style={s} className="rmx-screen">
                 {this.props.children}
             </div>
         )

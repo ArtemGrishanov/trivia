@@ -7,7 +7,7 @@ import App from './App';
 
 import store from './store'
 import Remix from './lib/remix'
-import actions from './actions'
+import {actions, init} from './actions'
 import DataSchema from './lib/schema';
 
 Remix.init({
@@ -30,6 +30,8 @@ Remix.init({
     }],
     container: document.getElementById('root')
 });
+
+store.dispatch(init(store.getState().quiz.questions));
 
 ReactDOM.render(
     <Provider store={store}>

@@ -19,6 +19,13 @@ const initialState = {
     quiz: {
         // questions: Hashlist,
         // results: Hashlist,
+    },
+    style: {
+
+    },
+    session: {
+        questionIds: [],
+        currentQuestionIndex: 0,
         answers: {
             // <questionId>: <points>,
             // "werq123": 1,
@@ -27,9 +34,6 @@ const initialState = {
             // calc result in the end
         },
         result: null // result: <resultId>
-    },
-    style: {
-
     }
 }
 
@@ -46,32 +50,6 @@ function quiz(state = initialState.quiz, action) {
 
         //TODO ON delete questions...
 
-        case actions.ANSWER: {
-            // action.optionId
-            const points = getOption(state.questions, action.optionId).points;
-            const questionId = getQuestionIdByOption(state.questions, action.optionId);
-            const answers = {
-                ...state.answers,
-                [questionId]: points
-            };
-            let resultId = null;
-            if (Object.keys(answers).length === state.questions.toArray().length) {
-                // ответили на все вопросы, можно подсчитать результат
-                resultId = calcResult(state.questions, state.results, Object.values(answers).reduce((a,b) => a+b) );
-            }
-            return {
-                ...state,
-                answers: answers,
-                result: resultId
-            }
-        }
-        case actions.INIT: {
-            return {
-                ...state,
-                answers: {},
-                result: null
-            }
-        }
         case actions.SET_CORRECT_OPTION: {
             // action.questionIndex, action.optionIndex
             const qid = state.questions.getId(action.questionIndex);
@@ -98,6 +76,47 @@ function style(state = initialState.style, action) {
     }
 }
 
-const reducer = remixReducer(combineReducers({app, quiz, style}), schema);
+function session(state = initialState.session, action) {
+    switch(action.type) {
+        case actions.INIT: {
+            // подготовить вопросы, перемешать вопросы например
+            return {
+                ...state,
+                answers: {},
+                currentQuestionIndex: 0,
+                questionIds: action.questions.toArray().map((q, i) => {
+                    //return {...q, id: action.questions.getId(i)}
+                    return action.questions.getId(i);
+                    //TODO shuffle option
+                }),
+                result: null
+            }
+        }
+        case actions.ANSWER: {
+            // action.optionId
+            const points = getOption(action.questions, action.optionId).points;
+            const questionId = getQuestionIdByOption(action.questions, action.optionId);
+            const answers = {
+                ...state.answers,
+                [questionId]: points
+            };
+            let resultId = null;
+            if (Object.keys(answers).length === state.questionIds.length) {
+                // ответили на все вопросы, можно подсчитать результат
+                resultId = calcResult(action.questions, action.results, Object.values(answers).reduce((a,b) => a+b) );
+            }
+            return {
+                ...state,
+                answers: answers,
+                result: resultId,
+                currentQuestionIndex: state.currentQuestionIndex + 1
+            }
+        }
+        default:
+            return state;
+    }
+}
+
+const reducer = remixReducer(combineReducers({app, quiz, style, session}), schema);
 
 export default reducer

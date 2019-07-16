@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import DataSchema from '../schema'
 import Remix from '../remix'
 
-import './style/eng-common.css';
+import './style/rmx-common.css';
 
 /**
  * TODO
@@ -125,8 +125,9 @@ class EngageApp extends React.Component {
                 result.deleted.push(scr);
             }
         });
-        //console.log('Screens: ', result);
-        Remix._setScreenEvents(result);
+        if (result.added.length > 0 || result.changed.length > 0 || result.deleted.length > 0) {
+            Remix._setScreenEvents(result);
+        }
     }
 
     getScreenById(screenArr = [], id) {

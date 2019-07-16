@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default class ResultSlide extends React.Component {
+export default class ResultBlock extends React.Component {
 
     constructor(props) {
         super(props);
@@ -22,7 +22,7 @@ export default class ResultSlide extends React.Component {
                 <p>{this.props.title}</p>
                 <p>{this.props.description}</p>
                 <div>
-                    <button onClick={this.onRestartClick}>Начать заново</button>
+                    <button className="rmx-button __white" onClick={this.onRestartClick}>Начать заново</button>
                 </div>
             </div>
         )
