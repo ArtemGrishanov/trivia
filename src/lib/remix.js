@@ -505,7 +505,8 @@ function diff(prevState = {}, nextState = {}) {
 }
 
 function _isHashlistInstance(obj) {
-    return obj.constructor && typeof obj.constructor.name === "string" && obj.constructor.name.toLowerCase() === "hashlist";
+    return obj._orderedIds && obj._orderedIds.length >= 0;
+    //return obj.constructor && typeof obj.constructor.name === "string" && obj.constructor.name.toLowerCase() === "hashlist";
 }
 
 function _getPropAndDelete(props, propPath) {
