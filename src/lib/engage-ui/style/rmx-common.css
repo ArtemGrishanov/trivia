@@ -26,10 +26,13 @@ p {
     font-size: 16px;
     background-color: #2990fb;
     border-radius: 4px;
-    padding: 12px 20px;
+    padding: 12px 20px 13px;
     border: none;
     cursor: pointer;
     outline: none;
+}
+.rmx-button.__small {
+    padding: 8px 20px 9px;
 }
 .rmx-button:hover {
     background-color: #1879ea;
@@ -37,7 +40,7 @@ p {
 .rmx-button.__white {
     color: #787878;
     background-color: #fff;
-    border: 1px solid #787878;
+    border: 1px solid #d8d8d8;
 }
 .rmx-button.__white:hover {
     background-color: #fafafa;
@@ -59,4 +62,14 @@ p {
 .rmx-quiz_option:hover {
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
     border: solid 1px #979797;
+}
+
+.rmx-control_wr {
+    display: inline-block;
+    vertical-align: top;
+    min-width: 120px;
+    min-height: 120px;
+    padding: 20px;
+    margin: 5px;
+    border: 1px solid #999;
 }

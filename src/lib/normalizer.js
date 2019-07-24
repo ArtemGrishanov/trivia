@@ -8,6 +8,9 @@ export default class Normalizer {
      * @param {DataSchema} dataSchema 
      */
     constructor(dataSchema) {
+        if (!dataSchema) {
+            throw new Error('DataSchema is not specified');
+        }
         this.dataSchema = dataSchema;
     }
 
@@ -92,6 +95,9 @@ export default class Normalizer {
             case "hashlist": {
                 return this.processHashlist(propDescription, value);
             }
+            case "string": {
+                return this.processString(propDescription, value);
+            }
             default: {
                 if (value === undefined) {
                     return propDescription.default;
@@ -116,6 +122,19 @@ export default class Normalizer {
         }
         else if (value > info.max) {
             value = info.max;
+        }
+        return value;
+    }
+
+    processString(info, value) {
+        if (value === undefined || value === null) {
+            value = info.default;
+        }
+        else if (info.minLength >= 0 && value.length < info.minLength) {
+            value = info.default;
+        }
+        else if (info.maxLength >= 0 && value.length > info.maxLength) {
+            value = info.default;
         }
         return value;
     }

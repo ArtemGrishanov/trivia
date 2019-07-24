@@ -2,6 +2,10 @@ const HtmlWebPackPlugin = require("html-webpack-plugin");
 
 module.exports = {
     mode: 'development',
+    entry: {
+        main: './src/index.js',
+        demo: './src/lib/engage-ui/demo/index.js'
+    },
     devServer: {
         contentBase: './dist'
     },
