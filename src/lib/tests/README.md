@@ -5,7 +5,7 @@ Install and Run
 Or you may use http server you like.
 
 2. Then run it with no cache option
-`cd %test directoty%`
+`cd %lib directoty%`
 `http-server -c-1`
 Go to http://127.0.0.1:8081/tests/test_remix-hashlist-operations.html or http://127.0.0.1:8081/tests/test_object-path.html or any test page you need.
 

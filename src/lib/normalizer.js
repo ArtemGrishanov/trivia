@@ -9,7 +9,7 @@ export default class Normalizer {
      */
     constructor(dataSchema) {
         if (!dataSchema) {
-            throw new Error('DataSchema is not specified');
+            throw new Error('dataSchema is not specified');
         }
         this.dataSchema = dataSchema;
     }
@@ -98,6 +98,9 @@ export default class Normalizer {
             case "string": {
                 return this.processString(propDescription, value);
             }
+            case "boolean": {
+                return this.processBoolean(propDescription, value);
+            }
             default: {
                 if (value === undefined) {
                     return propDescription.default;
@@ -127,14 +130,35 @@ export default class Normalizer {
     }
 
     processString(info, value) {
-        if (value === undefined || value === null) {
+        if (typeof value === 'string') {
+            // do nothing
+        }
+        else if (typeof value === 'number' || typeof value === 'boolean') {
+            value = value.toString();
+        }
+        else {
             value = info.default;
+        }
+        if (info.enum) {
+            if (!info.enum.includes(value.toLowerCase())) {
+                value = info.default;
+            }
         }
         else if (info.minLength >= 0 && value.length < info.minLength) {
             value = info.default;
         }
         else if (info.maxLength >= 0 && value.length > info.maxLength) {
-            value = info.default;
+            value = value.substr(0, info.maxLength);
+        }
+        return value;
+    }
+
+    processBoolean(info, value) {
+        if (value === undefined) {
+            value = !!info.default;
+        }
+        else {
+            value = !!value;
         }
         return value;
     }

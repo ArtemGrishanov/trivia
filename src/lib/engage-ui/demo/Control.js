@@ -19,20 +19,34 @@ export default class Control extends React.Component {
         });
     }
 
-    //TODO normalize on focus lost
-
     render() {
         const childrenWithProps = React.Children.map(this.props.children, child =>
             React.cloneElement(child, { ...this.state.editedProps })
         );
+        const selectors = this.props.schema ? this.props.schema.selectorsInProcessOrder: [];
         return (
-            <div>
-                <div className="rmx-control_wr">
+            <div className="rmx-control">
+                <div className="rmx-control_elem_wr">
                     {childrenWithProps}
                 </div>
-                <div>
-                    <label htmlFor="text">Текст кнопки</label>
-                    <input id="text" data-prop-name="text" onBlur={this.onFocus}></input>
+                <div className="rmx-control_fields_wr">
+                    {selectors.map((sel) => {
+                        return (
+                            <div key={sel}>
+                                <label htmlFor={sel}>{sel}</label>
+                                {this.props.schema.getDescription(sel).enum &&
+                                    <select data-prop-name={sel} defaultValue="" onChange={this.onFocus}>
+                                        {this.props.schema.getDescription(sel).enum.map((enval) =>
+                                            <option key={sel+':'+enval}>{enval}</option>
+                                        )}
+                                    </select>
+                                }
+                                {!this.props.schema.getDescription(sel).enum &&
+                                    <input id={sel} data-prop-name={sel} onBlur={this.onFocus}></input>
+                                }
+                            </div>
+                        )
+                    })}
                 </div>
             </div>
         )

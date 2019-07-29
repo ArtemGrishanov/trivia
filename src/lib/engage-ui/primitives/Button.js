@@ -1,9 +1,9 @@
 import React from 'react'
 import DataSchema from '../../schema'
-import Normalizer from '../../normalizer'
+import PropsNormalizer from '../PropsNormalizer'
 
-function Button({text="Button title", color = "blue", size = "normal"}) {
-    return <button className={`rmx-button __${color} __${size}`}>{text}</button>
+function Button({text="Button title", colorMod = "blue", sizeMod = "normal"}) {
+    return <button className={`rmx-button __${colorMod} __${sizeMod}`}>{text}</button>
 }
 
 /**
@@ -16,39 +16,18 @@ export const Schema = new DataSchema({
         minLength: 1,
         maxLength: 128,
         default: 'Default button title'
+    },
+    "sizeMod": {
+        type: 'string',
+        enum: ['small', 'normal'],
+        default: 'normal'
+    },
+    "colorMod": {
+        type: 'string',
+        enum: ['blue','white'],
+        default: 'blue'
     }
+    //TODO color format for strings, +tests
 });
 
 export default PropsNormalizer(Button, Schema);
-
-// size: small | normal
-// color: white | blue
-// text string length
-// disable true false
-
-function PropsNormalizer(Component, schema) {
-    const n = new Normalizer(schema);
-
-    return class extends React.Component {
-
-        static getDerivedStateFromProps(props, state) {
-            return {
-                normalizedProps: n.process({...props})
-            }
-        }
-
-        constructor(props) {
-            super(props);
-            this.state = {};
-        }
-
-        componentDidMount() {
-            console.log('PropsNormalizer.componentDidMount');
-        }
-
-        render() {
-            console.log('PropsNormalizer.render');
-            return <Component {...this.state.normalizedProps}/>
-        }
-    }
-}

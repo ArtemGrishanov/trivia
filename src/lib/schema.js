@@ -1,12 +1,36 @@
 import Format from './format.js'
 import { getTokens, matchPropertyPath } from './object-path.js';
 
+const types = {
+    'string': {
+        attributes: ["default","enum","minLength","maxLength"],
+        mandatory: ["default"]
+    },
+    'number': {
+        attributes: ["default","min","max","enum","appWidthProperty","appHeightProperty"],
+        mandatory: ["default","min","max"]
+    },
+    'boolean': {
+        attributes: ["default"],
+        mandatory: ["default"]
+    },
+    'hashlist': {
+        attributes: ["default","minLength","maxLength","elementSchema","prototypes"],
+        mandatory: ["default"]
+    },
+    'url': {
+        attributes: ["default"],
+        mandatory: ["default"]
+    },
+    'color': {
+        attributes: ["default"],
+        mandatory: ["default"]
+    }
+}
+
 export default class DataSchema {
 
     constructor(schm) {
-        this.whitelistAttr = new Set(["type","min","max","default","format","enum","minLength","maxLength","elementSchema","prototypes","appWidthProperty","appHeightProperty"]);
-        this.mandatoryAttrs = ["type","default"];
-        this.whitelistTypes = new Set(["number","string","boolean","hashlist","url","color"]); // TODO type Color? Url?
         this._validateSchema(schm);
         this._schm = schm;
         this._selectorsInProcessOrder = this._getSelectorsInProcessOrder();
@@ -62,24 +86,21 @@ export default class DataSchema {
         return Object.keys(this._schm).sort( (a, b) => getTokens(a).length - getTokens(b).length);
     }
 
-    // get props() {
-    //     return this._schm;
-    // }
-
-    // set schema(schm) {
-    //     this._schm = schm;
-    // }
-
     _validateSchema(schm) {
-        const self = this;
+        const whitelistTypes = Object.keys(types);
         Object.keys(schm).forEach( (prop) => {
-            let mAttrs = self.mandatoryAttrs.slice(0);
+            const type = schm[prop].type;
+            if (!type) {
+                throw new Error(`DataSchema: type must be specified`);
+            }
+            if (whitelistTypes.includes(type.toLowerCase()) === false) {
+                throw new Error(`DataSchema: unsupported type "${schm[prop][attr]}". Supported typed: ${whitelistTypes.join(',')}`);
+            }
+            const whitelistAttr = types[type].attributes;
+            let mAttrs = types[type].mandatory.slice(0);
             Object.keys(schm[prop]).forEach( (attr) => {
-                if (self.whitelistAttr.has(attr) === false) {
-                    throw new Error(`DataSchema: invalid attribute "${attr}". Valid attributes: ${Array.from(self.whitelistAttr).join(',')}`);
-                }
-                if (attr === "type" && self.whitelistTypes.has(schm[prop][attr].toLowerCase()) === false) {
-                    throw new Error(`DataSchema: unsupported type "${schm[prop][attr]}". Supported typed: ${Array.from(self.whitelistTypes).join(',')}`);
+                if (whitelistAttr.includes(attr) === false && attr !== 'type') {
+                    throw new Error(`DataSchema: invalid attribute "${attr}". Valid attributes: ${whitelistAttr.join(',')} for type "${type}"`);
                 }
                 mAttrs = mAttrs.filter( (e) => e !== attr);
             })
@@ -87,15 +108,6 @@ export default class DataSchema {
                 throw new Error(`DataSchema: attribute "${mAttrs[0]}" is missed in "${prop}"`);
             }
         });
-
-        //valid types only! hashlist
-
-        //_validateSchema recursive
-
-        // default attr is mandatory
-
-        // check min < default < max
-        // set min max defaul anyway
     }
 
     toString() {

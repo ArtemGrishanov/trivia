@@ -12,7 +12,7 @@
   "scripts": {
     "build": "webpack --mode development",
     "babel": "babel --presets es2015 js/main.js -o build/main.bundle.js",
-    "start": "webpack-dev-server --open",
+    "start": "webpack-dev-server -d --open",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
