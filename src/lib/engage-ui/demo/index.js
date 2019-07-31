@@ -49,7 +49,7 @@ ReactDOM.render(
                 border={true}
                 />
         </Control>
-        <Control schema={ProgressiveImageSchema} width={500} height={900}>
+        {/* <Control schema={ProgressiveImageSchema} width={500} height={900}>
             <ProgressiveImage
                 blur={false}
                 maxWidth={1400}
@@ -59,7 +59,10 @@ ReactDOM.render(
                 srcThumb="http://p.testix.me/temp/waterfall1000x1500_thumb.jpg"
                 border={true}
                 />
-        </Control>
+        </Control> */}
+
+
+
         {/*<Control>
             <ProgressiveImage
                 blur={false}

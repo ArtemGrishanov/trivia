@@ -5,9 +5,13 @@ export default class Control extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            editedProps: {}
+            editedProps: {},
+            normalizedProps: {}
         }
+        this.controlRefs = {};
+        props.schema.selectorsInProcessOrder.forEach((sel) => this.controlRefs[sel] = React.createRef());
         this.onFocus = this.onFocus.bind(this);
+        this.normalizePropsCallback = this.normalizePropsCallback.bind(this);
     }
 
     onFocus(e) {
@@ -19,9 +23,25 @@ export default class Control extends React.Component {
         });
     }
 
+    normalizePropsCallback(props) {
+        const self = this;
+        setTimeout( () => {
+            Object.keys(props).forEach((sel) => {
+                if (self.controlRefs[sel] && self.controlRefs[sel].current) {
+                    self.controlRefs[sel].current.value = props[sel]
+                }
+            });
+            // this.setState({
+            //     editedProps: props
+            // })
+            console.log('Control:normalizePropsCallback ', props);
+        }, 200)
+    }
+
     render() {
+        console.log('control render');
         const childrenWithProps = React.Children.map(this.props.children, child =>
-            React.cloneElement(child, { ...this.state.editedProps })
+            React.cloneElement(child, { ...this.state.editedProps, normalizePropsCallback: this.normalizePropsCallback })
         );
         const selectors = this.props.schema ? this.props.schema.selectorsInProcessOrder: [];
         return (
@@ -35,14 +55,17 @@ export default class Control extends React.Component {
                             <div key={sel}>
                                 <label htmlFor={sel}>{sel}</label>
                                 {this.props.schema.getDescription(sel).enum &&
-                                    <select data-prop-name={sel} defaultValue="" onChange={this.onFocus}>
+                                    <select ref={this.controlRefs[sel]} data-prop-name={sel} onChange={this.onFocus}>
                                         {this.props.schema.getDescription(sel).enum.map((enval) =>
-                                            <option key={sel+':'+enval}>{enval}</option>
+                                            <option
+                                                key={sel+':'+enval}
+                                                value={enval}
+                                                >{enval}</option>
                                         )}
                                     </select>
                                 }
                                 {!this.props.schema.getDescription(sel).enum &&
-                                    <input id={sel} data-prop-name={sel} onBlur={this.onFocus}></input>
+                                    <input ref={this.controlRefs[sel]} id={sel} data-prop-name={sel} onBlur={this.onFocus} defaultValue={this.state.editedProps[sel]}></input>
                                 }
                             </div>
                         )

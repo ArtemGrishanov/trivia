@@ -18,28 +18,28 @@ const REVEAL_ANIM_TIME = 1000; // slightly larger then 1s transition in tstx_pro
 //TODO no image vector thumb
 class ProgressiveImage extends React.Component {
 
-    static getImageState({image, maxWidth, height}) {
+    static getImageState({image, maxWidth, maxHeight}) {
         let imgRatio = image.naturalWidth / image.naturalHeight;
-        let w = maxWidth, h = height;
+        let w = maxWidth, h = maxHeight;
         if (maxWidth > 0) {
             w = maxWidth;
-            if (height > 0) {
-                h = height;
+            if (maxHeight > 0) {
+                h = maxHeight;
             }
             else {
                 //h = this.state.maxWidth / this.imgRatio; do not need to fix height if its is not specified
             }
         }
-        else {
-            if (height > 0) {
-                h = height;
-                w = height * imgRatio;
-            }
-            else {
-                w = image.naturalWidth;
-                //h = img.naturalHeight; do not need to fix height if its is not specified
-            }
-        }
+        // else {
+        //     if (maxHeight > 0) {
+        //         h = maxHeight;
+        //         w = maxHeight * imgRatio;
+        //     }
+        //     else {
+        //         w = image.naturalWidth;
+        //         //h = img.naturalHeight; do not need to fix height if its is not specified
+        //     }
+        // }
         console.log('ProgressiveImage.getImageState');
         console.log({
             image: image,
@@ -65,11 +65,11 @@ class ProgressiveImage extends React.Component {
                 image: null
             }
         }
-        else if (state.image && state.propsMaxWidth !== props.maxWidth) {
+        else if (state.image && (state.propsMaxWidth !== props.maxWidth || state.propsMaxHeight !== props.maxHeight)) {
             imgst = ProgressiveImage.getImageState({
                 image: state.image,
                 maxWidth: props.maxWidth,
-                height: props.height
+                maxHeight: props.maxHeight
             });
         }
         return {
@@ -78,6 +78,7 @@ class ProgressiveImage extends React.Component {
             src: props.src,
             propsBlur: pb,
             propsMaxWidth: props.maxWidth,
+            propsMaxHeight: props.maxHeight,
             blur: (state.propsBlur !== pb) ? pb: state.blur
         };
     }
@@ -145,12 +146,12 @@ class ProgressiveImage extends React.Component {
                 const image = new Image();
                 image.src = this.props.src;
                 if (image.complete) {
-                    this.setState(ProgressiveImage.getImageState({image, maxWidth: this.props.maxWidth, height: this.props.height}));
+                    this.setState(ProgressiveImage.getImageState({image, maxWidth: this.props.maxWidth, height: this.props.maxHeight}));
                     resolve();
                 }
                 else {
                     image.onload = ()=> {
-                        this.setState(ProgressiveImage.getImageState({image, maxWidth: this.props.maxWidth, height: this.props.height}));
+                        this.setState(ProgressiveImage.getImageState({image, maxWidth: this.props.maxWidth, height: this.props.maxHeight}));
                         resolve();
                     }
                 }
@@ -185,7 +186,8 @@ class ProgressiveImage extends React.Component {
         const showThumb = this.isThumbLoaded() && (this.state.step === STATE_LOADING || this.state.step === STATE_REVEALING);
         const showOriginal = this.isLoaded() && (this.state.step === STATE_REVEALING || this.state.step === STATE_SHOW);
         const cntSt = {
-            width: "100%",
+            width: '100%',
+            height: '100%',
             maxWidth: this.state.width+"px"
         };
         if (this.state.height > 0) {

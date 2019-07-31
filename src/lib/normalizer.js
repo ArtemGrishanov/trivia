@@ -15,6 +15,42 @@ export default class Normalizer {
     }
 
     /**
+     * Сравнить два объекта по схеме и определить равны ли они
+     * Сравнение происходит только по свойствам описанным в схеме
+     * 
+     * @param {*} state1 
+     * @param {*} state2 
+     * 
+     * @return {boolean}
+     */
+    equal(state1, state2) {
+        for (let i = 0; i < this.dataSchema.selectorsInProcessOrder.length; i++) {
+            const selector = this.dataSchema.selectorsInProcessOrder[i];
+            const pathes1 = getPathes(state1, selector);
+            const pathes2 = getPathes(state2, selector);
+            if (pathes1.length !== pathes2.length) {
+                return false;
+            }
+            for (let n = 0; n < pathes1.length; n++) {
+                const path = pathes1[n];
+                const requestResult1 = getPropertiesBySelector(state1, path);
+                const requestResult2 = getPropertiesBySelector(state2, path);
+                if (requestResult1.length !== requestResult2.length) {
+                    return false;
+                }
+                for (let k = 0; k < requestResult1.length; k++) {
+                    const res1 = requestResult1[k];
+                    const res2 = requestResult2[k];
+                    if (res1.path !== res2.path || res1.value !== res2.value) {
+                        return false;
+                    }
+                }
+            }
+        };
+        return true;
+    }
+
+    /**
      * Normalize state object according to schema
      * 
      * @param {object} state 
