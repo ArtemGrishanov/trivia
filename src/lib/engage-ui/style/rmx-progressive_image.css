@@ -1,0 +1,123 @@
+div.image_cnt {
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    overflow: hidden;
+    outline: none;
+}
+div.image_cnt.__border {
+    border: 1px solid #999;
+}
+
+/* align it inside image_cnt vertically and horizontally */
+/* it contains img and thumb img */
+div.image_align_cnt {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+div.image_cnt img {
+    position: relative;
+    opacity: 0;
+    vertical-align: middle;
+    transform: scale(1.02);
+    transition: opacity 1s linear, transform 1s linear;
+    max-width: 100%;
+    max-height: 100%;
+    border: 0 none;
+    user-select: none;
+    /* 3d acceleration optimization */
+    backface-visibility: hidden;
+    perspective: 1000;
+}
+
+div.image_cnt img.__zoom {
+    animation: zoom 30s infinite;
+}
+
+div.image_cnt img.__eight {
+    animation: eight 60s infinite linear;
+}
+
+div.image_cnt img.__blur {
+    -webkit-filter: blur(10px);
+    filter: blur(10px);
+}
+
+div.image_cnt img.reveal {
+    opacity: 1;
+    transform: scale(1);
+}
+
+div.image_cnt img.preview {
+    filter: blur(1vw);
+    opacity: 1;
+    transform: scale(1);
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+div.image_cnt img.preview.hide {
+    opacity: 0;
+}
+
+@keyframes zoom {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes eight {
+  0% {
+    transform: translateX(-3%) translateY(-3%) scale(1.06);
+  }
+  23% {
+    transform: translateX(3%) translateY(3%) scale(1.06);
+  }
+  50% {
+    transform: translateX(-3%) translateY(3%) scale(1.06);
+  }
+  73% {
+    transform: translateX(3%) translateY(-3%) scale(1.06);
+  }
+  100% {
+    transform: translateX(-3%) translateY(-3%) scale(1.06);
+  }
+}
+
+.cursor_wr {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    cursor: pointer;
+    width: 82px;
+    height: 97px;
+    line-height: initial;
+    animation: clickhint 4s infinite;
+}
+
+@keyframes clickhint {
+  0% {
+    transform: translate(-50%,-50%) scale(1);
+  }
+  90% {
+    transform: translate(-50%,-50%) scale(1);
+  }
+  95% {
+    transform: translate(-50%,-50%) scale(0.88);
+  }
+  100% {
+    transform: translate(-50%,-50%) scale(1);
+  }
+}

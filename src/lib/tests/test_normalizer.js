@@ -106,6 +106,9 @@ describe('Selector', function() {
             o = n.process({boo: false});
             chai.assert.equal(o.boo, false);
 
+            o = n.process({boo: 'false'}); // special case string 'false' must be considered as boolean false
+            chai.assert.equal(o.boo, false);
+
             const s2 = new DataSchema({
                 'boo': {
                     type: 'boolean',

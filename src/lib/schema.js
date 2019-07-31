@@ -32,6 +32,7 @@ export default class DataSchema {
 
     constructor(schm) {
         this._validateSchema(schm);
+        this._prepareSchema(schm);
         this._schm = schm;
         this._selectorsInProcessOrder = this._getSelectorsInProcessOrder();
     }
@@ -84,6 +85,18 @@ export default class DataSchema {
      */
     _getSelectorsInProcessOrder() {
         return Object.keys(this._schm).sort( (a, b) => getTokens(a).length - getTokens(b).length);
+    }
+
+    /**
+     * Makes some preparations
+     * @param {object} schm 
+     */
+    _prepareSchema(schm) {
+        Object.keys(schm).forEach( (prop) => {
+            if (schm[prop].type === 'boolean') {
+                schm[prop].enum = ['false','true'];
+            }
+        });
     }
 
     _validateSchema(schm) {

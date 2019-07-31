@@ -19,12 +19,14 @@ Remix.init({
             "questionIndex": {
                 type: "number",
                 default: 0,
-                min: 0
+                min: 0,
+                max: 1
             },
             "optionIndex": {
                 type: "number",
                 default: 0,
-                min: 0
+                min: 0,
+                max: 1
             }
         })
     }],

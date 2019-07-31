@@ -157,6 +157,9 @@ export default class Normalizer {
         if (value === undefined) {
             value = !!info.default;
         }
+        else if (value === 'false') {
+            value = false;
+        }
         else {
             value = !!value;
         }

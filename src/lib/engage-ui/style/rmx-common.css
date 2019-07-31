@@ -67,14 +67,20 @@ p {
 .rmx-control {
     margin: 5px;
     color:#333;
+    white-space: nowrap;
 }
 .rmx-control_elem_wr {
+    resize: both;
+    overflow: hidden;
     display: inline-block;
     vertical-align: top;
-    min-width: 320px;
-    min-height: 120px;
+    min-width: 30px;
+    min-height: 15px;
+    width: 320px;
+    height: 120px;
     padding: 20px;
-    border: 1px solid #999;
+    border: 1px solid #aaa;
+    background-color: #eee;
     text-align: center;
 }
 .rmx-control_fields_wr {

@@ -26,7 +26,7 @@ export default class Control extends React.Component {
         const selectors = this.props.schema ? this.props.schema.selectorsInProcessOrder: [];
         return (
             <div className="rmx-control">
-                <div className="rmx-control_elem_wr">
+                <div className="rmx-control_elem_wr" style={{width:this.props.width+'px', height:this.props.height+'px'}}>
                     {childrenWithProps}
                 </div>
                 <div className="rmx-control_fields_wr">
