@@ -4,13 +4,41 @@ import ReactDOM from 'react-dom';
 import Control from './Control'
 import Button from '../primitives/Button'
 import { Schema as ButtonSchema } from '../primitives/Button'
-import IsCorrect from '../primitives/IsCorrect'
-import { Schema as IsCorrectSchema} from '../primitives/IsCorrect'
+import CorrectIcon from '../primitives/CorrectIcon'
+import { Schema as CorrectIconSchema} from '../primitives/CorrectIcon'
 import ProgressiveImage from '../primitives/ProgressiveImage'
 import { Schema as ProgressiveImageSchema } from '../primitives/ProgressiveImage'
+import TextOption from '../primitives/TextOption';
+import { Schema as TextOptionSchema } from '../primitives/TextOption'
 
 ReactDOM.render(
     <div>
+        <Control schema={TextOptionSchema}>
+            <TextOption percent={55}/>
+        </Control>
+        <Control schema={TextOptionSchema}>
+            <TextOption correctIndicator='correct' percent={44}/>
+        </Control>
+        <Control schema={TextOptionSchema}>
+            <TextOption correctIndicator='wrong_gray' borderRadius={100} percent={33}/>
+        </Control>
+        <Control schema={TextOptionSchema}>
+            <TextOption correctIndicator='wrong' textAlign='center' borderRadius={0} percent={77}/>
+        </Control>
+        <Control schema={TextOptionSchema} width={400}>
+            <TextOption correctIndicator='wrong' percent={12}
+                text='У меня работают умные сотрудники! Пусть придумают алгоритм создания паролей и на него ориентируются. Главное, не забыть схему.'
+            />
+        </Control>
+        <Control schema={TextOptionSchema} width={300}>
+            <TextOption/>
+        </Control>
+        <Control schema={TextOptionSchema} width={300}>
+            <TextOption correctIndicator='correct' text='У меня работают умные сотрудники! Пусть придумают алгоритм создания паролей'/>
+        </Control>
+        <Control schema={TextOptionSchema} width={300}>
+            <TextOption correctIndicator='wrong' percent={49} text='У меня работают умные сотрудники! Пусть придумают алгоритм создания паролей'/>
+        </Control>
         <Control schema={ButtonSchema}>
             <Button/>
         </Control>
@@ -23,16 +51,19 @@ ReactDOM.render(
         <Control schema={ButtonSchema}>
             <Button colorMod="white" sizeMod="small"/>
         </Control>
-        <Control schema={IsCorrectSchema}>
-            <IsCorrect correct={false}/>
+        <Control schema={CorrectIconSchema}>
+            <CorrectIcon mod='empty'/>
         </Control>
-        <Control schema={IsCorrectSchema}>
-            <IsCorrect correct={false} gray={true}/>
+        <Control schema={CorrectIconSchema}>
+            <CorrectIcon mod='correct'/>
         </Control>
-        <Control schema={IsCorrectSchema}>
-            <IsCorrect/>
+        <Control schema={CorrectIconSchema}>
+            <CorrectIcon mod='wrong'/>
         </Control>
-        <Control schema={ProgressiveImageSchema}>
+        <Control schema={CorrectIconSchema}>
+            <CorrectIcon mod='wrong_gray'/>
+        </Control>
+        <Control schema={ProgressiveImageSchema} width={500} height={300}>
             <ProgressiveImage
                 src="http://p.testix.me/temp/cat1500x1000.jpg"
                 srcThumb="http://p.testix.me/temp/cat1500x1000_thumb.jpg"
@@ -49,7 +80,7 @@ ReactDOM.render(
                 border={true}
                 />
         </Control>
-        {/* <Control schema={ProgressiveImageSchema} width={500} height={900}>
+        <Control schema={ProgressiveImageSchema} width={500} height={900}>
             <ProgressiveImage
                 blur={false}
                 maxWidth={1400}
@@ -57,45 +88,34 @@ ReactDOM.render(
                 animation={'none'}
                 src="http://p.testix.me/temp/waterfall1000x1500.jpeg"
                 srcThumb="http://p.testix.me/temp/waterfall1000x1500_thumb.jpg"
-                border={true}
                 />
-        </Control> */}
-
-
-
-        {/*<Control>
+        </Control>
+        <Control schema={ProgressiveImageSchema} width={500} height={500}>
             <ProgressiveImage
                 blur={false}
-                width={500}
-                height={500}
+                maxWidth={500}
+                maxHeight={500}
                 animation={"zoom"}
                 src="http://p.testix.me/temp/shore259x194.jpeg"
                 border={true}
                 />
         </Control>
-        <Control>
+        <Control schema={ProgressiveImageSchema} width={500} height={500}>
             <ProgressiveImage
                 blur={false}
-                width={1600}
-                height={400}
+                maxWidth={1600}
+                maxHeight={400}
                 src="http://p.testix.me/temp/1000x611.jpg"
-                border={true}
                 />
         </Control>
-        <Control>
+        <Control schema={ProgressiveImageSchema} width={500} height={500}>
             <ProgressiveImage
                 blur={false}
-                width={500}
-                //height={400}
+                maxWidth={500}
                 animation={"eight"}
                 src="http://p.testix.me/temp/1000x611.jpg"
                 srcThumb="http://p.testix.me/temp/4000x2443_thumb.jpg"
-                border={true}
                 />
-        </Control> */}
-    </div>,
-
-    //TODO combobox true | false for boolean values
-    //TODO width height for container wrapper
-    
+        </Control>
+    </div>,    
     document.getElementById('root'));

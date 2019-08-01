@@ -1,5 +1,6 @@
 import React from 'react'
 
+const NARROW_WIDTH = 340;
 export default class Control extends React.Component {
 
     constructor(props) {
@@ -31,9 +32,6 @@ export default class Control extends React.Component {
                     self.controlRefs[sel].current.value = props[sel]
                 }
             });
-            // this.setState({
-            //     editedProps: props
-            // })
             console.log('Control:normalizePropsCallback ', props);
         }, 200)
     }
@@ -46,7 +44,7 @@ export default class Control extends React.Component {
         const selectors = this.props.schema ? this.props.schema.selectorsInProcessOrder: [];
         return (
             <div className="rmx-control">
-                <div className="rmx-control_elem_wr" style={{width:this.props.width+'px', height:this.props.height+'px'}}>
+                <div className={'rmx-control_elem_wr ' + (this.props.width <= NARROW_WIDTH ? 'narrow': '')} style={{width:this.props.width+'px', height:this.props.height+'px'}}>
                     {childrenWithProps}
                 </div>
                 <div className="rmx-control_fields_wr">

@@ -1,0 +1,112 @@
+
+.rmx-option {
+    position: relative;
+    padding: 16px 60px 17px;
+    background-color: #fff;
+    line-height: 18px;
+    font-size: 18px;
+    text-align: left;
+    border: 1px solid #d8d8d8;
+    border-radius: 4px;
+    overflow: hidden;
+    cursor: pointer;
+    white-space: normal;
+}
+.narrow .rmx-option {
+    font-size: 16px;
+    line-height: 16px;
+    padding: 14px 16px 15px;
+}
+.narrow .rmx-option.withIndic {
+    padding: 14px 16px 16px 36px;
+}
+.narrow .rmx-option.withPercent {
+    padding-top: 34px;
+}
+.rmx-option:hover {
+    box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
+}
+.rmx-option_indicator {
+    position: absolute;
+    top: 14px;
+    left: 15px;
+    width: 24px;
+    height: 24px;
+    display: block;
+}
+.narrow .rmx-option_indicator {
+    top: 11px;
+    left: 8px;
+    width: 20px;
+    height: 20px;
+}
+.narrow .rmx-option_indicator.withPercent {
+    top: 8px;
+}
+
+.rmx-percent_info {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%
+}
+.narrow .rmx-percent_info {
+    position: relative;
+    padding: 0 0 0 36px;
+}
+/* Percentage bar */
+.rmx-pb_wr {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 5px;
+    background-color: #eee;
+    overflow: hidden;
+}
+.narrow .rmx-pb_wr {
+    top: 20px;
+    left: 76px;
+    border-radius: 99px;
+}
+.rmx-option-pb {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #dedede;
+}
+.rmx-option-pb.__correct {
+    background-color: #65bb5a;
+}
+.rmx-option-pb.__wrong {
+    background-color: #ff5656;
+}
+
+/* Percentage digits */
+.rmx-option-pct {
+    position: absolute;
+    top: 16px;
+    right: 14px;
+    font-size: 20px;
+    text-align: right;
+    color: #a7a7a7;
+}
+.narrow .rmx-option-pct {
+    top: 11px;
+    left: 36px;
+    right: auto;
+    font-size: 16px;
+    text-align: left;
+}
+.rmx-option-pct.__none,
+.rmx-option-pct.__gray {
+    color: #a7a7a7;
+}
+.rmx-option-pct.__correct {
+    color: #65bb5a;
+}
+.rmx-option-pct.__wrong {
+    color: #ff5656;
+}

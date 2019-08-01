@@ -89,3 +89,7 @@ p {
     padding: 5px;
     font-size: 12px;
 }
+
+rmx-ci {
+    display: inline-block;
+}
