@@ -7,17 +7,17 @@ function CorrectIcon({mod = 'empty'}) {
         <span className='rmx-ci'>
             {mod === 'correct' &&
                 <svg xmlns="http://www.w3.org/2000/svg" width='100%' height='100%' viewBox="0 0 24 24">
-                    <g fill="none" fill-rule="evenodd">
+                    <g fill="none" fillRule="evenodd">
                         <circle cx="12" cy="12" r="12" fill="#65BB5A"/>
-                        <path stroke="#FFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.843 12L11 17l7.535-9.24"/>
+                        <path stroke="#FFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5.843 12L11 17l7.535-9.24"/>
                     </g>
                 </svg>
             }
             {mod === 'wrong' &&
                 <svg xmlns="http://www.w3.org/2000/svg" width='100%' height='100%' viewBox="0 0 24 24">
-                    <g fill="none" fill-rule="evenodd">
+                    <g fill="none" fillRule="evenodd">
                         <circle cx="12" cy="12" r="12" fill="#FF5656"/>
-                        <g stroke="#FFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                        <g stroke="#FFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
                             <path d="M7 7l10 10M17 7L7 17"/>
                         </g>
                     </g>
@@ -25,9 +25,9 @@ function CorrectIcon({mod = 'empty'}) {
             }
             {mod === 'wrong_gray' &&
                 <svg xmlns="http://www.w3.org/2000/svg" width='100%' height='100%' viewBox="0 0 20 20">
-                    <g fill="none" fill-rule="evenodd">
+                    <g fill="none" fillRule="evenodd">
                         <circle cx="10" cy="10" r="10" fill="#D8D8D8"/>
-                        <g stroke="#FFF" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.667">
+                        <g stroke="#FFF" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.667">
                             <path d="M5.833 5.833l8.334 8.334M14.167 5.833l-8.334 8.334"/>
                         </g>
                     </g>
@@ -46,7 +46,7 @@ function CorrectIcon({mod = 'empty'}) {
                             </feMerge>
                         </filter>
                     </defs>
-                    <circle cx="12" cy="12" r="11.5" fill="#FFF" fill-rule="evenodd" stroke="#D8D8D8" filter="url(#a)" transform="translate(8 6)"/>
+                    <circle cx="12" cy="12" r="11.5" fill="#FFF" fillRule="evenodd" stroke="#D8D8D8" filter="url(#a)" transform="translate(8 6)"/>
                 </svg>
             }
         </span>

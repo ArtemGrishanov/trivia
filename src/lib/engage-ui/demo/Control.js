@@ -32,12 +32,11 @@ export default class Control extends React.Component {
                     self.controlRefs[sel].current.value = props[sel]
                 }
             });
-            console.log('Control:normalizePropsCallback ', props);
+            //console.log('Control:normalizePropsCallback ', props);
         }, 200)
     }
 
     render() {
-        console.log('control render');
         const childrenWithProps = React.Children.map(this.props.children, child =>
             React.cloneElement(child, { ...this.state.editedProps, normalizePropsCallback: this.normalizePropsCallback })
         );

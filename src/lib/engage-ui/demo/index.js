@@ -10,9 +10,44 @@ import ProgressiveImage from '../primitives/ProgressiveImage'
 import { Schema as ProgressiveImageSchema } from '../primitives/ProgressiveImage'
 import TextOption from '../primitives/TextOption';
 import { Schema as TextOptionSchema } from '../primitives/TextOption'
+import QuizBlock from '../blocks/quiz/QuizBlock';
+import { Schema as QuizBlockSchema } from '../blocks/quiz/QuizBlock';
+import HashList from '../../hashlist';
+import LayoutContainer from '../layout/LayoutContainer';
+import { Schema as LayoutContainerSchema } from '../layout/LayoutContainer'
+import LayoutItem from '../layout/LayoutItem';
 
 ReactDOM.render(
     <div>
+        <Control schema={LayoutContainerSchema} width={600} height={400}>
+            <LayoutContainer mode={'absolute'} border={true}>
+                <LayoutItem>
+                    <div style={{width:'200px',height:'30px',backgroundColor:'#a22222'}}>Fixed width/height</div>
+                </LayoutItem>
+                <LayoutItem>
+                    <div style={{width:'100%',height:'60px',backgroundColor:'#22a222'}}>Dynamic width<br/>fixed height</div>
+                </LayoutItem>
+                <LayoutItem>
+                    <div style={{width:'70px',height:'100%',backgroundColor:'#5555a2'}}>Fixed width<br/>dynamic height</div>
+                </LayoutItem>
+                {/* <LayoutItem>
+                    <p style={{}}>Simple text in block</p>
+                </LayoutItem> */}
+            </LayoutContainer>
+        </Control>
+        <Control schema={LayoutContainerSchema} width={600} height={400}>
+            <LayoutContainer mode={'absolute'} border={true}>
+                <LayoutItem>
+                    <Button/>
+                </LayoutItem>
+                <LayoutItem>
+                    <Button colorMod="white"/>
+                </LayoutItem>
+            </LayoutContainer>
+        </Control>
+        <Control schema={QuizBlockSchema} width={600} height={400}>
+            <QuizBlock options={new HashList(['Answer1', 'Answer2', 'Answer3'])}/>
+        </Control>
         <Control schema={TextOptionSchema}>
             <TextOption percent={55}/>
         </Control>
@@ -117,5 +152,5 @@ ReactDOM.render(
                 srcThumb="http://p.testix.me/temp/4000x2443_thumb.jpg"
                 />
         </Control>
-    </div>,    
+    </div>,
     document.getElementById('root'));

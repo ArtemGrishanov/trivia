@@ -40,13 +40,13 @@ class ProgressiveImage extends React.Component {
         //         //h = img.naturalHeight; do not need to fix height if its is not specified
         //     }
         // }
-        console.log('ProgressiveImage.getImageState');
-        console.log({
-            image: image,
-            step: STATE_REVEALING,
-            width: w,
-            height: h
-        });
+        // console.log('ProgressiveImage.getImageState');
+        // console.log({
+        //     image: image,
+        //     step: STATE_REVEALING,
+        //     width: w,
+        //     height: h
+        // });
         return {
             image: image,
             step: STATE_REVEALING,

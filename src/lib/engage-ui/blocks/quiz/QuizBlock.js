@@ -1,6 +1,10 @@
+import '../../style/rmx-quiz.css'
 import React from 'react'
+import DataSchema from '../../../schema'
+import PropsNormalizer from '../../PropsNormalizer';
+import TextOption from '../../primitives/TextOption';
 
-export default class QuizBlock extends React.Component {
+class QuizBlock extends React.Component {
 
     constructor(props) {
         super(props);
@@ -18,9 +22,12 @@ export default class QuizBlock extends React.Component {
     
     render() {
         const arr = this.props.options ? this.props.options.toArray(): [];
+        const st = {
+            backgroundColor: this.props.backgroundColor
+        }
         return (
-            <div className="rmx-quiz_block">
-                <p>{this.props.text}</p>
+            <div className="rmx-quiz_block" style={st}>
+                <p>{this.props.questionText}</p>
                 {this.props.imageSrc &&
                     <div>
                         <img src={this.props.imageSrc} alt="some"/>
@@ -31,7 +38,7 @@ export default class QuizBlock extends React.Component {
                         {
                             arr.map( (o, i) => {
                                 const id = this.props.options.getId(i);
-                                return (<button className="rmx-quiz_option" data-oid={id} key={id} onClick={this.onOptionClick.bind(this, id)}>{o.text}</button>)
+                                return (<TextOption data-oid={id} key={id} onClick={this.onOptionClick.bind(this, id)}>{o.text}></TextOption>)
                             })
                         }
                     </ul>
@@ -39,5 +46,25 @@ export default class QuizBlock extends React.Component {
             </div>
         )
     }
-
 }
+
+export const Schema = new DataSchema({
+    'questionText': {
+        type: 'string',
+        minLength: 1,
+        maxLength: 1000,
+        default: 'input question text'
+    },
+    //TODO create layout container for options? 'vlist', 'tiles-2col', 'tiles-3col'
+    'type': {
+        type: 'string',
+        enum: ['text-column','text-tiles','text-on-image'],
+        default: 'text-column'
+    },
+    'backgroundColor': {
+        type: 'color',
+        default: '#a7a7a7'
+    }
+});
+
+export default PropsNormalizer(QuizBlock, Schema);
