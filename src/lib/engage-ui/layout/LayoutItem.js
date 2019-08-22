@@ -1,92 +1,108 @@
-import React from 'react';
-
+import React from 'react'
+import { SizeMe } from 'react-sizeme'
 /**
  * Обертка для управления размерами компонента
  * Может быть помещена в LayoutContainer
  *
  * Вводная информация:
  * - Элемент внутри LayoutItem может быть как c динамической шириной (width:100%) так и со статичной
- * TODO расширение / сжатие
  * - LayoutItem можно попытаться расширить или сжать, потянув за уголки
  * - Показывается рамка обозначающая границы контента и LayoutItem
  *
  * Обладает свойствами:
- * - Всегда равен реальному размеру контента
- * TODO или нет? И контент должен центроваться в растягивающимся LayoutItem?
- * - В том числе и при расширении/сжатии. То есть уже чем элемент может быть min-width, сжать не получится. И рамка будет в актуальном состоянии
+ * - Не меньше чем реальный размер контента или чем 30х20 пикселей. Если LayoutItem больше контента то контент центрируется внутри
+ * - Устанавливает размер в % относительно контейнера LayoutContainer
  *
- * - Устанавливает размер в % относительно контейнера LayoutContainer, но если контент статичный то
- *
- *
- * - Если дочерний элемент не обладает адаптивной шириной или высотой, не реагирует на изменение ширины LayoutItem,
- *   то LayoutItem также не должен менять свой размер и соответствует реальному размеру children
- *
- *
- * LayoutItem calcState procedure (согласование размеров потомка и контейнера):
- * - Предположим props.width / props.height для LayoutItem не определены
- * - render()
- * - componentDidMount/componentDidUpdate измеряем width/height children
- * - ставим актуальные width/height для LayoutItem
- * - создаем observer для отслеживания изменений в размерах children
- *
- *
- * TODO формат сохранения лейаута
  */
 
-function getComponentWidthInPercent(widthPx, containerWidth) {
+const MIN_WIDTH = 30; // px
+const MIN_HEIGHT = 20; // px
+
+function toPercent(widthPx, containerWidth) {
     if (widthPx >= 0 && containerWidth >= 0) {
         return widthPx / containerWidth * 100;
     }
     return undefined;
 }
 
+function toPx(widthPercent, containerWidth) {
+    if (widthPercent >= 0 && containerWidth >= 0) {
+        return widthPercent / 100 * containerWidth;
+    }
+    return undefined;
+}
+
 function calcState({
         state,
+        propLeft,
+        propTop,
         propWidth,
         propHeight,
-        containerWidth,
+        propContainerWidth,
         contentWidth,
         contentHeight,
+        left,
+        top,
         width,
         height
     }) {
 
-        if (propWidth === undefined && contentWidth > 0 && state.contentWidth === undefined && containerWidth > 0) {
-            // как только определился размер контента, устанавливаем ширину LayoutItem равной контенту
-            // при условии что в props не указана ширина
-            width = getComponentWidthInPercent(contentWidth, containerWidth)
-        }
-
         if (width === undefined) {
+            // auto width
             if (propWidth >= 0) {
+                // props имеют наибольший приоритет при изначальной установке
+                // в props передаются размеры при десериализации
                 width = propWidth;
             }
-            else if (containerWidth > 0 && contentWidth > 0) {
-                // рассчитать ширину в процентах относительно контейнера
-                // делаем это только при первоначальной установке ширины контейнера
-                width = getComponentWidthInPercent(contentWidth, containerWidth)
-            }
-            else {
-                width = 33; //%
+            else if (contentWidth > 0 && state.contentWidth === undefined && propContainerWidth > 0) {
+                // как только определился размер контента, устанавливаем ширину LayoutItem равной контенту
+                // при условии что в props не указана ширина
+                width = toPercent(contentWidth, propContainerWidth);
             }
         }
 
         if (height === undefined) {
+            // auto height
             if (propHeight >= 0) {
                 height = propHeight;
             }
-            else if (contentHeight > 0) {
+            else if (contentHeight > 0 && state.contentHeight === undefined) {
+                // как только определен размер контента ставим высоту
                 height = contentHeight;
             }
-            else {
-                height = 30; //px
-            }
         }
-        else if (contentHeight > height) {
+
+        // width cannot be less then content
+        if (contentWidth > 0 && toPx(width, propContainerWidth) < contentWidth) {
+            width = toPercent(contentWidth, propContainerWidth);
+        }
+
+        // width normalization
+        if (toPx(width, propContainerWidth) < MIN_WIDTH) {
+            width = toPercent(MIN_WIDTH, propContainerWidth);
+        }
+
+        // height cannot be less then content
+        if (contentHeight > 0 && height < contentHeight) {
             height = contentHeight;
         }
 
+        // height normalization
+        if (height < MIN_HEIGHT) {
+            height = MIN_HEIGHT;
+        }
+
+        if (top === undefined) {
+            top = propTop;
+        }
+
+        if (left === undefined) {
+            left = propLeft;
+        }
+
         return {
+            top: top,
+            left: left,
             width: width,
             height: height,
             contentWidth: contentWidth,
@@ -101,13 +117,17 @@ export default class LayoutItem extends React.Component {
             ...state,
             ...calcState({
                 state: state,
+                propLeft: props.left,
+                propTop: props.top,
                 propWidth: props.width,
                 propHeight: props.height,
-                containerWidth: props.containerWidth,
+                propContainerWidth: props.containerWidth,
                 contentWidth: state.contentWidth,
                 contentHeight: state.contentHeight,
                 width: state.width,
-                height: state.height
+                height: state.height,
+                top: state.top,
+                left: state.left
             })
         }
     }
@@ -126,45 +146,160 @@ export default class LayoutItem extends React.Component {
         //TODO props чтобы задать начальную позицию для компонента а не 33 50
         super(props);
         this.state = {
+            top: undefined,
+            left: undefined,
             width: undefined,
             height: undefined,
             contentWidth: undefined,
-            contentHeight: undefined
+            contentHeight: undefined,
+            selected: false
         }
-        this.childRef = React.createRef();
         this.thisRef = React.createRef();
         this.contentObserver = null;
         this.onMouseDown = this.onMouseDown.bind(this);
+
+        // dragging/resizing
+        this.isItemMouseDown = false;
+        this.markerId = 0;
+        this.isDragging = false;
+        this.itemNode = null;
+        this.startAttr = null;
+        this.mouseStartPosition = null;
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onWindowMouseMove = this.onWindowMouseMove.bind(this);
+        this.onWindowMouseUp = this.onWindowMouseUp.bind(this);
+    }
+
+    onMouseDown(e) {
+        this.itemNode = this.thisRef.current;
+        if (this.itemNode) {
+            this.markerId = e.currentTarget.getAttribute('datamarker');
+            e.stopPropagation();
+            this.isItemMouseDown = true;
+            // TODO force select (hover) while dragging or resizing
+            if (this.itemNode.style.left.indexOf('px') > 0) {
+                // if 'px' transform to '%'
+                this.itemNode.style.left = this.leftPxToPercent(this.itemNode.style.left) + '%';
+            }
+            this.startAttr = {
+                left: parseFloat(this.state.left),
+                top: parseFloat(this.state.top),
+                width: parseFloat(this.state.width),
+                height: parseFloat(this.state.height)
+            }
+            this.mouseStartPosition = {
+                left: toPercent(e.clientX, this.props.containerWidth),
+                top: e.clientY
+            }
+        }
+    }
+
+    leftPxToPercent(lpx) {
+        return (parseFloat(lpx) / this.props.containerWidth) * 100;
+    }
+
+    onWindowMouseMove(e) {
+        if (this.isItemMouseDown) {
+            this.isDragging = true;
+            this.setState({
+                selected: true
+            });
+            const dx = toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
+            const dy = e.clientY - this.mouseStartPosition.top; // px
+            let l, t, w, h;
+            if (this.markerId == 9) {
+                l = this.startAttr.left + dx;
+                t = this.startAttr.top + dy;
+            }
+            else if (this.markerId == 3 || this.markerId == 4 || this.markerId == 5) {
+                w = this.startAttr.width + dx;
+            }
+            else if (this.markerId == 1 || this.markerId == 7 || this.markerId == 8) {
+                w = this.startAttr.width - dx;
+                // ????
+                l = this.startAttr.left + dx;
+                // if (w !== this.itemNode.style.width) {
+                //     this.itemNode.style.width = w;
+                //     this.itemNode.style.left = (this.startAttr.left + dx) + '%';
+                // }
+            }
+            else if (this.markerId == 6) {
+                h = this.startAttr.height + dy;
+            }
+            else if (this.markerId == 2) {
+                h = this.startAttr.height - dy;
+                t = this.startAttr.top + dy;
+                // ????
+                // if (h !== this.itemNode.style.height) {
+                //     this.itemNode.style.height = h;
+                //     this.itemNode.style.top = (this.startAttr.top + dy) + 'px';
+                // }
+            }
+            if (l !== undefined || t !== undefined || w !== undefined || h != undefined) {
+                this.setState({
+                    ...calcState({
+                        state: this.state,
+                        contentWidth: this.state.contentWidth,
+                        contentHeight: this.state.contentHeight,
+                        propContainerWidth: this.props.containerWidth,
+                        propWidth: this.props.width,
+                        propHeight: this.props.height,
+                        width: w === undefined ? this.state.width: w,
+                        height: h === undefined ? this.state.height: h,
+                        top: t === undefined ? this.state.top: t,
+                        left: l === undefined ? this.state.left: l
+                    })
+                });
+            }
+            //TODO check LayoutItemWidth cannot be less than content width, but text can collapse: break by words and letters
+        }
+    }
+
+    onWindowMouseUp() {
+        if (this.isDragging) {
+            this.isDragging = false;
+            this.setState({
+                selected: false
+            });
+        }
+        this.isItemMouseDown = false;
     }
 
     componentDidMount() {
-        try {
-            this.contentObserver = new ResizeObserver((event) => {
-                // console.log('content dimension changed', event);
-                const rect = event[0].contentRect;
-                // if (rect.width !== this.state.contentWidth || rect.height !== this.state.contentHeight) {
-                if (!this.state.contentWidth || !this.state.contentHeight) {
-                    console.log('content dimension init', event);
-                    //TODO пока просто первый раз измеряем размеры контента
-                    this.setState({
-                        ...calcState({
-                            state: this.state,
-                            contentWidth: rect.width,
-                            contentHeight: rect.height,
-                            containerWidth: this.props.containerWidth,
-                            propWidth: this.props.width,
-                            propHeight: this.props.height,
-                            width: this.state.width,
-                            height: this.state.height
-                        })
-                    });
-                    this.initObserver();
-                }
-            }).observe(this.childRef.current);
-        }
-        catch(error) {
-            console.error('Element con not be observed');
-        }
+        window.addEventListener('mousemove', this.onWindowMouseMove);
+        window.addEventListener('mouseup', this.onWindowMouseUp);
+        // try {
+        //     this.contentObserver = new ResizeObserver((event) => {
+        //         // console.log('content dimension changed', event);
+        //         const rect = event[0].contentRect;
+        //         // if (rect.width !== this.state.contentWidth || rect.height !== this.state.contentHeight) {
+        //         if (!this.state.contentWidth || !this.state.contentHeight) {
+        //             console.log('content dimension init', event);
+        //             //TODO пока просто первый раз измеряем размеры контента
+        //             this.setState({
+        //                 ...calcState({
+        //                     state: this.state,
+        //                     contentWidth: rect.width,
+        //                     contentHeight: rect.height,
+        //                     containerWidth: this.props.containerWidth,
+        //                     propWidth: this.props.width,
+        //                     propHeight: this.props.height,
+        //                     width: this.state.width,
+        //                     height: this.state.height
+        //                 })
+        //             });
+        //             this.initObserver();
+        //         }
+        //     }).observe(this.childRef.current);
+        // }
+        // catch(error) {
+        //     console.error('Element con not be observed');
+        // }
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('mousemove', this.onWindowMouseMove);
+        window.removeEventListener('mouseup', this.onWindowMouseUp);
     }
 
     /**
@@ -174,68 +309,79 @@ export default class LayoutItem extends React.Component {
      * Library: http://marcj.github.io/css-element-queries/
      */
     initObserver() {
-        this.borderObserver = new ResizeObserver((event) => {
-            //TODO как мы хотим выравнивать контент внутри LayoutItem?
-            // контент меньше по ширине
-            // контент больше по ширине
-            // контент меньше по высоте
-            // контент больше по высоте
-            //
-            //
-            const rect = event[0].contentRect;
-            if (rect.width !== this.state.width || rect.height != this.state.height) {
-                this.setState({
-                    ...calcState({
-                        state: this.state,
-                        contentWidth: this.state.contentWidth,
-                        contentHeight: this.state.contentHeight,
-                        containerWidth: this.props.containerWidth,
-                        propWidth: this.props.width,
-                        propHeight: this.props.height,
-                        width: getComponentWidthInPercent(rect.width, this.props.containerWidth),
-                        height: rect.height
-                    })
-                });
-            }
-        }).observe(this.thisRef.current);
-    }
-
-    isResizeable(elem) {
-        //TODO нужен ли этот метод вообще?
-
-        //TODO определить можно ли увеличить измерение блока
-        //TODO определить можно ли увеличить другое измерение блока
-
-        //maxWidth === '' || maxWidth > contentWidth
-        return elem.style.width === '100%';
+        // this.borderObserver = new ResizeObserver((event) => {
+        //     //TODO как мы хотим выравнивать контент внутри LayoutItem?
+        //     // контент меньше по ширине
+        //     // контент больше по ширине
+        //     // контент меньше по высоте
+        //     // контент больше по высоте
+        //     //
+        //     //
+        //     const rect = event[0].contentRect;
+        //     if (rect.width !== this.state.width || rect.height != this.state.height) {
+        //         this.setState({
+        //             ...calcState({
+        //                 state: this.state,
+        //                 contentWidth: this.state.contentWidth,
+        //                 contentHeight: this.state.contentHeight,
+        //                 containerWidth: this.props.containerWidth,
+        //                 propWidth: this.props.width,
+        //                 propHeight: this.props.height,
+        //                 width: toPercent(rect.width, this.props.containerWidth),
+        //                 height: rect.height
+        //             })
+        //         });
+        //     }
+        // }).observe(this.thisRef.current);
     }
 
     componentDidUpdate() {
 
     }
 
-    onMouseDown(event) {
-        if (this.props.onMouseDown) {
-            const markerId = event.currentTarget.getAttribute('datamarker');
-            this.props.onMouseDown(event, this.thisRef.current, markerId, this.state.width, this.state.height, this.resize);
+    onContentSize(size) {
+        console.log('onContentSize', size);
+        this.setState({
+            ...calcState({
+                state: this.state,
+                contentWidth: size.width,
+                contentHeight: size.height,
+                propContainerWidth: this.props.containerWidth,
+                propWidth: this.props.width,
+                propHeight: this.props.height,
+                width: this.state.width,
+                height: this.state.height
+            })
+        });
+        if (!this.observerInited) {
+            // init this border observer first time
+            this.initObserver();
+            this.observerInited = true;
         }
-        event.stopPropagation();
     }
 
     render() {
         const st = {
-            left: this.props.left+'%',
-            top: this.props.top+'px',
+            left: this.state.left+'%',
+            top: this.state.top+'px',
             width: this.state.width+'%',
             height: this.state.height+'px'
         };
+        // align child inside container
+        const cst = {
+            left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
+            top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
+        }
         const children = React.Children.map(this.props.children, child =>
-            React.cloneElement(child, {ref: this.childRef})
+            React.cloneElement(child, {onSize: this.onContentSize.bind(this)})
         );
         return (
             <div ref={this.thisRef} className={"rmx-layout_item __"+this.props.mod} style={st} datamarker="9" onMouseDown={this.onMouseDown}>
-                {children}
-                <div className="rmx-layout_item_selection_cnt">
+                <div className="rmx-l_child_cnt" style={cst}>
+                    {children}
+                </div>
+                <div className={"rmx-layout_item_selection_cnt " + ((this.state.selected) ? '__selected': '')}>
+                    <p className="rmx-l-info">{Math.round(toPx(this.state.width, this.props.containerWidth))}x{Math.round(this.state.height)}</p>
                     <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>
                     <div className="rmx-l-sel-m __2" datamarker="2" onMouseDown={this.onMouseDown}></div>
                     <div className="rmx-l-sel-m __3" datamarker="3" onMouseDown={this.onMouseDown}></div>

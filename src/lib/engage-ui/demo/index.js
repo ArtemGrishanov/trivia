@@ -19,7 +19,7 @@ import LayoutItem from '../layout/LayoutItem';
 
 ReactDOM.render(
     <div>
-        <Control schema={LayoutContainerSchema} width={600} height={400}>
+        {/* <Control schema={LayoutContainerSchema} width={600} height={400}>
             <LayoutContainer mode={'absolute'} border={true}>
                 <LayoutItem>
                     <div style={{width:'200px',height:'30px',backgroundColor:'#a22222'}}>Fixed width/height</div>
@@ -30,19 +30,22 @@ ReactDOM.render(
                 <LayoutItem>
                     <div style={{width:'70px',height:'100%',backgroundColor:'#5555a2'}}>Fixed width<br/>dynamic height</div>
                 </LayoutItem>
+                {<LayoutItem>
+                    <p style={{}}>Simple text in block</p>
+                </LayoutItem>}
+            </LayoutContainer>
+        </Control> */}
+        <Control schema={LayoutContainerSchema} width={600} height={400}>
+            <LayoutContainer mode={'absolute'} border={true}>
                 {/* <LayoutItem>
                     <p style={{}}>Simple text in block</p>
                 </LayoutItem> */}
-            </LayoutContainer>
-        </Control>
-        <Control schema={LayoutContainerSchema} width={600} height={400}>
-            <LayoutContainer mode={'absolute'} border={true}>
                 <LayoutItem>
                     <Button/>
                 </LayoutItem>
-                <LayoutItem>
+                {/* <LayoutItem>
                     <Button colorMod="white"/>
-                </LayoutItem>
+                </LayoutItem> */}
             </LayoutContainer>
         </Control>
         <Control schema={QuizBlockSchema} width={600} height={400}>

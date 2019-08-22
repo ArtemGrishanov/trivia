@@ -23,7 +23,7 @@
     border: 2px solid #59d2f7;
     cursor: pointer;
 }
-
+.rmx-layout_item_selection_cnt.__selected,
 .rmx-layout_item:hover .rmx-layout_item_selection_cnt {
     display: block;
 }
@@ -71,4 +71,19 @@
     top: 50%;
     left: -6px;
     transform: translateY(-50%);
+}
+
+.rmx-l-info {
+    position: absolute;
+    top: -18px;
+    left: 0;
+    height: 14px;
+    background-color: rgba(89, 210, 247, 0.2);
+    padding: 2px;
+    font-size: 12px;
+    user-select: none;
+}
+
+.rmx-l_child_cnt {
+    position: absolute;
 }

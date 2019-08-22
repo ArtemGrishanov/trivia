@@ -1,6 +1,7 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import PropsNormalizer from '../PropsNormalizer'
+import sizeMe from 'react-sizeme'
 
 function Button({text="Button title", colorMod = "blue", sizeMod = "normal"}) {
     return <button className={`rmx-button __${colorMod} __${sizeMod}`}>{text}</button>
@@ -30,4 +31,4 @@ export const Schema = new DataSchema({
     //TODO color format for strings, +tests
 });
 
-export default PropsNormalizer(Button, Schema);
+export default sizeMe({monitorHeight: true, noPlaceholder: true})(PropsNormalizer(Button, Schema));
