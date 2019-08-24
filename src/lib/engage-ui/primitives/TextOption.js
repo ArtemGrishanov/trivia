@@ -3,6 +3,7 @@ import React from 'react'
 import DataSchema from '../../schema'
 import PropsNormalizer from '../PropsNormalizer';
 import CorrectIcon from './CorrectIcon';
+import sizeMe from 'react-sizeme'
 
 class TextOption extends React.Component {
 
@@ -85,4 +86,4 @@ export const Schema = new DataSchema({
     }
 });
 
-export default PropsNormalizer(TextOption, Schema);
+export default sizeMe({monitorHeight: true, noPlaceholder: true})(PropsNormalizer(TextOption, Schema));

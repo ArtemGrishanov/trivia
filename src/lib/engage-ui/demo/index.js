@@ -43,6 +43,9 @@ ReactDOM.render(
                 <LayoutItem>
                     <Button/>
                 </LayoutItem>
+                <LayoutItem>
+                    <TextOption correctIndicator='correct' percent={44}/>
+                </LayoutItem>
                 {/* <LayoutItem>
                     <Button colorMod="white"/>
                 </LayoutItem> */}

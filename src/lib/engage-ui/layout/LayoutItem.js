@@ -1,5 +1,18 @@
 import React from 'react'
 import { SizeMe } from 'react-sizeme'
+
+//TODO minContentWidth minContentHeight определяется на ширине контента 1x1 px
+// но оказывается что некоторые компоненты например TextOption имеют наименьшую высоту при ширине более чем 70px, а не при ширине 1px
+// подумать над другой логикой
+// это нужно для того чтобы понимать насколько можно уменьшать компонент при ресайзе
+// возможно придется отвечать на вопрос можем ли мы уменьшить компонент прямо во время процедуры ресайза:
+// - пробуем уменьшить ширину компонента и смотрим на то как "ответит" компонент - уменьшится ли или нет. Если нет - возвращаем контейнер в исходное состояние
+
+//TODO если слева уменьшаем ширину компонента или сверху уменьшаем ширину то компонент смещается при достижении минимальной ширины
+// надо сделать так: когда ширина/высота достигла минимального значения то не менять left/top
+
+//TODO
+
 /**
  * Обертка для управления размерами компонента
  * Может быть помещена в LayoutContainer
@@ -14,7 +27,6 @@ import { SizeMe } from 'react-sizeme'
  * - Устанавливает размер в % относительно контейнера LayoutContainer
  *
  */
-
 const MIN_WIDTH = 30; // px
 const MIN_HEIGHT = 20; // px
 
@@ -41,6 +53,8 @@ function calcState({
         propContainerWidth,
         contentWidth,
         contentHeight,
+        contentMinWidth,
+        contentMinHeight,
         left,
         top,
         width,
@@ -72,9 +86,19 @@ function calcState({
             }
         }
 
-        // width cannot be less then content
-        if (contentWidth > 0 && toPx(width, propContainerWidth) < contentWidth) {
-            width = toPercent(contentWidth, propContainerWidth);
+        // set min width first time
+        if (contentMinWidth === undefined && contentWidth >= 0) {
+            contentMinWidth = contentWidth;
+        }
+
+        // set min width first time
+        if (contentMinHeight === undefined && contentHeight >= 0) {
+            contentMinHeight = contentHeight;
+        }
+
+        // width cannot be less then min content
+        if (contentMinWidth > 0 && toPx(width, propContainerWidth) < contentMinWidth) {
+            width = toPercent(contentMinWidth, propContainerWidth);
         }
 
         // width normalization
@@ -83,8 +107,8 @@ function calcState({
         }
 
         // height cannot be less then content
-        if (contentHeight > 0 && height < contentHeight) {
-            height = contentHeight;
+        if (contentMinHeight > 0 && height < contentMinHeight) {
+            height = contentMinHeight;
         }
 
         // height normalization
@@ -106,7 +130,9 @@ function calcState({
             width: width,
             height: height,
             contentWidth: contentWidth,
-            contentHeight: contentHeight
+            contentHeight: contentHeight,
+            contentMinWidth: contentMinWidth,
+            contentMinHeight: contentMinHeight
         }
 }
 
@@ -127,7 +153,9 @@ export default class LayoutItem extends React.Component {
                 width: state.width,
                 height: state.height,
                 top: state.top,
-                left: state.left
+                left: state.left,
+                contentMinWidth: state.contentMinWidth,
+                contentMinHeight: state.contentMinHeight
             })
         }
     }
@@ -242,12 +270,16 @@ export default class LayoutItem extends React.Component {
                         contentWidth: this.state.contentWidth,
                         contentHeight: this.state.contentHeight,
                         propContainerWidth: this.props.containerWidth,
+                        propLeft: this.props.left,
+                        propTop: this.props.top,
                         propWidth: this.props.width,
                         propHeight: this.props.height,
                         width: w === undefined ? this.state.width: w,
                         height: h === undefined ? this.state.height: h,
                         top: t === undefined ? this.state.top: t,
-                        left: l === undefined ? this.state.left: l
+                        left: l === undefined ? this.state.left: l,
+                        contentMinWidth: this.state.contentMinWidth,
+                        contentMinHeight: this.state.contentMinHeight
                     })
                 });
             }
@@ -340,17 +372,23 @@ export default class LayoutItem extends React.Component {
     }
 
     onContentSize(size) {
-        console.log('onContentSize', size);
+        // console.log('onContentSize', size);
         this.setState({
             ...calcState({
                 state: this.state,
                 contentWidth: size.width,
                 contentHeight: size.height,
+                propLeft: this.props.left,
+                propTop: this.props.top,
                 propContainerWidth: this.props.containerWidth,
                 propWidth: this.props.width,
                 propHeight: this.props.height,
                 width: this.state.width,
-                height: this.state.height
+                height: this.state.height,
+                top: this.state.top,
+                left: this.state.left,
+                contentMinWidth: this.state.contentMinWidth,
+                contentMinHeight: this.state.contentMinHeight
             })
         });
         if (!this.observerInited) {
@@ -369,8 +407,12 @@ export default class LayoutItem extends React.Component {
         };
         // align child inside container
         const cst = {
-            left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
-            top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
+            // left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
+            // top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
+        }
+        if (this.state.contentMinWidth === undefined) {
+            cst.width = '1px';
+            cst.height = '1px';
         }
         const children = React.Children.map(this.props.children, child =>
             React.cloneElement(child, {onSize: this.onContentSize.bind(this)})
