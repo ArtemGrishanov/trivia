@@ -29,6 +29,7 @@ import { SizeMe } from 'react-sizeme'
  */
 const MIN_WIDTH = 30; // px
 const MIN_HEIGHT = 20; // px
+const MAGNET_DISTANCE = 10; // px
 
 function toPercent(widthPx, containerWidth) {
     if (widthPx >= 0 && containerWidth >= 0) {
@@ -58,7 +59,9 @@ function calcState({
         left,
         top,
         width,
-        height
+        height,
+
+        propMagnetsVertical
     }) {
 
         if (width === undefined) {
@@ -124,6 +127,31 @@ function calcState({
             left = propLeft;
         }
 
+        // trying to find an appropriate magnet to align 'left'
+        if (propMagnetsVertical) {
+            const magnet = propMagnetsVertical.find( (mv) => {
+                let ll = left;
+                if (mv.type === 'center') {
+                    ll += width/2;
+                }
+                else if (mv.type === 'right') {
+                    ll += width;
+                }
+                return Math.abs(mv.left - ll) < toPercent(MAGNET_DISTANCE, propContainerWidth)
+            });
+            if (magnet) {
+                if (magnet.type === 'center') {
+                    left = magnet.left - width/2;
+                }
+                else if (magnet.type === 'right') {
+                    left = magnet.left - width;
+                }
+                else {
+                    left = magnet.left;
+                }
+            }
+        }
+
         return {
             top: top,
             left: left,
@@ -167,7 +195,7 @@ export default class LayoutItem extends React.Component {
         width: undefined,
         height: undefined,
         containerWidth: undefined,
-        onMouseDown: null
+        magnetsVertical: null
     }
 
     constructor(props) {
@@ -279,7 +307,9 @@ export default class LayoutItem extends React.Component {
                         top: t === undefined ? this.state.top: t,
                         left: l === undefined ? this.state.left: l,
                         contentMinWidth: this.state.contentMinWidth,
-                        contentMinHeight: this.state.contentMinHeight
+                        contentMinHeight: this.state.contentMinHeight,
+
+                        propMagnetsVertical: this.props.magnetsVertical
                     })
                 });
             }
@@ -372,7 +402,7 @@ export default class LayoutItem extends React.Component {
     }
 
     onContentSize(size) {
-        console.log('onContentSize', size);
+        // console.log('onContentSize', size);
         this.setState({
             ...calcState({
                 state: this.state,

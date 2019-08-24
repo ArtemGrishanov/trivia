@@ -18,7 +18,12 @@ class LayoutContainer extends React.Component {
         super(props);
         this.state = {
             width: undefined,
-            height: undefined
+            height: undefined,
+            magnetsVertical: [
+                {left:50, type:'center'},
+                {left:0, type:'left', hide: true},
+                {left:100, type:'right', hide: true}
+            ]
         }
         this.containerRef = React.createRef();
         this.observer = null;
@@ -62,15 +67,19 @@ class LayoutContainer extends React.Component {
             childrenWithProps = React.Children.map(this.props.children, child =>
                 React.cloneElement(child, {
                     mod: this.mod,
-                    // onMouseDown: this.onItemMouseDown.bind(this),
                     containerWidth: this.state.width,
-                    containerHeight: this.state.height
+                    containerHeight: this.state.height,
+                    magnetsVertical: this.state.magnetsVertical
                 })
             );
         }
         return (
             <div style={st} ref={this.containerRef} className="rmx-layout_container">
                 {childrenWithProps}
+                {this.state.magnetsVertical && this.state.magnetsVertical.map( (mv) => {
+                    if (mv.hide !== true)
+                        return <div className="rmx-l_mgn" style={{left:mv.left+'%'}}></div>
+                })}
             </div>
         )
     }
