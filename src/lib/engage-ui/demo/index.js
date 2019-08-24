@@ -16,39 +16,37 @@ import HashList from '../../hashlist';
 import LayoutContainer from '../layout/LayoutContainer';
 import { Schema as LayoutContainerSchema } from '../layout/LayoutContainer'
 import LayoutItem from '../layout/LayoutItem';
+import Element from '../primitives/Element'
 
 ReactDOM.render(
     <div>
-        {/* <Control schema={LayoutContainerSchema} width={600} height={400}>
-            <LayoutContainer mode={'absolute'} border={true}>
-                <LayoutItem>
-                    <div style={{width:'200px',height:'30px',backgroundColor:'#a22222'}}>Fixed width/height</div>
-                </LayoutItem>
-                <LayoutItem>
-                    <div style={{width:'100%',height:'60px',backgroundColor:'#22a222'}}>Dynamic width<br/>fixed height</div>
-                </LayoutItem>
-                <LayoutItem>
-                    <div style={{width:'70px',height:'100%',backgroundColor:'#5555a2'}}>Fixed width<br/>dynamic height</div>
-                </LayoutItem>
-                {<LayoutItem>
-                    <p style={{}}>Simple text in block</p>
-                </LayoutItem>}
-            </LayoutContainer>
-        </Control> */}
         <Control schema={LayoutContainerSchema} width={600} height={400}>
             <LayoutContainer mode={'absolute'} border={true}>
-                {/* <LayoutItem>
-                    <p style={{}}>Simple text in block</p>
-                </LayoutItem> */}
-                <LayoutItem>
+                <LayoutItem top={20}>
+                    <Element>
+                        <div style={{width:'222px',height:'33px',backgroundColor:'#a22222'}}>Fixed width/height</div>
+                    </Element>
+                </LayoutItem>
+                <LayoutItem top={80}>
+                    <Element>
+                        <div style={{width:'100%',height:'60px',backgroundColor:'#22a222'}}>Dynamic width<br/>fixed height</div>
+                    </Element>
+                </LayoutItem>
+                <LayoutItem top={160}>
+                    <Element>
+                        <div style={{width:'70px',height:'100%',backgroundColor:'#5555a2'}}>Fixed width<br/>dynamic height</div>
+                    </Element>
+                </LayoutItem>
+            </LayoutContainer>
+        </Control>
+        <Control schema={LayoutContainerSchema} width={600} height={400}>
+            <LayoutContainer mode={'absolute'} border={true}>
+                <LayoutItem top={200} left={70}>
                     <Button/>
                 </LayoutItem>
-                <LayoutItem>
+                <LayoutItem top={120} left={20}>
                     <TextOption correctIndicator='correct' percent={44}/>
                 </LayoutItem>
-                {/* <LayoutItem>
-                    <Button colorMod="white"/>
-                </LayoutItem> */}
             </LayoutContainer>
         </Control>
         <Control schema={QuizBlockSchema} width={600} height={400}>
