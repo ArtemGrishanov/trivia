@@ -340,75 +340,11 @@ export default class LayoutItem extends React.Component {
     componentDidMount() {
         window.addEventListener('mousemove', this.onWindowMouseMove);
         window.addEventListener('mouseup', this.onWindowMouseUp);
-        // try {
-        //     this.contentObserver = new ResizeObserver((event) => {
-        //         // console.log('content dimension changed', event);
-        //         const rect = event[0].contentRect;
-        //         // if (rect.width !== this.state.contentWidth || rect.height !== this.state.contentHeight) {
-        //         if (!this.state.contentWidth || !this.state.contentHeight) {
-        //             console.log('content dimension init', event);
-        //             //TODO пока просто первый раз измеряем размеры контента
-        //             this.setState({
-        //                 ...calcState({
-        //                     state: this.state,
-        //                     contentWidth: rect.width,
-        //                     contentHeight: rect.height,
-        //                     containerWidth: this.props.containerWidth,
-        //                     propWidth: this.props.width,
-        //                     propHeight: this.props.height,
-        //                     width: this.state.width,
-        //                     height: this.state.height
-        //                 })
-        //             });
-        //             this.initObserver();
-        //         }
-        //     }).observe(this.childRef.current);
-        // }
-        // catch(error) {
-        //     console.error('Element con not be observed');
-        // }
     }
 
     componentWillUnmount() {
         window.removeEventListener('mousemove', this.onWindowMouseMove);
         window.removeEventListener('mouseup', this.onWindowMouseUp);
-    }
-
-    /**
-     * Observe component width/height changes and recalculate the state
-     * It could be resize operations in LayoutContainer.js
-     *
-     * Library: http://marcj.github.io/css-element-queries/
-     */
-    initObserver() {
-        // this.borderObserver = new ResizeObserver((event) => {
-        //     //TODO как мы хотим выравнивать контент внутри LayoutItem?
-        //     // контент меньше по ширине
-        //     // контент больше по ширине
-        //     // контент меньше по высоте
-        //     // контент больше по высоте
-        //     //
-        //     //
-        //     const rect = event[0].contentRect;
-        //     if (rect.width !== this.state.width || rect.height != this.state.height) {
-        //         this.setState({
-        //             ...calcState({
-        //                 state: this.state,
-        //                 contentWidth: this.state.contentWidth,
-        //                 contentHeight: this.state.contentHeight,
-        //                 containerWidth: this.props.containerWidth,
-        //                 propWidth: this.props.width,
-        //                 propHeight: this.props.height,
-        //                 width: toPercent(rect.width, this.props.containerWidth),
-        //                 height: rect.height
-        //             })
-        //         });
-        //     }
-        // }).observe(this.thisRef.current);
-    }
-
-    componentDidUpdate() {
-
     }
 
     onContentSize(size) {
@@ -431,11 +367,6 @@ export default class LayoutItem extends React.Component {
                 contentMinHeight: this.state.contentMinHeight
             })
         });
-        if (!this.observerInited) {
-            // init this border observer first time
-            this.initObserver();
-            this.observerInited = true;
-        }
     }
 
     render() {

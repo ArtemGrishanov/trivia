@@ -17,6 +17,8 @@ import LayoutContainer from '../layout/LayoutContainer';
 import { Schema as LayoutContainerSchema } from '../layout/LayoutContainer'
 import LayoutItem from '../layout/LayoutItem';
 import Element from '../primitives/Element'
+import Text from '../primitives/Text'
+import { Schema as TextSchema } from '../primitives/Text'
 
 ReactDOM.render(
     <div>
@@ -52,6 +54,9 @@ ReactDOM.render(
         <Control schema={LayoutContainerSchema} width={600} height={400}>
             <LayoutContainer globalTestId={'test1'} mode={'absolute'} border={true}>
                 <LayoutItem>
+                    <Text></Text>
+                </LayoutItem>
+                <LayoutItem>
                     <ProgressiveImage
                         src="http://p.testix.me/temp/cat1500x1000.jpg"
                         srcThumb="http://p.testix.me/temp/cat1500x1000_thumb.jpg"
@@ -63,6 +68,12 @@ ReactDOM.render(
                 </LayoutItem>
                 <LayoutItem>
                     <TextOption/>
+                </LayoutItem>
+                <LayoutItem>
+                    <Button text='Next'></Button>
+                </LayoutItem>
+                <LayoutItem>
+                    <ProgressiveImage src='http://www.earthtimes.org/newsimage/wwf-50-Years-Conservation_153.jpg'/>
                 </LayoutItem>
             </LayoutContainer>
         </Control>
@@ -118,6 +129,9 @@ ReactDOM.render(
         </Control>
         <Control schema={CorrectIconSchema}>
             <CorrectIcon mod='wrong_gray'/>
+        </Control>
+        <Control schema={TextSchema}>
+            <Text fontSize={50} color='red'></Text>
         </Control>
         <Control schema={ProgressiveImageSchema} width={500} height={300}>
             <ProgressiveImage

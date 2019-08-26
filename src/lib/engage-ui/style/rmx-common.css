@@ -73,6 +73,12 @@ p {
     font-size: 12px;
 }
 
-rmx-ci {
+.rmx-ci {
     display: inline-block;
+}
+
+.rmx-text {
+    display: inline-block; /* to measure text content inside element */
+    margin: 0;
+    padding: 0;
 }

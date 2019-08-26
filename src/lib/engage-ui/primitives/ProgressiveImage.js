@@ -3,6 +3,8 @@ import '../style/rmx-progressive_image.css'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper';
 
+//TODO contain | cover modes for image
+
 const STATE_INITIAL = 'STATE_INITIAL';
 const STATE_LOADING = 'STATE_LOADING';
 const STATE_REVEALING = 'STATE_REVEALING';
