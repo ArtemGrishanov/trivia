@@ -70,6 +70,10 @@ class App extends React.Component {
             </EngageApp>
         );
     }
+
+    // render() {
+    //     return <div></div>
+    // }
 }
 
 const mapStateToProps = (state) => {

@@ -1,6 +1,6 @@
 import React from 'react'
 import DataSchema from '../../schema'
-import PropsNormalizer from '../PropsNormalizer'
+import RemixWrapper from '../RemixWrapper'
 
 function CorrectIcon({mod = 'empty'}) {
     return (
@@ -61,4 +61,4 @@ export const Schema = new DataSchema({
     }
 });
 
-export default PropsNormalizer(CorrectIcon, Schema);
+export default RemixWrapper(CorrectIcon, Schema, 'CorrectIcon')

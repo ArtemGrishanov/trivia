@@ -13,6 +13,9 @@ import { SizeMe } from 'react-sizeme'
 
 //TODO Element {children} не определяет корректно размер контента
 
+//TODO add align properties: vertical and horizonal, when content less then LayoutItem
+
+
 /**
  * Обладает свойствами:
  * - содержит один элемент (со статичными или динамичными размерами width:100%)
@@ -92,17 +95,11 @@ function calcState({
         // set min width first time
         if (contentMinWidth === undefined && contentWidth >= 0) {
             contentMinWidth = contentWidth;
-            if (contentMinWidth < MIN_WIDTH) {
-                contentMinWidth = MIN_WIDTH;
-            }
         }
 
         // set min width first time
         if (contentMinHeight === undefined && contentHeight >= 0) {
             contentMinHeight = contentHeight;
-            if (contentMinHeight < MIN_HEIGHT) {
-                contentMinHeight = MIN_HEIGHT;
-            }
         }
 
         // width cannot be less then min content

@@ -1,6 +1,6 @@
 import '../style/rmx-layout.css'
 import React from 'react';
-import PropsNormalizer from '../PropsNormalizer';
+import RemixWrapper from '../RemixWrapper';
 import DataSchema from '../../schema';
 
 /**
@@ -182,4 +182,4 @@ export const Schema = new DataSchema({
     }
 });
 
-export default PropsNormalizer(LayoutContainer, Schema);
+export default RemixWrapper(LayoutContainer, Schema, 'LayoutContainer')

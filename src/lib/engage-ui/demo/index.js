@@ -56,7 +56,6 @@ ReactDOM.render(
                         src="http://p.testix.me/temp/cat1500x1000.jpg"
                         srcThumb="http://p.testix.me/temp/cat1500x1000_thumb.jpg"
                         animation="zoom"
-                        maxWidth="300"
                         />
                 </LayoutItem>
                 <LayoutItem>

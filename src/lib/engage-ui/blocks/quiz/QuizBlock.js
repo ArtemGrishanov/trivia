@@ -1,7 +1,7 @@
 import '../../style/rmx-quiz.css'
 import React from 'react'
 import DataSchema from '../../../schema'
-import PropsNormalizer from '../../PropsNormalizer';
+import RemixWrapper from '../../RemixWrapper';
 import TextOption from '../../primitives/TextOption';
 
 class QuizBlock extends React.Component {
@@ -19,7 +19,7 @@ class QuizBlock extends React.Component {
             this.props.onOptionSelect(optionId);
         }
     }
-    
+
     render() {
         const arr = this.props.options ? this.props.options.toArray(): [];
         const st = {
@@ -67,4 +67,4 @@ export const Schema = new DataSchema({
     }
 });
 
-export default PropsNormalizer(QuizBlock, Schema);
+export default RemixWrapper(QuizBlock, Schema, 'QuizBlock')

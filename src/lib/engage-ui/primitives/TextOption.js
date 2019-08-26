@@ -1,9 +1,8 @@
 import '../style/rmx-options.css'
 import React from 'react'
 import DataSchema from '../../schema'
-import PropsNormalizer from '../PropsNormalizer';
 import CorrectIcon from './CorrectIcon';
-import sizeMe from 'react-sizeme'
+import RemixWrapper from '../RemixWrapper';
 
 class TextOption extends React.Component {
 
@@ -86,4 +85,4 @@ export const Schema = new DataSchema({
     }
 });
 
-export default sizeMe({monitorHeight: true, noPlaceholder: true})(PropsNormalizer(TextOption, Schema));
+export default RemixWrapper(TextOption, Schema, 'TextOption')

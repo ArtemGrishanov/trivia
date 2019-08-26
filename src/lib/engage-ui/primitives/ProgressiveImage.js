@@ -1,7 +1,7 @@
 import React from 'react'
 import '../style/rmx-progressive_image.css'
 import DataSchema from '../../schema'
-import PropsNormalizer from '../PropsNormalizer';
+import RemixWrapper from '../RemixWrapper';
 
 const STATE_INITIAL = 'STATE_INITIAL';
 const STATE_LOADING = 'STATE_LOADING';
@@ -282,4 +282,4 @@ export const Schema = new DataSchema({
     }
 });
 
-export default PropsNormalizer(ProgressiveImage, Schema);
+export default RemixWrapper(ProgressiveImage, Schema, 'ProgressiveImage')
