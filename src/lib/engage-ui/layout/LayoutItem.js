@@ -64,7 +64,7 @@ function calcState({
         propMagnetsVertical
     }) {
 
-        if (width === undefined) {
+        if (width === undefined || state.prevPropWidth != propWidth) {
             // auto width
             if (propWidth >= 0) {
                 // props имеют наибольший приоритет при изначальной установке
@@ -78,7 +78,7 @@ function calcState({
             }
         }
 
-        if (height === undefined) {
+        if (height === undefined || state.prevPropHeight != propHeight) {
             // auto height
             if (propHeight >= 0) {
                 height = propHeight;
@@ -92,11 +92,17 @@ function calcState({
         // set min width first time
         if (contentMinWidth === undefined && contentWidth >= 0) {
             contentMinWidth = contentWidth;
+            if (contentMinWidth < MIN_WIDTH) {
+                contentMinWidth = MIN_WIDTH;
+            }
         }
 
         // set min width first time
         if (contentMinHeight === undefined && contentHeight >= 0) {
             contentMinHeight = contentHeight;
+            if (contentMinHeight < MIN_HEIGHT) {
+                contentMinHeight = MIN_HEIGHT;
+            }
         }
 
         // width cannot be less then min content
@@ -119,11 +125,13 @@ function calcState({
             height = MIN_HEIGHT;
         }
 
-        if (top === undefined) {
+        if (top === undefined || state.prevPropTop != propTop) {
+            // props changed or it's a first setup
             top = propTop;
         }
 
-        if (left === undefined) {
+        if (left === undefined || state.prevPropLeft != propLeft) {
+            // props changed or it's a first setup
             left = propLeft;
         }
 
@@ -160,7 +168,12 @@ function calcState({
             contentWidth: contentWidth,
             contentHeight: contentHeight,
             contentMinWidth: contentMinWidth,
-            contentMinHeight: contentMinHeight
+            contentMinHeight: contentMinHeight,
+
+            prevPropTop: propTop,
+            prevPropLeft: propLeft,
+            prevPropWidth: propWidth,
+            prevPropHeight: propHeight
         }
 }
 
@@ -465,5 +478,14 @@ export default class LayoutItem extends React.Component {
                 </div>
             </div>
         )
+    }
+
+    exportLayout() {
+        return {
+            top: this.state.top,
+            left: this.state.left,
+            width: this.state.width,
+            height: this.state.height
+        }
     }
 }

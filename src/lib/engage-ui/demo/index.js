@@ -20,7 +20,7 @@ import Element from '../primitives/Element'
 
 ReactDOM.render(
     <div>
-        <Control schema={LayoutContainerSchema} width={600} height={400}>
+        {/* <Control schema={LayoutContainerSchema} width={600} height={400}>
             <LayoutContainer mode={'absolute'} border={true}>
                 <LayoutItem top={20}>
                     <Element>
@@ -46,6 +46,24 @@ ReactDOM.render(
                 </LayoutItem>
                 <LayoutItem top={120} left={20}>
                     <TextOption correctIndicator='correct' percent={44}/>
+                </LayoutItem>
+            </LayoutContainer>
+        </Control> */}
+        <Control schema={LayoutContainerSchema} width={600} height={400}>
+            <LayoutContainer globalTestId={'test1'} mode={'absolute'} border={true}>
+                <LayoutItem>
+                    <ProgressiveImage
+                        src="http://p.testix.me/temp/cat1500x1000.jpg"
+                        srcThumb="http://p.testix.me/temp/cat1500x1000_thumb.jpg"
+                        animation="zoom"
+                        maxWidth="300"
+                        />
+                </LayoutItem>
+                <LayoutItem>
+                    <TextOption/>
+                </LayoutItem>
+                <LayoutItem>
+                    <TextOption/>
                 </LayoutItem>
             </LayoutContainer>
         </Control>
