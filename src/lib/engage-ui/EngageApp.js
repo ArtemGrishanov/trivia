@@ -32,13 +32,20 @@ import './style/rmx-common.css';
  * -
  */
 class EngageApp extends React.Component {
-    
+
     // TODO как соотнести их со схемой? по идее надо по схеме компонента их заполнять
     // static defaultProps = {
     //     width: 400,
     //     height: undefined
     //     //TODO many props
     // }
+
+    static getDerivedStateFromProps(props, state) {
+        //const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
+        return {
+            ...state
+        }
+    }
 
     constructor(props) {
         super(props);
@@ -63,7 +70,7 @@ class EngageApp extends React.Component {
 
     componentDidMount() {
         this.syncScreens();
-        
+
         // we may use refs to get a link to dom elems
         //     //TODO no inline styles in this rendered string, inline styles may come from store!
 

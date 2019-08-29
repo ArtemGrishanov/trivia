@@ -15,7 +15,7 @@ export const Schema = new DataSchema({
         type: 'string',
         minLength: 1,
         maxLength: 128,
-        default: 'Default button title'
+        default: 'Button text'
     },
     "sizeMod": {
         type: 'string',

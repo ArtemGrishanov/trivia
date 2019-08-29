@@ -1,5 +1,6 @@
 import React from 'react'
 import './style/rmx-common.css';
+import LayoutContainer from './layout/LayoutContainer';
 
 /**
  * Это контейнер визуальных элементов,
@@ -9,7 +10,7 @@ import './style/rmx-common.css';
  * Может использоваться анимация для переключения экранов
  */
 export default class Screen extends React.Component {
-    
+
     static defaultProps = {
         screenId: undefined,
         name: 'screen',
@@ -28,8 +29,10 @@ export default class Screen extends React.Component {
             backgroundColor: this.props.backgroundColor
         };
         return (
-            <div  style={s} className="rmx-screen">
-                {this.props.children}
+            <div style={s} className="rmx-screen">
+                <LayoutContainer>
+                    {this.props.children}
+                </LayoutContainer>
             </div>
         )
     }

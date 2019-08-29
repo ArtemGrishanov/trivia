@@ -5,6 +5,10 @@ import DataSchema from '../../schema';
 
 //TODO у компонента с которым работаю временно менять zOrder на максимальный, потом обратно
 
+//TODO hide/show magnet lines when operation in action
+
+//TODO calc actiual size of all layoutItems (for auto height for example)
+
 /**
  * Компонент контейнер отвечающий за позиционирование дочерних элементов
  * - можно выбрать заранее заготовленный лейаут дочерних компонентов: в ряд по вертикали, плиткой и тд
@@ -15,6 +19,14 @@ import DataSchema from '../../schema';
  * - Показ координат top/left блока
  */
 class LayoutContainer extends React.Component {
+
+    static getDerivedStateFromProps(props, state) {
+        return {
+            ...state,
+            width: props.size.width >= 0 ? props.size.width: state.width,
+            height: props.size.height >= 0 ? props.size.height: state.height
+        }
+    }
 
     constructor(props) {
         super(props);
@@ -29,30 +41,11 @@ class LayoutContainer extends React.Component {
             flow: []
         }
         this.containerRef = React.createRef();
-        this.observer = null;
         if (props.globalTestId) {
             window[props.globalTestId] = this;
         }
         this.childRefs = [];
         this.flowElementIndex = -1;
-    }
-
-    onWindowResize() {
-
-    }
-
-    componentDidMount() {
-        window.addEventListener('resize', this.onWindowResize);
-
-        // http://marcj.github.io/css-element-queries/
-        this.observer = new ResizeObserver((event) => {
-            console.log('LayoutContainer dimension changed', event);
-            this.setState({
-                width: event[0].contentRect.width,
-                height: event[0].contentRect.height
-            });
-        }).observe(this.containerRef.current);
-        //TODO use also react-sizeme module
     }
 
     normalizeChildrenWidth() {
@@ -96,8 +89,10 @@ class LayoutContainer extends React.Component {
         )
     }
 
-    componentWillUnmount() {
-        window.removeEventListener('resize', this.onWindowResize);
+    componentDidMount() {
+        if (this.props.layout) {
+            this.setLayout(this.props.layout);
+        }
     }
 
     exportLayout() {

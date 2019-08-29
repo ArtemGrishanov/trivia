@@ -3,6 +3,7 @@ import { remixReducer } from './lib/remix'
 import schema from './appStoreDataSchema'
 import actions from './actions'
 import { getOption, getQuestionIdByOption, calcResult } from './helper'
+import Trigger from './Trigger'
 
 const initialState = {
     // app specific data tree
@@ -23,7 +24,24 @@ const initialState = {
     style: {
 
     },
+    screens: {
+        /*
+        'questionScreen_1': {
+            'staticElements': [ ], // components wich were added by user
+            'layout': 'string with layout',
+            'triggers': [ ]
+        }
+        */
+
+        /**
+         * before_screen_show, calcRes
+         */
+    },
+    triggers: {
+        history: []
+    },
     session: {
+        startClientTime: new Date().getTime(),
         questionIds: [],
         currentQuestionIndex: 0,
         answers: {
@@ -76,6 +94,46 @@ function style(state = initialState.style, action) {
     }
 }
 
+//test
+//store.dispatch({type: 'EVENT', eventType: 'quiz_option_select'})
+function triggers(state = initialState.triggers, action) {
+    switch(action.type) {
+        case actions.EVENT: {
+            let activatedTrigger = null;
+
+            //TODO find trigger in screen triggers list
+            //TODO check conditions. Conditions - autotests?
+            if (action.eventType === 'quiz_option_select') {
+                // trigger found, activate it
+                activatedTrigger = new Trigger({eventType: action.eventType});
+            }
+
+            if (activatedTrigger) {
+                console.log(`Trigger with event type ${activatedTrigger.eventType} activated`);
+                // put trigger in history
+                state.history.push({
+                    activatedTrigger,
+                    clientTime: new Date().getTime()
+                });
+            }
+
+            //TODO detect 'result' stage
+            // like
+            // if (Object.keys(answers).length === state.questionIds.length) { }
+            //
+            // но в схеме с ветвлением не обязательно прохождение всех вопросов
+            // next trigger with screenId argument?
+            // calcResult action? when?
+
+            return {
+                ...state
+            }
+        }
+        default:
+            return state;
+    }
+}
+
 function session(state = initialState.session, action) {
     switch(action.type) {
         case actions.INIT: {
@@ -117,6 +175,6 @@ function session(state = initialState.session, action) {
     }
 }
 
-const reducer = remixReducer(combineReducers({app, quiz, style, session}), schema);
+const reducer = remixReducer(combineReducers({app, quiz, style, session, triggers}), schema);
 
 export default reducer

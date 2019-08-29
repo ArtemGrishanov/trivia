@@ -378,6 +378,11 @@ export default class LayoutItem extends React.Component {
         };
         // align child inside container
         const cst = {
+
+            //TODO trying to prevent progressive image overflow
+            //maxHeight: this.state.height+'px'
+
+
             // left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
             // top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
         }
