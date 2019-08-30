@@ -4,8 +4,8 @@ import HashList from "./hashlist.js";
 export default class Normalizer {
 
     /**
-     * 
-     * @param {DataSchema} dataSchema 
+     *
+     * @param {DataSchema} dataSchema
      */
     constructor(dataSchema) {
         if (!dataSchema) {
@@ -17,10 +17,10 @@ export default class Normalizer {
     /**
      * Сравнить два объекта по схеме и определить равны ли они
      * Сравнение происходит только по свойствам описанным в схеме
-     * 
-     * @param {*} state1 
-     * @param {*} state2 
-     * 
+     *
+     * @param {*} state1
+     * @param {*} state2
+     *
      * @return {boolean}
      */
     equal(state1, state2) {
@@ -52,8 +52,8 @@ export default class Normalizer {
 
     /**
      * Normalize state object according to schema
-     * 
-     * @param {object} state 
+     *
+     * @param {object} state
      */
     process(state = {}) {
         // check al selectors in application schema
@@ -83,7 +83,7 @@ export default class Normalizer {
     }
     // process(state) {
     //     this.dataSchema.selectorsInProcessOrder.forEach( (selector) => {
-            
+
     //         // for each property in dataSchema fetch property value by path, exmaple "property.deep.path.value"
     //         // in common case there could be many properties for one selector
     //         const requestResult = getPropertiesBySelector(state, selector);
@@ -114,9 +114,9 @@ export default class Normalizer {
     // }
 
     /**
-     * 
-     * @param {string} path 
-     * @param {*} value 
+     *
+     * @param {string} path
+     * @param {*} value
      */
     processValue(path, value) {
         const propDescription = this.dataSchema.getDescription(path);
@@ -143,7 +143,7 @@ export default class Normalizer {
                 }
             }
         }
-        
+
         return value;
         //TODO min max
         //TODO enum
@@ -203,9 +203,9 @@ export default class Normalizer {
     }
 
     /**
-     * 
-     * @param {object} info 
-     * @param {HashList | object} value 
+     *
+     * @param {object} info
+     * @param {HashList | object} value
      */
     processHashlist(info, value) {
         if (value instanceof HashList === false) {
@@ -214,8 +214,11 @@ export default class Normalizer {
                 // try to convert it to HashList
                 value = new HashList(value);
             }
-            else {
+            else if (info.default && info.default._orderedIds) {
                 value = info.default.clone();
+            }
+            else {
+                value = new HashList();
             }
         }
         //TODO min, max size of value

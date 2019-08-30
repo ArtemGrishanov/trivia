@@ -43,7 +43,7 @@ class App extends React.Component {
         });
     }
 
-    render() {
+    renderOld() {
         return (
             <EngageApp appHeight={this.props.height} appWidth={this.props.width} loading={this.props.loading}>
                 {/* <ScreenManager> */}
@@ -112,9 +112,12 @@ class App extends React.Component {
         );
     }
 
-    // render() {
-    //     return <div></div>
-    // }
+    render() {
+        return (
+            <EngageApp appHeight={this.props.height} appWidth={this.props.width} loading={this.props.loading}>
+            </EngageApp>
+        )
+    }
 }
 
 const mapStateToProps = (state) => {

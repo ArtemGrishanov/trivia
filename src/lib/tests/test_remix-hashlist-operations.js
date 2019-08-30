@@ -44,6 +44,15 @@ describe('Remix', function() {
             default: "Option text",
             minLength: 1,
             maxLength: 256
+        },
+        "emptyList": {
+            type: "hashlist",
+            default: new HashList(),
+            minLength: 1,
+            maxLength: 9,
+            prototypes: [
+                {id: "foo", data: { type: "bar", text: "Text bazz"}}
+            ]
         }
     });
 
@@ -51,15 +60,18 @@ describe('Remix', function() {
         quiz: {
         }
     }
-    
+
     function quiz(state = initialState.quiz, action) {
         switch(action.type) {
             default:
                 return state;
         }
     }
-    
-    const reducer = remixReducer(Redux.combineReducers({quiz}), schema);    
+
+    const reducer = remixReducer({
+        reducers: {quiz},
+        dataSchema: schema
+    });
     const store = Redux.createStore(reducer);
     window.store = store; // for debug: inspect storage state in browser console
 
@@ -72,7 +84,7 @@ describe('Remix', function() {
     function hasDuplicates(array) {
         return (new Set(array)).size !== array.length;
     }
-    
+
     /**
      * Универсальная проверка стейта
      */
@@ -136,7 +148,7 @@ describe('Remix', function() {
                 questionsCount: 2,
                 optionsCount: [2,2]
             });
-            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 9);
+            chai.assert.equal(Remix._getLastUpdateDiff().added.length, 10);
             chai.assert.equal(Remix._getLastUpdateDiff().changed.length, 0);
             chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 0);
         });
@@ -184,7 +196,7 @@ describe('Remix', function() {
         });
 
         it('deleteHashlistElement', () => {
-            Remix.deleteHashlistElement("quiz.questions", 1); // delete the second question
+            Remix.deleteHashlistElement("quiz.questions", {index: 1}); // delete the second question
             checkState({
                 state: store.getState(),
                 questionsCount: 2,
@@ -197,7 +209,7 @@ describe('Remix', function() {
             chai.assert.equal(Remix._getLastUpdateDiff().deleted.length, 4);
 
             const lastQuestionId = store.getState().quiz.questions.getId(1);
-            Remix.deleteHashlistElement(`quiz.questions.${lastQuestionId}.options`, 0);
+            Remix.deleteHashlistElement(`quiz.questions.${lastQuestionId}.options`, {index: 0});
             checkState({
                 state: store.getState(),
                 questionsCount: 2,

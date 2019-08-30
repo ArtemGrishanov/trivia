@@ -3,6 +3,7 @@ import ReactDOMServer from 'react-dom/server';
 import { connect } from 'react-redux'
 import DataSchema from '../schema'
 import Remix from '../remix'
+import Router from './router'
 
 import './style/rmx-common.css';
 
@@ -53,10 +54,6 @@ class EngageApp extends React.Component {
             message: null
         };
         this.screens = [];
-    }
-
-    componentWillReceiveProps(newProps) {
-        //console.log(newProps);
     }
 
     sendRequest() {
@@ -143,7 +140,7 @@ class EngageApp extends React.Component {
 
     emitEvents() {}
 
-    render() {
+    renderOld() {
 
         const appSt = {
             width: this.props.appWidth + "px",
@@ -167,6 +164,20 @@ class EngageApp extends React.Component {
                 {/*<Banner></Banner>*/}
             </div>
         )
+    }
+
+    render() {
+        const appSt = {
+            width: this.props.appWidth + "px",
+            minHeight: this.props.appHeight + "px"
+        }
+        return (
+            <div className="rmx-app" style={appSt}>
+                <Router>
+
+                </Router>
+            </div>
+        );
     }
 }
 

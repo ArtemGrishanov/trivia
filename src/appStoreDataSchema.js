@@ -9,6 +9,18 @@ const schema = new DataSchema({
     "app.size.width": EngageAppSchema.getDescription("width"),
     "app.size.height": EngageAppSchema.getDescription("height"),
 
+    "router.screens": {
+        type: 'hashlist',
+        default: new HashList([
+            { displayName: 'Screen', backgroundColor: 'yellow' }
+        ]),
+        minLength: 0,
+        maxLength: 32,
+        prototypes: [
+            { id: 'screen', data: { displayName: 'Screen', backgroundColor: 'green' }}
+        ]
+    },
+
     // // for all properties which match the pattern "quiz.questions.0.text, quiz.questions.1.text ... quiz.questions.999.text ... "
 
     // quiz.[questions HashList].ugltc7.text - это path без указания типа? откуда мы знаем что надо искать/создавать HashList
@@ -106,9 +118,9 @@ const schema = new DataSchema({
         //css: true ?
         // 1) можно делать традиционно через обновление стора-коннект и руками прописать стиль в компонент
         // тогда добавить "css" атрибут и как формировать css строку
-        // 
         //
-        
+        //
+
         // 2) а можно описать здесь селектор как было в MutApp
         // так проще добавлять новые стили
         // но не будет событий, подписки на события, общего механизма. как отслеживать и обновлять актуальное значение цвета

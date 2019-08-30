@@ -1,6 +1,8 @@
 import React from 'react'
 import './style/rmx-common.css';
 import LayoutContainer from './layout/LayoutContainer';
+import DataSchema from '../schema'
+import RemixWrapper from './RemixWrapper';
 
 /**
  * Это контейнер визуальных элементов,
@@ -9,7 +11,7 @@ import LayoutContainer from './layout/LayoutContainer';
  * Растягивается по всему доступному пространству приложения
  * Может использоваться анимация для переключения экранов
  */
-export default class Screen extends React.Component {
+class Screen extends React.Component {
 
     static defaultProps = {
         screenId: undefined,
@@ -22,14 +24,13 @@ export default class Screen extends React.Component {
         this.state = {};
     }
 
-    //TODO no content stub in the screen
-
     render() {
         const s = {
             backgroundColor: this.props.backgroundColor
         };
         return (
             <div style={s} className="rmx-screen">
+                <p>{this.props.id}</p>
                 <LayoutContainer>
                     {this.props.children}
                 </LayoutContainer>
@@ -37,3 +38,16 @@ export default class Screen extends React.Component {
         )
     }
 }
+
+/**
+ * Props schema
+ * Which props could be edited and how (types, range and other rules)
+ */
+export const Schema = new DataSchema({
+    "backgroundColor": {
+        type: 'string',
+        default: ''
+    }
+});
+
+export default RemixWrapper(Screen, Schema, 'Screen');

@@ -96,6 +96,7 @@ function style(state = initialState.style, action) {
 
 //test
 //store.dispatch({type: 'EVENT', eventType: 'quiz_option_select'})
+//TODO move reducer to remix core
 function triggers(state = initialState.triggers, action) {
     switch(action.type) {
         case actions.EVENT: {
@@ -175,6 +176,10 @@ function session(state = initialState.session, action) {
     }
 }
 
-const reducer = remixReducer(combineReducers({app, quiz, style, session, triggers}), schema);
+const reducer = remixReducer({
+    // some client reducers
+    reducers: {app, quiz, style, session, triggers},
+    dataSchema: schema
+});
 
 export default reducer

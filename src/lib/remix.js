@@ -128,9 +128,9 @@ function setData(data, forceFeedback) {
 /**
  * Sets application width and height
  * Value sill be set if not "undefined"
- * 
- * @param {number} width 
- * @param {number} height 
+ *
+ * @param {number} width
+ * @param {number} height
  */
 function setSize(width, height) {
     // find propertes in schema responsible for width and height
@@ -166,9 +166,9 @@ function setSize(width, height) {
  * Dispatches an action defined in Remix.init
  * External action can be used for state modification in reducer which can not be descibed in schema
  * For example: "set quiz correct option"
- * 
- * @param {string} type 
- * @param {object} param 
+ *
+ * @param {string} type
+ * @param {object} param
  */
 function dispatchAction(type, param) {
     const actInfo = extActions.find( (act) => type === act.type);
@@ -185,9 +185,9 @@ function dispatchAction(type, param) {
 }
 
 /**
- * 
- * @param {string} hashlistPropPath 
- * @param {number} index 
+ *
+ * @param {string} hashlistPropPath
+ * @param {number} index
  * @param {string} prototypeId
  */
 function addHashlistElement(hashlistPropPath, index, prototypeId) {
@@ -206,9 +206,9 @@ function addHashlistElement(hashlistPropPath, index, prototypeId) {
 }
 
 /**
- * 
- * @param {number} elementIndex 
- * @param {number} newElementIndex 
+ *
+ * @param {number} elementIndex
+ * @param {number} newElementIndex
  */
 function changePositionInHashlist(hashlistPropPath, elementIndex, newElementIndex) {
     elementIndex = parseInt(elementIndex);
@@ -231,8 +231,8 @@ function changePositionInHashlist(hashlistPropPath, elementIndex, newElementInde
 }
 
 /**
- * 
- * @param {string} hashlistPropPath 
+ *
+ * @param {string} hashlistPropPath
  * @param {object} targetElement - specify targetElement.elementId or targetElement.index
  */
 function deleteHashlistElement(hashlistPropPath, targetElement) {
@@ -340,7 +340,7 @@ function eventEmitterTick() {
 * High Order Reducer:
 * - data normalization
 */
-export function remixReducer(reducer, dataSchema) {
+export function remixReducer({reducers, dataSchema}) {
 
     if (!dataSchema) {
         throw new  Error('Remix: schema is not defined');;
@@ -350,6 +350,8 @@ export function remixReducer(reducer, dataSchema) {
     }
     schema = dataSchema;
     normalizer = new Normalizer(schema);
+    // clients reducers + standart remix reducers
+    const reducer = combineReducers({...reducers, router});
     log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
@@ -374,7 +376,7 @@ export function remixReducer(reducer, dataSchema) {
             const newElement = clone(schema.getDescription(action.path).prototypes[0].data);
             targetHashlist.addElement(newElement, action.index);
             //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-            
+
             //TODO
             //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_ADDED", property: action.path})};
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
@@ -386,7 +388,7 @@ export function remixReducer(reducer, dataSchema) {
             const targetHashlist = fetchHashlist(nextState, action.path, action.type);
             targetHashlist.changePosition(action.elementIndex, action.newElementIndex);
             //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-            
+
             //TODO
             //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_POSITION_WAS_CHANGED", property: action.path})};
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
@@ -406,7 +408,7 @@ export function remixReducer(reducer, dataSchema) {
                 throw new Error('Remix: can not delete hashlist element. You must specify "elementId" or "index"');
             }
             //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-            
+
             //TODO
             //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_DELETED", property: action.path})};
             //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
@@ -414,7 +416,7 @@ export function remixReducer(reducer, dataSchema) {
             // - например создать новый экран (хотя это в компонентах может быть)
         }
         else {
-            // it maybe @@redux/INITx.x.x.x actions 
+            // it maybe @@redux/INITx.x.x.x actions
             // it maybe a regular app action
             nextState = reducer(state, action);
         }
@@ -436,10 +438,14 @@ export function remixReducer(reducer, dataSchema) {
     }
 }
 
+function router(state = { backgroundColor: '#ff8888', screens: []}, action) {
+    return state
+}
+
 /**
- * 
- * @param {object} state 
- * @param {array | object} data 
+ *
+ * @param {object} state
+ * @param {array | object} data
  */
 function _doUpdate(state, data) {
     const pathesArr = Array.isArray(data) ? data.map((p) => p.path): Object.keys(data);
@@ -462,7 +468,7 @@ function _doUpdate(state, data) {
 
 /**
  * Calc a diff netween states
- * 
+ *
  * @param {*} prevState
  * @param {*} nextState
  */
@@ -505,7 +511,7 @@ function diff(prevState = {}, nextState = {}) {
 }
 
 function _isHashlistInstance(obj) {
-    return obj._orderedIds && obj._orderedIds.length >= 0;
+    return obj && obj._orderedIds && obj._orderedIds.length >= 0;
     //return obj.constructor && typeof obj.constructor.name === "string" && obj.constructor.name.toLowerCase() === "hashlist";
 }
 
@@ -553,10 +559,10 @@ function _setScreenEvents(updateData) {
 
 /**
  * Helper function
- * 
- * @param {*} path 
- * @param {*} state 
- * @param {*} action 
+ *
+ * @param {*} path
+ * @param {*} state
+ * @param {*} action
  */
 function fetchHashlist(state, path, actionType) {
     const fetchResult = getPropertiesBySelector(state, path);
@@ -575,8 +581,8 @@ function clone(obj) {
 
 /**
  * Deep cloning of all dynamic properties
- * 
- * @param {object} state 
+ *
+ * @param {object} state
  * @return {object} new state
  */
 function _cloneState(state) {
@@ -592,7 +598,7 @@ function _cloneState(state) {
 /**
  * Serialize dynamic store properties
  * We use array to order properties. From more common props to specific ones
- * 
+ *
  * @returns {string} example - '{"quiz.questions":{"_orderedIds":["54bwai","5lokro"],"54bwai":{"text":"Input your question"},"5lokro":{"text":"Input your question num2"}},"app.size.width":400,"app.size.height":400,"quiz.questions.54bwai.text":"Input your question","quiz.questions.5lokro.text":"Input your question num2"}'
  * You can see duplicate values ('Input your question'), It's OK when hashlist is serilized
  */
@@ -610,8 +616,8 @@ export function serialize(state) {
 }
 
 /**
- * 
- * 
+ *
+ *
  * @result {string} json string object, only dynamic properties are included in this tree.
  * "app": {
  *      "size": {
@@ -625,11 +631,11 @@ export function serialize(state) {
  *              text: 'Question title'
  *          },
  *          "ret67q": {
- *              
+ *
  *          }
  *      }
  * }
- * 
+ *
  * In this algorithm there is no duplicate values. Good for micro Editor. Moreover it is shorter.
  */
 export function serialize2(state) {
@@ -638,7 +644,7 @@ export function serialize2(state) {
     if (!st) {
         if (store)
             st = store.getState();
-        else 
+        else
             return;
     }
     schema.selectorsInProcessOrder.forEach((selector) => {
@@ -668,8 +674,8 @@ export function serialize2(state) {
 /**
  * Deserialize dynamic store properties
  * You can put string got from serialize method
- * 
- * @param {string} json 
+ *
+ * @param {string} json
  */
 export function deserialize(json) {
     if (typeof json === "string") {
@@ -701,3 +707,44 @@ remix._setCss = () => {
 
 export default remix
 window.remix = remix; // for debug
+
+
+/**
+ * From https://github.com/reduxjs/redux/blob/master/src/combineReducers.js
+ * TODO import normally
+ * This function for automated tests
+ *
+ * @param {*} reducers
+ */
+function combineReducers(reducers) {
+    const reducerKeys = Object.keys(reducers)
+    const finalReducers = {}
+    for (let i = 0; i < reducerKeys.length; i++) {
+      const key = reducerKeys[i]
+
+      if (typeof reducers[key] === 'function') {
+        finalReducers[key] = reducers[key]
+      }
+    }
+    const finalReducerKeys = Object.keys(finalReducers)
+
+    return function combination(state = {}, action) {
+      let hasChanged = false
+      const nextState = {}
+      for (let i = 0; i < finalReducerKeys.length; i++) {
+        const key = finalReducerKeys[i]
+        const reducer = finalReducers[key]
+        const previousStateForKey = state[key]
+        const nextStateForKey = reducer(previousStateForKey, action)
+        if (typeof nextStateForKey === 'undefined') {
+          const errorMessage = getUndefinedStateErrorMessage(key, action)
+          throw new Error(errorMessage)
+        }
+        nextState[key] = nextStateForKey
+        hasChanged = hasChanged || nextStateForKey !== previousStateForKey
+      }
+      hasChanged =
+        hasChanged || finalReducerKeys.length !== Object.keys(state).length
+      return hasChanged ? nextState : state
+    }
+  }
