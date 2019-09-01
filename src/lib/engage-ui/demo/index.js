@@ -61,13 +61,14 @@ ReactDOM.render(
                         src="http://p.testix.me/temp/cat1500x1000.jpg"
                         srcThumb="http://p.testix.me/temp/cat1500x1000_thumb.jpg"
                         animation="zoom"
+                        maxWidth={300}
                         />
                 </LayoutItem>
                 <LayoutItem>
-                    <TextOption/>
+                    <TextOption correctIndicator='correct' percent={44}/>
                 </LayoutItem>
                 <LayoutItem>
-                    <TextOption/>
+                    <TextOption correctIndicator='wrong' percent={66}/>
                 </LayoutItem>
                 <LayoutItem>
                     <Button text='Next'></Button>
@@ -77,14 +78,14 @@ ReactDOM.render(
                 </LayoutItem>
             </LayoutContainer>
         </Control>
-        <Control schema={QuizBlockSchema} width={600} height={400}>
+        {/* <Control schema={QuizBlockSchema} width={600} height={400}>
             <QuizBlock options={new HashList(['Answer1', 'Answer2', 'Answer3'])}/>
-        </Control>
+        </Control> */}
         <Control schema={TextOptionSchema}>
             <TextOption percent={55}/>
         </Control>
         <Control schema={TextOptionSchema}>
-            <TextOption correctIndicator='correct' percent={44}/>
+            <TextOption correctIndicator='correct' percent={34}/>
         </Control>
         <Control schema={TextOptionSchema}>
             <TextOption correctIndicator='wrong_gray' borderRadius={100} percent={33}/>
@@ -131,7 +132,10 @@ ReactDOM.render(
             <CorrectIcon mod='wrong_gray'/>
         </Control>
         <Control schema={TextSchema}>
-            <Text fontSize={50} color='red'></Text>
+            <Text fontSize={50} color='red' text='Text example'></Text>
+        </Control>
+        <Control schema={TextSchema} width={800}>
+            <Text fontSize={24} color='black' backgroundColor={'yellow'} text='Long text with typing effect. The user is printing this text on his keyboard.' animationOnAppearance='typing'></Text>
         </Control>
         <Control schema={ProgressiveImageSchema} width={500} height={300}>
             <ProgressiveImage
