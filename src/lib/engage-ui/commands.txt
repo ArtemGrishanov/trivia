@@ -1,0 +1,20 @@
+
+// добавить новый экран со свойствами по умолчанию
+remix.addHashlistElement('router.screens')
+
+// добавить новый экран со свойствами
+remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: 'red', tags: 'screen question'} })
+
+Смотреть:
+store.getState().router.screens
+
+
+// добавить новый компонент на экран
+var screenId = store.getState().router.screens.getId(0)
+remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', color: 'red'} })
+store.getState().router.screens[screenId].components
+
+// добавить картинку
+var screenId = store.getState().router.screens.getId(0)
+remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'ProgressiveImage', src: 'http://p.testix.me/temp/cat1500x1000.jpg', maxWidth: 300} })
+store.getState().router.screens[screenId].components

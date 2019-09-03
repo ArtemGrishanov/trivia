@@ -2,7 +2,9 @@ import React from 'react'
 import './style/rmx-common.css';
 import LayoutContainer from './layout/LayoutContainer';
 import DataSchema from '../schema'
+import HashList from '../hashlist'
 import RemixWrapper from './RemixWrapper';
+import { getComponentClass } from './RemixWrapper'
 
 /**
  * Это контейнер визуальных элементов,
@@ -13,12 +15,6 @@ import RemixWrapper from './RemixWrapper';
  */
 class Screen extends React.Component {
 
-    static defaultProps = {
-        screenId: undefined,
-        name: 'screen',
-        group: undefined
-    }
-
     constructor(props) {
         super(props);
         this.state = {};
@@ -28,11 +24,19 @@ class Screen extends React.Component {
         const s = {
             backgroundColor: this.props.backgroundColor
         };
+        const components = this.props.components.toArray().map( (cmpn, i) => {
+            // Screen produces components based in their displayName and props saved in state
+            const cmpnId = this.props.components.getId(i);
+            const RemixComponent = getComponentClass(cmpn.displayName);
+            return ( <RemixComponent {...cmpn} id={cmpnId} key={cmpnId}/> )
+        });
         return (
             <div style={s} className="rmx-screen">
-                <p>{this.props.id}</p>
+                {/* <p>{this.props.id}</p> */}
                 <LayoutContainer>
-                    {this.props.children}
+                    {/* TODO how about children? */}
+                    {/* {this.props.children} */}
+                    {components}
                 </LayoutContainer>
             </div>
         )
@@ -44,9 +48,20 @@ class Screen extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
-    "backgroundColor": {
+    'backgroundColor': {
         type: 'string',
         default: ''
+    },
+    'components': {
+        type: 'hashlist',
+        minLength: 0,
+        maxLength: 128,
+        default: new HashList( [
+            // {displayName: 'Text', id: '123456'}
+        ] ),
+        prototypes: [
+            { id: 'dumb_component', data: { displayName: 'Element', backgroundColor: '#fff' }}
+        ]
     }
 });
 

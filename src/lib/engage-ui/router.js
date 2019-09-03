@@ -1,6 +1,7 @@
 import React from 'react'
 import RemixWrapper from './RemixWrapper';
 import DataSchema from '../schema'
+import HashList from '../hashlist'
 import Screen from './Screen'
 
 /**
@@ -25,7 +26,9 @@ import Screen from './Screen'
                     <p>no screens</p>
                 }
                 {this.props.screens.length > 0 &&
-                    this.props.screens.toArray().map( (scr, i) => <Screen id={this.props.screens.getId(i)} key={this.props.screens.getId(i)}></Screen>)
+                    this.props.screens.toArray().map( (scr, i) => {
+                        return <Screen {...scr} id={this.props.screens.getId(i)} key={this.props.screens.getId(i)}></Screen>
+                    })
                     // {scr.displayName}
                     // TODO init Screen components here, based on state
                 }
@@ -56,7 +59,14 @@ export const Schema = new DataSchema({
     },
     "screens": {
         type: 'hashlist',
-        default: []
+        default: new HashList([
+            { displayName: 'Screen', backgroundColor: 'yellow' }
+        ]),
+        minLength: 0,
+        maxLength: 32,
+        prototypes: [
+            { id: 'default_prototype', data: { displayName: 'Screen', backgroundColor: 'green' }}
+        ]
     }
 });
 

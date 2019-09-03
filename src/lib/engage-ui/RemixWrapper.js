@@ -3,13 +3,48 @@ import PropsNormalizer from './PropsNormalizer'
 import { getPropertiesBySelector } from '../object-path'
 import { connect } from 'react-redux'
 
-export default (Component, Schema, displayName, statePath) => {
-    return compose(
+// import Text from './primitives/Text'
+// import TextOption from './primitives/TextOption'
+// import ProgressiveImage from './primitives/ProgressiveImage'
+
+const componentClassMap = {
+    // 'Text': Text,
+    // 'TextOption': TextOption,
+    // 'ProgressiveImage': ProgressiveImage
+}
+
+const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
+    'id': {
+        type: 'string',
+        minLength: 4,
+        maxLength: 32,
+        default: 'none'
+    },
+    'tags': {
+        type: 'string',
+        minLength: 0,
+        default: 'remixcomponent'
+    },
+    'displayName': {
+        type: 'string',
+        minLength: 1,
+        default: 'RemixComponent'
+    }
+};
+
+export default (Component, Schema, DisplayName, statePath) => {
+    if (!DisplayName) {
+        throw new Error('RemixWrapper: you must specify DisplayName for each component. Usually it matches the class name');
+    }
+    const wrappedComponent = compose(
         sizeMe({monitorHeight: true, noPlaceholder: true}),
-        PropsNormalizer(Schema),
+        PropsNormalizer(Schema.extend({
+            ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
+            ...{'displayName': {...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{'default': DisplayName}}} // use specific displayName for each Component type
+        })),
         connect(
             (state, ownProps) => {
-                if (ownProps.id) {
+                if (ownProps.id && state.router.screens[ownProps.id]) {
                     //TODO specify path 'router.screens' ?
                     //TODO different path for all components 'app.components' ?
                     return state.router.screens[ownProps.id];
@@ -24,11 +59,13 @@ export default (Component, Schema, displayName, statePath) => {
                 return {}
             }
         )
-        //TODO displayName, to default props?
     )(Component);
+    componentClassMap[DisplayName] = wrappedComponent;
+    return wrappedComponent;
 }
-
-//export default connect(mapStateToProps)(EngageApp);
+export const getComponentClass = (DisplayName) => {
+    return componentClassMap[DisplayName];
+}
 
 /**
  * Regular compose function

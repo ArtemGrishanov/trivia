@@ -188,9 +188,10 @@ function dispatchAction(type, param) {
  *
  * @param {string} hashlistPropPath
  * @param {number} index
- * @param {string} prototypeId
+ * @param {*} elementData.newElement
+ * @param {number} elementData.prototypeIndex
  */
-function addHashlistElement(hashlistPropPath, index, prototypeId) {
+function addHashlistElement(hashlistPropPath, index, elementData = {}) {
     index = parseInt(index);
     if (hashlistPropPath === undefined) {
         throw new Error('Remix.addElement: hashlistPropPath is not specified');
@@ -198,11 +199,18 @@ function addHashlistElement(hashlistPropPath, index, prototypeId) {
     if (!schema.getDescription(hashlistPropPath)) {
         throw new Error(`Remix.addElement: ${hashlistPropPath} is not described in schema`);
     }
-    store.dispatch({
+    const d = {
         type: REMIX_HASHLIST_ADD_ACTION,
         path: hashlistPropPath,
         index: index
-    });
+    };
+    if (elementData.hasOwnProperty('newElement')) {
+        d.newElement = elementData.newElement;
+    }
+    if (elementData.hasOwnProperty('prototypeIndex')) {
+        d.prototypeIndex = elementData.prototypeIndex;
+    }
+    store.dispatch(d);
 }
 
 /**
@@ -351,7 +359,7 @@ export function remixReducer({reducers, dataSchema}) {
     schema = dataSchema;
     normalizer = new Normalizer(schema);
     // clients reducers + standart remix reducers
-    const reducer = combineReducers({...reducers, router});
+    const reducer = combineReducers({...reducers/*, router*/}); //TODO do we need separate router reducer? In this case router.screens are not normalized
     log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
@@ -373,7 +381,8 @@ export function remixReducer({reducers, dataSchema}) {
             nextState = _cloneState(state);
             const targetHashlist = fetchHashlist(nextState, action.path, action.type);
             //TODO how to specify prototype id or index
-            const newElement = clone(schema.getDescription(action.path).prototypes[0].data);
+            const protIndex = action.prototypeIndex || 0;
+            const newElement = (action.hasOwnProperty('newElement')) ? action.newElement: clone(schema.getDescription(action.path).prototypes[protIndex].data);
             targetHashlist.addElement(newElement, action.index);
             //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
 
@@ -438,7 +447,7 @@ export function remixReducer({reducers, dataSchema}) {
     }
 }
 
-function router(state = { backgroundColor: '#ff8888', screens: []}, action) {
+function router(state = { backgroundColor: '#ff8888', screens: {}}, action) {
     return state
 }
 
