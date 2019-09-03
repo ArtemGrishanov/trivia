@@ -173,9 +173,7 @@ class EngageApp extends React.Component {
         }
         return (
             <div className="rmx-app" style={appSt}>
-                <Router>
-
-                </Router>
+                <Router></Router>
             </div>
         );
     }

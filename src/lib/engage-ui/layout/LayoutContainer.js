@@ -1,4 +1,5 @@
 import '../style/rmx-layout.css'
+import sizeMe from 'react-sizeme'
 import React from 'react';
 import RemixWrapper from '../RemixWrapper';
 import DataSchema from '../../schema';
@@ -40,7 +41,6 @@ class LayoutContainer extends React.Component {
             ],
             flow: []
         }
-        this.containerRef = React.createRef();
         if (props.globalTestId) {
             window[props.globalTestId] = this;
         }
@@ -69,7 +69,8 @@ class LayoutContainer extends React.Component {
             this.flowElementIndex = -1;
             childrenWithProps = React.Children.map(this.props.children, child =>
                 React.cloneElement(child, {
-                    ref: (childLi) => { if (childLi) this.childRefs.push(childLi)},
+                    //TODO I got an error about refs from React in console while adding a new component. Temporarily switched off.
+                    //ref: (childLi) => { if (childLi) this.childRefs.push(childLi)},
                     mod: this.mod,
                     containerWidth: this.state.width,
                     containerHeight: this.state.height,
@@ -79,7 +80,7 @@ class LayoutContainer extends React.Component {
             );
         }
         return (
-            <div style={st} ref={this.containerRef} className="rmx-layout_container">
+            <div style={st} className="rmx-layout_container">
                 {childrenWithProps}
                 {this.state.magnetsVertical && this.state.magnetsVertical.map( (mv) => {
                     if (mv.hide !== true)
@@ -179,4 +180,5 @@ export const Schema = new DataSchema({
     }
 });
 
-export default RemixWrapper(LayoutContainer, Schema, 'LayoutContainer')
+//export default RemixWrapper(LayoutContainer, Schema, 'LayoutContainer')
+export default sizeMe({monitorHeight: true, noPlaceholder: true})(LayoutContainer)

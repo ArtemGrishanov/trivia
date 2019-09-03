@@ -70,7 +70,4 @@ export const Schema = new DataSchema({
     }
 });
 
-// this component must know about its store property (store.getState().screenManager),
-// because it is unique and exists by default in EngageApp
-
-export default RemixWrapper(Router, Schema, 'Router', 'router');
+export default RemixWrapper(Router, Schema, 'Router');

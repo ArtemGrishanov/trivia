@@ -2,16 +2,9 @@ import sizeMe from 'react-sizeme'
 import PropsNormalizer from './PropsNormalizer'
 import { getPropertiesBySelector } from '../object-path'
 import { connect } from 'react-redux'
+import LayoutItem from './layout/LayoutItem';
 
-// import Text from './primitives/Text'
-// import TextOption from './primitives/TextOption'
-// import ProgressiveImage from './primitives/ProgressiveImage'
-
-const componentClassMap = {
-    // 'Text': Text,
-    // 'TextOption': TextOption,
-    // 'ProgressiveImage': ProgressiveImage
-}
+const componentClassMap = {};
 
 const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     'id': {
@@ -32,37 +25,37 @@ const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     }
 };
 
-export default (Component, Schema, DisplayName, statePath) => {
+export default (Component, Schema, DisplayName) => {
     if (!DisplayName) {
         throw new Error('RemixWrapper: you must specify DisplayName for each component. Usually it matches the class name');
     }
-    const wrappedComponent = compose(
-        sizeMe({monitorHeight: true, noPlaceholder: true}),
-        PropsNormalizer(Schema.extend({
-            ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
-            ...{'displayName': {...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{'default': DisplayName}}} // use specific displayName for each Component type
-        })),
-        connect(
-            (state, ownProps) => {
-                if (ownProps.id && state.router.screens[ownProps.id]) {
-                    //TODO specify path 'router.screens' ?
-                    //TODO different path for all components 'app.components' ?
-                    return state.router.screens[ownProps.id];
-                }
-                if (statePath) {
-                    const res = getPropertiesBySelector(state, statePath);
-                    if (res.length > 0) {
-                        console.log('mapStateToProps ', res[0].value)
-                        return res[0].value;
-                    }
-                }
-                return {}
-            }
-        )
-    )(Component);
-    componentClassMap[DisplayName] = wrappedComponent;
-    return wrappedComponent;
+
+    let composed = null;
+
+    switch (DisplayName) {
+        case 'Router': {
+            composed = compose( routerConnect(), withPropNormalizer(Schema, DisplayName) )(Component);
+            break;
+        }
+        case 'Screen': {
+            composed = compose( screenConnect(), withPropNormalizer(Schema, DisplayName) )(Component);
+            break;
+        }
+        default: {
+            composed = compose(
+                LayoutItem(),
+                sizeMe({monitorHeight: true, noPlaceholder: true}),
+                componentConnect(),
+                withPropNormalizer(Schema, DisplayName)
+
+            )(Component);
+        }
+    }
+
+    componentClassMap[DisplayName] = composed;
+    return composed;
 }
+
 export const getComponentClass = (DisplayName) => {
     return componentClassMap[DisplayName];
 }
@@ -80,4 +73,37 @@ function compose(...enhancers) {
         return enhancers[0]
     }
     return enhancers.reduce((a, b) => (...args) => a(b(...args)))
+}
+
+function routerConnect() {
+    return connect(
+        (state) => state.router
+    );
+}
+
+function screenConnect() {
+    return connect(
+        (state, ownProps) => {
+            if (ownProps.id && state.router.screens[ownProps.id]) {
+                return state.router.screens[ownProps.id];
+            }
+            return {}
+        }
+    )
+}
+
+function componentConnect() {
+    return connect(
+        (state, ownProps) => {
+            //TODO find and return component state in global state
+            return {}
+        }
+    )
+}
+
+function withPropNormalizer(Schema, DisplayName) {
+    return PropsNormalizer(Schema.extend({
+        ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
+        ...{'displayName': {...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{'default': DisplayName}}} // use specific displayName for each Component type
+    }));
 }
