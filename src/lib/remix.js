@@ -10,6 +10,7 @@ export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 export const REMIX_HASHLIST_ADD_ACTION = '__Remix_hashlist_update_action__';
 export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_position_action__'
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
+export const REMIX_EVENT_FIRED = '__Remix_event_fired__'
 
 const remix = {};
 
@@ -182,6 +183,23 @@ function dispatchAction(type, param) {
     else {
         throw new Error(`Remix: this action ${type} is not defined. Use Remix.init() to define some external actions.`);
     }
+}
+
+/**
+ * Event happend in Remix app
+ *
+ * @param {string} eventType
+ * @param {object} eventData
+ */
+function fireEvent(eventType, eventData) {
+    if (eventType === undefined) {
+        throw new Error('Remix.fireEvent: eventType is not specified');
+    }
+    store.dispatch({
+        type: REMIX_EVENT_FIRED,
+        eventType: eventType,
+        eventData: eventData
+    });
 }
 
 /**
@@ -359,7 +377,7 @@ export function remixReducer({reducers, dataSchema}) {
     schema = dataSchema;
     normalizer = new Normalizer(schema);
     // clients reducers + standart remix reducers
-    const reducer = combineReducers({...reducers/*, router*/}); //TODO do we need separate router reducer? In this case router.screens are not normalized
+    const reducer = combineReducers({...reducers, events/*, router*/}); //TODO do we need separate router reducer? In this case router.screens are not normalized
     log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
@@ -424,6 +442,9 @@ export function remixReducer({reducers, dataSchema}) {
             // - например перераспределить баллы по результатам с появлением нового вопроса
             // - например создать новый экран (хотя это в компонентах может быть)
         }
+        // else if (action.type === REMIX_EVENT_FIRED) {
+        //     nextState = events(state.events, action);
+        // }
         else {
             // it maybe @@redux/INITx.x.x.x actions
             // it maybe a regular app action
@@ -444,6 +465,23 @@ export function remixReducer({reducers, dataSchema}) {
         }
         _sendEvents();
         return nextState;
+    }
+}
+
+function events(state = { history: [] }, action) {
+    switch(action.type) {
+        case REMIX_EVENT_FIRED: {
+            state.history.push({
+                eventType: action.eventType,
+                eventData: action.eventData
+            });
+            scheduleTriggerCheck();
+            return {
+                ...state
+            }
+        }
+        default:
+            return state;
     }
 }
 
@@ -706,6 +744,7 @@ remix.serialize = serialize;
 remix.serialize2 = serialize2;
 remix.deserialize = deserialize
 remix.dispatchAction = dispatchAction;
+remix.fireEvent = fireEvent;
 remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
 remix._getSchema = () => schema;

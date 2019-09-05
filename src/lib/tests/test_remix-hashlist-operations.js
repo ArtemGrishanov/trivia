@@ -77,7 +77,6 @@ describe('Remix', function() {
 
     Remix.init({
         appStore: store,
-        dataSchema: schema,
         container: document.getElementById('root')
     });
 

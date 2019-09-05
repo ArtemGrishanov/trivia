@@ -8,11 +8,22 @@ remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundCo
 Смотреть:
 store.getState().router.screens
 
+// изменить фон экрана (после добавления)
+var screenId = store.getState().router.screens.getId(0);
+remix.setData({['router.screens.'+screenId+'.backgroundColor']: '#ff8888'});
 
-// добавить новый компонент на экран
+// добавить текст на экран
 var screenId = store.getState().router.screens.getId(0)
 remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', color: 'red'} })
 store.getState().router.screens[screenId].components
+
+// изменить цвет текста (после добавления)
+var screenId = store.getState().router.screens.getId(0);
+var compId = store.getState().router.screens[screenId].components.getId(0);
+remix.setData({['router.screens.'+screenId+'.components.'+compId+'.color']: 'blue'});
+
+// изменить координату компонента
+..
 
 // добавить картинку
 var screenId = store.getState().router.screens.getId(0)

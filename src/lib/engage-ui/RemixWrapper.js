@@ -45,7 +45,8 @@ export default (Component, Schema, DisplayName) => {
             composed = compose(
                 LayoutItem(),
                 sizeMe({monitorHeight: true, noPlaceholder: true}),
-                componentConnect(),
+                //TODO It works! How it work without connect?
+                //componentConnect(),
                 withPropNormalizer(Schema, DisplayName)
 
             )(Component);

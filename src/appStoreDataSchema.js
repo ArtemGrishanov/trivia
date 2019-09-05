@@ -4,6 +4,7 @@ import DataSchema from './lib/schema.js';
 import HashList from './lib/hashlist.js';
 import { Schema as ScreenComponentsSchema} from './lib/engage-ui/Screen'
 import { Schema as RouterScreensSchema} from './lib/engage-ui/router'
+import { Schema as TextSchema} from './lib/engage-ui/primitives/Text'
 //import { ProgressiveImage } from 'remix-ui'
 
 // Definition of dynamic editable data
@@ -15,8 +16,10 @@ const schema = new DataSchema({
 
     //TODO move to remix app schema
     "router.[screens HashList]": RouterScreensSchema.getDescription('screens'),
+    "router.[screens HashList]./^[0-9a-z]+$/.backgroundColor": ScreenComponentsSchema.getDescription('backgroundColor'),
     //TODO move to remix app schema
     "router.[screens HashList]./^[0-9a-z]+$/.components": ScreenComponentsSchema.getDescription('components'),
+    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.color": TextSchema.getDescription('color'),
 
     // // for all properties which match the pattern "quiz.questions.0.text, quiz.questions.1.text ... quiz.questions.999.text ... "
 
