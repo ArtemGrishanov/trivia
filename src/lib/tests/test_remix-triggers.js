@@ -21,7 +21,7 @@ describe('Remix', function() {
             // //TODO bind data to trigger on option click
             // Remix.addTrigger({
             //     when: {type: 'beforescreenshow'},
-            //     do: { CustomActions.calcResult }
+            //     execute: { CustomActions.calcResult }
             // });
             // for test purposes we are able to initiate any event intentionally
 
@@ -29,26 +29,57 @@ describe('Remix', function() {
             Remix.fireEvent('other_dumb_event', {variable: 987});
             chai.assert.equal(store.getState().events.history.length, 2);
 
+            Remix.clearEventsHistory()
+            chai.assert.equal(store.getState().events.history.length, 0);
             // Remix.addTrigger({
             //     when: {type: 'afterscreenshow'},
-            //     do: {delay: 2000, type: 'sendData'}
+            //     execute: {delay: 2000, type: 'sendData'}
             // });
 
         });
     })
 
     describe('#addTrigger', function() {
+        Remix.clearEventsHistory();
+
         it('add simple trigger', function(done) {
+            let c = 0;
+            let v = 0;
+
             Remix.addTrigger({
-                when: {eventType: 'dumb_event'},
-                do: () => {
-                    // you can specify a function as action
-                    chai.assert.equal(true, true, 'trigger activated');
-                    done();
+                when: {eventType: 'dumb_event52'},
+                execute: (t) => {
+                    chai.assert.equal(t.when.eventType === 'dumb_event52', true, 'trigger activated');
+                    v++;
                 }
             });
 
-            Remix.fireEvent('dumb_event');
+            Remix.fireEvent('dumb_event32'); // execute nothing
+
+            Remix.addTrigger({
+                when: {eventType: 'dumb_event32'},
+                execute: (t) => {
+                    // you can specify a function as action
+                    chai.assert.equal(t.when.eventType === 'dumb_event32', true, 'trigger activated');
+                    c++;
+                }
+            });
+
+            Remix.fireEvent('dumb_event32'); // 1 c activation
+            Remix.fireEvent('dumb_event32'); // 2 c activation
+
+            Remix.fireEvent('dumb_event52'); // 1 v act
+
+            setTimeout( () => Remix.fireEvent('dumb_event32'), 30) // 3 c activation
+
+            setTimeout( () => {
+                if (c === 3 && v === 1) {
+                    chai.assert.equal(store.getState().events.history.length, 5);
+                    done();
+                }
+            }, 100)
+
+            //TODO triggers out in state also?
         });
     })
 

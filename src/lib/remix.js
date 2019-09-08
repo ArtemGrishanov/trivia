@@ -10,7 +10,8 @@ export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 export const REMIX_HASHLIST_ADD_ACTION = '__Remix_hashlist_update_action__';
 export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_position_action__'
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
-export const REMIX_EVENT_FIRED = '__Remix_event_fired__'
+export const REMIX_EVENT_FIRED = '__Remix_event_fired__';
+export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
 
 const remix = {};
 
@@ -32,6 +33,8 @@ let initialSize = null;
 let mode = 'none'; // edit | preview | published
 let _lastUpdDiff = null;
 let _events = [];
+let _triggers = [];
+let _eventsCounter = 0;
 
 // establish communication with RContainer
 window.addEventListener("message", receiveMessage, false);
@@ -199,6 +202,12 @@ function fireEvent(eventType, eventData) {
         type: REMIX_EVENT_FIRED,
         eventType: eventType,
         eventData: eventData
+    });
+}
+
+function clearEventsHistory() {
+    store.dispatch({
+        type: REMIX_EVENTS_CLEAR
     });
 }
 
@@ -468,21 +477,78 @@ export function remixReducer({reducers, dataSchema}) {
     }
 }
 
-function events(state = { history: [] }, action) {
+/**
+ *
+ * @param {*} state
+ * @param {*} action
+ */
+function events(state = { history: [], triggers: [] }, action) {
     switch(action.type) {
         case REMIX_EVENT_FIRED: {
-            state.history.push({
+            const event = {
                 eventType: action.eventType,
-                eventData: action.eventData
-            });
-            scheduleTriggerCheck();
+                eventData: action.eventData,
+                order: ++_eventsCounter
+            };
+            const newTriggers = [
+                ...state.triggers,
+                ...runTriggers(event)
+            ];
+            const newHistory = [
+                ...state.history,
+                event
+            ];
             return {
-                ...state
+                ...state,
+                history: newHistory,
+                triggers: newTriggers
+            }
+        }
+        case REMIX_EVENTS_CLEAR: {
+            return {
+                ...state,
+                history: []
             }
         }
         default:
             return state;
     }
+}
+
+/**
+ *
+ * @param {*}
+ */
+function addTrigger({when = {}, execute = null}) {
+    _triggers.push({when, execute, order: ++_eventsCounter});
+}
+
+/**
+ * Checks triggers and runs them
+ *
+ * @return {array} array of activated triggers
+ */
+function runTriggers(event) {
+    const toExec = [];
+    // recent triggers have more priority
+    for (let i = _triggers.length-1; i >= 0; i--) {
+        const t = _triggers[i];
+        if (event.order < t.order) {
+            // event occured earlier then trigger was setup, skip it
+            return;
+        }
+        if (event.eventType === t.when.eventType && !toExec.includes(t)) {
+            // do not execute the same trigger twice
+            toExec.push(t);
+        }
+    }
+    // now do some actions
+    toExec.forEach( (t) => {
+        if (typeof t.execute === 'function') {
+            t.execute(t);
+        }
+    })
+    return toExec;
 }
 
 function router(state = { backgroundColor: '#ff8888', screens: {}}, action) {
@@ -744,7 +810,9 @@ remix.serialize = serialize;
 remix.serialize2 = serialize2;
 remix.deserialize = deserialize
 remix.dispatchAction = dispatchAction;
+remix.addTrigger = addTrigger;
 remix.fireEvent = fireEvent;
+remix.clearEventsHistory = clearEventsHistory;
 remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
 remix._getSchema = () => schema;
