@@ -53,7 +53,7 @@ function test( ) {
         when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: 'option'} },
         execute: (t) => {
             console.log('option clicked');
-            //TODO go to screen
+            //TODO destinated screen id from option 'data' attr.
             Remix.setCurrentScreen(screenId2);
         }
     });
