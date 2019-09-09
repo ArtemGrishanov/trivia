@@ -1,4 +1,5 @@
 import React from 'react'
+import Remix from '../../../lib/remix'
 
 //TODO minContentWidth minContentHeight определяется на ширине контента 1x1 px
 // но оказывается что некоторые компоненты например TextOption имеют наименьшую высоту при ширине более чем 70px, а не при ширине 1px
@@ -224,7 +225,6 @@ export default function LayoutItem() {
                 }
                 this.thisRef = React.createRef();
                 this.contentObserver = null;
-                this.onMouseDown = this.onMouseDown.bind(this);
 
                 // dragging/resizing
                 this.isItemMouseDown = false;
@@ -236,6 +236,7 @@ export default function LayoutItem() {
                 this.onMouseDown = this.onMouseDown.bind(this);
                 this.onWindowMouseMove = this.onWindowMouseMove.bind(this);
                 this.onWindowMouseUp = this.onWindowMouseUp.bind(this);
+                this.onClick = this.onClick.bind(this);
             }
 
             onMouseDown(e) {
@@ -371,6 +372,10 @@ export default function LayoutItem() {
                 });
             }
 
+            onClick() {
+                Remix.fireEvent('onclick', {...this.props});
+            }
+
             render() {
                 const st = {
                     left: this.state.left+'%',
@@ -390,13 +395,15 @@ export default function LayoutItem() {
                     cst.width = '1px';
                     cst.height = '1px';
                 }
+                const sizemsg = Math.round(toPx(this.state.width, this.props.containerWidth)) + 'x' + Math.round(this.state.height);
                 return (
-                    <div ref={this.thisRef} className={"rmx-layout_item __"+this.props.mod} style={st} datamarker="9" onMouseDown={this.onMouseDown}>
+                    <div ref={this.thisRef} className={"rmx-layout_item __"+this.props.mod} style={st} datamarker="9" onMouseDown={this.onMouseDown} onClick={this.onClick}>
                         <div className="rmx-l_child_cnt" style={cst}>
                             <Component {...this.props} onSize={this.onContentSize.bind(this)}></Component>
                         </div>
                         <div className={"rmx-layout_item_selection_cnt " + ((this.state.selected) ? '__selected': '')}>
-                            <p className="rmx-l-info">{Math.round(toPx(this.state.width, this.props.containerWidth))}x{Math.round(this.state.height)}</p>
+                            {/* TODO uncomment */}
+                            {/* <p className="rmx-l-info">{sizemsg}</p> */}
                             <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>
                             <div className="rmx-l-sel-m __2" datamarker="2" onMouseDown={this.onMouseDown}></div>
                             <div className="rmx-l-sel-m __3" datamarker="3" onMouseDown={this.onMouseDown}></div>

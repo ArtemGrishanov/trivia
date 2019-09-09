@@ -81,6 +81,33 @@ describe('Remix', function() {
 
             //TODO triggers out in state also?
         });
+
+        it('trigger with condition CONTAINS', function(done) {
+            Remix.clearEventsHistory();
+
+            let c = 0;
+
+            Remix.addTrigger({
+                when: {eventType: 'on_condition', condition: { prop: 'tags', clause: 'CONTAINS', value: 'option' }},
+                execute: (t) => {
+                    chai.assert.equal(t.when.eventType === 'on_condition', true, 'trigger activated');
+                    c++;
+                }
+            });
+
+            Remix.fireEvent('on_condition');
+            Remix.fireEvent('on_condition', { tags: 'tag1 option tag2' } ); // this will work
+            Remix.fireEvent('on_condition', { tags: 'tag3'});
+            Remix.fireEvent('on_condition9', { tags: 'tag1 option tag2' } );
+
+            setTimeout( () => {
+                if (c === 1) {
+                    chai.assert.equal(store.getState().events.history.length, 4);
+                    done();
+                }
+            }, 100)
+
+        });
     })
 
     // describe('#macro', function() {

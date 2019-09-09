@@ -48,7 +48,7 @@ class App extends React.Component {
             <EngageApp appHeight={this.props.height} appWidth={this.props.width} loading={this.props.loading}>
                 {/* <ScreenManager> */}
                     {/* single screen */}
-                    <Screen screenId="startScreen"
+                    {/* <Screen screenId="startScreen"
                             backgroundColor={this.props.startBackgroundColor}
                             if={(state) => { return !this.props.result && this.state.status === "start" }}>
                         <StartBlock onStart={this.onStart}></StartBlock>
@@ -58,12 +58,7 @@ class App extends React.Component {
                                 <Text semantic="question_title" text={'question title'}></Text>
                             </LayoutItem>
 
-                            {/* что если мы и опции добавляем произвольно перетаскиванием на поле? */}
-                            {/* что если мы и несколько картинок к вопросу можем добавить на экран? - Хорошая идея, но пока не понятно возможно ли. Попробую перенести картинку вопроса как декор к вопросу просто. */}
-                            {/* а QuizBlock1,2,3... - это будет набор компонентов+лейаут(само собой)+триггеры, возможно обернутый во что-то
-                            если не обернутый то это экран*/}
                             <LayoutItem>
-                                {/* action type and arguments can set in editor */}
                                 <TextOption semantic="question_option" onClick={() => this.props.event({type: 'quiz_correct', points: 1})} text="option1"></TextOption>
                             </LayoutItem>
                             <LayoutItem>
@@ -73,18 +68,14 @@ class App extends React.Component {
                                 <Button onClick={() => act({type: 'next'})}></Button>
                             </LayoutItem>
 
-                            {/* static components */}
-                            {/* how store static components? */}
                             <LayoutItem>
-                                {/* question image - was optionally added by user. Not described in app schema */}
                                 <ProgressiveImage semantic="question_image" src='https://media.gettyimages.com/photos/spring-field-picture-id539016480?s=612x612'/>
                             </LayoutItem>
                             <LayoutItem>
-                                {/* imitates logo image, inserted by user */}
                                 <ProgressiveImage src='http://www.earthtimes.org/newsimage/wwf-50-Years-Conservation_153.jpg'/>
                             </LayoutItem>
                         </LayoutContainer>
-                    </Screen>
+                    </Screen> */}
                     {/* for many subling screens */}
                     {/* {this.props.questions.map( (q, i) =>
                         <Screen screenId={"question"+i} key={i} group="questions" if={(state) => { return !this.props.result && this.state.status === "questions" && this.props.questionHashlist.getId(i) === this.props.questionIds[this.props.currentQuestionIndex]}}> */}
@@ -100,13 +91,13 @@ class App extends React.Component {
                         {/* </Screen>
                     )} */}
                     {/* single screen */}
-                    <Screen screenId="resultId" if={(state) => { return this.props.result }}>
+                    {/* <Screen screenId="resultId" if={(state) => { return this.props.result }}>
                         <ResultBlock
                             title={this.props.result ? this.props.result.title: null}
                             description={this.props.result ? this.props.result.description: null}
                             onRestart={this.onRestart}>
                         </ResultBlock>
-                    </Screen>
+                    </Screen> */}
                 {/* </ScreenManager> */}
             </EngageApp>
         );
@@ -122,17 +113,17 @@ class App extends React.Component {
 
 const mapStateToProps = (state) => {
     return {
-        currentQuestionIndex: state.session.currentQuestionIndex,
-        questionIds: state.session.questionIds,
+        // currentQuestionIndex: state.session.currentQuestionIndex,
+        // questionIds: state.session.questionIds,
         width: state.app.size.width,
         height: state.app.size.height,
         loading: state.app.loading,
-        questionHashlist: state.quiz.questions,
-        questions: state.quiz.questions.toArray(),
-        resultHashlist: state.quiz.results,
-        results: state.quiz.results.toArray(),
-        result: state.session.result ? state.quiz.results[state.session.result]: null,
-        startBackgroundColor: state.style.startBackgroundColor
+        // questionHashlist: state.quiz.questions,
+        // questions: state.quiz.questions.toArray(),
+        // resultHashlist: state.quiz.results,
+        // results: state.quiz.results.toArray(),
+        // result: state.session.result ? state.quiz.results[state.session.result]: null,
+        // startBackgroundColor: state.style.startBackgroundColor
     }
 }
 

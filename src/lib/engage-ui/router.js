@@ -20,18 +20,19 @@ import Screen from './Screen'
         const st = {
             backgroundColor: this.props.backgroundColor
         };
+        //TODO set prev screenId in local component state
+        const scr = this.props.currentScreenId ? this.props.screens[this.props.currentScreenId]: null;
         return (
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 &&
                     <p>no screens</p>
                 }
-                {this.props.screens.length > 0 &&
+                {scr && <Screen {...scr} id={this.props.currentScreenId}></Screen>}
+                {/* {this.props.screens.length > 0 &&
                     this.props.screens.toArray().map( (scr, i) => {
                         return <Screen {...scr} id={this.props.screens.getId(i)} key={this.props.screens.getId(i)}></Screen>
                     })
-                    // {scr.displayName}
-                    // TODO init Screen components here, based on state
-                }
+                } */}
             </div>
         )
     }
@@ -60,13 +61,18 @@ export const Schema = new DataSchema({
     "screens": {
         type: 'hashlist',
         default: new HashList([
-            { displayName: 'Screen', backgroundColor: 'yellow' }
+            //no screens in app by default
+            //{ displayName: 'Screen', backgroundColor: 'yellow' }
         ]),
         minLength: 0,
         maxLength: 32,
         prototypes: [
             { id: 'default_prototype', data: { displayName: 'Screen', backgroundColor: 'green' }}
         ]
+    },
+    "currentScreenId": {
+        type: 'string',
+        default: null
     }
 });
 

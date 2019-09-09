@@ -12,6 +12,7 @@ export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_po
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
 export const REMIX_EVENT_FIRED = '__Remix_event_fired__';
 export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
+export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 
 const remix = {};
 
@@ -128,6 +129,15 @@ function setData(data, forceFeedback) {
         forceFeedback
     });
 }
+
+function setCurrentScreen(screenId) {
+    store.dispatch({
+        type: REMIX_SET_CURRENT_SCREEN,
+        screenId
+    });
+}
+
+
 
 /**
  * Sets application width and height
@@ -386,7 +396,7 @@ export function remixReducer({reducers, dataSchema}) {
     schema = dataSchema;
     normalizer = new Normalizer(schema);
     // clients reducers + standart remix reducers
-    const reducer = combineReducers({...reducers, events/*, router*/}); //TODO do we need separate router reducer? In this case router.screens are not normalized
+    const reducer = combineReducers({...reducers, router, events});
     log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
@@ -477,6 +487,19 @@ export function remixReducer({reducers, dataSchema}) {
     }
 }
 
+function router(state = {}, action) {
+    switch(action.type) {
+        case REMIX_SET_CURRENT_SCREEN: {
+            return {
+                ...state,
+                currentScreenId: action.screenId
+            }
+        }
+    }
+    // state sets by normalizer
+    return state;
+}
+
 /**
  *
  * @param {*} state
@@ -537,7 +560,7 @@ function runTriggers(event) {
             // event occured earlier then trigger was setup, skip it
             return;
         }
-        if (event.eventType === t.when.eventType && !toExec.includes(t)) {
+        if (event.eventType === t.when.eventType && !toExec.includes(t) && conditionWorks(event, t)) {
             // do not execute the same trigger twice
             toExec.push(t);
         }
@@ -551,8 +574,20 @@ function runTriggers(event) {
     return toExec;
 }
 
-function router(state = { backgroundColor: '#ff8888', screens: {}}, action) {
-    return state
+function conditionWorks(event, trigger) {
+    const c = trigger.when.condition;
+    if (c) {
+        if (event.eventData) {
+            if (c.clause.toLowerCase() === 'contains') {
+                return event.eventData[c.prop].toString().indexOf(c.value) >= 0;
+            }
+            else {
+                throw new Error(`${c.clause} clause not supported`);
+            }
+        }
+        return false
+    }
+    return true;
 }
 
 /**
@@ -812,6 +847,7 @@ remix.deserialize = deserialize
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
 remix.fireEvent = fireEvent;
+remix.setCurrentScreen = setCurrentScreen;
 remix.clearEventsHistory = clearEventsHistory;
 remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
