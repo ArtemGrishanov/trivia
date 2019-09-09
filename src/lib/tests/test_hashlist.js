@@ -154,5 +154,14 @@ describe('HashList', function() {
 
     });
 
+    describe('#list empty', function() {
+        const listEmpty = new HashList([]);
+
+        it('Can be created', function() {
+            chai.assert.equal(listEmpty.length == 0, true);
+            chai.assert.equal(listEmpty._orderedIds.length == 0, true);
+        });
+    });
+
 
 });

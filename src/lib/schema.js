@@ -11,7 +11,7 @@ const types = {
         mandatory: ["default","min","max"]
     },
     'boolean': {
-        attributes: ["default"],
+        attributes: ["default","enum"], // do not need to specify enum ['true', 'false']
         mandatory: ["default"]
     },
     'hashlist': {
@@ -31,15 +31,24 @@ const types = {
 export default class DataSchema {
 
     constructor(schm) {
+        this.extend(schm)
+    }
+
+    /**
+     * Add some new properties to existing schema
+     */
+    extend(newSchm) {
+        const schm = {...this._schm, ...newSchm};
         this._validateSchema(schm);
         this._prepareSchema(schm);
         this._schm = schm;
         this._selectorsInProcessOrder = this._getSelectorsInProcessOrder();
+        return this;
     }
 
     /**
-     * 
-     * @param {string} path 
+     *
+     * @param {string} path
      */
     getDescription(path) {
         // _schm содержит массив селекторов (хотя большинство совпадает с name)
@@ -50,8 +59,8 @@ export default class DataSchema {
 
     /**
      * example: path=quiz.questions.ugltc7.text, we should find quiz.[questions HashList].text
-     * 
-     * @param {string} path 
+     *
+     * @param {string} path
      * @return {string} selector
      */
     findSelectorForPath(path) {
@@ -63,7 +72,7 @@ export default class DataSchema {
     }
 
     /**
-     * 
+     *
      * @returns {Array}
      */
     get selectorsInProcessOrder() {
@@ -74,13 +83,13 @@ export default class DataSchema {
      * Returns schema selector in priority order
      * It matter how to process the state
      * We must process more common selectors, then more specific.
-     * 
-     * Compare: 
-     * 
+     *
+     * Compare:
+     *
      * 1. process "app.quiz.[questions HashList]" // creates HashList if needed
      * ...
      * n. process "app.quiz.[questions HashList]./^0-9a-z$/.text" // uses created HashList instance
-     * 
+     *
      * @returns {Array}
      */
     _getSelectorsInProcessOrder() {
@@ -89,7 +98,7 @@ export default class DataSchema {
 
     /**
      * Makes some preparations
-     * @param {object} schm 
+     * @param {object} schm
      */
     _prepareSchema(schm) {
         Object.keys(schm).forEach( (prop) => {
@@ -137,7 +146,7 @@ export default class DataSchema {
 
     /**
      * Gets all descriptions where the attribute presents
-     * 
+     *
      * @param {string} attrName
      * @returns {Array}
      */

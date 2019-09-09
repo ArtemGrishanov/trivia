@@ -2,7 +2,7 @@
  * Ordered collection with unique element ids
  *
  * 1) Каждому элементу после добавления присваивается уникальный постоянный id, example '42a7f0'
- *    Получить позже id можно так getIdFromPosition()
+ *    Получить позже id можно так getId()
  *    обеспечивает уникальный постоянный path к каждому элементу используя уникальные id для элементов
  *    Example: 'id=pm quiz.12ed42a.answer.options.a45f09.text'
  *
@@ -95,7 +95,7 @@ class HashList {
 
     /**
      * Вернуть id элемента по его позиции
-     * 
+     *
      * @param {number} index
      * @return {string} например '34ea90'
      */
@@ -121,7 +121,7 @@ class HashList {
 
     /**
      * Добавить новый элемент на позицию. По умолчанию в конец
-     * 
+     *
      * @param {*} element
      * @param {number} position - optional
      * @param {string} newElementId - optional, иногда указывается извне
@@ -141,7 +141,7 @@ class HashList {
     /**
      * Переместить элемент с одной позиции на другую
      * Остальные элементы сдвигаются, это не swap
-     * 
+     *
      * @param {number} elementIndex текущий индекс элемента
      * @param {number} newElementIndex новая позиция элемента
      */
@@ -298,7 +298,7 @@ class HashList {
 
     /**
      * Вернуть новый объект с ключами и значениями
-     * 
+     *
      * @returns {object}
      */
     _getValuesShallowCopy() {
@@ -313,7 +313,7 @@ class HashList {
 
     /**
      * Compares elements count, ids and values
-     * @param {boolean}  
+     * @param {boolean}
      */
     equal(otherHashlist) {
         if (this.length !== otherHashlist.length) {
