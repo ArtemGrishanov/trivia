@@ -1,6 +1,6 @@
 /**
- * 
- * @param {string} selector 
+ *
+ * @param {string} selector
  */
 export function getTokens(selector) {
     //TODO do not include \. in regexp
@@ -9,10 +9,10 @@ export function getTokens(selector) {
 
 /**
  * Serialize to string all pathes in object which match selectors
- * 
- * @param {object} obj 
- * @param {Array} selectors 
- * 
+ *
+ * @param {object} obj
+ * @param {Array} selectors
+ *
  * @return {string}
  */
 export function serialize(obj, selectors) {
@@ -43,14 +43,16 @@ export function assignByPropertyString(obj, prop, value) {
 export class Selector {
 
     // ex: "quiz.[questions HashList]./^[0-9a-z]+$/.text"
-    constructor(str) {
+    constructor(str, options = {}) {
         this._selector = str;
         this._tokens = getTokens(this._selector);
+        this._options = options;
+        this._options.typeCheckers = this._options.typeCheckers || {};
     }
 
     /**
-     * 
-     * @param {string} propertyPath 
+     *
+     * @param {string} propertyPath
      * @return {boolean}
      */
     match(propertyPath, startTokenIndex = 0) {
@@ -87,8 +89,8 @@ export class Selector {
 
     /**
      * Fetch all properties from the object using current selector
-     * 
-     * @param {Array} array of results, which match selector 
+     *
+     * @param {Array} array of results, which match selector
      */
     fetch(obj) {
         if (obj === undefined || obj === null) {
@@ -108,9 +110,9 @@ export class Selector {
     }
 
     /**
-     * 
-     * @param {object} obj 
-     * @param {boolean} resolvedPathesOnly 
+     *
+     * @param {object} obj
+     * @param {boolean} resolvedPathesOnly
      */
     getPathes(obj, resolvedPathesOnly) {
         if (obj === undefined || obj === null) {
@@ -169,15 +171,15 @@ export class Selector {
     /**
      * Makes a sync iterator for processing an object using selector
      * Callback "func" will be called for every step, even if property is not exist
-     * 
+     *
      * Example 1: "app.size.width", obj: {app:{}}
      * - clb({propName:'app', path:'app', value:{}, parentObj: %linktoobjcet%, done:false})
-     * - 
-     * 
-     * @param {*} obj 
+     * -
+     *
+     * @param {*} obj
      * @param {Function} func is called on each element
      * @param {Array}
-     * @param {string} actualPath 
+     * @param {string} actualPath
      * @param {boolean} throwErrorOnTypeMismatch
      */
     _iterate(obj, func, selectorTokens = [], actualPath = '', throwErrorOnTypeMismatch = false) {
@@ -210,12 +212,19 @@ export class Selector {
             const cname = candidates[i];
             // type checkings
             if (typeof ti.type === "string" && obj[cname].constructor.name.toLowerCase() !== ti.type.toLowerCase()) {
-                if (throwErrorOnTypeMismatch)
-                    // usually this logic is used in assignment. We must know about type mismatch
-                    throw new Error(`${ti.name} has type "${obj[cname].constructor.name}", but "${ti.type}" expected`);
-                else
-                    // here, in fetching type mismatch is OK
-                    continue;
+                // there is custom type checker for this type, ducktyping maybe etc...
+                const tch = this._options.typeCheckers[ti.type];
+                if (tch && tch(obj[cname])) {
+                    // type matches!
+                }
+                else {
+                    if (throwErrorOnTypeMismatch)
+                        // usually this logic is used in assignment. We must know about type mismatch
+                        throw new Error(`${ti.name} has type "${obj[cname].constructor.name}", but "${ti.type}" expected`);
+                    else
+                        // here, in fetching type mismatch is OK
+                        continue;
+                }
             }
             //if (isAssignment) {
                 //TODO ?? to callback
@@ -240,10 +249,10 @@ export class Selector {
 
     /**
      * Parse selector token (a piece of selector between dots
-     * 
+     *
      * "[questions HashList]" -> {name: questions, type: HashList}
      * "width" -> {name: width, type: undefined}
-     * 
+     *
      * @param {string} token
      * @return {object} {name, type} token information
      */
@@ -269,18 +278,19 @@ export class Selector {
  *
  * @param obj
  * @param selector
+ * @param options
  *
  * @return {Array} result
  */
-export function getPropertiesBySelector(obj, selector) {
-    const s = new Selector(selector);
+export function getPropertiesBySelector(obj, selector, options) {
+    const s = new Selector(selector, options);
     return s.fetch(obj);
 }
 
 /**
  * Convert selector into array of pathes. It might be one path or many if selector contains regular expressions
  * If obj does not contain full path
- * 
+ *
  * @param {object} obj
  * @param {selector} selector
  * @param {boolean} resolvedPathesOnly
@@ -291,11 +301,11 @@ export function getPathes(obj, selector, resolvedPathesOnly = false) {
 }
 
 /**
- * Проверить соответствие между собой селектора например  и строки свойства, например 
+ * Проверить соответствие между собой селектора например  и строки свойства, например
  *
  * @param {string} propertyPath "quiz.questions.ugltc7.text"
  * @param {string} selector "quiz.[questions Hashlist].text"
- * 
+ *
  * @return {boolean}
  */
 export function matchPropertyPath(propertyPath, selector) {
@@ -308,7 +318,7 @@ export function matchPropertyPath(propertyPath, selector) {
     // try {
     //     const pathElems = propertyPath.split('.');
     //     const selectorElems = selector.split('.');
-        
+
     //     const ppart0 = pathElems[0];
     //     const spart0 = selectorElems[0];
     //     if (spart0 === ppart0) {

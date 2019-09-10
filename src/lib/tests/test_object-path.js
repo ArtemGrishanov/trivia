@@ -115,7 +115,7 @@ describe('Selector', function() {
             const s1 = new Selector("app.[size Object].[width Number]");
 
             const obj = {
-                app:{
+                app: {
                     size: {
                         width: 123
                     }
@@ -126,7 +126,7 @@ describe('Selector', function() {
             chai.assert.equal(s1.fetch(obj)[0].path, "app.size.width");
 
             const obj2 = {
-                app:{
+                app: {
                     size: {
                         width: '123'
                     }
@@ -168,6 +168,39 @@ describe('Selector', function() {
             chai.assert.equal(s2.fetch(obj)[1].value, 999);
             chai.assert.equal(s2.fetch(obj)[1].path, "nope123.bar.prop");
         });
+
+        it('fetch Hashlist', function() {
+            const s1 = new Selector("app.[screens HashList]./^[a-z0-9]+$/");
+
+            const obj = {
+                app: {
+                    screens: new HashList([ 'A', 'B' ]),
+                    otherdata: 1
+                }
+            };
+            chai.assert.equal(s1.fetch(obj).length, 2);
+            chai.assert.equal(s1.fetch(obj)[0].value, 'A');
+            chai.assert.equal(s1.fetch(obj)[1].value, 'B');
+        });
+
+        it('fetch Hashlist with custom type checking', function() {
+            const s1 = new Selector("app.[screens HashList]./^[a-z0-9]+$/", {
+                typeCheckers: {
+                    'HashList': (obj) => obj.hasOwnProperty('_orderedIds')
+                }
+            });
+
+            const obj = {
+                app: {
+                    // this is a serialized hashlist and we need consider it as 'hashlist'
+                    screens: {"_orderedIds": ["ar1r5h","vven03"], "ar1r5h":'A', "vven03":'B'},
+                    otherdata: 1
+                }
+            };
+            chai.assert.equal(s1.fetch(obj).length, 2);
+            chai.assert.equal(s1.fetch(obj)[0].value, 'A');
+            chai.assert.equal(s1.fetch(obj)[1].value, 'B');
+        });
     });
 
 
@@ -203,7 +236,7 @@ describe('Selector', function() {
             };
             try {
                 s1.assign(obj, 777);
-                chai.assert.equal(false, true);    
+                chai.assert.equal(false, true);
             }
             catch(err) {
                 // it is OK
@@ -278,7 +311,7 @@ describe('Selector', function() {
             const obj = {
                 app:{
                     path: {
-                        
+
                     }
                 }
             };

@@ -766,7 +766,7 @@ export function serialize(state) {
 /**
  *
  *
- * @result {string} json string object, only dynamic properties are included in this tree.
+ * @result {string} json tree, only dynamic properties are included in this tree.
  * "app": {
  *      "size": {
  *          "width": 120,
@@ -788,7 +788,7 @@ export function serialize(state) {
  */
 export function serialize2(state) {
     const res = {};
-    const st = state;
+    let st = state;
     if (!st) {
         if (store)
             st = store.getState();
@@ -834,6 +834,33 @@ export function deserialize(json) {
     }
 }
 
+/**
+ *
+ * @param {string} json
+ */
+export function deserialize2(json) {
+    if (typeof json === "string") {
+        const st = JSON.parse(json);
+        const data = {};
+        schema.selectorsInProcessOrder.forEach((selector) => {
+            const props = getPropertiesBySelector(st, selector, {
+                typeCheckers: {
+                    'HashList': (obj) => obj.hasOwnProperty('_orderedIds')
+                }
+            });
+            props.forEach((p) => {
+                data[p.path] = p.value;
+            });
+        });
+        console.log('deserialize2');
+        console.dir(data);
+        remix.setData(data);
+    }
+    else {
+        throw new Error('Remix: json string expected')
+    }
+}
+
 // public methods
 remix.init = init;
 remix.setData = setData;
@@ -843,7 +870,8 @@ remix.changePositionInHashlist = changePositionInHashlist;
 remix.deleteHashlistElement = deleteHashlistElement;
 remix.serialize = serialize;
 remix.serialize2 = serialize2;
-remix.deserialize = deserialize
+remix.deserialize = deserialize;
+remix.deserialize2 = deserialize2;
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
 remix.fireEvent = fireEvent;
