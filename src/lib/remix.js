@@ -1,5 +1,6 @@
 import DataSchema from './schema.js'
 import Normalizer from './normalizer.js'
+import HashList from './hashlist.js'
 import {
     assignByPropertyString,
     getPropertiesBySelector
@@ -12,6 +13,7 @@ export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_po
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
 export const REMIX_EVENT_FIRED = '__Remix_event_fired__';
 export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
+export const REMIX_ADD_TRIGGER = '__Remix_add_trigger__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 
 const remix = {};
@@ -33,9 +35,9 @@ let root = null;
 let initialSize = null;
 let mode = 'none'; // edit | preview | published
 let _lastUpdDiff = null;
-let _events = [];
-let _triggers = [];
-let _eventsCounter = 0;
+let _outerEvents = [];
+let _orderCounter = 0;
+let _triggerActions = {};
 
 // establish communication with RContainer
 window.addEventListener("message", receiveMessage, false);
@@ -176,6 +178,11 @@ function setSize(width, height) {
     }
 }
 
+function registerTriggerAction(name, fn) {
+    _triggerActions[name] = fn;
+    return { actionType: name }
+}
+
 /**
  * Dispatches an action defined in Remix.init
  * External action can be used for state modification in reducer which can not be descibed in schema
@@ -196,6 +203,17 @@ function dispatchAction(type, param) {
     else {
         throw new Error(`Remix: this action ${type} is not defined. Use Remix.init() to define some external actions.`);
     }
+}
+
+/**
+ *
+ * @param {object} trigger
+ */
+function addTrigger({when = {}, then = null}) {
+    store.dispatch({
+        type: REMIX_ADD_TRIGGER,
+        trigger: {when, then, order: ++_orderCounter}
+    });
 }
 
 /**
@@ -505,17 +523,24 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function events(state = { history: [], triggers: [] }, action) {
+function events(state = { triggers: new HashList(), history: [], activatedTriggers: [] }, action) {
     switch(action.type) {
+        case REMIX_ADD_TRIGGER: {
+            const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
+            return {
+                ...state,
+                triggers: newTriggers
+            }
+        }
         case REMIX_EVENT_FIRED: {
             const event = {
                 eventType: action.eventType,
                 eventData: action.eventData,
-                order: ++_eventsCounter
+                order: ++_orderCounter
             };
-            const newTriggers = [
-                ...state.triggers,
-                ...runTriggers(event)
+            const newActivatedTriggers = [
+                ...state.activatedTriggers,
+                ...runTriggers(state.triggers.toArray(), event)
             ];
             const newHistory = [
                 ...state.history,
@@ -524,7 +549,7 @@ function events(state = { history: [], triggers: [] }, action) {
             return {
                 ...state,
                 history: newHistory,
-                triggers: newTriggers
+                activatedTriggers: newActivatedTriggers
             }
         }
         case REMIX_EVENTS_CLEAR: {
@@ -539,36 +564,44 @@ function events(state = { history: [], triggers: [] }, action) {
 }
 
 /**
- *
- * @param {*}
- */
-function addTrigger({when = {}, execute = null}) {
-    _triggers.push({when, execute, order: ++_eventsCounter});
-}
-
-/**
  * Checks triggers and runs them
  *
  * @return {array} array of activated triggers
  */
-function runTriggers(event) {
+function runTriggers(triggers, event) {
     const toExec = [];
     // recent triggers have more priority
-    for (let i = _triggers.length-1; i >= 0; i--) {
-        const t = _triggers[i];
+    for (let i = triggers.length-1; i >= 0; i--) {
+        const t = triggers[i];
         if (event.order < t.order) {
             // event occured earlier then trigger was setup, skip it
             return;
         }
         if (event.eventType === t.when.eventType && !toExec.includes(t) && conditionWorks(event, t)) {
             // do not execute the same trigger twice
-            toExec.push(t);
+            toExec.push({t, e:event});
         }
     }
     // now do some actions
-    toExec.forEach( (t) => {
-        if (typeof t.execute === 'function') {
-            t.execute(t);
+    toExec.forEach( ({t, e}) => {
+        // if (typeof t.then === 'function') {
+        //     t.then(t);
+        // }
+        // else
+        if (typeof t.then.actionType === 'string') {
+            if (typeof _triggerActions[t.then.actionType] === 'function') {
+                _triggerActions[t.then.actionType]({
+                    remix: this,
+                    trigger: t,
+                    eventData: e.eventData
+                });
+            }
+            else {
+                throw new Error(`Unregistered action type ${t.then}. Use registerTriggerAction() to register it`);
+            }
+        }
+        else {
+            throw new Error('\'then.actionType\' must be a string');
         }
     })
     return toExec;
@@ -677,10 +710,10 @@ function _getPropAndDelete(props, propPath) {
 
 function _putEventInQueue(method, data, eventIndex) {
     if (eventIndex !== undefined) {
-        _events.splice(eventIndex, 0, {method: method, data: data});
+        _outerEvents.splice(eventIndex, 0, {method: method, data: data});
     }
     else {
-        _events.push({method: method, data: data});
+        _outerEvents.push({method: method, data: data});
     }
 }
 
@@ -688,8 +721,8 @@ function _putEventInQueue(method, data, eventIndex) {
 function _sendEvents() {
     // containerWindow.postMessage({method: 'app_size_changed'}, containerOrigin); ?
     // containerWindow.postMessage({method: 'send_data_state'}, containerOrigin); // on 'request_data_state'
-    while (containerWindow && containerOrigin && _events.length > 0) {
-        const e = _events.shift();
+    while (containerWindow && containerOrigin && _outerEvents.length > 0) {
+        const e = _outerEvents.shift();
         // in postMessage default serialization algorythm is used https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Structured_clone_algorithm
         // hashlist will be serialized as object
         containerWindow.postMessage({...e.data, method: e.method }, containerOrigin);
@@ -884,6 +917,7 @@ remix._setCss = () => {
     //TODO set project css styles
     // maybe use to-string-loader https://github.com/webpack-contrib/css-loader#tostring
 };
+remix.registerTriggerAction = registerTriggerAction;
 
 export default remix
 window.remix = remix; // for debug

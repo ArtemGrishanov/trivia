@@ -136,6 +136,7 @@ class HashList {
         }
         this._orderedIds.splice(position, -1, newElementId);
         this[newElementId] = element;
+        return this;
     }
 
     /**
@@ -277,35 +278,35 @@ class HashList {
      *
      * @returns {string}
      */
-    serialize() {
-        return JSON.stringify(this._prepareSerializedObject());
-    }
+    // serialize() {
+    //     return JSON.stringify(this._prepareSerializedObject());
+    // }
 
     /**
      * Подготовить свойства для сериализации в виде отдельного объекта
      * @return {object}
      */
-    _prepareSerializedObject() {
+    // _prepareSerializedObject() {
 
-        return {
-            _class: 'HashList',
-            _orderedIds: this._orderedIds,
-            _value: this._getValuesShallowCopy()
-            // так как dictionary сложный тип данных используется рекурсивный проход по всем подсвойствам
-            //value: this._serializeSubProperty(this._value)
-        };
-    }
+    //     return {
+    //         _class: 'HashList',
+    //         _orderedIds: this._orderedIds,
+    //         _value: this._getValuesShallowCopy()
+    //         // так как dictionary сложный тип данных используется рекурсивный проход по всем подсвойствам
+    //         //value: this._serializeSubProperty(this._value)
+    //     };
+    // }
 
     /**
      * Вернуть новый объект с ключами и значениями
      *
      * @returns {object}
      */
-    _getValuesShallowCopy() {
-        const v = {};
-        this._orderedIds.forEach( (id) => v[id] = this[id])
-        return v;
-    }
+    // _getValuesShallowCopy() {
+    //     const v = {};
+    //     this._orderedIds.forEach( (id) => v[id] = this[id])
+    //     return v;
+    // }
 
     _isPrimitive(value) {
         return value === undefined || value === null || typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean';
@@ -340,12 +341,12 @@ class HashList {
     shallowClone() {
         const cloned = new HashList();
         cloned._orderedIds = this._orderedIds.slice();
-        cloned._value = this._getValuesShallowCopy();
+        cloned._orderedIds.forEach( (id) => cloned[id] = this[id])
         return cloned;
     }
 
     /**
-     * use different ids for cloning
+     * Use different ids for cloning
      */
     clone() {
         const cloned = new HashList();

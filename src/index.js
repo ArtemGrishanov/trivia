@@ -38,7 +38,7 @@ Remix.init({
 function test( ) {
 
     // remix.serizlise2(), deserialize2 does not work
-    var s = '{"router":{"screens":{"_orderedIds":["zm100s","ju3ahw"],"zm100s":{"backgroundColor":"#ff9999","components":{"_orderedIds":["tm33ye","2djvts"],"tm33ye":{"color":"blue","tags":"question title","displayName":"Text"},"2djvts":{"color":"red","tags":"option","displayName":"Text"}}},"ju3ahw":{"backgroundColor":"#99ff99","components":{"_orderedIds":[]}}},"currentScreenId":"zm100s"},"app":{"size":{"width":400,"height":400}}}';
+    var s = '{"events":{"triggers":{"_orderedIds":["51c1r4"],"51c1r4":{"when":{"eventType":"onclick","condition":{"prop":"tags","clause":"CONTAINS","value":"option"}},"then":{"actionType":"console_log","data":"tags"}}}},"router":{"screens":{"_orderedIds":["vwo8k6","qxvle4"],"vwo8k6":{"backgroundColor":"#ff9999","components":{"_orderedIds":["w5qics","jxkpsp"],"w5qics":{"color":"blue","tags":"question title","displayName":"Text"},"jxkpsp":{"color":"red","tags":"option","displayName":"Text"}}},"qxvle4":{"backgroundColor":"#99ff99","components":{"_orderedIds":[]}}},"currentScreenId":"vwo8k6"},"app":{"size":{"width":400,"height":400}}}';
 
     // remix.serialize, deserialiize works
     var s2 = '[{"path":"router.screens","value":{"_orderedIds":["jmfgu2","84upba"],"jmfgu2":{"backgroundColor":"#ff9999","tags":"screen question1","components":{"_orderedIds":["ywmqwp","mgl6sf"],"ywmqwp":{"displayName":"Text","color":"blue","tags":"question title"},"mgl6sf":{"displayName":"Text","color":"red","tags":"option"}}},"84upba":{"backgroundColor":"#99ff99","tags":"screen question2","components":{"_orderedIds":[]}}}},{"path":"router.currentScreenId","value":"jmfgu2"},{"path":"app.size.width","value":400},{"path":"app.size.height","value":400},{"path":"router.screens.jmfgu2.backgroundColor","value":"#ff9999"},{"path":"router.screens.84upba.backgroundColor","value":"#99ff99"},{"path":"router.screens.jmfgu2.components","value":{"_orderedIds":["ywmqwp","mgl6sf"],"ywmqwp":{"displayName":"Text","color":"blue","tags":"question title"},"mgl6sf":{"displayName":"Text","color":"red","tags":"option"}}},{"path":"router.screens.84upba.components","value":{"_orderedIds":[]}},{"path":"router.screens.jmfgu2.components.ywmqwp.color","value":"blue"},{"path":"router.screens.jmfgu2.components.mgl6sf.color","value":"red"}]';
@@ -54,16 +54,23 @@ function test( ) {
     // remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', color: 'blue', tags: 'question title'} });
 
     // remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', color: 'red', tags: 'option'} });
-    // //store.getState().router.screens[screenId].components
 
     // Remix.addTrigger({
     //     when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: 'option'} },
-    //     execute: (t) => {
-    //         console.log('option clicked');
-    //         //TODO destinated screen id from option 'data' attr.
-    //         Remix.setCurrentScreen(screenId2);
-    //     }
+    //     then: { actionType: 'console_log', data: 'tags'}
+    //     // then: (t) => {
+    //     //     console.log('option clicked');
+    //     //     //TODO destinated screen id from option 'data' attr.
+    //     //     //Remix.setCurrentScreen(screenId2);
+    //     // }
+    //     // I can serialize this:
+    //     // then: 'set_current_screen', 'data.screenId'
     // });
+
+    //TODO move to standart remix trigger actions
+    Remix.registerTriggerAction('console_log', (event) => {
+        console.log(event.eventData[event.trigger.then.data]);
+    });
 
 
 

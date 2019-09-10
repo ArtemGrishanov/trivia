@@ -116,7 +116,7 @@ export default class DataSchema {
                 throw new Error(`DataSchema: type must be specified`);
             }
             if (whitelistTypes.includes(type.toLowerCase()) === false) {
-                throw new Error(`DataSchema: unsupported type "${schm[prop][attr]}". Supported typed: ${whitelistTypes.join(',')}`);
+                throw new Error(`DataSchema: unsupported type "${type}". Supported typed: ${whitelistTypes.join(',')}`);
             }
             const whitelistAttr = types[type].attributes;
             let mAttrs = types[type].mandatory.slice(0);

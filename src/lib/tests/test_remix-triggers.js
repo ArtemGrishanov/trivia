@@ -48,21 +48,20 @@ describe('Remix', function() {
 
             Remix.addTrigger({
                 when: {eventType: 'dumb_event52'},
-                execute: (t) => {
-                    chai.assert.equal(t.when.eventType === 'dumb_event52', true, 'trigger activated');
+                then: Remix.registerTriggerAction('custom_action_0', (evt) => {
+                    chai.assert.equal(evt.trigger.when.eventType === 'dumb_event52', true, 'trigger 52 activated');
                     v++;
-                }
+                })
             });
 
             Remix.fireEvent('dumb_event32'); // execute nothing
 
             Remix.addTrigger({
                 when: {eventType: 'dumb_event32'},
-                execute: (t) => {
-                    // you can specify a function as action
-                    chai.assert.equal(t.when.eventType === 'dumb_event32', true, 'trigger activated');
+                then: Remix.registerTriggerAction('custom_action_1', (evt) => {
+                    chai.assert.equal(evt.trigger.when.eventType === 'dumb_event32', true, 'trigger 32 activated');
                     c++;
-                }
+                })
             });
 
             Remix.fireEvent('dumb_event32'); // 1 c activation
@@ -89,10 +88,10 @@ describe('Remix', function() {
 
             Remix.addTrigger({
                 when: {eventType: 'on_condition', condition: { prop: 'tags', clause: 'CONTAINS', value: 'option' }},
-                execute: (t) => {
-                    chai.assert.equal(t.when.eventType === 'on_condition', true, 'trigger activated');
+                then: Remix.registerTriggerAction('custommm', (evt) => {
+                    chai.assert.equal(evt.trigger.when.eventType === 'on_condition', true, 'trigger activated');
                     c++;
-                }
+                })
             });
 
             Remix.fireEvent('on_condition');

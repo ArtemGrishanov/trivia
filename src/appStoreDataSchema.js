@@ -14,6 +14,37 @@ const schema = new DataSchema({
     //TODO move to remix app schema
     "app.size.height": EngageAppSchema.getDescription("height"),
 
+    //TODO move to standart app schema
+    "events.[triggers HashList]": {
+        type: 'hashlist',
+        default: new HashList()
+    },
+    "events.[triggers HashList]./^[0-9a-z]+$/.when.eventType": {
+        type: 'string',
+        default: ''
+    },
+    "events.[triggers HashList]./^[0-9a-z]+$/.when.condition.prop": {
+        type: 'string',
+        default: ''
+    },
+    "events.[triggers HashList]./^[0-9a-z]+$/.when.condition.clause": {
+        type: 'string',
+        default: 'CONTAINS'
+    },
+    "events.[triggers HashList]./^[0-9a-z]+$/.when.condition.value": {
+        type: 'string',
+        default: undefined
+    },
+    "events.[triggers HashList]./^[0-9a-z]+$/.then.actionType": {
+        type: 'string',
+        default: ''
+    },
+    "events.[triggers HashList]./^[0-9a-z]+$/.then.data": {
+        type: 'string',
+        default: ''
+    },
+
+
     //TODO move to remix app schema
     "router.[screens HashList]": RouterScreensSchema.getDescription('screens'),
     "router.currentScreenId": RouterScreensSchema.getDescription('currentScreenId'),
