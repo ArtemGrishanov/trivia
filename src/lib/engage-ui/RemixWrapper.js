@@ -22,6 +22,36 @@ const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         type: 'string',
         minLength: 1,
         default: 'RemixComponent'
+    },
+    'data': {
+        type: 'string',
+        minLength: 0,
+        maxLength: 4096,
+        default: ''
+    },
+    'width': {
+        type: 'number',
+        min: 1,
+        max: 100,
+        default: 30
+    },
+    'height': {
+        type: 'number',
+        min: 1,
+        max: 100,
+        default: 30
+    },
+    'left': {
+        type: 'number',
+        min: -50,
+        max: 150,
+        default: 11
+    },
+    'top': {
+        type: 'number',
+        min: -50,
+        max: 150,
+        default: 11
     }
 };
 
@@ -45,7 +75,7 @@ export default (Component, Schema, DisplayName) => {
             composed = compose(
                 LayoutItem(),
                 sizeMe({monitorHeight: true, noPlaceholder: true}),
-                //TODO It works! How it work without connect?
+                //TODO It works without componentConnect Is screenConnect sufficient?
                 //componentConnect(),
                 withPropNormalizer(Schema, DisplayName)
 

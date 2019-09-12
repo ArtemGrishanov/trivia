@@ -14,6 +14,7 @@ export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
 export const REMIX_EVENT_FIRED = '__Remix_event_fired__';
 export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
 export const REMIX_ADD_TRIGGER = '__Remix_add_trigger__'
+export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 
 const remix = {};
@@ -217,6 +218,18 @@ function addTrigger({when = {}, then = null}) {
 }
 
 /**
+ * Mark some triggers as executed
+ *
+ * @param {string} transactionIds
+ */
+function markAsExecuted(transactionIds) {
+    store.dispatch({
+        type: REMIX_MARK_AS_EXECUTED,
+        transactionIds: transactionIds
+    });
+}
+
+/**
  * Event happend in Remix app
  *
  * @param {string} eventType
@@ -414,7 +427,7 @@ export function remixReducer({reducers, dataSchema}) {
     schema = dataSchema;
     normalizer = new Normalizer(schema);
     // clients reducers + standart remix reducers
-    const reducer = combineReducers({...reducers, router, events});
+    const reducer = combineReducers({...reducers, app, router, events});
     log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
@@ -505,6 +518,10 @@ export function remixReducer({reducers, dataSchema}) {
     }
 }
 
+function app(state = {}) {
+    return state;
+}
+
 function router(state = {}, action) {
     switch(action.type) {
         case REMIX_SET_CURRENT_SCREEN: {
@@ -523,7 +540,7 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function events(state = { triggers: new HashList(), history: [], activatedTriggers: [] }, action) {
+function events(state = { triggers: new HashList(), history: [], activatedTriggers: [], toExecute: [] }, action) {
     switch(action.type) {
         case REMIX_ADD_TRIGGER: {
             const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
@@ -538,18 +555,30 @@ function events(state = { triggers: new HashList(), history: [], activatedTrigge
                 eventData: action.eventData,
                 order: ++_orderCounter
             };
+            const texec = getTriggersToExecute(state.triggers.toArray(), event);
             const newActivatedTriggers = [
                 ...state.activatedTriggers,
-                ...runTriggers(state.triggers.toArray(), event)
+                ...texec
             ];
             const newHistory = [
                 ...state.history,
                 event
             ];
+            const toExecute = [
+                ...state.toExecute,
+                ...texec
+            ]
             return {
                 ...state,
                 history: newHistory,
-                activatedTriggers: newActivatedTriggers
+                activatedTriggers: newActivatedTriggers,
+                toExecute: toExecute
+            }
+        }
+        case REMIX_MARK_AS_EXECUTED: {
+            return {
+                ...state,
+                toExecute: state.toExecute.filter( ({transactionId}) => !action.transactionIds.includes(transactionId) )
             }
         }
         case REMIX_EVENTS_CLEAR: {
@@ -568,7 +597,7 @@ function events(state = { triggers: new HashList(), history: [], activatedTrigge
  *
  * @return {array} array of activated triggers
  */
-function runTriggers(triggers, event) {
+function getTriggersToExecute(triggers, event) {
     const toExec = [];
     // recent triggers have more priority
     for (let i = triggers.length-1; i >= 0; i--) {
@@ -579,31 +608,31 @@ function runTriggers(triggers, event) {
         }
         if (event.eventType === t.when.eventType && !toExec.includes(t) && conditionWorks(event, t)) {
             // do not execute the same trigger twice
-            toExec.push({t, e:event});
+            toExec.push({t, e:event, transactionId: getUniqueId()});
         }
     }
     // now do some actions
-    toExec.forEach( ({t, e}) => {
-        // if (typeof t.then === 'function') {
-        //     t.then(t);
-        // }
-        // else
-        if (typeof t.then.actionType === 'string') {
-            if (typeof _triggerActions[t.then.actionType] === 'function') {
-                _triggerActions[t.then.actionType]({
-                    remix: this,
-                    trigger: t,
-                    eventData: e.eventData
-                });
-            }
-            else {
-                throw new Error(`Unregistered action type ${t.then}. Use registerTriggerAction() to register it`);
-            }
-        }
-        else {
-            throw new Error('\'then.actionType\' must be a string');
-        }
-    })
+    // toExec.forEach( ({t, e}) => {
+    //     // if (typeof t.then === 'function') {
+    //     //     t.then(t);
+    //     // }
+    //     // else
+    //     if (typeof t.then.actionType === 'string') {
+    //         if (typeof _triggerActions[t.then.actionType] === 'function') {
+    //             _triggerActions[t.then.actionType]({
+    //                 remix: this,
+    //                 trigger: t,
+    //                 eventData: e.eventData
+    //             });
+    //         }
+    //         else {
+    //             throw new Error(`Unregistered action type ${t.then}. Use registerTriggerAction() to register it`);
+    //         }
+    //     }
+    //     else {
+    //         throw new Error('\'then.actionType\' must be a string');
+    //     }
+    // })
     return toExec;
 }
 
@@ -907,11 +936,13 @@ remix.deserialize = deserialize;
 remix.deserialize2 = deserialize2;
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
+remix.markAsExecuted = markAsExecuted;
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
 remix.clearEventsHistory = clearEventsHistory;
 remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
+remix._triggerActions = _triggerActions;
 remix._getSchema = () => schema;
 remix._setCss = () => {
     //TODO set project css styles
@@ -961,4 +992,12 @@ function combineReducers(reducers) {
         hasChanged || finalReducerKeys.length !== Object.keys(state).length
       return hasChanged ? nextState : state
     }
-  }
+}
+
+function getUniqueId() {
+    var firstPart = (Math.random() * 46656) | 0;
+    var secondPart = (Math.random() * 46656) | 0;
+    firstPart = ("000" + firstPart.toString(36)).slice(-3);
+    secondPart = ("000" + secondPart.toString(36)).slice(-3);
+    return firstPart + secondPart;
+}

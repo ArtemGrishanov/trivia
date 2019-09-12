@@ -43,8 +43,13 @@ class EngageApp extends React.Component {
 
     static getDerivedStateFromProps(props, state) {
         //const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
+        let toExecute = [];
+        if (props.toExecute.length > 0) {
+            toExecute = props.toExecute;
+        }
         return {
-            ...state
+            ...state,
+            toExecute
         }
     }
 
@@ -53,6 +58,7 @@ class EngageApp extends React.Component {
         this.state = {
             message: null
         };
+        this.executedTransactionIds = {};
         this.screens = [];
     }
 
@@ -66,7 +72,7 @@ class EngageApp extends React.Component {
     }
 
     componentDidMount() {
-        this.syncScreens();
+        //this.syncScreens();
 
         // we may use refs to get a link to dom elems
         //     //TODO no inline styles in this rendered string, inline styles may come from store!
@@ -79,7 +85,36 @@ class EngageApp extends React.Component {
     }
 
     componentDidUpdate() {
-        this.syncScreens();
+        //this.syncScreens();
+        this.executeTriggers();
+    }
+
+    executeTriggers() {
+        this.state.toExecute.forEach( (ex) => {
+            if (this.executedTransactionIds[ex.transactionId]) {
+                console.warn('EngageApp. Trigger already executed.');
+            }
+            else {
+                this.executedTransactionIds[ex.transactionId] = ex;
+                console.log('EngageApp. Execute ', ex.t.then.actionType);
+                if (typeof ex.t.then.actionType === 'string') {
+                    if (typeof Remix._triggerActions[ex.t.then.actionType] === 'function') {
+                        Remix._triggerActions[ex.t.then.actionType]({
+                            remix: this,
+                            trigger: ex.t,
+                            eventData: ex.e.eventData
+                        });
+                        Remix.markAsExecuted([ex.transactionId]);
+                    }
+                    else {
+                        throw new Error(`Unregistered action type ${ex.t.then}. Use registerTriggerAction() to register it`);
+                    }
+                }
+                else {
+                    throw new Error('\'then.actionType\' must be a string');
+                }
+            }
+        });
     }
 
     syncScreens() {
@@ -143,8 +178,8 @@ class EngageApp extends React.Component {
     renderOld() {
 
         const appSt = {
-            width: this.props.appWidth + "px",
-            minHeight: this.props.appHeight + "px"
+            width: this.props.width + "px",
+            minHeight: this.props.height + "px"
         }
 
         // only Screen children expected
@@ -168,8 +203,8 @@ class EngageApp extends React.Component {
 
     render() {
         const appSt = {
-            width: this.props.appWidth + "px",
-            minHeight: this.props.appHeight + "px"
+            width: this.props.width + "px",
+            minHeight: this.props.height + "px"
         }
         return (
             <div className="rmx-app" style={appSt}>
@@ -181,9 +216,13 @@ class EngageApp extends React.Component {
 
 const mapStateToProps = (state) => {
     return {
-        width: state.app.width,
-        height: state.app.height
+        width: state.app.size.width,
+        height: state.app.size.height,
+        toExecute: state.events.toExecute
     }
+}
+
+const mapDispatchToProps = {
 }
 
 /**
@@ -195,16 +234,16 @@ export const EngageAppSchema = new DataSchema({
         type: 'number',
         min: 80,
         max: 4000,
-        default: 400,
+        default: 444,
         appWidthProperty: true
     },
     "height": {
         type: 'number',
         min: 18,
         max: 12000,
-        default: 400,
+        default: 444,
         appHeightProperty: true
     }
 });
 
-export default connect(mapStateToProps)(EngageApp);
+export default connect(mapStateToProps, mapDispatchToProps)(EngageApp);

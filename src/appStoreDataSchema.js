@@ -54,6 +54,7 @@ const schema = new DataSchema({
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.color": TextSchema.getDescription('color'),
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.tags": TextSchema.getDescription('tags'),
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.displayName": TextSchema.getDescription('displayName'),
+    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.width": TextSchema.getDescription('width'),
 
     // // for all properties which match the pattern "quiz.questions.0.text, quiz.questions.1.text ... quiz.questions.999.text ... "
 

@@ -74,8 +74,8 @@ class LayoutContainer extends React.Component {
                     mod: this.mod,
                     containerWidth: this.state.width,
                     containerHeight: this.state.height,
-                    magnetsVertical: this.state.magnetsVertical,
-                    ...this.getNextElementInFlow()
+                    magnetsVertical: this.state.magnetsVertical
+                    //,...this.getNextElementInFlow()
                 })
             );
         }
@@ -146,6 +146,7 @@ class LayoutContainer extends React.Component {
     }
 
     getNextElementInFlow() {
+        //TODO этой крутой штуки, сейчас она переписывает нормальные сериализованные коорндинаты
         if (this.state.flow.length === 0) {
             this.state.flow.push({
                 top: 10,
