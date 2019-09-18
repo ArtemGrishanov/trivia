@@ -29,11 +29,12 @@ const schema = new DataSchema({
     },
     "events.[triggers HashList]./^[0-9a-z]+$/.when.condition.clause": {
         type: 'string',
-        default: 'CONTAINS'
+        enum: ['NONE', 'CONTAINS', 'EQUALS'],
+        default: 'NONE'
     },
     "events.[triggers HashList]./^[0-9a-z]+$/.when.condition.value": {
         type: 'string',
-        default: undefined
+        default: ''
     },
     "events.[triggers HashList]./^[0-9a-z]+$/.then.actionType": {
         type: 'string',

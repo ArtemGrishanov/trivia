@@ -34,13 +34,6 @@ import './style/rmx-common.css';
  */
 class EngageApp extends React.Component {
 
-    // TODO как соотнести их со схемой? по идее надо по схеме компонента их заполнять
-    // static defaultProps = {
-    //     width: 400,
-    //     height: undefined
-    //     //TODO many props
-    // }
-
     static getDerivedStateFromProps(props, state) {
         //const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
         let toExecute = [];
@@ -72,16 +65,7 @@ class EngageApp extends React.Component {
     }
 
     componentDidMount() {
-        //this.syncScreens();
-
-        // we may use refs to get a link to dom elems
-        //     //TODO no inline styles in this rendered string, inline styles may come from store!
-
-//     //TODO compare prev html strings
-
-//     //TODO sync screens count -> create, delete events
-
-//     //TODO how to integrate this func with remix SDK
+        Remix.fireEvent('app_start');
     }
 
     componentDidUpdate() {
@@ -96,11 +80,11 @@ class EngageApp extends React.Component {
             }
             else {
                 this.executedTransactionIds[ex.transactionId] = ex;
-                console.log('EngageApp. Execute ', ex.t.then.actionType);
+                console.log('EngageApp: Execute', ex.t.then.actionType);
                 if (typeof ex.t.then.actionType === 'string') {
                     if (typeof Remix._triggerActions[ex.t.then.actionType] === 'function') {
                         Remix._triggerActions[ex.t.then.actionType]({
-                            remix: this,
+                            remix: Remix,
                             trigger: ex.t,
                             eventData: ex.e.eventData
                         });

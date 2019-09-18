@@ -639,9 +639,15 @@ function getTriggersToExecute(triggers, event) {
 function conditionWorks(event, trigger) {
     const c = trigger.when.condition;
     if (c) {
+        if (c.clause && c.clause.toLowerCase() === 'none') {
+            return true;
+        }
         if (event.eventData) {
             if (c.clause.toLowerCase() === 'contains') {
                 return event.eventData[c.prop].toString().indexOf(c.value) >= 0;
+            }
+            else if (c.clause.toLowerCase() === 'equals') {
+                return event.eventData[c.prop] === c.value;
             }
             else {
                 throw new Error(`${c.clause} clause not supported`);
@@ -949,9 +955,18 @@ remix._setCss = () => {
     // maybe use to-string-loader https://github.com/webpack-contrib/css-loader#tostring
 };
 remix.registerTriggerAction = registerTriggerAction;
+remix.getState = () => store.getState();
+/**
+ * Add new properties descriptions to app schema
+ * Plugins may use this method
+ */
+remix.extendSchema = (schm) => {
+    schema = schema.extend(schm);
+    normalizer = new Normalizer(schema);
+}
 
 export default remix
-window.remix = remix; // for debug
+window.Remix = remix; // for debug
 
 
 /**
