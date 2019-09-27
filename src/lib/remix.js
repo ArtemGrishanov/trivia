@@ -30,6 +30,7 @@ let containerOrigin = null;
 let containerWindow = null;
 let store = null;
 let schema = null;
+let customFunctions = {};
 let normalizer = null;
 let extActions = null;
 let root = null;
@@ -69,9 +70,9 @@ function receiveMessage({origin = null, data = {}, source = null}) {
             root.style.position = 'relative';
             root.style.overflow = 'hidden';
         }
-        _putEventInQueue('inited', {schema: schema, css: "TODO: pass css string from project to container."}, 0);
+        _putOuterEventInQueue('inited', {schema: schema, css: "TODO: pass css string from project to container."}, 0);
         // before this 'init' we may already have some events in queue
-        _sendEvents();
+        _sendOuterEvents();
     }
     else if (data.method === 'run') {
         // Container can set size only
@@ -100,8 +101,8 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         setData(data.data, data.forceFeedback);
     }
     if (data.method === 'serialize') {
-        _putEventInQueue('serialized', {state: serialize2()});
-        _sendEvents();
+        _putOuterEventInQueue('serialized', {state: serialize2()});
+        _sendOuterEvents();
     }
     if (data.method === 'setsize') {
         setSize(data.width, data.height);
@@ -239,11 +240,14 @@ function fireEvent(eventType, eventData) {
     if (eventType === undefined) {
         throw new Error('Remix.fireEvent: eventType is not specified');
     }
-    store.dispatch({
-        type: REMIX_EVENT_FIRED,
-        eventType: eventType,
-        eventData: eventData
-    });
+    if (store) {
+        //TODO с помощью этой проверки в начале старта приложения создаются свойствва и мы теряем эти события получается.. reducer создается и запускается а store еще не создан
+        store.dispatch({
+            type: REMIX_EVENT_FIRED,
+            eventType: eventType,
+            eventData: eventData
+        });
+    }
 }
 
 function clearEventsHistory() {
@@ -336,32 +340,6 @@ function init({appStore = null, externalActions = [], container = null}) {
     //     type: REMIX_INIT_ACTION
     // });
 }
-
-/**
-* Специальные доступные форматы.
-* Такие как цвет или урл
-*/
-export const RemixFormat = {
-    /**
-    * Checks if value represents a color
-    * Returns formatted color or null
-    *
-    * rgb(r,g,b) value will be converted to ##rrggbb format
-    * but rgb(r,g,b,a) value will be remained
-    * Otherwise returns null if value is invalid color
-    *
-    * @param {string} value
-    */
-    // Color: function(value) {
-    //     return value;
-    // },
-    // /**
-    // *
-    // */
-    // Url: function(value) {
-    //     return value;
-    // }
-};
 
 /**
  * Конвертация rgba(126,0,255,100) -> #7e00ff
@@ -508,12 +486,16 @@ export function remixReducer({reducers, dataSchema}) {
             log('remixReducer: normalized next state: ', nextState);
         }
         _lastUpdDiff = diff(state, nextState);
-        if (action.forceFeedback || _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0) {
+        const changed = _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0;
+        if (changed) {
             log('Diff', _lastUpdDiff);
-            _putEventInQueue('properties_changed', {..._lastUpdDiff, state: serialize2(nextState)});
-            // history.push(nextState);
+            //todo
+            //fireEvent('property_updated', {diff: _lastUpdDiff});
         }
-        _sendEvents();
+        if (action.forceFeedback || changed) {
+            _putOuterEventInQueue('properties_changed', {..._lastUpdDiff, state: serialize2(nextState)});
+        }
+        _sendOuterEvents();
         return nextState;
     }
 }
@@ -743,7 +725,7 @@ function _getPropAndDelete(props, propPath) {
     return (index >= 0) ? props.splice(index, 1)[0]: null;
 }
 
-function _putEventInQueue(method, data, eventIndex) {
+function _putOuterEventInQueue(method, data, eventIndex) {
     if (eventIndex !== undefined) {
         _outerEvents.splice(eventIndex, 0, {method: method, data: data});
     }
@@ -753,7 +735,7 @@ function _putEventInQueue(method, data, eventIndex) {
 }
 
 //TODO очередь зачем? реализовать отправку по таймеру?
-function _sendEvents() {
+function _sendOuterEvents() {
     // containerWindow.postMessage({method: 'app_size_changed'}, containerOrigin); ?
     // containerWindow.postMessage({method: 'send_data_state'}, containerOrigin); // on 'request_data_state'
     while (containerWindow && containerOrigin && _outerEvents.length > 0) {
@@ -769,8 +751,8 @@ function _getLastUpdateDiff() {
 }
 
 function _setScreenEvents(updateData) {
-    _putEventInQueue('screens_update', updateData);
-    _sendEvents();
+    _putOuterEventInQueue('screens_update', updateData);
+    _sendOuterEvents();
 }
 
 /**
@@ -963,6 +945,22 @@ remix.getState = () => store.getState();
 remix.extendSchema = (schm) => {
     schema = schema.extend(schm);
     normalizer = new Normalizer(schema);
+}
+/**
+ * App and plugin authors can declare function to use in applications, triggers etc..
+ * Call by name later..
+ */
+remix.addCustomFunction = (fnName, fn) => {
+    customFunctions[fnName] = fn;
+}
+/**
+ * Call the declared custom function
+ */
+remix.callCustomFunction = (fnName) => {
+    if (customFunctions[fnName]) {
+        return customFunctions[fnName].call(remix);
+    }
+    throw new Error(`custom function not found ${fnName}`);
 }
 
 export default remix

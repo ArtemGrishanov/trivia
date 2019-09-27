@@ -1,8 +1,5 @@
 import Remix, {remixReducer} from '../remix.js';
 import DataSchema from '../schema.js';
-import App from './App';
-import { Provider } from 'react-redux'
-import ReactDOM from 'react-dom';
 
 const reducer = remixReducer({
     reducers: {},
@@ -15,12 +12,6 @@ Remix.init({
     appStore: store,
     container: document.getElementById('root')
 });
-
-ReactDOM.render(
-    <Provider store={store}>
-        <App />
-    </Provider>,
-    document.getElementById('root'));
 
 describe('Remix', function() {
 

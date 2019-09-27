@@ -176,7 +176,7 @@ export default class Normalizer {
             value = info.default;
         }
         if (info.enum) {
-            if (!info.enum.includes(value.toLowerCase())) {
+            if (!info.enum.map( (s) => s.toLowerCase() ).includes(value.toLowerCase())) {
                 value = info.default;
             }
         }

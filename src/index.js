@@ -40,38 +40,7 @@ Remix.registerTriggerAction('console_log', (event) => {
 //     }
 // });
 
-/**
- * Это действие пробует переключить экран на следующий.
- * Следуюший экран задается параметром nextScreenId
- *
- * 1. nextScreenId ищется в eventData
- * 2. nextScreenId ищется в свойстве 'data' у текущего экрана
- * 3. Если id найден, то выполняется показ нового экрана
- *
- */
-Remix.registerTriggerAction('go_next_screen', (event) => {
-    const paramName = 'nextScreenId';
-    let nsId = event.eventData ? event.eventData[paramName]: null;
-    if (!nsId) {
-        const state = event.remix.getState();
-        const sid = state.router.currentScreenId;
-        if (sid) {
-            const scr = state.router.screens[sid];
-            if (scr) {
-                nsId = scr.data ? scr.data.nextScreenId: null;
-            }
-            else {
-                console.error(`Action "go_next_screen" says: active scrren "${sid}" not found in screen list`);
-            }
-        }
-    }
-    if (nsId) {
-        event.remix.setCurrentScreen(nsId);
-    }
-    else {
-        console.warn('Action "go_next_screen" says: "nextScreenId" not found neither in event.eventData nor active screen. Can not go to next screen.');
-    }
-});
+
 
 initRemixRouting({
     remix: Remix,
@@ -79,17 +48,22 @@ initRemixRouting({
     screenRoute: [
         {tag: 'start'}, // show all scrrens with tag in linear order
         {tag: 'question', shuffle: true}, // show all scrrens with tag and shuffle them
-        {id: calcTriviaRes} // show one screenId returned by function 'calcTriviaRes'
-    ]
+        {idByFunction: 'calcTriviaRes'} // show one screenId returned by function 'calcTriviaRes'
+    ],
+    rebuildRouteTag: 'restart',
+    nextTag: 'option'
 });
 
 /**
  * Trivia quiz custom result calculation
  *
  */
-const calcTriviaRes = () => {
-    return 'todo';
-}
+Remix.addCustomFunction('calcTriviaRes', () => {
+    //TODO
+    //return 'result';
+    const state = Remix.getState();
+    return state.router.screens.getId(2)
+});
 
 // TODO show start screen: true/false - component disabling
 
@@ -116,13 +90,13 @@ function test( ) {
     Remix.setCurrentScreen(screenId);
 
     Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 18, text: '«Приятно слышать, что вы так вежливо обращаетесь с котом. Котам обычно почему-то говорят "ты", хотя ни один кот никогда ни с кем не пил брудершафта»'} });
-    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: '{"points":"0", "screenId":"'+screenId2+'"}', width: 60, left: 20, top: 250, text: 'Это «Каникулы в Простоквашино» Успенского'} });
-    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: '{"points":"1", "screenId":"'+screenId3+'"}', width: 60, left: 20, top: 330, text: 'Это Булгаков. «Мастер и Маргарита»'} });
+    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0", "screenId": screenId2}, width: 60, left: 20, top: 250, text: 'Это «Каникулы в Простоквашино» Успенского'} });
+    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": screenId3}, width: 60, left: 20, top: 330, text: 'Это Булгаков. «Мастер и Маргарита»'} });
     //Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'ProgressiveImage', src: '', width: 50, left: 25, top: 90} });
 
     Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 50, text: 'Это был неверный ответ, пожалуйста попробуйте заново.'} });
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: '{"points":"0", "screenId":"'+screenId+'"}', width: 60, left: 20, top: 250, text: 'Попробовать еще раз'} });
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: '{"points":"0"}', width: 60, left: 20, top: 350, text: 'Не знаю что делать...'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0", "screenId": screenId}, width: 60, left: 20, top: 250, text: 'Попробовать еще раз'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0"}, width: 60, left: 20, top: 350, text: 'Не знаю что делать...'} });
 
     Remix.addHashlistElement('router.screens.'+screenId3+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Верный ответ! «Ма́стер и Маргари́та» — роман Михаила Афанасьевича Булгакова, работа над которым началась в конце 1920-х годов и продолжалась вплоть до смерти писателя'} });
 
@@ -137,11 +111,6 @@ function test( ) {
     Remix.addTrigger({
         when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: 'option'} },
         then: { actionType: 'console_log', data: 'tags'}
-    });
-
-    Remix.addTrigger({
-        when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: 'option'} },
-        then: { actionType: 'set_active_screen', data: 'data.screenId'}
     });
 
     // Plan ******* */
@@ -195,6 +164,7 @@ function test( ) {
     // goToNextScreenOfTag('option_screen')
     // setForAllComponentsWithTagInAllScreens(prop: value)
     //
+    //Remix.fireEvent('app_start');
 }
 
 setTimeout(test, 100);
