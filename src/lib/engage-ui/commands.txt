@@ -32,9 +32,12 @@ store.getState().router.screens[screenId].components
 
 
 -----
+Remix:
+addTrigger
+registerTriggerAction
+extendSchema
 
 Events:
-
 'app_start' - componentDidMount для главного компонент EngageApp
 data: -
 

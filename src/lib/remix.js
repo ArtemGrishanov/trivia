@@ -5,6 +5,7 @@ import {
     assignByPropertyString,
     getPropertiesBySelector
 } from './object-path.js'
+import { getUniqueId } from './remix/util/util.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -15,6 +16,7 @@ export const REMIX_EVENT_FIRED = '__Remix_event_fired__';
 export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
 export const REMIX_ADD_TRIGGER = '__Remix_add_trigger__'
 export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
+// export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 
 const remix = {};
@@ -223,12 +225,12 @@ function addTrigger({when = {}, then = null}) {
  *
  * @param {string} transactionIds
  */
-function markAsExecuted(transactionIds) {
-    store.dispatch({
-        type: REMIX_MARK_AS_EXECUTED,
-        transactionIds: transactionIds
-    });
-}
+// function markAsExecuted(transactionIds) {
+//     store.dispatch({
+//         type: REMIX_MARK_AS_EXECUTED,
+//         transactionIds: transactionIds
+//     });
+// }
 
 /**
  * Event happend in Remix app
@@ -489,7 +491,7 @@ export function remixReducer({reducers, dataSchema}) {
         const changed = _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0;
         if (changed) {
             log('Diff', _lastUpdDiff);
-            //todo
+            //todo use saga for this ?
             //fireEvent('property_updated', {diff: _lastUpdDiff});
         }
         if (action.forceFeedback || changed) {
@@ -532,37 +534,40 @@ function events(state = { triggers: new HashList(), history: [], activatedTrigge
             }
         }
         case REMIX_EVENT_FIRED: {
+            // create events only in this place
             const event = {
                 eventType: action.eventType,
                 eventData: action.eventData,
+                id: getUniqueId(),
+                time: Date.now(),
                 order: ++_orderCounter
             };
-            const texec = getTriggersToExecute(state.triggers.toArray(), event);
-            const newActivatedTriggers = [
-                ...state.activatedTriggers,
-                ...texec
-            ];
+            const texec = []; //getTriggersToExecute(state.triggers.toArray(), event);
+            // const newActivatedTriggers = [
+            //     ...state.activatedTriggers,
+            //     ...texec
+            // ];
             const newHistory = [
                 ...state.history,
                 event
             ];
-            const toExecute = [
-                ...state.toExecute,
-                ...texec
-            ]
+            // const toExecute = [
+            //     ...state.toExecute,
+            //     ...texec
+            // ]
             return {
                 ...state,
-                history: newHistory,
-                activatedTriggers: newActivatedTriggers,
-                toExecute: toExecute
+                history: newHistory
+                //activatedTriggers: newActivatedTriggers,
+                //toExecute: toExecute
             }
         }
-        case REMIX_MARK_AS_EXECUTED: {
-            return {
-                ...state,
-                toExecute: state.toExecute.filter( ({transactionId}) => !action.transactionIds.includes(transactionId) )
-            }
-        }
+        // case REMIX_MARK_AS_EXECUTED: {
+        //     return {
+        //         ...state,
+        //         toExecute: state.toExecute.filter( ({transactionId}) => !action.transactionIds.includes(transactionId) )
+        //     }
+        // }
         case REMIX_EVENTS_CLEAR: {
             return {
                 ...state,
@@ -572,72 +577,6 @@ function events(state = { triggers: new HashList(), history: [], activatedTrigge
         default:
             return state;
     }
-}
-
-/**
- * Checks triggers and runs them
- *
- * @return {array} array of activated triggers
- */
-function getTriggersToExecute(triggers, event) {
-    const toExec = [];
-    // recent triggers have more priority
-    for (let i = triggers.length-1; i >= 0; i--) {
-        const t = triggers[i];
-        if (event.order < t.order) {
-            // event occured earlier then trigger was setup, skip it
-            return;
-        }
-        if (event.eventType === t.when.eventType && !toExec.includes(t) && conditionWorks(event, t)) {
-            // do not execute the same trigger twice
-            toExec.push({t, e:event, transactionId: getUniqueId()});
-        }
-    }
-    // now do some actions
-    // toExec.forEach( ({t, e}) => {
-    //     // if (typeof t.then === 'function') {
-    //     //     t.then(t);
-    //     // }
-    //     // else
-    //     if (typeof t.then.actionType === 'string') {
-    //         if (typeof _triggerActions[t.then.actionType] === 'function') {
-    //             _triggerActions[t.then.actionType]({
-    //                 remix: this,
-    //                 trigger: t,
-    //                 eventData: e.eventData
-    //             });
-    //         }
-    //         else {
-    //             throw new Error(`Unregistered action type ${t.then}. Use registerTriggerAction() to register it`);
-    //         }
-    //     }
-    //     else {
-    //         throw new Error('\'then.actionType\' must be a string');
-    //     }
-    // })
-    return toExec;
-}
-
-function conditionWorks(event, trigger) {
-    const c = trigger.when.condition;
-    if (c) {
-        if (c.clause && c.clause.toLowerCase() === 'none') {
-            return true;
-        }
-        if (event.eventData) {
-            if (c.clause.toLowerCase() === 'contains') {
-                return event.eventData[c.prop].toString().indexOf(c.value) >= 0;
-            }
-            else if (c.clause.toLowerCase() === 'equals') {
-                return event.eventData[c.prop] === c.value;
-            }
-            else {
-                throw new Error(`${c.clause} clause not supported`);
-            }
-        }
-        return false
-    }
-    return true;
 }
 
 /**
@@ -924,7 +863,7 @@ remix.deserialize = deserialize;
 remix.deserialize2 = deserialize2;
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
-remix.markAsExecuted = markAsExecuted;
+// remix.markAsExecuted = markAsExecuted;
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
 remix.clearEventsHistory = clearEventsHistory;
@@ -1005,12 +944,4 @@ function combineReducers(reducers) {
         hasChanged || finalReducerKeys.length !== Object.keys(state).length
       return hasChanged ? nextState : state
     }
-}
-
-function getUniqueId() {
-    var firstPart = (Math.random() * 46656) | 0;
-    var secondPart = (Math.random() * 46656) | 0;
-    firstPart = ("000" + firstPart.toString(36)).slice(-3);
-    secondPart = ("000" + secondPart.toString(36)).slice(-3);
-    return firstPart + secondPart;
 }

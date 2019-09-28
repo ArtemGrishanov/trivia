@@ -1,11 +1,14 @@
 import Remix, {remixReducer} from '../remix.js';
 import DataSchema from '../schema.js';
+import eventSaga from '../remix/sagas/triggerExecutor.js'
 
+const sagaMiddleware = ReduxSaga.default();
 const reducer = remixReducer({
     reducers: {},
     dataSchema: new DataSchema({})
 });
-const store = Redux.createStore(reducer);
+const store = Redux.createStore(reducer, Redux.applyMiddleware(sagaMiddleware));
+sagaMiddleware.run(eventSaga);
 window.store = store; // for debug: inspect storage state in browser console
 
 Remix.init({
@@ -76,7 +79,7 @@ describe('Remix', function() {
                     chai.assert.equal(store.getState().events.history.length, 5);
                     done();
                 }
-            }, 100)
+            }, 80)
         });
 
         it('trigger with condition CONTAINS', function(done) {
@@ -102,7 +105,7 @@ describe('Remix', function() {
                     chai.assert.equal(store.getState().events.history.length, 4);
                     done();
                 }
-            }, 100)
+            }, 80)
 
         });
     })

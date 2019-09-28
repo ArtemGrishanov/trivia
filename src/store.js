@@ -1,15 +1,26 @@
 import { createStore, applyMiddleware } from 'redux'
-import reducer from './reducer'
+import createSagaMiddleware from 'redux-saga'
 
+import reducer from './reducer'
+import eventSaga from './lib/remix/sagas/triggerExecutor'
+
+const sagaMiddleware = createSagaMiddleware()
 const store = createStore(
     reducer,
-    applyMiddleware(logger)
+    applyMiddleware(logger, sagaMiddleware)
 );
+
+sagaMiddleware.run(eventSaga);
 
 window.store = store; // for debug: inspect storage state in browser console
 
 export default store
 
+/**
+ * Simple middleware example
+ *
+ * @param {*} store
+ */
 function logger(store) {
     return function(next) {
 
