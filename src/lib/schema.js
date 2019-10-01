@@ -36,8 +36,14 @@ export default class DataSchema {
 
     /**
      * Add some new properties to existing schema
+     *
+     * User may pass plain object or DataSchema instance
      */
     extend(newSchm) {
+        if (newSchm && newSchm.hasOwnProperty('_schm')) {
+            // DataSchema instance was passed
+            newSchm = newSchm._schm;
+        }
         const schm = {...this._schm, ...newSchm};
         this._validateSchema(schm);
         this._prepareSchema(schm);

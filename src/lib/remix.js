@@ -5,7 +5,7 @@ import {
     assignByPropertyString,
     getPropertiesBySelector
 } from './object-path.js'
-import { getUniqueId } from './remix/util/util.js'
+import { getUniqueId, isHashlistInstance } from './remix/util/util.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -14,6 +14,7 @@ export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_po
 export const REMIX_HASHLIST_DELETE_ACTION = '__Remix_hashlist_delete_action__';
 export const REMIX_EVENT_FIRED = '__Remix_event_fired__';
 export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
+export const REMIX_TRIGGERS_CLEAR = '__Remix_triggers_clear__'
 export const REMIX_ADD_TRIGGER = '__Remix_add_trigger__'
 export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 // export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
@@ -242,17 +243,21 @@ function fireEvent(eventType, eventData) {
     if (eventType === undefined) {
         throw new Error('Remix.fireEvent: eventType is not specified');
     }
-    if (store) {
-        //TODO с помощью этой проверки в начале старта приложения создаются свойствва и мы теряем эти события получается.. reducer создается и запускается а store еще не создан
+    // if (store) {
+        //TODO с помощью этой проверки в начале старта приложения создаются свойствва и мы теряем эти события..
+        // reducer создается и запускается а store еще не создан
         store.dispatch({
             type: REMIX_EVENT_FIRED,
             eventType: eventType,
             eventData: eventData
         });
-    }
+    // }
 }
 
-function clearEventsHistory() {
+function clearTriggersAndEvents() {
+    store.dispatch({
+        type: REMIX_TRIGGERS_CLEAR
+    });
     store.dispatch({
         type: REMIX_EVENTS_CLEAR
     });
@@ -487,14 +492,12 @@ export function remixReducer({reducers, dataSchema}) {
             nextState = normalizer.process(nextState);
             log('remixReducer: normalized next state: ', nextState);
         }
-        _lastUpdDiff = diff(state, nextState);
-        const changed = _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0;
-        if (changed) {
-            log('Diff', _lastUpdDiff);
-            //todo use saga for this ?
-            //fireEvent('property_updated', {diff: _lastUpdDiff});
-        }
-        if (action.forceFeedback || changed) {
+        // _lastUpdDiff = diff(state, nextState);
+        // const changed = _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0;
+        // if (changed) {
+        //     log('Diff', _lastUpdDiff);
+        // }
+        if (action.forceFeedback/* || changed*/) {
             _putOuterEventInQueue('properties_changed', {..._lastUpdDiff, state: serialize2(nextState)});
         }
         _sendOuterEvents();
@@ -502,6 +505,8 @@ export function remixReducer({reducers, dataSchema}) {
     }
 }
 
+//TODO если объявить свойство в схеме и не использовать редюсер, то оно стирается каждый раз, и потом нормализуется (дефолтное значение). Не решил пока проблема ли это.
+// где пользователю объявлять кастомные данные типа getState().my.property
 function app(state = {}) {
     return state;
 }
@@ -524,7 +529,7 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function events(state = { triggers: new HashList(), history: [], activatedTriggers: [], toExecute: [] }, action) {
+function events(state = { triggers: new HashList(), history: [] }, action) {
     switch(action.type) {
         case REMIX_ADD_TRIGGER: {
             const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
@@ -534,6 +539,7 @@ function events(state = { triggers: new HashList(), history: [], activatedTrigge
             }
         }
         case REMIX_EVENT_FIRED: {
+            console.log('Remix.REMIX_EVENT_FIRED. +1 event', action.eventType);
             // create events only in this place
             const event = {
                 eventType: action.eventType,
@@ -574,6 +580,12 @@ function events(state = { triggers: new HashList(), history: [], activatedTrigge
                 history: []
             }
         }
+        case REMIX_TRIGGERS_CLEAR: {
+            return {
+                ...state,
+                triggers: new HashList()
+            }
+        }
         default:
             return state;
     }
@@ -601,67 +613,6 @@ function _doUpdate(state, data) {
             assignByPropertyString(state, path, value);
         }
     });
-}
-
-/**
- * Calc a diff netween states
- *
- * @param {*} prevState
- * @param {*} nextState
- */
-function diff(prevState = {}, nextState = {}) {
-    const result = {
-        added: [],
-        changed: [],
-        deleted: []
-    };
-    schema.selectorsInProcessOrder.forEach( (selector) => {
-        // get all possible pathes in state for this selector
-        const psRes = getPropertiesBySelector(prevState, selector);
-        const nsRes = getPropertiesBySelector(nextState, selector);
-        for (let i = 0; i < nsRes.length; i++) {
-            const nsProp = nsRes[i]
-            const psProp = (psRes.length > 0) ? _getPropAndDelete(psRes, nsProp.path): null;
-            if (psProp) {
-                // this property exists in both states, check for modification
-                if (_isHashlistInstance(psProp.value) && _isHashlistInstance(nsProp.value)) {
-                    // hashlist comparison
-                    if (!psProp.value.equal(nsProp.value)) {
-                        result.changed.push(nsProp);
-                    }
-                }
-                else if (psProp.value !== nsProp.value) {
-                    // default comparison
-                    result.changed.push(nsProp);
-                }
-            }
-            else {
-                // new property
-                result.added.push(nsProp);
-            }
-        }
-        for (let i = 0; i < psRes.length; i++) {
-            result.deleted.push(psRes[i]);
-        }
-    });
-    return result;
-}
-
-function _isHashlistInstance(obj) {
-    return obj && obj._orderedIds && obj._orderedIds.length >= 0;
-    //return obj.constructor && typeof obj.constructor.name === "string" && obj.constructor.name.toLowerCase() === "hashlist";
-}
-
-function _getPropAndDelete(props, propPath) {
-    let index = -1;
-    props.find( (p, i) => {
-        if (p.path === propPath) {
-            index = i;
-            return true;
-        }
-        return false;
-    });
-    return (index >= 0) ? props.splice(index, 1)[0]: null;
 }
 
 function _putOuterEventInQueue(method, data, eventIndex) {
@@ -787,7 +738,7 @@ export function serialize2(state) {
     schema.selectorsInProcessOrder.forEach((selector) => {
         const propsToSerialize = getPropertiesBySelector(st, selector);
         propsToSerialize.forEach((prop) => {
-            if (_isHashlistInstance(prop.value)) {
+            if (isHashlistInstance(prop.value)) {
                 let shallowValue = {};
                 // Prepare hashlist with empty items (only keys and orders)
                 // quiz
@@ -866,7 +817,7 @@ remix.addTrigger = addTrigger;
 // remix.markAsExecuted = markAsExecuted;
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
-remix.clearEventsHistory = clearEventsHistory;
+remix.clearTriggersAndEvents = clearTriggersAndEvents;
 remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
 remix._triggerActions = _triggerActions;

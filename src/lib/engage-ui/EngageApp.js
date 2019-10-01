@@ -34,28 +34,18 @@ import './style/rmx-common.css';
  */
 class EngageApp extends React.Component {
 
-    static getDerivedStateFromProps(props, state) {
-        //const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
-        let toExecute = [];
-        if (props.toExecute.length > 0) {
-            toExecute = props.toExecute;
-        }
-        return {
-            ...state,
-            toExecute
-        }
-    }
-
     constructor(props) {
         super(props);
         this.state = {
             message: null
         };
-        this.executedTransactionIds = {};
+        // this.executedTransactionIds = {};
         this.screens = [];
     }
 
     sendRequest() {
+        //TODO saga
+
         // network request?
 
         // network.send({
@@ -70,35 +60,6 @@ class EngageApp extends React.Component {
 
     componentDidUpdate() {
         //this.syncScreens();
-        this.executeTriggers();
-    }
-
-    executeTriggers() {
-        this.state.toExecute.forEach( (ex) => {
-            if (this.executedTransactionIds[ex.transactionId]) {
-                console.warn('EngageApp. Trigger already executed.');
-            }
-            else {
-                this.executedTransactionIds[ex.transactionId] = ex;
-                console.log('EngageApp: Execute', ex.t.then.actionType);
-                if (typeof ex.t.then.actionType === 'string') {
-                    if (typeof Remix._triggerActions[ex.t.then.actionType] === 'function') {
-                        Remix._triggerActions[ex.t.then.actionType]({
-                            remix: Remix,
-                            trigger: ex.t,
-                            eventData: ex.e.eventData
-                        });
-                        Remix.markAsExecuted([ex.transactionId]);
-                    }
-                    else {
-                        throw new Error(`Unregistered action type ${ex.t.then}. Use registerTriggerAction() to register it`);
-                    }
-                }
-                else {
-                    throw new Error('\'then.actionType\' must be a string');
-                }
-            }
-        });
     }
 
     syncScreens() {
@@ -201,8 +162,7 @@ class EngageApp extends React.Component {
 const mapStateToProps = (state) => {
     return {
         width: state.app.size.width,
-        height: state.app.size.height,
-        toExecute: state.events.toExecute
+        height: state.app.size.height
     }
 }
 

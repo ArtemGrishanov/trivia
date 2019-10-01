@@ -12,6 +12,7 @@ const processedEventIds = {};
  * @param {Object} action
  */
 function* runTriggers(action) {
+    console.log('Saga triggers. start');
     const state = yield select();
     const eventsToProcess = [];
     // get unprocessed events from the history
@@ -33,6 +34,7 @@ function* runTriggers(action) {
             executeTriggers(texec);
         }
     })
+    console.log('/Saga triggers. end');
 }
 
 function executeTriggers(toExecute) {
@@ -88,6 +90,8 @@ function getTriggersToExecute(triggers, event) {
     return toExec;
 }
 
+const validClauses = ['contains', 'equals'];
+
 function conditionWorks(event, trigger) {
     const c = trigger.when.condition;
     if (c) {
@@ -95,11 +99,16 @@ function conditionWorks(event, trigger) {
             return true;
         }
         if (event.eventData) {
-            if (c.clause.toLowerCase() === 'contains') {
-                return event.eventData[c.prop].toString().indexOf(c.value) >= 0;
-            }
-            else if (c.clause.toLowerCase() === 'equals') {
-                return event.eventData[c.prop] === c.value;
+            if (validClauses.includes(c.clause.toLowerCase())) {
+                switch(event.eventType) {
+                    case 'property_updated': {
+                        return _conditionPropertyUpdated(event, c);
+                    }
+                    default: {
+                        // default checking for all actions
+                        return _condition(event, c);
+                    }
+                }
             }
             else {
                 throw new Error(`${c.clause} clause not supported`);
@@ -108,6 +117,37 @@ function conditionWorks(event, trigger) {
         return false
     }
     return true;
+}
+
+/**
+ * Common condition trigger/event checking
+ *
+ * @param {*} event
+ * @param {*} triggerCondition
+ */
+function _condition(event, triggerCondition) {
+    if (triggerCondition.clause.toLowerCase() === 'contains') {
+        return event.eventData[triggerCondition.prop].toString().indexOf(triggerCondition.value) >= 0;
+    }
+    else if (triggerCondition.clause.toLowerCase() === 'equals') {
+        return event.eventData[triggerCondition.prop] === triggerCondition.value;
+    }
+    return false;
+}
+
+/**
+ * Custom condtiditon checking for specific event
+ *
+ * @param {*} event
+ * @param {*} triggerCondition
+ */
+function _conditionPropertyUpdated(event, triggerCondition) {
+    if (triggerCondition.clause.toLowerCase() === 'equals') {
+        //TODO diff.deleted - can not be deleted?
+        //TODO diff added ?
+        return !!event.eventData.diff.changed.find( (p) => p.path == triggerCondition.value);
+    }
+    return false;
 }
 
 /**

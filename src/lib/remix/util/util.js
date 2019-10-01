@@ -5,3 +5,8 @@ export function getUniqueId() {
     secondPart = ("000" + secondPart.toString(36)).slice(-3);
     return firstPart + secondPart;
 }
+
+export function isHashlistInstance(obj) {
+    return obj && obj._orderedIds && obj._orderedIds.length >= 0;
+    //return obj.constructor && typeof obj.constructor.name === "string" && obj.constructor.name.toLowerCase() === "hashlist";
+}
