@@ -50,10 +50,10 @@ describe('Remix', function() {
 
             Remix.fireEvent('dumb_event', {datazz: '123'});
             Remix.fireEvent('other_dumb_event', {variable: 987});
-            chai.assert.equal(store.getState().events.history.length, 2);
+            chai.assert.equal(store.getState().session.events.length, 2);
 
             Remix.clearTriggersAndEvents()
-            chai.assert.equal(store.getState().events.history.length, 0);
+            chai.assert.equal(store.getState().session.events.length, 0);
         });
     })
 
@@ -91,7 +91,7 @@ describe('Remix', function() {
 
             setTimeout( () => {
                 if (c === 3 && v === 1) {
-                    const dumbEventsCount = store.getState().events.history.filter( (evt) => evt.eventType.indexOf('dumb_event') >= 0 ).length;
+                    const dumbEventsCount = store.getState().session.events.filter( (evt) => evt.eventType.indexOf('dumb_event') >= 0 ).length;
                     chai.assert.equal(dumbEventsCount, 5);
                     done();
                 }
@@ -119,7 +119,7 @@ describe('Remix', function() {
 
             setTimeout( () => {
                 if (c === 1) {
-                    const condEventsCount = store.getState().events.history.filter( (evt) => evt.eventType.indexOf('on_cond') >= 0 ).length;
+                    const condEventsCount = store.getState().session.events.filter( (evt) => evt.eventType.indexOf('on_cond') >= 0 ).length;
                     chai.assert.equal(condEventsCount, 4);
                     done();
                 }
@@ -136,7 +136,7 @@ describe('Remix', function() {
 
             var c = 0;
 
-            chai.assert.equal(store.getState().events.history.length, 0);
+            chai.assert.equal(store.getState().session.events.length, 0);
 
             Remix.addTrigger({
                 when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.my.property'} },
@@ -146,7 +146,7 @@ describe('Remix', function() {
                 })
             });
 
-            chai.assert.equal(store.getState().events.history.length, 1);
+            chai.assert.equal(store.getState().session.events.length, 0);
 
             Remix.setData({'app.my.property': 88});
             chai.assert.equal(c, 1);
@@ -162,7 +162,7 @@ describe('Remix', function() {
             var c1 = 0;
             var c2 = 0;
 
-            chai.assert.equal(store.getState().events.history.length, 0);
+            chai.assert.equal(store.getState().session.events.length, 0);
 
             Remix.addTrigger({
                 when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.my.property'} },
@@ -180,7 +180,7 @@ describe('Remix', function() {
                 })
             });
 
-            chai.assert.equal(store.getState().events.history.length, 2);
+            chai.assert.equal(store.getState().session.events.length, 0);
 
             Remix.setData({'app.my.property': 88}); // triggers custom1
             Remix.setData({'app.my.property': 99}); // triggers custom2
@@ -196,7 +196,7 @@ describe('Remix', function() {
             var c1 = 0;
             var c2 = 0;
 
-            chai.assert.equal(store.getState().events.history.length, 0);
+            chai.assert.equal(store.getState().session.events.length, 0);
 
             Remix.addTrigger({
                 when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.my.property'} },
@@ -215,11 +215,11 @@ describe('Remix', function() {
                 })
             });
 
-            chai.assert.equal(store.getState().events.history.length, 2);
+            chai.assert.equal(store.getState().session.events.length, 0);
 
             Remix.setData({'app.my.property': 88}); // triggers custom1
 
-            chai.assert.equal(store.getState().events.history.length, 4); // 2 addTrigger + 2 fireEvent
+            chai.assert.equal(store.getState().session.events.length, 2); // 2 fireEvent
             chai.assert.equal(c1, 1);
             chai.assert.equal(c2, 1);
         });

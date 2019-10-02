@@ -1,6 +1,5 @@
 import DataSchema from './schema.js'
 import Normalizer from './normalizer.js'
-import HashList from './hashlist.js'
 import {
     assignByPropertyString,
     getPropertiesBySelector
@@ -389,15 +388,6 @@ function log(...msg) {
 }
 
 /**
-* Interval
-*/
-function eventEmitterTick() {
-    // send events from queue
-    // -- return new getState()
-    // -- return changed properties pathes
-}
-
-/**
 * High Order Reducer:
 * - data normalization
 */
@@ -412,7 +402,7 @@ export function remixReducer({reducers, dataSchema}) {
     schema = dataSchema;
     normalizer = new Normalizer(schema);
     // clients reducers + standart remix reducers
-    const reducer = combineReducers({...reducers, app, router, events});
+    const reducer = combineReducers({...reducers, app, router, session});
     log('data schema added. Selectors count ' + Object.keys(schema).length);
 
     return (state, action) => {
@@ -477,9 +467,6 @@ export function remixReducer({reducers, dataSchema}) {
             // - например перераспределить баллы по результатам с появлением нового вопроса
             // - например создать новый экран (хотя это в компонентах может быть)
         }
-        // else if (action.type === REMIX_EVENT_FIRED) {
-        //     nextState = events(state.events, action);
-        // }
         else {
             // it maybe @@redux/INITx.x.x.x actions
             // it maybe a regular app action
@@ -529,13 +516,16 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function events(state = { triggers: new HashList(), history: [] }, action) {
+function session(state = { triggers: [], events: [] }, action) {
     switch(action.type) {
         case REMIX_ADD_TRIGGER: {
-            const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
+            //const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
             return {
                 ...state,
-                triggers: newTriggers
+                triggers: [
+                    ...state.triggers,
+                    action.trigger
+                ]
             }
         }
         case REMIX_EVENT_FIRED: {
@@ -554,7 +544,7 @@ function events(state = { triggers: new HashList(), history: [] }, action) {
             //     ...texec
             // ];
             const newHistory = [
-                ...state.history,
+                ...state.events,
                 event
             ];
             // const toExecute = [
@@ -563,27 +553,19 @@ function events(state = { triggers: new HashList(), history: [] }, action) {
             // ]
             return {
                 ...state,
-                history: newHistory
-                //activatedTriggers: newActivatedTriggers,
-                //toExecute: toExecute
+                events: newHistory
             }
         }
-        // case REMIX_MARK_AS_EXECUTED: {
-        //     return {
-        //         ...state,
-        //         toExecute: state.toExecute.filter( ({transactionId}) => !action.transactionIds.includes(transactionId) )
-        //     }
-        // }
         case REMIX_EVENTS_CLEAR: {
             return {
                 ...state,
-                history: []
+                events: []
             }
         }
         case REMIX_TRIGGERS_CLEAR: {
             return {
                 ...state,
-                triggers: new HashList()
+                triggers: []
             }
         }
         default:

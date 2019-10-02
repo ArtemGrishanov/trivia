@@ -16,8 +16,8 @@ function* runTriggers(action) {
     const state = yield select();
     const eventsToProcess = [];
     // get unprocessed events from the history
-    for (let i = state.events.history.length - 1; i >= 0; i--) {
-        const evt = state.events.history[i];
+    for (let i = state.session.events.length - 1; i >= 0; i--) {
+        const evt = state.session.events[i];
         if (processedEventIds[evt.id]) {
             break;
         }
@@ -26,10 +26,9 @@ function* runTriggers(action) {
             eventsToProcess.push(evt);
         }
     }
-    const triggersArr = state.events.triggers.toArray()
     // reverse - process early events first of all
     eventsToProcess.reverse().forEach( (evt) => {
-        const texec = getTriggersToExecute(triggersArr, evt);
+        const texec = getTriggersToExecute(state.session.triggers, evt);
         if (texec.length > 0) {
             executeTriggers(texec);
         }
