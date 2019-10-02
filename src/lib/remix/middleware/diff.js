@@ -8,20 +8,21 @@ import { getPropertiesBySelector } from '../../object-path.js'
  */
 
 let lastUpdDiff = null;
+let prevState = null;
 
 const diffMiddleware = (store) => (next) => (action) => {
     //TODO с помощью этой проверки в начале старта приложения создаются свойствва и мы теряем эти события получается.. reducer создается и запускается а store еще не создан
     //...
 
     console.log('Diff middleware begin');
-    const prevState = store.getState();
+    const firstDiff = prevState === null;
+    prevState = store.getState();
     const result = next(action);
     const nextState = store.getState();
-    lastUpdDiff = diff(Remix._getSchema(), prevState, nextState);
+    lastUpdDiff = diff(Remix._getSchema(), firstDiff ? {}: prevState, nextState);
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0;
     if (changed) {
         console.log('diff', lastUpdDiff);
-        //setTimeout(() => Remix.fireEvent('property_updated', { diff: lastUpdDiff }), 0);
         Remix.fireEvent('property_updated', { diff: lastUpdDiff });
     }
     console.log('/Diff middleware end');

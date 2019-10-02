@@ -143,9 +143,8 @@ function _condition(event, triggerCondition) {
  */
 function _conditionPropertyUpdated(event, triggerCondition) {
     if (triggerCondition.clause.toLowerCase() === 'equals') {
-        //TODO diff.deleted - can not be deleted?
-        //TODO diff added ?
-        return !!event.eventData.diff.changed.find( (p) => p.path == triggerCondition.value);
+        //TODO diff.deleted - can not be deleted
+        return !!event.eventData.diff.changed.find( (p) => p.path == triggerCondition.value) || !!event.eventData.diff.added.find( (p) => p.path == triggerCondition.value);
     }
     return false;
 }

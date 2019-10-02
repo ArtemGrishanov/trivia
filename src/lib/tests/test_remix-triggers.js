@@ -224,6 +224,17 @@ describe('Remix', function() {
             chai.assert.equal(c2, 1);
         });
 
+        it('property_updated diff.add', function() {
+            Remix.clearTriggersAndEvents();
+
+            //tests with diff.add
+
+            //невозможно подписаться не создание так как оно происходит сразу же до всего??
+            //может и не надо этого
+
+            //и удаление не надо делать
+        });
+
     });
 
 });
