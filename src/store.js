@@ -3,11 +3,15 @@ import createSagaMiddleware from 'redux-saga'
 
 import reducer from './reducer'
 import eventSaga from './lib/remix/sagas/triggerExecutor'
+import diffMiddleware from './lib/remix/middleware/diff.js'
 
 const sagaMiddleware = createSagaMiddleware()
 const store = createStore(
     reducer,
-    applyMiddleware(logger, sagaMiddleware)
+    applyMiddleware(
+        sagaMiddleware,
+        diffMiddleware
+        )
 );
 
 sagaMiddleware.run(eventSaga);

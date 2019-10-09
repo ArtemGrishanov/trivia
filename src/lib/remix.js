@@ -5,6 +5,7 @@ import {
     getPropertiesBySelector
 } from './object-path.js'
 import { getUniqueId, isHashlistInstance } from './remix/util/util.js'
+import { getLastDiff } from './remix/middleware/diff.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -38,7 +39,7 @@ let extActions = null;
 let root = null;
 let initialSize = null;
 let mode = 'none'; // edit | preview | published
-let _lastUpdDiff = null;
+// let _lastUpdDiff = null;
 let _outerEvents = [];
 let _orderCounter = 0;
 let _triggerActions = {};
@@ -485,7 +486,7 @@ export function remixReducer({reducers, dataSchema}) {
         //     log('Diff', _lastUpdDiff);
         // }
         if (action.forceFeedback/* || changed*/) {
-            _putOuterEventInQueue('properties_changed', {..._lastUpdDiff, state: serialize2(nextState)});
+            _putOuterEventInQueue('properties_changed', {...getLastDiff(), state: serialize2(nextState)});
         }
         _sendOuterEvents();
         return nextState;
@@ -619,7 +620,7 @@ function _sendOuterEvents() {
 }
 
 function _getLastUpdateDiff() {
-    return _lastUpdDiff;
+    return getLastDiff();
 }
 
 function _setScreenEvents(updateData) {

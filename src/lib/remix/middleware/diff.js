@@ -14,7 +14,7 @@ const diffMiddleware = (store) => (next) => (action) => {
     //TODO с помощью этой проверки в начале старта приложения создаются свойствва и мы теряем эти события получается.. reducer создается и запускается а store еще не создан
     //...
 
-    console.log('Diff middleware begin');
+    // console.log('Diff middleware begin');
     const firstDiff = prevState === null;
     prevState = store.getState();
     const result = next(action);
@@ -25,7 +25,7 @@ const diffMiddleware = (store) => (next) => (action) => {
         console.log('diff', lastUpdDiff);
         Remix.fireEvent('property_updated', { diff: lastUpdDiff });
     }
-    console.log('/Diff middleware end');
+    // console.log('/Diff middleware end');
     return result
 }
 
@@ -84,6 +84,10 @@ function getPropAndDelete(props, propPath) {
         return false;
     });
     return (index >= 0) ? props.splice(index, 1)[0]: null;
+}
+
+export function getLastDiff() {
+    return lastUpdDiff;
 }
 
 export default diffMiddleware;

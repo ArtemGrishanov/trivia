@@ -86,11 +86,17 @@ class HashList {
     /**
      * Returns a new regular js array
      * ['value1','value2', ...]
+     * Adding new hashlistId property for each 'object' element for convenience
      *
      * @return {Array}
      */
     toArray() {
-        return this._orderedIds.map( (id) => this[id] );
+        return this._orderedIds.map( (id) => {
+            if (typeof this[id] === 'object') {
+                return {...this[id], hashlistId: id}
+            }
+            return this[id];
+        });
     }
 
     /**

@@ -50,7 +50,7 @@ initRemixRouting({
         {tag: 'question', shuffle: true}, // show all scrrens with tag and shuffle them
         {idByFunction: 'calcTriviaRes'} // show one screenId returned by function 'calcTriviaRes'
     ],
-    rebuildRouteTag: 'restart',
+    restartTag: 'restart',
     nextTag: 'option'
 });
 
@@ -59,10 +59,49 @@ initRemixRouting({
  *
  */
 Remix.addCustomFunction('calcTriviaRes', () => {
-    //TODO
-    //return 'result';
-    const state = Remix.getState();
-    return state.router.screens.getId(2)
+    const state = Remix.getState(),
+        questionsCount = state.router.screens.toArray().filter( (scr) => scr.tags.indexOf('question') >= 0).length,
+        results = state.router.screens.toArray().filter( (scr) => scr.tags.indexOf('result') >= 0);
+    let resultPointsAllocation = {},
+        q = 0,
+        points = 0,
+        maxPoints = questionsCount;
+    // посчитаем количество набранных баллов, посмотрим историю событий "клик по опциям" с конца (начиная с самых новых)
+    for (var i = state.session.events.length-1; i >= 0; i--) {
+        const evt = state.session.events[i];
+        if (evt.eventType === 'onclick' && evt.eventData.tags.indexOf('option') > 0) {
+            q++;
+            points += parseInt(evt.eventData.data.points);
+        }
+        if (q >= questionsCount) {
+            // достаточно: мы нашли количество кликов по опциям равное количеству вопросов
+            // их может быть больше - но это уже прежние прохождения с рамкам одной сессии пользователя
+            break;
+        }
+    }
+    // подсчитаем распределение ответов, то есть таблицу соотношения <количество баллов> = <ид результата>
+    // для любого возможного количества баллов
+    let resGap = Math.floor(questionsCount / results.length), // длина промежутка на шкале распределения, которая приходится на один результат
+        g = 1,
+        resIndex = results.length-1; // начинаем распределять с конца
+    if (resGap < 1) {
+        resGap = 1;
+    }
+    if (resIndex >= 0) {
+        let currentResultId = results[resIndex].hashlistId;
+        for (let i = maxPoints; i >= 0; i--) { // >= важно!
+            resultPointsAllocation[i] = currentResultId;
+            g++;
+            if (g > resGap) {
+                g = 1;
+                if (resIndex) {
+                    resIndex--;
+                    currentResultId = results[resIndex].hashlistId;
+                }
+            }
+        }
+    }
+    return resultPointsAllocation[points];
 });
 
 // TODO show start screen: true/false - component disabling
@@ -84,29 +123,30 @@ function test( ) {
     Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#292C30', tags: 'screen question question1'} });
     Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#3d6b37', tags: 'screen question question2'} });
     Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#456fab', tags: 'screen result result1'} });
+    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#450f00', tags: 'screen result result2'} });
+
     var screenId = store.getState().router.screens.getId(0);
     var screenId2 = store.getState().router.screens.getId(1);
-    var screenId3 = store.getState().router.screens.getId(2);
+
+    var result1sid = store.getState().router.screens.getId(2);
+    var result2sid = store.getState().router.screens.getId(3);
+
     Remix.setCurrentScreen(screenId);
 
     Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 18, text: '«Приятно слышать, что вы так вежливо обращаетесь с котом. Котам обычно почему-то говорят "ты", хотя ни один кот никогда ни с кем не пил брудершафта»'} });
     Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0", "screenId": screenId2}, width: 60, left: 20, top: 250, text: 'Это «Каникулы в Простоквашино» Успенского'} });
-    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": screenId3}, width: 60, left: 20, top: 330, text: 'Это Булгаков. «Мастер и Маргарита»'} });
+    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": result1sid}, width: 60, left: 20, top: 330, text: 'Это Булгаков. «Мастер и Маргарита»'} });
     //Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'ProgressiveImage', src: '', width: 50, left: 25, top: 90} });
 
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 50, text: 'Это был неверный ответ, пожалуйста попробуйте заново.'} });
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0", "screenId": screenId}, width: 60, left: 20, top: 250, text: 'Попробовать еще раз'} });
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0"}, width: 60, left: 20, top: 350, text: 'Не знаю что делать...'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 50, text: 'Придумай текст вопроса'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": screenId}, width: 60, left: 20, top: 250, text: 'Верный ответ'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0"}, width: 60, left: 20, top: 350, text: 'Неверный'} });
 
-    Remix.addHashlistElement('router.screens.'+screenId3+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Верный ответ! «Ма́стер и Маргари́та» — роман Михаила Афанасьевича Булгакова, работа над которым началась в конце 1920-х годов и продолжалась вплоть до смерти писателя'} });
+    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Неплохо, но можно и лучше'} });
+    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', text: 'Начать заново'} });
 
-    //change component text color for test
-    /*
-    var screenId = store.getState().router.screens.getId(0);
-    var componentId = store.getState().router.screens[screenId].components.getId(0);
-    Remix.setData({['router.screens.'+screenId+'.components.'+componentId+'.color']: 'yellow'});
-    */
-    // Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', color: 'red', tags: 'option'} });
+    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Отлично, вы знаток литературы'} });
+    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', text: 'Начать заново'} });
 
     Remix.addTrigger({
         when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: 'option'} },

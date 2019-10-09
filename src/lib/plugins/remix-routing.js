@@ -1,6 +1,6 @@
 /**
  * Плагин initRemixRouting строит маршрут по экранам по параметру options.screenRoute.
- * Переход на следующий экран будет осуществлен по options.nextTag, перестроение маршрута по options.rebuildRouteTag
+ * Переход на следующий экран будет осуществлен по options.nextTag, перестроение маршрута по options.restartTag
  *
  * Плагин добавляет специальные возможности в приложение:
  * - параметры в схему данных, в стейте появляется новое свойство state.router.routingMode
@@ -22,14 +22,16 @@
  * Следующий экран (id) может быть определен функцией. Такие образом для разных типов проектов можно делать вычисляемые переходы
  * (например вычислять результат теста и показывать соответствующий экран результата)
  *
- * @param {string} options.rebuildRouteTag - клик на тег, при котором будет происходить перестроение маршрута
+ * @param {string} options.restartTag - клик на тег, при котором будет происходить перестроение маршрута
  */
 export default function initRemixRouting(options = {remix: null, screenRoute: []}) {
 
     const screenRoute = options.screenRoute;
     const remix = options.remix;
-    const rebuildRouteTag = options.rebuildRouteTag;
+    const restartTag = options.restartTag;
     const nextTag = options.nextTag;
+
+    let screenIds = null;
 
     /**
      * Add new properties to app schema for additional plugin functionality
@@ -62,7 +64,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
         const state = event.remix.getState();
         const routingMode = state.router.routingMode;
         if (routingMode === 'linear' || routingMode === 'linear_random') {
-            let screenIds = [];
+            screenIds = [];
             screenRoute.forEach((range) => {
                 let localIds;
                 if (range.tag) {
@@ -133,8 +135,12 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
             event.remix.setCurrentScreen(nsId);
         }
         else {
-            console.warn('Action "go_next_screen" says: "nextScreenId" not found neither in event.eventData nor active screen. Can not go to next screen.');
+            console.warn('Action "go_next_screen" says: "nextScreenId" not found neither in event.eventData nor in active screen. Can not go to next screen.');
         }
+    });
+
+    Remix.registerTriggerAction('restart', (event) => {
+        remix.setCurrentScreen(screenIds[0]);
     });
 
     // Build a screen route when app started (including app deserialization)
@@ -144,10 +150,10 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
     //     then: { actionType: 'build_route'}
     // });
 
-    if (rebuildRouteTag) {
+    if (restartTag) {
         remix.addTrigger({
-            when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: rebuildRouteTag} },
-            then: { actionType: 'build_route'}
+            when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: restartTag} },
+            then: { actionType: ['build_route', 'restart']}
         });
     }
 

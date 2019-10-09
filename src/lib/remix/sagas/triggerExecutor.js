@@ -1,6 +1,6 @@
-//import { select, put, takeLatest } from 'redux-saga/effects'
-const { select, put, takeLatest } = ReduxSaga.effects;
-import { REMIX_EVENT_FIRED, REMIX_MARK_AS_EXECUTED } from '../../remix.js'
+import { select, put, takeLatest } from 'redux-saga/effects'
+//const { select, put, takeLatest } = ReduxSaga.effects; //dont delete, for tests
+import { REMIX_EVENT_FIRED } from '../../remix.js'
 import { getUniqueId } from '../util/util.js'
 
 const executedTransactionIds = [];
@@ -12,7 +12,7 @@ const processedEventIds = {};
  * @param {Object} action
  */
 function* runTriggers(action) {
-    console.log('Saga triggers. start');
+    // console.log('Saga triggers. start');
     const state = yield select();
     const eventsToProcess = [];
     // get unprocessed events from the history
@@ -33,7 +33,7 @@ function* runTriggers(action) {
             executeTriggers(texec);
         }
     })
-    console.log('/Saga triggers. end');
+    // console.log('/Saga triggers. end');
 }
 
 function executeTriggers(toExecute) {
@@ -51,14 +51,19 @@ function executeTriggers(toExecute) {
                         trigger: ex.t,
                         eventData: ex.e.eventData
                     });
-                    // put({
-                    //     type: REMIX_MARK_AS_EXECUTED,
-                    //     transactionIds: [ex.transactionId]
-                    // });
                 }
                 else {
                     throw new Error(`Unregistered action type ${ex.t.then}. Use registerTriggerAction() to register it`);
                 }
+            }
+            else if (Array.isArray(ex.t.then.actionType)) {
+                ex.t.then.actionType.forEach( (at) => {
+                    Remix._triggerActions[at]({
+                        remix: Remix,
+                        trigger: ex.t,
+                        eventData: ex.e.eventData
+                    });
+                });
             }
             else {
                 throw new Error('\'then.actionType\' must be a string');
