@@ -12,27 +12,56 @@ import Screen from './Screen'
     constructor(props) {
         super(props);
         this.state = {
-            screens: {}
+            prevScreenId: null,
+            showPrevScreen: false,
+            transition: false,
+            scrLeft: 0
         };
+    }
+
+    componentDidUpdate(prevProps, prevState) {
+        if (prevProps.currentScreenId && this.props.currentScreenId !== prevProps.currentScreenId) {
+            this.setState({
+                prevScreenId: prevProps.currentScreenId,
+                scrLeft: 999,
+                transition: false,
+                showPrevScreen: true
+            });
+            setTimeout(() => {
+                this.setState({
+                    scrLeft: 0,
+                    transition: true
+                })
+            }, 0);
+            setTimeout(() => {
+                this.setState({
+                    showPrevScreen: false
+                })
+            }, 501); // .rmx-scr_container_item.__transition delay
+        }
     }
 
     render() {
         const st = {
             backgroundColor: this.props.backgroundColor
         };
-        //TODO set prev screenId in local component state
-        const scr = this.props.currentScreenId ? this.props.screens[this.props.currentScreenId]: null;
+        const scr = this.props.currentScreenId ? this.props.screens[this.props.currentScreenId]: null,
+              prevScr = this.state.prevScreenId ? this.props.screens[this.state.prevScreenId]: null;
         return (
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 &&
                     <p>no screens</p>
                 }
-                {scr && <Screen {...scr} id={this.props.currentScreenId}></Screen>}
-                {/* {this.props.screens.length > 0 &&
-                    this.props.screens.toArray().map( (scr, i) => {
-                        return <Screen {...scr} id={this.props.screens.getId(i)} key={this.props.screens.getId(i)}></Screen>
-                    })
-                } */}
+                {this.state.showPrevScreen && prevScr &&
+                    <div className="rmx-scr_container_item">
+                        <Screen {...prevScr} id={this.state.prevScreenId}></Screen>
+                    </div>
+                }
+                {scr &&
+                    <div className={"rmx-scr_container_item " + (this.state.transition ? '__transition': '')} style={{transform: 'translateX('+this.state.scrLeft+'px)'}}>
+                        <Screen {...scr} id={this.props.currentScreenId}></Screen>
+                    </div>
+                }
             </div>
         )
     }
