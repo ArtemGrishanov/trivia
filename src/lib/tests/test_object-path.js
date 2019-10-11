@@ -201,6 +201,61 @@ describe('Selector', function() {
             chai.assert.equal(s1.fetch(obj)[0].value, 'A');
             chai.assert.equal(s1.fetch(obj)[1].value, 'B');
         });
+
+        it('fetch with attribute filter', function() {
+            const s1 = new Selector("app.[component displayName=Text].tags");
+            const s2 = new Selector("app.[component displayName=Image].tags");
+
+            const obj = {
+                app: {
+                    component: {
+                        displayName: 'Text',
+                        tags: 'text component remix',
+                        data: 'some data'
+                    }
+                }
+            };
+            chai.assert.equal(s1.fetch(obj).length, 1);
+            chai.assert.equal(s1.fetch(obj)[0].value, 'text component remix');
+
+            chai.assert.equal(s2.fetch(obj).length, 0);
+        });
+
+        it('fetch with attribute filter and regexp', function() {
+            const s1 = new Selector("app./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Text].tags");
+            const s2 = new Selector("app./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Image].tags");
+
+            const obj = {
+                app: {
+                    wf127j: {
+                        components: {
+                            gf644a: {
+                                displayName: 'Text',
+                                tags: 'ttt',
+                                data: 'some data'
+                            },
+                            cca321: {
+                                displayName: 'Image',
+                                tags: 'iii',
+                                data: 'some data'
+                            },
+                            gth8877: {
+                                displayName: 'Text',
+                                tags: 'ttt',
+                                data: 'some data'
+                            }
+                        }
+                    }
+                }
+            };
+
+            chai.assert.equal(s1.fetch(obj).length, 2);
+            chai.assert.equal(s1.fetch(obj)[0].value, 'ttt');
+            chai.assert.equal(s1.fetch(obj)[1].value, 'ttt');
+
+            chai.assert.equal(s2.fetch(obj).length, 1);
+            chai.assert.equal(s2.fetch(obj)[0].value, 'iii');
+        });
     });
 
 

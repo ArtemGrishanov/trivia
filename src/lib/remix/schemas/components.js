@@ -23,10 +23,8 @@ const schema = new DataSchema({
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.displayName": TextSchema.getDescription('displayName'),
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.width": TextSchema.getDescription('width'),
 
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.max": ProgressSchema.getDescription('max'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.step": ProgressSchema.getDescription('step')
-    //todo добавить описание только для компонента определенного типа, max только для Progress ?
-    // "router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Progress].max"
+    "router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Progress].max": ProgressSchema.getDescription('max'),
+    "router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Progress].step": ProgressSchema.getDescription('step')
 });
 
 export default schema;

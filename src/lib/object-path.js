@@ -215,7 +215,7 @@ export class Selector {
                 // there is custom type checker for this type, ducktyping maybe etc...
                 const tch = this._options.typeCheckers[ti.type];
                 if (tch && tch(obj[cname])) {
-                    // type matches!
+                    // type matches! Go next
                 }
                 else {
                     if (throwErrorOnTypeMismatch)
@@ -226,12 +226,18 @@ export class Selector {
                         continue;
                 }
             }
-            //if (isAssignment) {
-                //TODO ?? to callback
-                // if (typeof obj[tokenInfo.name] !== "object" && typeof obj[tokenInfo.name] !== "undefined") {
-                //     throw new Error(`Normalizer: ${tokenInfo.name} has illegal type to assign`);
-                // }
-            //}
+            if (ti.filter && ti.filter.key) {
+                // key=value filter checking
+                let match = false;
+                if (obj[cname].hasOwnProperty(ti.filter.key) && obj[cname][ti.filter.key] == ti.filter.value) {
+                    // OK, it matches
+                    match = true;
+                }
+                if (!match) {
+                    // no property - no match
+                    continue;
+                }
+            }
             const candidatePath = actualPath + ((actualPath.length > 0) ? ".": "") + cname;
             func({
                 propName: cname,
@@ -257,16 +263,26 @@ export class Selector {
      * @return {object} {name, type} token information
      */
     _getSelectorTokenInfo(token) {
+        let name = token, filter = null, type = null;
         if (token.length > 2 && token[0] === '[' && token[token.length-1] === ']') {
             const pair = token.substring(1,token.length-1).split(' ');
-            return {
-                name: pair[0],
-                type: pair[1]
+            if (typeof pair[1] === 'string' && pair[1].indexOf('=') >= 0) {
+                // key=value filter
+                filter = {};
+                const f = pair[1].split('=');
+                filter.key = f[0];
+                filter.value = f[1];
             }
+            else {
+                // type filter
+                type = pair[1];
+            }
+            name = pair[0];
         }
         return {
-            name: token,
-            type: undefined
+            name: name,
+            type: type,
+            filter: filter
         }
     }
 }
