@@ -53,7 +53,7 @@ function executeTriggers(toExecute) {
                     });
                 }
                 else {
-                    throw new Error(`Unregistered action type ${ex.t.then}. Use registerTriggerAction() to register it`);
+                    throw new Error(`Unregistered action type ${ex.t.then.actionType}. Use registerTriggerAction() to register it`);
                 }
             }
             else if (Array.isArray(ex.t.then.actionType)) {

@@ -8,39 +8,12 @@ import App from './App';
 import store from './store'
 import Remix from './lib/remix'
 import initRemixRouting from './lib/plugins/remix-routing'
+import initScreenProgress from './lib/plugins/screen-progress'
 
 Remix.init({
     appStore: store,
     container: document.getElementById('root')
 });
-
-//TODO move to standart remix trigger actions
-Remix.registerTriggerAction('console_log', (event) => {
-    console.log(event.eventData[event.trigger.then.data]);
-});
-
-// Remix.registerTriggerAction('set_active_screen', (event) => {
-//     let screenId = null;
-//     if (event.eventData.data) {
-//         if (event.eventData.data.screenId) {
-//             screenId = event.eventData.data.screenId;
-//         }
-//         else if (typeof event.eventData.data === 'string') {
-//             try {
-//                 screenId = JSON.parse(event.eventData.data).screenId
-//             }
-//             catch(err) {}
-//         }
-//     }
-//     if (screenId) {
-//         Remix.setCurrentScreen(screenId);
-//     }
-//     else {
-//         console.warn('Action "set_active_screen" says:"data.screenId" must be set in component');
-//     }
-// });
-
-
 
 initRemixRouting({
     remix: Remix,
@@ -52,6 +25,11 @@ initRemixRouting({
     ],
     restartTag: 'restart',
     nextTag: 'option'
+});
+
+initScreenProgress({
+    remix: Remix,
+    screenTag: 'question'
 });
 
 /**
@@ -148,11 +126,6 @@ function test( ) {
     Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Отлично, вы знаток литературы'} });
     Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', text: 'Начать заново'} });
 
-    Remix.addTrigger({
-        when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: 'option'} },
-        then: { actionType: 'console_log', data: 'tags'}
-    });
-
     // Plan ******* */
     // 1. Доделать триггеры до подсчета результата и показа экрана результата
     // - автотесты вернуть
@@ -199,12 +172,6 @@ function test( ) {
     //Modal
     // - feedback modal
     // - router can show some screens in modal mode on the top of other screens
-
-    //Macros
-    // goToNextScreenOfTag('option_screen')
-    // setForAllComponentsWithTagInAllScreens(prop: value)
-    //
-    //Remix.fireEvent('app_start');
 }
 
 setTimeout(test, 100);

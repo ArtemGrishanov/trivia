@@ -4,7 +4,11 @@ import {
     assignByPropertyString,
     getPropertiesBySelector
 } from './object-path.js'
-import { getUniqueId, isHashlistInstance } from './remix/util/util.js'
+import {
+    getUniqueId,
+    isHashlistInstance,
+    combineReducers
+} from './remix/util/util.js'
 import { getLastDiff } from './remix/middleware/diff.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
@@ -835,47 +839,58 @@ remix.callCustomFunction = (fnName) => {
     }
     throw new Error(`custom function not found ${fnName}`);
 }
+/**
+ * Helper method.
+ * Add component from the screen
+ *
+ * @param {string} screenId
+ * @param {object} props, example
+ *                  {
+ *                      displayName: 'Progress',
+                        id: COMPONENT_ID,
+                        left: 20,
+                        top: 20,
+                        step: i + 1,
+                        max: scrs.length,
+                        color: '#fff'
+                    }
+ *
+ */
+remix.addScreenComponent = function(screenId, componentProps) {
+    let path = `router.screens.${screenId}.components`;
+    this.addHashlistElement(path, undefined, {newElement: componentProps});
+}
+/**
+ * Helper method.
+ * Delete component from the screen
+ */
+remix.deleteScreenComponent = function(screenId, componentId) {
+    let path = `router.screens.${screenId}.components`;
+    this.deleteHashlistElement(path, {elementId: componentId});
+}
+/**
+ * Helper props
+ * Set existing component props
+ */
+remix.setComponentProps = function(screenId, componentId, props) {
+    let path = `router.screens.${screenId}.components.${componentId}.`;
+    const data = {};
+    Object.keys(props).forEach( (prop) => {
+        data[path+prop] = props[prop];
+    })
+    this.setData(data);
+}
+/**
+ * Helper method
+ * Get some screens by criteria
+ *
+ * @param {string} filter.tag
+ */
+remix.getScreens = function(filter = {}) {
+    return this.getState().router.screens
+        .toArray()
+        .filter( (s) => filter.tag ? s.tags.indexOf(filter.tag) >= 0: true );
+}
 
 export default remix
 window.Remix = remix; // for debug
-
-
-/**
- * From https://github.com/reduxjs/redux/blob/master/src/combineReducers.js
- * TODO import normally
- * This function for automated tests
- *
- * @param {*} reducers
- */
-function combineReducers(reducers) {
-    const reducerKeys = Object.keys(reducers)
-    const finalReducers = {}
-    for (let i = 0; i < reducerKeys.length; i++) {
-      const key = reducerKeys[i]
-
-      if (typeof reducers[key] === 'function') {
-        finalReducers[key] = reducers[key]
-      }
-    }
-    const finalReducerKeys = Object.keys(finalReducers)
-
-    return function combination(state = {}, action) {
-      let hasChanged = false
-      const nextState = {}
-      for (let i = 0; i < finalReducerKeys.length; i++) {
-        const key = finalReducerKeys[i]
-        const reducer = finalReducers[key]
-        const previousStateForKey = state[key]
-        const nextStateForKey = reducer(previousStateForKey, action)
-        if (typeof nextStateForKey === 'undefined') {
-          const errorMessage = getUndefinedStateErrorMessage(key, action)
-          throw new Error(errorMessage)
-        }
-        nextState[key] = nextStateForKey
-        hasChanged = hasChanged || nextStateForKey !== previousStateForKey
-      }
-      hasChanged =
-        hasChanged || finalReducerKeys.length !== Object.keys(state).length
-      return hasChanged ? nextState : state
-    }
-}

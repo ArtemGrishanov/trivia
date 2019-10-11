@@ -3,6 +3,7 @@ import DataSchema from '../../schema.js';
 import { Schema as ScreenComponentsSchema} from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema} from '../../engage-ui/router.js'
 import { Schema as TextSchema} from '../../engage-ui/primitives/Text.js'
+import { Schema as ProgressSchema} from '../../engage-ui/primitives/Progress.js'
 
 
 /**
@@ -20,7 +21,12 @@ const schema = new DataSchema({
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.color": TextSchema.getDescription('color'),
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.tags": TextSchema.getDescription('tags'),
     "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.displayName": TextSchema.getDescription('displayName'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.width": TextSchema.getDescription('width')
+    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.width": TextSchema.getDescription('width'),
+
+    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.max": ProgressSchema.getDescription('max'),
+    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.step": ProgressSchema.getDescription('step')
+    //todo добавить описание только для компонента определенного типа, max только для Progress ?
+    // "router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Progress].max"
 });
 
 export default schema;
