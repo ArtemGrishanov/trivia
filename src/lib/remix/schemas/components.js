@@ -4,27 +4,52 @@ import { Schema as ScreenComponentsSchema} from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema} from '../../engage-ui/router.js'
 import { Schema as TextSchema} from '../../engage-ui/primitives/Text.js'
 import { Schema as ProgressSchema} from '../../engage-ui/primitives/Progress.js'
+import { Schema as TextOptionSchema} from '../../engage-ui/primitives/TextOption.js'
+import { Schema as ButtonSchema} from '../../engage-ui/primitives/Button.js'
+//INSTRUCTION 1: add your new component schema before this line with name ComponentName+'Schema'
 
+//INSTRUCTION 2: add your new component schema to this object:
+const componentSchemas = {
+    TextSchema,
+    ProgressSchema,
+    TextOptionSchema,
+    ButtonSchema
+    // put new schema here befor just this line
+}
+
+const schemaData = {
+    "app.size.width": EngageAppSchema.getDescription("width"),
+    "app.size.height": EngageAppSchema.getDescription("height"),
+
+    "router.[screens HashList]": RouterScreensSchema.getDescription('screens'),
+    "router.currentScreenId": RouterScreensSchema.getDescription('currentScreenId'),
+    "router.displayMode": RouterScreensSchema.getDescription('displayMode'),
+    "router.backgroundColor": RouterScreensSchema.getDescription('backgroundColor'),
+    "router.switchEffect": RouterScreensSchema.getDescription('switchEffect'),
+
+    "router.[screens HashList]./^[0-9a-z]+$/.backgroundColor": ScreenComponentsSchema.getDescription('backgroundColor'),
+    "router.[screens HashList]./^[0-9a-z]+$/.components": ScreenComponentsSchema.getDescription('components'),
+    "router.[screens HashList]./^[0-9a-z]+$/.tags": ScreenComponentsSchema.getDescription('tags')
+};
+
+// add common component properties from RemixWrapper
+//REMIX_COMPONENTS_COMMON_PROPS_SCHEMA
+
+// grab component schemas in one application schema
+// Note: inside RemiwWrapper component schemas were extended with common properties: id, left, top etc..
+const componentRootPath = `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/`;
+Object.keys(componentSchemas).forEach( (s) => {
+    const componentName = s.replace(/Schema/,'');
+    Object.keys(componentSchemas[s]._schm).forEach( (prop) => {
+        const path = `${componentRootPath} displayName=${componentName}].${prop}`;
+        schemaData[path] = componentSchemas[s]._schm[prop];
+    });
+});
 
 /**
  * Describes all main remix properties:
  *  router, screens, events etc...
  *
  */
-const schema = new DataSchema({
-    "app.size.width": EngageAppSchema.getDescription("width"),
-    "app.size.height": EngageAppSchema.getDescription("height"),
-    "router.[screens HashList]": RouterScreensSchema.getDescription('screens'),
-    "router.currentScreenId": RouterScreensSchema.getDescription('currentScreenId'),
-    "router.[screens HashList]./^[0-9a-z]+$/.backgroundColor": ScreenComponentsSchema.getDescription('backgroundColor'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components": ScreenComponentsSchema.getDescription('components'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.color": TextSchema.getDescription('color'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.tags": TextSchema.getDescription('tags'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.displayName": TextSchema.getDescription('displayName'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components./^[0-9a-z]+$/.width": TextSchema.getDescription('width'),
-
-    "router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Progress].max": ProgressSchema.getDescription('max'),
-    "router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Progress].step": ProgressSchema.getDescription('step')
-});
-
+const schema = new DataSchema(schemaData);
 export default schema;

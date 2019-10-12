@@ -534,7 +534,7 @@ function session(state = { triggers: [], events: [] }, action) {
             }
         }
         case REMIX_EVENT_FIRED: {
-            console.log('Remix.REMIX_EVENT_FIRED. +1 event', action.eventType);
+            console.log('Remix.REMIX_EVENT_FIRED', action.eventType);
             // create events only in this place
             const event = {
                 eventType: action.eventType,
@@ -779,8 +779,7 @@ export function deserialize2(json) {
                 data[p.path] = p.value;
             });
         });
-        console.log('deserialize2');
-        console.dir(data);
+        console.log('deserialize2:', data);
         remix.setData(data);
     }
     else {
@@ -889,7 +888,7 @@ remix.setComponentProps = function(screenId, componentId, props) {
 remix.getScreens = function(filter = {}) {
     return this.getState().router.screens
         .toArray()
-        .filter( (s) => filter.tag ? s.tags.indexOf(filter.tag) >= 0: true );
+        .filter( (s) => filter.tag ? (s.tags && s.tags.indexOf(filter.tag) >= 0): true );
 }
 
 export default remix

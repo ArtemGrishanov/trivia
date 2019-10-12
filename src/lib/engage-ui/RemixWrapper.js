@@ -6,16 +6,17 @@ import LayoutItem from './layout/LayoutItem';
 
 const componentClassMap = {};
 
-const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
+export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     'id': {
         type: 'string',
         minLength: 4,
-        maxLength: 32,
+        maxLength: 1024,
         default: 'none'
     },
     'tags': {
         type: 'string',
         minLength: 0,
+        maxLength: 1024,
         default: 'remixcomponent'
     },
     'displayName': {
@@ -23,12 +24,13 @@ const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         minLength: 1,
         default: 'RemixComponent'
     },
-    'data': {
-        type: 'string',
-        minLength: 0,
-        maxLength: 4096,
-        default: ''
-    },
+    // это не строка это объект в котором плагины размещают различные данные для своих нужд
+    // 'data': {
+    //     type: 'string',
+    //     minLength: 0,
+    //     maxLength: 4096,
+    //     default: ''
+    // },
     'width': {
         type: 'number',
         min: 1,
@@ -49,8 +51,8 @@ const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     },
     'top': {
         type: 'number',
-        min: -50,
-        max: 150,
+        min: -100,
+        max: 3000,
         default: 11
     }
 };

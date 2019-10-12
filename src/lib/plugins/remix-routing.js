@@ -112,6 +112,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
      * 3. Если id найден, то выполняется показ нового экрана
      */
     Remix.registerTriggerAction('go_next_screen', (event) => {
+        let isCustomFunc = false;
         const paramName = 'nextScreenId';
         let nsId = event.eventData ? event.eventData[paramName]: null;
         if (!nsId) {
@@ -122,6 +123,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
                 if (scr) {
                     nsId = scr.data ? scr.data.nextScreenId: null;
                     if (nsId.indexOf('idByFunction') === 0) {
+                        isCustomFunc = true;
                         const fnName = nsId.replace(/idByFunction:/,'');
                         nsId = event.remix.callCustomFunction(fnName);
                     }
@@ -135,7 +137,12 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
             event.remix.setCurrentScreen(nsId);
         }
         else {
-            console.warn('Action "go_next_screen" says: "nextScreenId" not found neither in event.eventData nor in active screen. Can not go to next screen.');
+            if (isCustomFunc) {
+                console.warn('Action "go_next_screen" says: function didn\'t return next screen id. Can not go to next screen.');
+            }
+            else {
+                console.warn('Action "go_next_screen" says: "nextScreenId" not found neither in event.eventData nor in active screen. Can not go to next screen.');
+            }
         }
     });
 
@@ -177,7 +184,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
     function getScreensIdsByTag(state, tag) {
         return state.router.screens
             .toArray()
-            .filter( (s) => s.tags.indexOf(tag) >= 0 )
+            .filter( (s) => s.tags && s.tags.indexOf(tag) >= 0 )
             .map( (s, i) => state.router.screens.getId(i) );
     }
 

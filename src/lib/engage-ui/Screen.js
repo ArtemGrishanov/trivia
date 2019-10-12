@@ -31,7 +31,7 @@ class Screen extends React.Component {
             return ( <RemixComponent {...cmpn} id={cmpnId} key={cmpnId}/> )
         });
         return (
-            <div style={s} className="rmx-screen">
+            <div style={s} className="rmx-screen" data-id={this.props.id}>
                 {/* <p>{this.props.id}</p> */}
                 <LayoutContainer>
                     {/* TODO how about children? */}
@@ -62,7 +62,13 @@ export const Schema = new DataSchema({
         prototypes: [
             { id: 'dumb_component', data: { displayName: 'Element', backgroundColor: '#fff' }}
         ]
-    }
+    },
+    'tags': {
+        type: 'string',
+        minLength: 0,
+        maxLength: 1024,
+        default: ''
+    },
 });
 
 export default RemixWrapper(Screen, Schema, 'Screen');
