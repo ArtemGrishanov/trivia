@@ -240,25 +240,27 @@ export default function LayoutItem() {
             }
 
             onMouseDown(e) {
-                this.itemNode = this.thisRef.current;
-                if (this.itemNode) {
-                    this.markerId = e.currentTarget.getAttribute('datamarker');
-                    e.stopPropagation();
-                    this.isItemMouseDown = true;
-                    // TODO force select (hover) while dragging or resizing
-                    if (this.itemNode.style.left.indexOf('px') > 0) {
-                        // if 'px' transform to '%'
-                        this.itemNode.style.left = this.leftPxToPercent(this.itemNode.style.left) + '%';
-                    }
-                    this.startAttr = {
-                        left: parseFloat(this.state.left),
-                        top: parseFloat(this.state.top),
-                        width: parseFloat(this.state.width),
-                        height: parseFloat(this.state.height)
-                    }
-                    this.mouseStartPosition = {
-                        left: toPercent(e.clientX, this.props.containerWidth),
-                        top: e.clientY
+                if (Remix.getMode() === 'edit') {
+                    this.itemNode = this.thisRef.current;
+                    if (this.itemNode) {
+                        this.markerId = e.currentTarget.getAttribute('datamarker');
+                        e.stopPropagation();
+                        this.isItemMouseDown = true;
+                        // TODO force select (hover) while dragging or resizing
+                        if (this.itemNode.style.left.indexOf('px') > 0) {
+                            // if 'px' transform to '%'
+                            this.itemNode.style.left = this.leftPxToPercent(this.itemNode.style.left) + '%';
+                        }
+                        this.startAttr = {
+                            left: parseFloat(this.state.left),
+                            top: parseFloat(this.state.top),
+                            width: parseFloat(this.state.width),
+                            height: parseFloat(this.state.height)
+                        }
+                        this.mouseStartPosition = {
+                            left: toPercent(e.clientX, this.props.containerWidth),
+                            top: e.clientY
+                        }
                     }
                 }
             }
@@ -373,7 +375,9 @@ export default function LayoutItem() {
             }
 
             onClick() {
-                Remix.fireEvent('onclick', {...this.props});
+                if (Remix.getMode() !== 'edit') {
+                    Remix.fireEvent('onclick', {...this.props});
+                }
             }
 
             render() {
@@ -395,24 +399,27 @@ export default function LayoutItem() {
                     cst.width = '1px';
                     cst.height = '1px';
                 }
+                const editing = Remix.getMode() === 'edit';
                 const sizemsg = Math.round(toPx(this.state.width, this.props.containerWidth)) + 'x' + Math.round(this.state.height);
                 return (
                     <div ref={this.thisRef} className={"rmx-layout_item __"+this.props.mod} style={st} datamarker="9" onMouseDown={this.onMouseDown} onClick={this.onClick}>
                         <div className="rmx-l_child_cnt" style={cst}>
                             <Component {...this.props} onSize={this.onContentSize.bind(this)}></Component>
                         </div>
-                        <div className={"rmx-layout_item_selection_cnt " + ((this.state.selected) ? '__selected': '')}>
-                            {/* TODO uncomment */}
-                            {/* <p className="rmx-l-info">{sizemsg}</p> */}
-                            <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __2" datamarker="2" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __3" datamarker="3" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __4" datamarker="4" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __5" datamarker="5" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __6" datamarker="6" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __7" datamarker="7" onMouseDown={this.onMouseDown}></div>
-                            <div className="rmx-l-sel-m __8" datamarker="8" onMouseDown={this.onMouseDown}></div>
-                        </div>
+                        {editing &&
+                            <div className={"rmx-layout_item_selection_cnt " + (this.state.selected ? '__selected': '')}>
+                                {/* TODO uncomment */}
+                                {/* <p className="rmx-l-info">{sizemsg}</p> */}
+                                <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __2" datamarker="2" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __3" datamarker="3" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __4" datamarker="4" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __5" datamarker="5" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __6" datamarker="6" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __7" datamarker="7" onMouseDown={this.onMouseDown}></div>
+                                <div className="rmx-l-sel-m __8" datamarker="8" onMouseDown={this.onMouseDown}></div>
+                            </div>
+                        }
                     </div>
                 )
             }

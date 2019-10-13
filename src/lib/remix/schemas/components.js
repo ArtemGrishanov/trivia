@@ -20,7 +20,6 @@ const componentSchemas = {
 const schemaData = {
     "app.size.width": EngageAppSchema.getDescription("width"),
     "app.size.height": EngageAppSchema.getDescription("height"),
-
     "router.[screens HashList]": RouterScreensSchema.getDescription('screens'),
     "router.currentScreenId": RouterScreensSchema.getDescription('currentScreenId'),
     "router.displayMode": RouterScreensSchema.getDescription('displayMode'),

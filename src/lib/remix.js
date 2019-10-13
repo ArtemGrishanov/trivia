@@ -29,7 +29,7 @@ const remix = {};
 //TODO specify origin during publishing?
 //const containerOrigin = "http://localhost:8080";
 const EXPECTED_CONTAINER_ORIGIN = null;
-const MODE_SET = new Set(['edit', 'preview', 'published']);
+const MODE_SET = new Set(['none', 'edit', 'preview', 'published']);
 const LOG_BY_DEFAULT = false;
 
 let logging = LOG_BY_DEFAULT;
@@ -42,7 +42,7 @@ let normalizer = null;
 let extActions = null;
 let root = null;
 let initialSize = null;
-let mode = 'none'; // edit | preview | published
+let mode = 'none';
 // let _lastUpdDiff = null;
 let _outerEvents = [];
 let _orderCounter = 0;
@@ -65,9 +65,7 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     if (data.method === 'init') {
         containerOrigin = origin;
         containerWindow = source;
-        if (MODE_SET.has(data.mode)) {
-            mode = data.mode;
-        }
+        setMode(data.mode);
         logging = typeof data.log === "boolean" ? data.log: LOG_BY_DEFAULT;
         initialSize = data.initialSize;
         if (root) {
@@ -184,6 +182,17 @@ function setSize(width, height) {
     }
     if (Object.keys(data).length > 0) {
         setData(data);
+    }
+}
+
+/**
+ * Установить режим редактирования приложения
+ *
+ * @param {string} newmode
+ */
+function setMode(newmode) {
+    if (MODE_SET.has(newmode)) {
+        mode = newmode;
     }
 }
 
@@ -343,10 +352,11 @@ function deleteHashlistElement(hashlistPropPath, targetElement) {
 /**
 * @param {Object} schema
 */
-function init({appStore = null, externalActions = [], container = null}) {
+function init({appStore = null, externalActions = [], container = null, mode = 'none'}) {
     store = appStore;
     root = container;
     extActions = externalActions || [];
+    setMode(mode);
     // store.dispatch({
     //     type: REMIX_INIT_ACTION
     // });
@@ -800,7 +810,8 @@ remix.deserialize = deserialize;
 remix.deserialize2 = deserialize2;
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
-// remix.markAsExecuted = markAsExecuted;
+remix.setMode = setMode;
+remix.getMode = () => mode;
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
 remix.clearTriggersAndEvents = clearTriggersAndEvents;
