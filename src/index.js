@@ -14,7 +14,7 @@ import initQuizPoints from './lib/plugins/quiz-points'
 Remix.init({
     appStore: store,
     container: document.getElementById('root'),
-    mode: 'none' // edit | none
+    mode: 'edit' // edit | none
 });
 
 initRemixRouting({

@@ -94,12 +94,16 @@ function calcState({
 
         // set min width first time
         if (contentMinWidth === undefined && contentWidth >= 0) {
-            contentMinWidth = contentWidth;
+            //TODO
+            // минимальный размер контента пока определяется не всегда корректно
+            //contentMinWidth = contentWidth;
         }
 
         // set min width first time
         if (contentMinHeight === undefined && contentHeight >= 0) {
-            contentMinHeight = contentHeight;
+            //TODO
+            // минимальный размер контента пока определяется не всегда корректно
+            //contentMinHeight = contentHeight;
         }
 
         // width cannot be less then min content
@@ -353,7 +357,8 @@ export default function LayoutItem() {
             }
 
             onContentSize(size) {
-                // console.log('onContentSize', size);
+
+                //console.log('onContentSize', size);
                 this.setState({
                     ...calcState({
                         state: this.state,
@@ -395,10 +400,16 @@ export default function LayoutItem() {
                     // left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
                     // top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
                 }
-                if (this.state.contentMinWidth === undefined) {
-                    cst.width = '1px';
-                    cst.height = '1px';
-                }
+
+                //TODO
+                // была попытка определить минимальный размер контента при установке размера блока 1х1 пиксель
+                // но далеко не всегда это работает например текст вытягивается по вертикали сильно, картинки надо проверить и тп
+                // if (this.state.contentMinWidth === undefined) {
+                //     cst.width = '1px';
+                //     cst.height = '1px';
+                // }
+                //TODO
+
                 const editing = Remix.getMode() === 'edit';
                 const sizemsg = Math.round(toPx(this.state.width, this.props.containerWidth)) + 'x' + Math.round(this.state.height);
                 return (
