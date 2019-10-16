@@ -79,10 +79,11 @@ class LayoutContainer extends React.Component {
                 })
             );
         }
+        const editing = Remix.getMode() === 'edit';
         return (
             <div style={st} className="rmx-layout_container">
                 {childrenWithProps}
-                {this.state.magnetsVertical && this.state.magnetsVertical.map( (mv) => {
+                {editing && this.state.magnetsVertical && this.state.magnetsVertical.map( (mv) => {
                     if (mv.hide !== true)
                         return <div key={'mv_'+mv.left} className="rmx-l_mgn" style={{left:mv.left+'%'}}></div>
                 })}

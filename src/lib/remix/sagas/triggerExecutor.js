@@ -43,7 +43,7 @@ function executeTriggers(toExecute) {
         }
         else {
             executedTransactionIds[ex.transactionId] = ex;
-            console.log('Execute', ex.t.then.actionType);
+            // console.log('Execute', ex.t.then.actionType);
             if (typeof ex.t.then.actionType === 'string') {
                 if (typeof Remix._triggerActions[ex.t.then.actionType] === 'function') {
                     Remix._triggerActions[ex.t.then.actionType]({

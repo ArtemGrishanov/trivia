@@ -22,7 +22,7 @@ const diffMiddleware = (store) => (next) => (action) => {
     lastUpdDiff = diff(Remix._getSchema(), firstDiff ? {}: prevState, nextState);
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0;
     if (changed) {
-        console.log('diff', lastUpdDiff);
+        // console.log('diff', lastUpdDiff);
         Remix.fireEvent('property_updated', { diff: lastUpdDiff });
     }
     // console.log('/Diff middleware end');

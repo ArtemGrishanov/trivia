@@ -101,10 +101,10 @@ function test( ) {
         'app.size.height': 600
     });
 
-    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#292C30', tags: 'screen question question1'} });
-    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#3d6b37', tags: 'screen question question2'} });
-    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#456fab', tags: 'screen result result1'} });
-    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#450f00', tags: 'screen result result2'} });
+    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#000', tags: 'screen question question1'} });
+    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#000', tags: 'screen question question2'} });
+    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#6e1717', tags: 'screen result result1'} });
+    Remix.addHashlistElement('router.screens', undefined, {newElement: {backgroundColor: '#1f5418', tags: 'screen result result2'} });
 
     var screenId = store.getState().router.screens.getId(0);
     var screenId2 = store.getState().router.screens.getId(1);
@@ -114,22 +114,22 @@ function test( ) {
 
     Remix.setCurrentScreen(screenId);
 
-    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 18, text: '«Приятно слышать, что вы так вежливо обращаетесь с котом. Котам обычно почему-то говорят "ты", хотя ни один кот никогда ни с кем не пил брудершафта»'} });
-    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0", "screenId": screenId2}, width: 60, left: 20, top: 250, text: 'Это «Каникулы в Простоквашино» Успенского'} });
-    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": result1sid}, width: 60, left: 20, top: 330, text: 'Это Булгаков. «Мастер и Маргарита»'} });
+    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 70, left: 15, top: 120, text: 'Айтишники просят использовать пароли типа gH74eW11!m, а сотрудники постоянно их забывают. Все друг на друга злятся, работа стоит. Как быть?'} });
+    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0", "screenId": screenId2}, width: 70, left: 15, top: 250, text: 'Я использую пароль qwerty123 для всех сервисов. Он достаточно сложен'} });
+    Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": result1sid}, width: 70, left: 15, top: 350, text: 'Есть же менеджеры паролей. Эти программы автоматически создают и хранят сложные для взлома ключи'} });
     //Remix.addHashlistElement('router.screens.'+screenId+'.components', undefined, { newElement: {displayName: 'ProgressiveImage', src: '', width: 50, left: 25, top: 90} });
 
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 50, text: 'Придумай текст вопроса'} });
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": screenId}, width: 60, left: 20, top: 250, text: 'Верный ответ'} });
-    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0"}, width: 60, left: 20, top: 350, text: 'Неверный'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 50, left: 27, top: 120, text: 'Пароль пользователя должен:'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"1", "screenId": screenId}, width: 70, left: 15, top: 250, text: 'Содержать цифры и буквы, знаки препинания и быть сложным для угадывания'} });
+    Remix.addHashlistElement('router.screens.'+screenId2+'.components', undefined, { newElement: {displayName: 'TextOption', fontSize: 18, color: '#fff', tags: 'question option', data: {"points":"0"}, width: 70, left: 15, top: 350, text: 'Быть простым и легко запоминаться, например «123», «111», «qwerty» и т.д.'} });
 
-    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Неплохо, но можно и лучше'} });
-    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', text: 'Начать заново'} });
-    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'FbButton', left: 20, top: 18} });
+    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 100, text: 'Ваши данные под угрозой. Вам срочно следует улучшить ваши знания в области ИТ-безопасности'} });
+    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', left: 40, top: 250, text: 'Начать заново'} });
+    Remix.addHashlistElement('router.screens.'+result1sid+'.components', undefined, { newElement: {displayName: 'FbButton', left: 38, top: 350} });
 
-    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: -51, text: 'Отлично, вы знаток литературы'} });
-    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', text: 'Начать заново'} });
-    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'FbButton', left: 20, top: 18} });
+    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 100, text: 'Отлично, вы в безопасности. Ваши знания по ИТ-безопасности помогут вам избежать угроз'} });
+    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', left: 40, top: 250, text: 'Начать заново'} });
+    Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'FbButton', left: 38, top: 350} });
     // PROGRAMMALICALLY CREATR PROJECT
 
 

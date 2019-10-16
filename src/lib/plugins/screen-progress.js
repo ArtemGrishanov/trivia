@@ -37,11 +37,12 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
                     event.remix.addScreenComponent(scr.hashlistId, {
                         displayName: 'Progress',
                         id: COMPONENT_ID,
-                        left: 20,
-                        top: 20,
+                        left: 48,
+                        top: 30,
+                        fontSize: 20,
                         step: i + 1,
                         max: scrs.length,
-                        color: '#fff'
+                        color: '#aaa'
                     });
                     // нужно узнать id нового компонента
                     // добавился новый компонент на экран, надо заново запросить стейт
