@@ -1,0 +1,17 @@
+.rmx-fb_button {
+    position: relative;
+    background-color: #3b5998;
+    border-radius: 999px;
+    border: none;
+    color: #fff;
+    font-size: 16px;
+    white-space: nowrap;
+    padding: 12px 42px 13px;
+    min-width: 180px;
+}
+
+.rmx-btn-i {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+}

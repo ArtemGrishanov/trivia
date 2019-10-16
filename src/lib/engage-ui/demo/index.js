@@ -19,6 +19,8 @@ import LayoutItem from '../layout/LayoutItem';
 import Element from '../primitives/Element'
 import Text from '../primitives/Text'
 import { Schema as TextSchema } from '../primitives/Text'
+import FbButton from '../primitives/social/FbButton'
+import { Schema as FbButtonSchema } from '../primitives/social/FbButton'
 
 ReactDOM.render(
     <div>
@@ -190,6 +192,9 @@ ReactDOM.render(
                 src="http://p.testix.me/temp/1000x611.jpg"
                 srcThumb="http://p.testix.me/temp/4000x2443_thumb.jpg"
                 />
+        </Control>
+        <Control schema={FbButtonSchema} width={500} height={500}>
+            <FbButton />
         </Control>
     </div>,
     document.getElementById('root'));

@@ -6,6 +6,7 @@ import { Schema as TextSchema} from '../../engage-ui/primitives/Text.js'
 import { Schema as ProgressSchema} from '../../engage-ui/primitives/Progress.js'
 import { Schema as TextOptionSchema} from '../../engage-ui/primitives/TextOption.js'
 import { Schema as ButtonSchema} from '../../engage-ui/primitives/Button.js'
+import { Schema as FbButton } from '../../engage-ui/primitives/social/FbButton.js'
 //INSTRUCTION 1: add your new component schema before this line with name ComponentName+'Schema'
 
 //INSTRUCTION 2: add your new component schema to this object:
@@ -13,7 +14,8 @@ const componentSchemas = {
     TextSchema,
     ProgressSchema,
     TextOptionSchema,
-    ButtonSchema
+    ButtonSchema,
+    FbButton
     // put new schema here befor just this line
 }
 
