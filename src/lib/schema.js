@@ -49,6 +49,7 @@ export default class DataSchema {
         this._prepareSchema(schm);
         this._schm = schm;
         this._selectorsInProcessOrder = this._getSelectorsInProcessOrder();
+        this._selectorForPathCache = {};
         return this;
     }
 
@@ -70,9 +71,15 @@ export default class DataSchema {
      * @return {string} selector
      */
     findSelectorForPath(path) {
+        if (this._selectorForPathCache[path]) {
+            return this._selectorForPathCache[path];
+        }
         const seltrs = Object.keys(this._schm)
         for (let i = 0; i < seltrs.length; i++) {
-            if (matchPropertyPath(path, seltrs[i]) === true) return seltrs[i]
+            if (matchPropertyPath(path, seltrs[i]) === true) {
+                this._selectorForPathCache[path] = seltrs[i];
+                return seltrs[i];
+            }
         }
         return null;
     }
