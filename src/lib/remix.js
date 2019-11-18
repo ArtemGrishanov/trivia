@@ -41,7 +41,6 @@ let customFunctions = {};
 let normalizer = null;
 let extActions = null;
 let root = null;
-let initialSize = null;
 let mode = 'none';
 // let _lastUpdDiff = null;
 let _outerEvents = [];
@@ -67,35 +66,12 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         containerWindow = source;
         setMode(data.mode);
         logging = typeof data.log === "boolean" ? data.log: LOG_BY_DEFAULT;
-        initialSize = data.initialSize;
-        if (root) {
-            root.style.maxWidth = initialSize.width+'px';
-            root.style.width = '100%';
-            root.style.minHeight = initialSize.height+'px';
-            root.style.position = 'relative';
-            root.style.overflow = 'hidden';
-        }
+
         _putOuterEventInQueue('inited', {schema: schema, css: "TODO: pass css string from project to container."}, 0);
         // before this 'init' we may already have some events in queue
         _sendOuterEvents();
     }
     else if (data.method === 'run') {
-        // Container can set size only
-        // Size from embed code (ex: data-width="620")
-        // if (data.initialSize) {
-        //     let size = null;
-        //     if (isNumeric(data.initialSize.width) === true) {
-        //         size = size || {};
-        //         size.width = data.initialSize.width;
-        //     }
-        //     if (isNumeric(data.initialSize.height) === true) {
-        //         size = size || {};
-        //         size.height = data.initialSize.height;
-        //     }
-            // if (size) {
-            //     setSize(size);
-            // }
-        // }
 
         setData(data.properties, data.forceFeedback);
 
@@ -110,7 +86,9 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         _sendOuterEvents();
     }
     if (data.method === 'setsize') {
-        setSize(data.width, data.height);
+        // сообщение от контейнера по установке размера не имеет смысла
+        // так как remix-приложение всегда width:100%;height:100% а реальный размер ставится в параметрах контейнера
+        //setSize(data.width, data.height);
     }
     if (data.method === 'addhashlistelement') {
         addHashlistElement(data.propertyPath, data.index, data.prototypeId);
@@ -150,7 +128,9 @@ function setCurrentScreen(screenId) {
 
 /**
  * Sets application width and height
- * Value sill be set if not "undefined"
+ * Value will be set, if not "undefined"
+ *
+ * It changes value in state only. In fact width-height are governed by rcontainer (and by loader.js params)
  *
  * @param {number} width
  * @param {number} height
@@ -360,6 +340,15 @@ function init({appStore = null, externalActions = [], container = null, mode = '
     // store.dispatch({
     //     type: REMIX_INIT_ACTION
     // });
+    if (window.__REMIX_DEFAULT_PROPERTIES__) {
+        try {
+            // один из способов передать свойства для запуска приложения. Используется при публикации
+            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__);
+        }
+        catch(err) {
+            console.error(err.message);
+        }
+    }
 }
 
 /**

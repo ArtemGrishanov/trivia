@@ -17,6 +17,8 @@ Remix.init({
     mode: 'none' // edit | none
 });
 
+//test();
+
 initRemixRouting({
     remix: Remix,
     // some params specially for Remix-Routing plugin
@@ -130,33 +132,11 @@ function test( ) {
     // Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Text', fontSize: 24, color: '#C7A667', tags: 'question title', animationOnAppearance: 'none', width: 60, left: 20, top: 100, text: 'Отлично, вы в безопасности. Ваши знания по ИТ-безопасности помогут вам избежать угроз'} });
     // Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'Button', tags: 'restart', left: 40, top: 250, text: 'Начать заново'} });
     // Remix.addHashlistElement('router.screens.'+result2sid+'.components', undefined, { newElement: {displayName: 'FbButton', left: 38, top: 350} });
-    // PROGRAMMALICALLY CREATR PROJECT
+    // PROGRAMMALICALLY CREATE PROJECT
 
 
-    // Plan ******* */
-    // - опции нужно время чтобы показать состояние/анимацию - верно или неверно а уже потом делать переход
-    // - что будет представлять собой проект Тривия, есть финальное понимание?
-    // - попробовать открыть микроредактор
-    //******* */
+    //TODO 'text' from Button, and 'text' from FbButton conflict because they exists in one schema
 
-    //can add a new option
-
-    //start screen
-    // -- prepare layout?
-    // logo link
-    // sharing buttons
-
-    //client reducer? Is there any CLIENT CODE?
-    // - show feedback layer
-
-    //Plugins: remix-quiz, remix-timeline, ... But basic remix app includes common classes
-    //
-
-    // 'text' from Button, and 'text' from FbButton conflict because they exists in one schema
-
-    //Modal
-    // - feedback modal
-    // - router can show some screens in modal mode on the top of other screens
 }
 
 ReactDOM.render(

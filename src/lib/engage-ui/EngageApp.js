@@ -148,8 +148,10 @@ class EngageApp extends React.Component {
 
     render() {
         const appSt = {
-            width: this.props.width + "px",
-            minHeight: this.props.height + "px"
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            overflow: 'hidden'
         }
         return (
             <div className="rmx-app" style={appSt}>
