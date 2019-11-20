@@ -62,57 +62,57 @@ class EngageApp extends React.Component {
         //this.syncScreens();
     }
 
-    syncScreens() {
-        const prevScrs = this.screens;
-        this.screens = [];
-        const result = {
-            added: [],
-            changed: [],
-            deleted: []
-        };
-        let childrenArr = this.props.children;
-        if (!childrenArr) {
-            childrenArr = [];
-        }
-        childrenArr.flat().forEach( (child) => {
-            const screenId = child.props.screenId;
-            if (!screenId) {
-                throw new Error('You must define unique prop "screenId" for each Screen component');
-            }
-            if (this.getScreenById(this.screens, screenId)) {
-                throw new Error(`screenId "${screenId}" is not unique`);
-            }
-            const markup = ReactDOMServer.renderToStaticMarkup(child);
-            const scr = this.getScreenById(prevScrs, screenId);
-            if (!scr) {
-                // a new screen came
-                const newScreen = {
-                    screenId: screenId,
-                    markup: markup
-                };
-                this.screens.push(newScreen);
-                result.added.push(newScreen);
-            }
-            else {
-                // screen already exist
-                // sync screen markup
-                if (scr.markup !== markup) {
-                    result.changed.push(scr);
-                    scr.markup = markup;
-                }
-                this.screens.push(scr); // because we created a new array
-            }
-        });
-        // check deleted screens
-        prevScrs.forEach( (scr) => {
-            if (!this.getScreenById(this.screens, scr.screenId)) {
-                result.deleted.push(scr);
-            }
-        });
-        if (result.added.length > 0 || result.changed.length > 0 || result.deleted.length > 0) {
-            Remix._setScreenEvents(result);
-        }
-    }
+    // syncScreens() {
+    //     const prevScrs = this.screens;
+    //     this.screens = [];
+    //     const result = {
+    //         added: [],
+    //         changed: [],
+    //         deleted: []
+    //     };
+    //     let childrenArr = this.props.children;
+    //     if (!childrenArr) {
+    //         childrenArr = [];
+    //     }
+    //     childrenArr.flat().forEach( (child) => {
+    //         const screenId = child.props.screenId;
+    //         if (!screenId) {
+    //             throw new Error('You must define unique prop "screenId" for each Screen component');
+    //         }
+    //         if (this.getScreenById(this.screens, screenId)) {
+    //             throw new Error(`screenId "${screenId}" is not unique`);
+    //         }
+    //         const markup = ReactDOMServer.renderToStaticMarkup(child);
+    //         const scr = this.getScreenById(prevScrs, screenId);
+    //         if (!scr) {
+    //             // a new screen came
+    //             const newScreen = {
+    //                 screenId: screenId,
+    //                 markup: markup
+    //             };
+    //             this.screens.push(newScreen);
+    //             result.added.push(newScreen);
+    //         }
+    //         else {
+    //             // screen already exist
+    //             // sync screen markup
+    //             if (scr.markup !== markup) {
+    //                 result.changed.push(scr);
+    //                 scr.markup = markup;
+    //             }
+    //             this.screens.push(scr); // because we created a new array
+    //         }
+    //     });
+    //     // check deleted screens
+    //     prevScrs.forEach( (scr) => {
+    //         if (!this.getScreenById(this.screens, scr.screenId)) {
+    //             result.deleted.push(scr);
+    //         }
+    //     });
+    //     if (result.added.length > 0 || result.changed.length > 0 || result.deleted.length > 0) {
+    //         Remix._setScreenEvents(result);
+    //     }
+    // }
 
     getScreenById(screenArr = [], id) {
         return screenArr.find( (scr) => scr.screenId === id);
@@ -120,31 +120,31 @@ class EngageApp extends React.Component {
 
     emitEvents() {}
 
-    renderOld() {
+    // renderOld() {
 
-        const appSt = {
-            width: this.props.width + "px",
-            minHeight: this.props.height + "px"
-        }
+    //     const appSt = {
+    //         width: this.props.width + "px",
+    //         minHeight: this.props.height + "px"
+    //     }
 
-        // only Screen children expected
-        //TODO move to componentwillreceive props ?
-        const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
+    //     // only Screen children expected
+    //     //TODO move to componentwillreceive props ?
+    //     const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
 
-        return (
-            <div className="eng-app" style={appSt}>
-                {/* only Screen children expected */}
-                {filteredChildren &&
-                    filteredChildren}
-                {!filteredChildren && <p>no content</p>}
-                {/*this.props.messages.length > 0 &&
-                    <MessageBox message="Application is not supported"/>
-                */}
+    //     return (
+    //         <div className="eng-app" style={appSt}>
+    //             {/* only Screen children expected */}
+    //             {filteredChildren &&
+    //                 filteredChildren}
+    //             {!filteredChildren && <p>no content</p>}
+    //             {/*this.props.messages.length > 0 &&
+    //                 <MessageBox message="Application is not supported"/>
+    //             */}
 
-                {/*<Banner></Banner>*/}
-            </div>
-        )
-    }
+    //             {/*<Banner></Banner>*/}
+    //         </div>
+    //     )
+    // }
 
     render() {
         const appSt = {

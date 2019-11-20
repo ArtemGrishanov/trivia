@@ -346,7 +346,7 @@ function init({appStore = null, externalActions = [], container = null, mode = '
             deserialize2(window.__REMIX_DEFAULT_PROPERTIES__);
         }
         catch(err) {
-            console.error(err.message);
+            //console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message);
         }
     }
 }
@@ -533,7 +533,6 @@ function session(state = { triggers: [], events: [] }, action) {
             }
         }
         case REMIX_EVENT_FIRED: {
-            console.log('Remix.REMIX_EVENT_FIRED', action.eventType);
             // create events only in this place
             const event = {
                 eventType: action.eventType,
@@ -778,7 +777,7 @@ export function deserialize2(json) {
                 data[p.path] = p.value;
             });
         });
-        console.log('deserialize2:', data);
+        log('deserialize2:', data);
         remix.setData(data);
     }
     else {
