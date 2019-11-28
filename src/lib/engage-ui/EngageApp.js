@@ -5,7 +5,7 @@ import DataSchema from '../schema'
 import Remix from '../remix'
 import Router from './router'
 
-import './style/rmx-common.css';
+import stylll from './style/rmx-common.css';
 
 /**
  * TODO
@@ -56,6 +56,7 @@ class EngageApp extends React.Component {
 
     componentDidMount() {
         Remix.fireEvent('app_start');
+        console.log('styllle', stylll);
     }
 
     componentDidUpdate() {

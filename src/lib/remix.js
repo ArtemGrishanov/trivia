@@ -61,17 +61,23 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     if (EXPECTED_CONTAINER_ORIGIN && origin !== EXPECTED_CONTAINER_ORIGIN) {
         return;
     }
-    if (data.method === 'init') {
-        containerOrigin = origin;
-        containerWindow = source;
-        setMode(data.mode);
-        logging = typeof data.log === "boolean" ? data.log: LOG_BY_DEFAULT;
+    // if (data.method === 'init') {
+    //     containerOrigin = origin;
+    //     containerWindow = source;
+    //     setMode(data.mode);
+    //     logging = typeof data.log === "boolean" ? data.log: LOG_BY_DEFAULT;
 
-        _putOuterEventInQueue('inited', {schema: schema, css: "TODO: pass css string from project to container."}, 0);
-        // before this 'init' we may already have some events in queue
-        _sendOuterEvents();
-    }
-    else if (data.method === 'run') {
+    //     _putOuterEventInQueue('inited', {
+    //         schema: schema,
+    //         css: "TODO: pass css string from project to container.",
+    //         screens: getScreens(),
+    //         state: serialize2()
+    //     }, 0);
+    //     // before this 'init' we may already have some events in queue
+    //     _sendOuterEvents();
+    // }
+    // else
+    if (data.method === 'run') {
 
         setData(data.properties, data.forceFeedback);
 
@@ -101,6 +107,11 @@ function receiveMessage({origin = null, data = {}, source = null}) {
             elementId: data.elementId,
             index: data.index
         });
+    }
+    if (data.method === 'setcurrentscreen') {
+        if (data.screenId) {
+            setCurrentScreen(data.screenId);
+        }
     }
 }
 
@@ -199,7 +210,7 @@ function dispatchAction(type, param) {
         });
     }
     else {
-        throw new Error(`Remix: this action ${type} is not defined. Use Remix.init() to define some external actions.`);
+        throw new Error(`Remix: this action ${type} is not defined. Use Remix.init to define some external actions.`);
     }
 }
 
@@ -329,18 +340,28 @@ function deleteHashlistElement(hashlistPropPath, targetElement) {
     });
 }
 
+export function setStore(astore) {
+    store = astore;
+}
+
 /**
-* @param {Object} schema
-*/
-function init({appStore = null, externalActions = [], container = null, mode = 'none'}) {
-    store = appStore;
+ * Inites remix framework
+ * Method for external init in index.html
+ */
+function init({/*appStore = null, */externalActions = [], container = null, mode = 'none', defaultProperties = '', origin, source, log}) {
+    //store = appStore;
     root = container;
+    containerOrigin = origin;
+    containerWindow = source;
+    logging = typeof log === "boolean" ? log: LOG_BY_DEFAULT;
     extActions = externalActions || [];
-    setMode(mode);
     // store.dispatch({
     //     type: REMIX_INIT_ACTION
     // });
-    if (window.__REMIX_DEFAULT_PROPERTIES__) {
+    if (defaultProperties) {
+        deserialize2(defaultProperties);
+    }
+    else if (window.__REMIX_DEFAULT_PROPERTIES__) {
         try {
             // один из способов передать свойства для запуска приложения. Используется при публикации
             deserialize2(window.__REMIX_DEFAULT_PROPERTIES__);
@@ -349,6 +370,8 @@ function init({appStore = null, externalActions = [], container = null, mode = '
             //console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message);
         }
     }
+    // mode устанавливаем после десериализации. Чтобы во время нее не рассылать
+    setMode(mode);
 }
 
 /**
@@ -488,9 +511,9 @@ export function remixReducer({reducers, dataSchema}) {
         // if (changed) {
         //     log('Diff', _lastUpdDiff);
         // }
-        if (action.forceFeedback/* || changed*/) {
-            _putOuterEventInQueue('properties_changed', {...getLastDiff(), state: serialize2(nextState)});
-        }
+        // if (action.forceFeedback/* || changed*/) {
+        //     _putOuterEventInQueue('properties_updated', {...getLastDiff(), state: serialize2(nextState)});
+        // }
         _sendOuterEvents();
         return nextState;
     }
@@ -610,6 +633,9 @@ function _putOuterEventInQueue(method, data, eventIndex) {
 }
 
 //TODO очередь зачем? реализовать отправку по таймеру?
+/**
+ * События могут накапливаться в очереди пока приложение в состоянии 'none'
+ */
 function _sendOuterEvents() {
     // containerWindow.postMessage({method: 'app_size_changed'}, containerOrigin); ?
     // containerWindow.postMessage({method: 'send_data_state'}, containerOrigin); // on 'request_data_state'
@@ -626,7 +652,7 @@ function _getLastUpdateDiff() {
 }
 
 function _setScreenEvents(updateData) {
-    _putOuterEventInQueue('screens_update', updateData);
+    _putOuterEventInQueue('screens_updated', updateData);
     _sendOuterEvents();
 }
 
@@ -785,6 +811,33 @@ export function deserialize2(json) {
     }
 }
 
+/**
+ * Helper method
+ * Get some screens by criteria
+ *
+ * @param {string} filter.tag
+ */
+function getScreens(filter = {}) {
+    return store.getState().router.screens
+        .toArray()
+        .filter( (s) => filter.tag ? (s.tags && s.tags.indexOf(filter.tag) >= 0): true );
+}
+
+function getProperties() {
+    const res = [];
+    let st = store.getState();
+    if (!st) {
+        return;
+    }
+    schema.selectorsInProcessOrder.forEach((selector) => {
+        const propsToSerialize = getPropertiesBySelector(st, selector);
+        propsToSerialize.forEach((prop) => {
+            res.push({path: prop.path, value: prop.value});
+        });
+    });
+    return res;
+}
+
 // public methods
 remix.init = init;
 remix.setData = setData;
@@ -807,12 +860,16 @@ remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
 remix._triggerActions = _triggerActions;
 remix._getSchema = () => schema;
+remix._putOuterEventInQueue = _putOuterEventInQueue;
+remix._sendOuterEvents = _sendOuterEvents;
+remix.getProperties = getProperties;
 remix._setCss = () => {
     //TODO set project css styles
     // maybe use to-string-loader https://github.com/webpack-contrib/css-loader#tostring
 };
 remix.registerTriggerAction = registerTriggerAction;
 remix.getState = () => store.getState();
+remix.setStore = setStore;
 /**
  * Add new properties descriptions to app schema
  * Plugins may use this method
@@ -878,17 +935,8 @@ remix.setComponentProps = function(screenId, componentId, props) {
     })
     this.setData(data);
 }
-/**
- * Helper method
- * Get some screens by criteria
- *
- * @param {string} filter.tag
- */
-remix.getScreens = function(filter = {}) {
-    return this.getState().router.screens
-        .toArray()
-        .filter( (s) => filter.tag ? (s.tags && s.tags.indexOf(filter.tag) >= 0): true );
-}
+
+remix.getScreens = getScreens;
 
 export default remix
 window.Remix = remix; // for debug

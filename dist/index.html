@@ -14,9 +14,9 @@
     <script>
         var __REMIX_DEFAULT_PROPERTIES__ = '{{PROJECT_STRUCTURE_JSON}}';
     </script>
-    <div id="root"></div>
+    <div id="remix-app-root"></div>
     <script>
-        var loadStatus = 0, loadStuff = 0, cntOrigin, cntSource;
+        var loadStatus = 0, loadStuff = 0, cntOrigin, cntSource, inited = false;
         function checkAndReply(loaded) {
             if (loaded) loadStatus++;
             // send 'embedded' back to RemixContainer
@@ -25,9 +25,9 @@
             }
         }
         function receiveMessage({origin = null, data = {}, source = null}) {
-            if (data.method) {
-                console.log('App index.html says: ' + data.method + ' message received');
-            }
+            // if (data.method) {
+            //     console.log('App index.html says: ' + data.method + ' message received');
+            // }
             var EXPECTED_CONTAINER_ORIGIN = null; //TODO define origin for production
             if (EXPECTED_CONTAINER_ORIGIN && origin !== EXPECTED_CONTAINER_ORIGIN) {
                 return;
@@ -53,11 +53,29 @@
                 cntOrigin = origin;
                 checkAndReply();
             }
-            else if (data.method === 'init' && !window.Remix) {
-                throw new Error('Remix app not loaded! Be sure you passed correct script url.');
+            else if (data.method === 'init' && !inited) {
+                if (!window.Remix) {
+                    throw new Error('Remix app not loaded! Be sure you passed correct script url.');
+                }
+                inited = true;
+                Remix.init({
+                    appStore: store,
+                    container: document.getElementById('remix-app-root'),
+                    mode: data.mode,
+                    log: data.log,
+                    defaultProperties: data.defaults,
+                    containerOrigin: origin,
+                    containerWindow: source
+                });
+                cntSource.postMessage({
+                    method: 'inited',
+                    initialProperties: Remix.getProperties(),
+                    schema: Remix._getSchema(),
+                    state: Remix.serialize2(),
+                    screens: Remix.getScreens(),
+                }, cntOrigin);
             }
         }
         window.addEventListener("message", receiveMessage, false);
     </script>
-  </body>
 </html>

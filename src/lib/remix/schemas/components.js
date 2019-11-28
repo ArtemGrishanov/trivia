@@ -16,7 +16,7 @@ const componentSchemas = {
     TextOptionSchema,
     ButtonSchema,
     FbButton
-    // put new schema here befor just this line
+    // put new schema here before just this line
 }
 
 const schemaData = {
