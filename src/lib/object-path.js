@@ -317,7 +317,7 @@ export function getPathes(obj, selector, resolvedPathesOnly = false) {
 }
 
 /**
- * Проверить соответствие между собой селектора например  и строки свойства, например
+ * Проверить соответствие между собой селектора например и строки свойства, например
  *
  * @param {string} propertyPath "quiz.questions.ugltc7.text"
  * @param {string} selector "quiz.[questions Hashlist].text"

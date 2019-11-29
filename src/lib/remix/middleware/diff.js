@@ -110,6 +110,7 @@ function diff(schema = null, prevState = {}, nextState = {}) {
         for (let i = 0; i < nsRes.length; i++) {
             const nsProp = nsRes[i]
             const psProp = (psRes.length > 0) ? getPropAndDelete(psRes, nsProp.path): null;
+            regex.lastIndex = 0;
             const m = regex.exec(nsProp),
                 screenId = (m && m[0] && m[1]) ? m[1]: null;
             if (psProp) {
@@ -137,6 +138,7 @@ function diff(schema = null, prevState = {}, nextState = {}) {
             }
         }
         for (let i = 0; i < psRes.length; i++) {
+            regex.lastIndex = 0;
             const m = regex.exec(psRes[i].path),
                 screenId = (m && m[0] && m[1]) ? m[1]: null;
             result.deleted.push(psRes[i]);

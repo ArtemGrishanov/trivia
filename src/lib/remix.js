@@ -823,8 +823,14 @@ function getScreens(filter = {}) {
         .filter( (s) => filter.tag ? (s.tags && s.tags.indexOf(filter.tag) >= 0): true );
 }
 
+/**
+ * Returns all dynamic properties with additional information from this remix app
+ *
+ * @return {Array}
+ */
 function getProperties() {
     const res = [];
+    const regex = /^router\.screens\.([A-z0-9]+)/g;
     let st = store.getState();
     if (!st) {
         return;
@@ -832,7 +838,11 @@ function getProperties() {
     schema.selectorsInProcessOrder.forEach((selector) => {
         const propsToSerialize = getPropertiesBySelector(st, selector);
         propsToSerialize.forEach((prop) => {
-            res.push({path: prop.path, value: prop.value});
+            // Also try to detect 'screenId' which holds this property. It's an additional data for filtering in external services, like editors, etc..
+            regex.lastIndex = 0;
+            const m = regex.exec(prop.path),
+                screenId = (m && m[0] && m[1]) ? m[1]: null;
+            res.push({path: prop.path, value: prop.value, screenId});
         });
     });
     return res;
