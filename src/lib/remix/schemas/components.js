@@ -1,5 +1,5 @@
 import { EngageAppSchema } from '../../engage-ui/EngageApp.js'
-import DataSchema from '../../schema.js';
+import DataSchema from '../../schema.js'
 import { Schema as ScreenComponentsSchema} from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema} from '../../engage-ui/router.js'
 import { Schema as TextSchema} from '../../engage-ui/primitives/Text.js'

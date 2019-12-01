@@ -1,5 +1,7 @@
 import React from 'react'
+import { connect } from 'react-redux';
 import Remix from '../../../lib/remix'
+import { selectComponent } from '../../../lib/remix'
 
 //TODO minContentWidth minContentHeight определяется на ширине контента 1x1 px
 // но оказывается что некоторые компоненты например TextOption имеют наименьшую высоту при ширине более чем 70px, а не при ширине 1px
@@ -178,10 +180,16 @@ function calcState({
         }
 }
 
+const mapStateToProps = (state, ownProps) => {
+    return {
+        selected: state.session.selectedComponentIds.indexOf(ownProps.id) >= 0
+    }
+}
+
 export default function LayoutItem() {
 
     return function(Component) {
-        return class extends React.Component {
+        return connect(mapStateToProps)(class extends React.Component {
 
             static getDerivedStateFromProps(props, state) {
                 return {
@@ -224,8 +232,7 @@ export default function LayoutItem() {
                     width: undefined,
                     height: undefined,
                     contentWidth: undefined,
-                    contentHeight: undefined,
-                    selected: false
+                    contentHeight: undefined
                 }
                 this.thisRef = React.createRef();
                 this.contentObserver = null;
@@ -276,9 +283,7 @@ export default function LayoutItem() {
             onWindowMouseMove(e) {
                 if (this.isItemMouseDown) {
                     this.isDragging = true;
-                    this.setState({
-                        selected: true
-                    });
+                    selectComponent(this.props.id);
                     const dx = toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
                     const dy = e.clientY - this.mouseStartPosition.top; // px
                     let l, t, w, h;
@@ -339,9 +344,7 @@ export default function LayoutItem() {
             onWindowMouseUp() {
                 if (this.isDragging) {
                     this.isDragging = false;
-                    this.setState({
-                        selected: false
-                    });
+                    selectComponent(null);
                 }
                 this.isItemMouseDown = false;
             }
@@ -380,7 +383,12 @@ export default function LayoutItem() {
             }
 
             onClick() {
-                if (Remix.getMode() !== 'edit') {
+                if (Remix.getMode() === 'edit') {
+                    // use selection mode for external services (like Editor)
+                    // and keep element selected (show selection border)
+                    selectComponent(this.props.id);
+                }
+                else {
                     Remix.fireEvent('onclick', {...this.props});
                 }
             }
@@ -418,7 +426,7 @@ export default function LayoutItem() {
                             <Component {...this.props} onSize={this.onContentSize.bind(this)}></Component>
                         </div>
                         {editing &&
-                            <div className={"rmx-layout_item_selection_cnt " + (this.state.selected ? '__selected': '')}>
+                            <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}>
                                 {/* TODO uncomment */}
                                 {/* <p className="rmx-l-info">{sizemsg}</p> */}
                                 <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>
@@ -443,6 +451,6 @@ export default function LayoutItem() {
                     height: this.state.height
                 }
             }
-        }
+        });
     }
 }

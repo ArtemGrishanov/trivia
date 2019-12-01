@@ -9,7 +9,7 @@ import {
     isHashlistInstance,
     combineReducers
 } from './remix/util/util.js'
-import { getLastDiff } from './remix/middleware/diff.js'
+// import { getLastDiff } from './remix/middleware/diff.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -23,6 +23,7 @@ export const REMIX_ADD_TRIGGER = '__Remix_add_trigger__'
 export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 // export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
+export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 
 const remix = {};
 
@@ -112,6 +113,9 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         if (data.screenId) {
             setCurrentScreen(data.screenId);
         }
+    }
+    if (data.method === 'select') {
+        selectComponent(data.componentId);
     }
 }
 
@@ -543,7 +547,7 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function session(state = { triggers: [], events: [] }, action) {
+function session(state = { triggers: [], events: [], selectedComponentIds: [] }, action) {
     switch(action.type) {
         case REMIX_ADD_TRIGGER: {
             //const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
@@ -592,6 +596,13 @@ function session(state = { triggers: [], events: [] }, action) {
             return {
                 ...state,
                 triggers: []
+            }
+        }
+        case REMIX_SELECT_COMPONENT: {
+            return {
+                ...state,
+                selectedComponentIds: action.componentId ? [action.componentId]: []
+                //...state.selectedComponentIds, TODO multiselect mode
             }
         }
         default:
@@ -647,13 +658,38 @@ function _sendOuterEvents() {
     }
 }
 
-function _getLastUpdateDiff() {
-    return getLastDiff();
-}
+// function _getLastUpdateDiff() {
+//     return getLastDiff();
+// }
 
 function _setScreenEvents(updateData) {
     _putOuterEventInQueue('screens_updated', updateData);
     _sendOuterEvents();
+}
+
+/**
+ * Send out a message to external services
+ *
+ * @param {string} method
+ * @param {*} data
+ */
+export function postMessage(method, data) {
+    _putOuterEventInQueue(method, data);
+    _sendOuterEvents();
+}
+
+/**
+ * Select a component on the screen
+ * User can select some components
+ *
+ * @param {string} componentId
+ */
+export function selectComponent(componentId) {
+    store.dispatch({
+        type: REMIX_SELECT_COMPONENT,
+        componentId
+    });
+    postMessage('selected', { componentId });
 }
 
 /**
@@ -866,7 +902,7 @@ remix.getMode = () => mode;
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
 remix.clearTriggersAndEvents = clearTriggersAndEvents;
-remix._getLastUpdateDiff = _getLastUpdateDiff;
+// remix._getLastUpdateDiff = _getLastUpdateDiff;
 remix._setScreenEvents = _setScreenEvents;
 remix._triggerActions = _triggerActions;
 remix._getSchema = () => schema;
