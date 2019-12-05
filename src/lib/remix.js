@@ -139,8 +139,6 @@ function setCurrentScreen(screenId) {
     });
 }
 
-
-
 /**
  * Sets application width and height
  * Value will be set, if not "undefined"
@@ -693,6 +691,24 @@ export function selectComponent(componentId) {
 }
 
 /**
+ * Sets component position and size
+ *
+ * @param {string} id component id
+ */
+export function setComponentPosition({id, top, left, width, height}) {
+    const screenId = store.getState().router.currentScreenId;
+    //TODO наиболее правильно было бы соотнести и хранить ид экрана в компоненте
+    if (screenId) {
+        const props = {};
+        if (top !== undefined) props.top = top;
+        if (left !== undefined) props.left = left;
+        if (width !== undefined) props.width = width;
+        if (height !== undefined) props.height = height;
+        setComponentProps(screenId, id, props);
+    }
+}
+
+/**
  * Helper function
  *
  * @param {*} path
@@ -946,15 +962,15 @@ remix.callCustomFunction = (fnName) => {
  *
  * @param {string} screenId
  * @param {object} props, example
- *                  {
- *                      displayName: 'Progress',
-                        id: COMPONENT_ID,
-                        left: 20,
-                        top: 20,
-                        step: i + 1,
-                        max: scrs.length,
-                        color: '#fff'
-                    }
+    {
+        displayName: 'Progress',
+        id: COMPONENT_ID,
+        left: 20,
+        top: 20,
+        step: i + 1,
+        max: scrs.length,
+        color: '#fff'
+    }
  *
  */
 remix.addScreenComponent = function(screenId, componentProps) {
@@ -970,18 +986,19 @@ remix.deleteScreenComponent = function(screenId, componentId) {
     this.deleteHashlistElement(path, {elementId: componentId});
 }
 /**
- * Helper props
+ * Helper method
  * Set existing component props
  */
-remix.setComponentProps = function(screenId, componentId, props) {
+export function setComponentProps(screenId, componentId, props) {
     let path = `router.screens.${screenId}.components.${componentId}.`;
     const data = {};
     Object.keys(props).forEach( (prop) => {
         data[path+prop] = props[prop];
     })
-    this.setData(data);
+    setData(data);
 }
 
+remix.setComponentProps = setComponentProps;
 remix.getScreens = getScreens;
 
 export default remix

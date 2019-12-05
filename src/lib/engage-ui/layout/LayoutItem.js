@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import Remix from '../../../lib/remix'
-import { selectComponent } from '../../../lib/remix'
+import { selectComponent, setComponentPosition } from '../../../lib/remix'
 
 //TODO minContentWidth minContentHeight определяется на ширине контента 1x1 px
 // но оказывается что некоторые компоненты например TextOption имеют наименьшую высоту при ширине более чем 70px, а не при ширине 1px
@@ -252,6 +252,9 @@ export default function LayoutItem() {
 
             onMouseDown(e) {
                 if (Remix.getMode() === 'edit') {
+                    // use selection mode for external services (like Editor)
+                    // and keep element selected (show selection border)
+                    selectComponent(this.props.id);
                     this.itemNode = this.thisRef.current;
                     if (this.itemNode) {
                         this.markerId = e.currentTarget.getAttribute('datamarker');
@@ -283,7 +286,6 @@ export default function LayoutItem() {
             onWindowMouseMove(e) {
                 if (this.isItemMouseDown) {
                     this.isDragging = true;
-                    selectComponent(this.props.id);
                     const dx = toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
                     const dy = e.clientY - this.mouseStartPosition.top; // px
                     let l, t, w, h;
@@ -344,7 +346,14 @@ export default function LayoutItem() {
             onWindowMouseUp() {
                 if (this.isDragging) {
                     this.isDragging = false;
-                    selectComponent(null);
+                    // save size and position after dragging
+                    setComponentPosition({
+                        id: this.props.id,
+                        top: this.state.top,
+                        left: this.state.left,
+                        width: this.state.width,
+                        height: this.state.height
+                    });
                 }
                 this.isItemMouseDown = false;
             }
@@ -384,9 +393,7 @@ export default function LayoutItem() {
 
             onClick() {
                 if (Remix.getMode() === 'edit') {
-                    // use selection mode for external services (like Editor)
-                    // and keep element selected (show selection border)
-                    selectComponent(this.props.id);
+
                 }
                 else {
                     Remix.fireEvent('onclick', {...this.props});
