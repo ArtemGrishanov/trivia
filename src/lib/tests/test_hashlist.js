@@ -143,15 +143,53 @@ describe('HashList', function() {
         it('Make copy of object', function() {
             const elem = {
                 data1: "value1",
-                data2: false
+                data2: false,
+                data3: {}
             };
             const list = new HashList([11, elem]);
             const cloned = list.getElementCopy(1);
             chai.assert.equal(cloned == elem, false);
+            chai.assert.equal(cloned == list[list.getId(1)], false);
             chai.assert.equal(cloned.data1 === "value1", true);
             chai.assert.equal(cloned.data2 === false, true);
+            chai.assert.equal(elem.data3 !== cloned.data3, true);
         });
 
+        it('deep clone child hashlist elements', function() {
+            const components = new HashList([
+                { name: 'Component1', data: '12345' },
+                { name: 'Component2', data: '09876' }
+            ]);
+            const screens = new HashList([
+                {
+                    backgroundColor: '#000',
+                    components
+                }
+            ]);
+            const copy = screens.getElementCopy(0, { cloneChildHashlists: true });
+
+            const origin = screens.getByIndex(0);
+            chai.assert.equal(copy == origin, false);
+            chai.assert.equal(copy.backgroundColor === origin.backgroundColor, true);
+
+            chai.assert.equal(origin.components.length === 2, true);
+            chai.assert.equal(copy.components.length === 2, true);
+
+            chai.assert.equal(copy.components.getByIndex(0).name === 'Component1', true);
+            chai.assert.equal(origin.components.getByIndex(0).name === 'Component1', true);
+
+            chai.assert.equal(copy.components.getByIndex(1).name === 'Component2', true);
+            chai.assert.equal(origin.components.getByIndex(1).name === 'Component2', true);
+
+            chai.assert.equal(copy.components.getByIndex(0) == origin.components.getByIndex(0), false);
+            chai.assert.equal(copy.components.getByIndex(1) == origin.components.getByIndex(1), false);
+
+            chai.assert.equal(copy.components.getId(0).length > 1, true);
+            chai.assert.equal(copy.components.getId(1).length > 1, true);
+
+            chai.assert.equal(copy.components.getId(0) == origin.components.getId(0), false);
+            chai.assert.equal(copy.components.getId(1) == origin.components.getId(1), false);
+        });
     });
 
     describe('#list empty', function() {

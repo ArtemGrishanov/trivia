@@ -14,7 +14,7 @@
  */
 class HashList {
 
-    constructor(initialValue) {
+    constructor(initialValue, options = { generateNewIds: false }) {
         this._orderedIds = [];
         if (initialValue !== undefined) {
             if (Array.isArray(initialValue)) {
@@ -25,8 +25,17 @@ class HashList {
                 }
             }
             else if (typeof initialValue === "object" && Array.isArray(initialValue._orderedIds)) {
-                this._orderedIds = initialValue._orderedIds;
-                this._orderedIds.forEach( (id) => this[id] = initialValue[id]);
+                if (options.generateNewIds) {
+                    initialValue._orderedIds.forEach( (id) => {
+                        const newid = this._getUniqueId();
+                        this[newid] = initialValue[id];
+                        this._orderedIds.push(newid);
+                    });
+                }
+                else {
+                    this._orderedIds = initialValue._orderedIds;
+                    this._orderedIds.forEach( (id) => this[id] = initialValue[id]);
+                }
             }
             // else if (this._validateDataType(initialValue) && Array.isArray(param._orderedIds) === true) {
             //     // это десериализация
@@ -57,31 +66,6 @@ class HashList {
         secondPart = ("000" + secondPart.toString(36)).slice(-3);
         return firstPart + secondPart;
     }
-
-    /**
-     * Проверить что устанавливаемое значение корректно.
-     * Это должен быть {'56473': value1, '87654': value2, ...}
-     *
-     * @param value
-     * @returns {boolean}
-     * @private
-     */
-    // _validateDataType(value) {
-    //     return typeof value === 'object';
-    // }
-
-    /**
-     *
-     * Пример:
-     *  returns {
-     *      '093bc4': 'value1',
-     *      '4ea119': 'value2',
-     *      ...
-     *  }
-     */
-    // get value() {
-    //     return this._value;
-    // }
 
     /**
      * Returns a new regular js array
@@ -123,6 +107,15 @@ class HashList {
             if (this._orderedIds[i] === id) return i;
         }
         return -1;
+    }
+
+    /**
+     * Вернуть значение элемента по индексу
+     *
+     * @param {number} index
+     */
+    getByIndex(index) {
+        return this[this._orderedIds[index]];
     }
 
     /**
@@ -221,87 +214,42 @@ class HashList {
     /**
      *
      * @param {number} index
+     * @param {boolean} options.cloneChildHashlists, default 'false'
      */
-    getElementCopy(index) {
+    getElementCopy(index, options = {cloneChildHashlists: false}) {
         if (Number.isInteger(index) === false || index < 0 || index >= this._orderedIds.length) {
             throw new Error('getElementCopy: illegal index');
         }
-        //const obj = this._serializeSubProperty(this._value[this._orderedIds[index]]);
-        //this._deserializeSubProperty(obj);
-        //return obj;
-        return JSON.parse(JSON.stringify(this[this._orderedIds[index]]));
+        const newElem = JSON.parse(JSON.stringify(this[this._orderedIds[index]]));
+        if (options.cloneChildHashlists && typeof newElem === 'object') {
+            this._cloneAllHashlistsInObject(newElem);
+        }
+        return newElem;
     }
 
     /**
-     * Создать новый элемент из прототипа и сразу добавить его в массив
-     *
-     * @param {string} protoFunctionPath, например 'id=pm quizProto1'
-     * @param {number} position - set '-1' or undefined for 'auto'
-     * @param {object} param
+     * Рекурсивно пройти по всем свойствам объекта и создать новый инстантсы hashlist с новыми id
      */
-    // addElementByPrototype(protoFunctionPath, position, param) {
-    //     var prt = this._getPrototype(protoFunctionPath);
-    //     if (prt !== null) {
-    //         var results = this._application.getPropertiesBySelector(protoFunctionPath);
-    //         if (results && results.length > 0 && _.isFunction(results[0].value)) {
-    //             // clone to be sure it's new JSON.parse(JSON.stringify())
-    //             // в качестве контекста передается объект в котором нашли функцию-прототип
-    //             var newElem = results[0].value.call(results[0].entity, param);
-    //             if (!newElem.element) {
-    //                 throw new Error('MutAppPropertyDictionary.addElementByPrototype: proto function must return object {id, element}. Element does not specified');
-    //             }
-    //             if (typeof newElem.id !== 'string') {
-    //                 throw new Error('MutAppPropertyDictionary.addElementByPrototype: proto function must return object {id, element}. Id does not specified');
-    //             }
-    //             this.addElement(newElem.element, position, newElem.id);
-    //         }
-    //         else {
-    //             console.error('MutAppPropertyDictionary.addElementByPrototype: can not find prototype function \''+protoFunctionPath+'\'');
-    //         }
-    //     }
-    //     else {
-    //         console.error('MutAppPropertyDictionary.addElementByPrototype: prototype \''+protoFunctionPath+'\' is not specified for this property \''+this.propertyString+'\'');
-    //     }
-    // }
+    _cloneAllHashlistsInObject(obj) {
+        Object.keys(obj).forEach( (key) => {
+            if (obj[key] && typeof obj[key] === 'object') {
+                if (this._isHashlistInstance(obj[key])) {
+                    // creating new HL with new element ids
+                    obj[key] = new HashList(obj[key], { generateNewIds: true });
+                }
+                this._cloneAllHashlistsInObject(obj[key]);
+            }
+        });
+        return obj;
+    }
 
     /**
-     * Найти описание прототипа, если таковой если в свойстве MutAppPropertyDictionary
-     * @param {string} protoFunctionPath например, 'id=pm quizProto1'
-     * @private
+     * Check object is hashlist instance, ducktyping
+     * @param {*} obj
      */
-    // _getPrototype(protoFunctionPath) {
-    //     for (var i = 0; i < this.prototypes.length; i++) {
-    //         if (this.prototypes[i].protoFunction === protoFunctionPath) {
-    //             return this.prototypes[i];
-    //         }
-    //     }
-    //     return null;
-    // }
-
-    /**
-     * Сериализовать MutAppPropertyDictionary
-     * Сохраняются только элементарные значения
-     *
-     * @returns {string}
-     */
-    // serialize() {
-    //     return JSON.stringify(this._prepareSerializedObject());
-    // }
-
-    /**
-     * Подготовить свойства для сериализации в виде отдельного объекта
-     * @return {object}
-     */
-    // _prepareSerializedObject() {
-
-    //     return {
-    //         _class: 'HashList',
-    //         _orderedIds: this._orderedIds,
-    //         _value: this._getValuesShallowCopy()
-    //         // так как dictionary сложный тип данных используется рекурсивный проход по всем подсвойствам
-    //         //value: this._serializeSubProperty(this._value)
-    //     };
-    // }
+    _isHashlistInstance(obj) {
+        return obj && obj._orderedIds && obj._orderedIds.length >= 0;
+    }
 
     /**
      * Вернуть новый объект с ключами и значениями

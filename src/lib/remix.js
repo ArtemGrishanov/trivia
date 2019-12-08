@@ -100,6 +100,9 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     if (data.method === 'addhashlistelement') {
         addHashlistElement(data.propertyPath, data.index, data.prototypeId);
     }
+    if (data.method === 'clonehashlistelement') {
+        cloneHashlistElement(data.propertyPath, data.elementId);
+    }
     if (data.method === 'changepositioninhashlist') {
         changePositionInHashlist(data.propertyPath, data.elementIndex, data.newElementIndex);
     }
@@ -296,6 +299,33 @@ function addHashlistElement(hashlistPropPath, index, elementData = {}) {
         d.prototypeIndex = elementData.prototypeIndex;
     }
     store.dispatch(d);
+}
+
+/**
+ *
+ * @param {string} hashlistPropPath
+ * @param {string} elementId
+ */
+function cloneHashlistElement(hashlistPropPath, elementId) {
+    if (!schema.getDescription(hashlistPropPath)) {
+        throw new Error(`Remix.cloneHashlistElement: ${hashlistPropPath} is not described in schema`);
+    }
+    if (!elementId) {
+        throw new Error('Remix.cloneHashlistElement: elementId is not specified');
+    }
+    const r = getPropertiesBySelector(store.getState(), hashlistPropPath);
+    if (r.length === 0) {
+        throw new Error(`Remix: there is no such property ${hashlistPropPath} in state`);
+    }
+    const hl = r[0].value,
+        elem = hl[elementId];
+    if (!elem) {
+        throw new Error(`Remix: there is no such element ${elementId} in hashlist ${hashlistPropPath}`);
+    }
+    const index = hl.getIndex(elementId);
+    addHashlistElement(hashlistPropPath, index + 1, {
+        newElement: hl.getElementCopy(index, { cloneChildHashlists: true })
+    })
 }
 
 /**

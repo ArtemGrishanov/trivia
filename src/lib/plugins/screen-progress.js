@@ -48,7 +48,7 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
                     // добавился новый компонент на экран, надо заново запросить стейт
                     pc = getProgressComponent(event.remix.getState().router.screens[scr.hashlistId]);
                 }
-                let path = `router.screens.${scr.hashlistId}.components.${pc.hashlistId}.`;
+                //let path = `router.screens.${scr.hashlistId}.components.${pc.hashlistId}.`;
                 // set props text or step-max
                 event.remix.setComponentProps(scr.hashlistId, pc.hashlistId, {
                     'max': scrs.length,

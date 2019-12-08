@@ -23,17 +23,11 @@ const diffMiddleware = (store) => (next) => (action) => {
     const lastUpdDiff = diff(Remix._getSchema(), prevState, nextState);
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0;
 
-    // 1. Даже при самом первом запуске diff начальный стейт уже содержит нормализованные по схеме свойства, поскольку @@redux/INIT action запускается без middleware
-    // И срабатывает нормализация в remix high order reducer, получается стейт который содержит все свойства приложения по схеме, но мы еще не разу не оказались в diffMiddleware.
-
-    // что делать?
-    // inited.initialProperties
-    //     это будет правильно
-    //     составить список свойств - чтобы отдать inited.initialProperties нужен новый метод
-    //     это делать в init()
-    //     сделать mode=edit после deserialize() в init(), чтобы события не рассылались во время десериализации
-    //     а после отправим inited initialProperties
-
+    // Важное замечание
+    // Даже при самом первом запуске этой функции diff начальный стейт уже содержит нормализованные по схеме свойства, поскольку @@redux/INIT action запускается без middleware
+    // Происходит нормализация в remix high order reducer. Получается стейт который содержит все свойства приложения по схеме, но мы еще не разу не оказались в diffMiddleware (здесь)
+    // поэтому начальный набор свойств невозможно да и не нужно отправлять как added (добавленные свойства)
+    // решил так - при старте приложения отправляются initialProperties в 'inited' сообщении
     if (changed) {
         // in 'edit' mode Remix send out event messages to RemixContainer
         if (Remix.getMode() === 'edit') {
@@ -41,15 +35,17 @@ const diffMiddleware = (store) => (next) => (action) => {
             Remix._sendOuterEvents();
             if (lastUpdDiff.routerScreensUpdates || lastUpdDiff.updatedScreens.length > 0) {
                 const screensDiff = diffHashlist(prevState.router.screens, nextState.router.screens);
-                Remix._putOuterEventInQueue('screens_updated', { diff: {
-                    added: screensDiff.added,
-                    updated: lastUpdDiff.updatedScreens,
-                    deleted: screensDiff.deleted
-                } });
+                Remix._putOuterEventInQueue('screens_updated', {
+                    diff: {
+                        added: screensDiff.added,
+                        updated: lastUpdDiff.updatedScreens,
+                        deleted: screensDiff.deleted
+                    },
+                    screens: Remix.getScreens()
+                });
                 Remix._sendOuterEvents();
             }
         }
-
         // это событие может вызвать другие actions а значит и эти diffMiddleware обработчики
         // поэтому вызываем в конце (как при рекурсии)
         Remix.fireEvent('property_updated', { diff: lastUpdDiff });
@@ -75,12 +71,12 @@ function diffHashlist(prevHL, nextHL) {
     }
     nextHL._orderedIds.forEach((id) => {
         if (!prevHL[id]) {
-            result.added.push({...nextHL._orderedIds[id], id});
+            result.added.push({...nextHL[id], hashlistId: id });
         }
     });
     prevHL._orderedIds.forEach((id) => {
         if (!nextHL[id]) {
-            result.deleted.push({...prevHL._orderedIds[id], id});
+            result.deleted.push({...prevHL[id], hashlistId: id });
         }
     });
     return result;
