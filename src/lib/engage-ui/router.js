@@ -1,8 +1,11 @@
 import React from 'react'
-import RemixWrapper from './RemixWrapper';
+import RemixWrapper from './RemixWrapper'
 import DataSchema from '../schema'
 import HashList from '../hashlist'
 import Screen from './Screen'
+import { setData } from '../remix'
+
+const refs = {};
 
 /**
  *
@@ -17,28 +20,58 @@ import Screen from './Screen'
             transition: false,
             scrLeft: 0
         };
+        this.timeoutId = null;
     }
 
     componentDidUpdate(prevProps, prevState) {
-        if (prevProps.currentScreenId && this.props.currentScreenId !== prevProps.currentScreenId) {
-            this.setState({
-                prevScreenId: prevProps.currentScreenId,
-                scrLeft: 999,
-                transition: false,
-                showPrevScreen: true
-            });
-            setTimeout(() => {
-                this.setState({
-                    scrLeft: 0,
-                    transition: true
-                })
-            }, 0);
-            setTimeout(() => {
-                this.setState({
-                    showPrevScreen: false
-                })
-            }, 501); // .rmx-scr_container_item.__transition delay
+        if (this.props.mode === 'edit') {
+            // no any transition effect in 'edit' mode
+            if (prevProps.currentScreenId && this.props.currentScreenId !== prevProps.currentScreenId) {
+                this.setState( {prevScreenId: prevProps.currentScreenId} );
+            }
+            this.renderStaticMarkup();
         }
+        else {
+            if (prevProps.currentScreenId && this.props.currentScreenId !== prevProps.currentScreenId) {
+                this.setState({
+                    prevScreenId: prevProps.currentScreenId,
+                    scrLeft: 999,
+                    transition: false,
+                    showPrevScreen: true
+                });
+                setTimeout(() => {
+                    this.setState({
+                        scrLeft: 0,
+                        transition: true
+                    })
+                }, 0);
+                setTimeout(() => {
+                    this.setState({
+                        showPrevScreen: false
+                    })
+                }, 501); // .rmx-scr_container_item.__transition delay
+            }
+        }
+    }
+
+    renderStaticMarkup() {
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+        }
+        this.timeoutId = setTimeout( () => {
+            this.timeoutId = null;
+            const markupData = {};
+            Object.keys(refs).forEach( (screenId) => {
+                const sm = refs[screenId].current.innerHTML;
+                if (this.props.screens[screenId].staticMarkup != sm) {
+                    markupData[`router.screens.${screenId}.staticMarkup`] = sm;
+                }
+            })
+            if (Object.keys(markupData).length > 0) {
+                this.props.setData(markupData);
+            }
+        },
+        3000) // don't render too often. User can perform many microoperations: dragging, resizing, changing colors etc...
     }
 
     render() {
@@ -51,6 +84,19 @@ import Screen from './Screen'
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 &&
                     <p>no screens</p>
+                }
+                {/* Render all screens first time in 'edit' */}
+                {this.props.mode === 'edit' &&
+                    this.props.screens.toArray().map( (s) => {
+                        //if (s.hashlistId !== this.props.currentScreenId) {
+                            if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef();
+                            return (
+                                <div key={s.hashlistId} ref={refs[s.hashlistId]} className="rmx-scr_container_item">
+                                    <Screen {...scr} id={s.hashlistId}></Screen>
+                                </div>
+                            )
+                        //}
+                    })
                 }
                 {this.state.showPrevScreen && prevScr &&
                     <div className="rmx-scr_container_item">

@@ -30,7 +30,8 @@ const schemaData = {
 
     "router.[screens HashList]./^[0-9a-z]+$/.backgroundColor": ScreenComponentsSchema.getDescription('backgroundColor'),
     "router.[screens HashList]./^[0-9a-z]+$/.components": ScreenComponentsSchema.getDescription('components'),
-    "router.[screens HashList]./^[0-9a-z]+$/.tags": ScreenComponentsSchema.getDescription('tags')
+    "router.[screens HashList]./^[0-9a-z]+$/.tags": ScreenComponentsSchema.getDescription('tags'),
+    "router.[screens HashList]./^[0-9a-z]+$/.staticMarkup": ScreenComponentsSchema.getDescription('staticMarkup')
 };
 
 // add common component properties from RemixWrapper

@@ -3,27 +3,27 @@ import { getTokens, matchPropertyPath } from './object-path.js';
 
 const types = {
     'string': {
-        attributes: ["default","enum","minLength","maxLength"],
+        attributes: ["default","serialize","enum","minLength","maxLength",],
         mandatory: ["default"]
     },
     'number': {
-        attributes: ["default","min","max","enum","appWidthProperty","appHeightProperty"],
+        attributes: ["default","serialize","min","max","enum","appWidthProperty","appHeightProperty"],
         mandatory: ["default","min","max"]
     },
     'boolean': {
-        attributes: ["default","enum"], // do not need to specify enum ['true', 'false']
+        attributes: ["default","serialize","enum"], // do not need to specify enum ['true', 'false']
         mandatory: ["default"]
     },
     'hashlist': {
-        attributes: ["default","minLength","maxLength","elementSchema","prototypes"],
+        attributes: ["default","serialize","minLength","maxLength","elementSchema","prototypes"],
         mandatory: ["default"]
     },
     'url': {
-        attributes: ["default"],
+        attributes: ["default","serialize"],
         mandatory: ["default"]
     },
     'color': {
-        attributes: ["default"],
+        attributes: ["default","serialize"],
         mandatory: ["default"]
     }
 }

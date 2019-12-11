@@ -33,7 +33,7 @@ const diffMiddleware = (store) => (next) => (action) => {
         if (Remix.getMode() === 'edit') {
             Remix._putOuterEventInQueue('properties_updated', { diff: lastUpdDiff });
             Remix._sendOuterEvents();
-            if (lastUpdDiff.routerScreensUpdates || lastUpdDiff.updatedScreens.length > 0) {
+            if (lastUpdDiff.routerScreensUpdates || Object.keys(lastUpdDiff.updatedScreens).length > 0) {
                 const screensDiff = diffHashlist(prevState.router.screens, nextState.router.screens);
                 Remix._putOuterEventInQueue('screens_updated', {
                     diff: {
@@ -107,7 +107,7 @@ function diff(schema = null, prevState = {}, nextState = {}) {
             const nsProp = nsRes[i]
             const psProp = (psRes.length > 0) ? getPropAndDelete(psRes, nsProp.path): null;
             regex.lastIndex = 0;
-            const m = regex.exec(nsProp),
+            const m = regex.exec(nsProp.path),
                 screenId = (m && m[0] && m[1]) ? m[1]: null;
             if (psProp) {
                 // this property exists in both states, check for modification

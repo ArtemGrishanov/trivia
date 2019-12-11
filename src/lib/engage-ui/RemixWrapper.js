@@ -3,6 +3,7 @@ import PropsNormalizer from './PropsNormalizer'
 import { getPropertiesBySelector } from '../object-path'
 import { connect } from 'react-redux'
 import LayoutItem from './layout/LayoutItem';
+import { setData } from '../remix'
 
 const componentClassMap = {};
 
@@ -110,7 +111,14 @@ function compose(...enhancers) {
 
 function routerConnect() {
     return connect(
-        (state) => state.router
+        (state) => {
+            return { ...state.router, mode: state.session.mode }
+        },
+        (dispatch) => {
+            return {
+                setData
+            }
+        }
     );
 }
 

@@ -56,7 +56,6 @@ class EngageApp extends React.Component {
 
     componentDidMount() {
         Remix.fireEvent('app_start');
-        console.log('styllle', stylll);
     }
 
     componentDidUpdate() {

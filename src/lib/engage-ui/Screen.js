@@ -69,6 +69,14 @@ export const Schema = new DataSchema({
         maxLength: 1024,
         default: ''
     },
+    // html string of rendered screen
+    'staticMarkup': {
+        type: 'string',
+        minLength: 0,
+        maxLength: 32000,
+        default: '',
+        serialize: false
+    }
 });
 
 export default RemixWrapper(Screen, Schema, 'Screen');

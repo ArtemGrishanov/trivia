@@ -12,6 +12,15 @@ npm install --save-dev webpack-dev-server
 
 Try to run "npm run"
 
+# Project build
+`npm run build`
+
+----
+
+# Build css styles as a separate file
+We need styles to copy and paste them into editor.config.js project file. For screen previews
+`npm run css`
+Open file dist/main.css and copy content. Paste into project 'editor.config.js' file
 
 -----
 

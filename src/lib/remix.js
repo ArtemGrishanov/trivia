@@ -21,9 +21,9 @@ export const REMIX_EVENTS_CLEAR = '__Remix_events_clear__'
 export const REMIX_TRIGGERS_CLEAR = '__Remix_triggers_clear__'
 export const REMIX_ADD_TRIGGER = '__Remix_add_trigger__'
 export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
-// export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
+export const REMIX_SET_MODE = '__Remix_set_mode__'
 
 const remix = {};
 
@@ -42,7 +42,6 @@ let customFunctions = {};
 let normalizer = null;
 let extActions = null;
 let root = null;
-let mode = 'none';
 // let _lastUpdDiff = null;
 let _outerEvents = [];
 let _orderCounter = 0;
@@ -98,7 +97,7 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         //setSize(data.width, data.height);
     }
     if (data.method === 'addhashlistelement') {
-        addHashlistElement(data.propertyPath, data.index, data.prototypeId);
+        addHashlistElement(data.propertyPath, data.index, { newElement: data.newElement });
     }
     if (data.method === 'clonehashlistelement') {
         cloneHashlistElement(data.propertyPath, data.elementId);
@@ -127,7 +126,7 @@ function receiveMessage({origin = null, data = {}, source = null}) {
 *
 * @param {object} data
 */
-function setData(data, forceFeedback) {
+export function setData(data, forceFeedback) {
     store.dispatch({
         type: REMIX_UPDATE_ACTION,
         data,
@@ -178,17 +177,6 @@ function setSize(width, height) {
     }
     if (Object.keys(data).length > 0) {
         setData(data);
-    }
-}
-
-/**
- * Установить режим редактирования приложения
- *
- * @param {string} newmode
- */
-function setMode(newmode) {
-    if (MODE_SET.has(newmode)) {
-        mode = newmode;
     }
 }
 
@@ -402,7 +390,8 @@ function init({/*appStore = null, */externalActions = [], container = null, mode
             //console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message);
         }
     }
-    // mode устанавливаем после десериализации. Чтобы во время нее не рассылать
+    // mode устанавливаем после десериализации. Чтобы во время десериализации не рассылать события об изменении свойств
+    // это произойдет потом единым событием
     setMode(mode);
 }
 
@@ -575,7 +564,7 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function session(state = { triggers: [], events: [], selectedComponentIds: [] }, action) {
+function session(state = { triggers: [], events: [], selectedComponentIds: [], mode: 'none' }, action) {
     switch(action.type) {
         case REMIX_ADD_TRIGGER: {
             //const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
@@ -632,6 +621,12 @@ function session(state = { triggers: [], events: [], selectedComponentIds: [] },
                 selectedComponentIds: action.componentId ? [action.componentId]: []
                 //...state.selectedComponentIds, TODO multiselect mode
             }
+        }
+        case REMIX_SET_MODE: {
+            if (MODE_SET.has(action.mode)) {
+                return { ...state, mode: action.mode }
+            }
+            return state;
         }
         default:
             return state;
@@ -718,6 +713,13 @@ export function selectComponent(componentId) {
         componentId
     });
     postMessage('selected', { componentId });
+}
+
+export function setMode(mode) {
+    store.dispatch({
+        type: REMIX_SET_MODE,
+        mode
+    });
 }
 
 /**
@@ -829,25 +831,28 @@ export function serialize2(state) {
             return;
     }
     schema.selectorsInProcessOrder.forEach((selector) => {
-        const propsToSerialize = getPropertiesBySelector(st, selector);
-        propsToSerialize.forEach((prop) => {
-            if (isHashlistInstance(prop.value)) {
-                let shallowValue = {};
-                // Prepare hashlist with empty items (only keys and orders)
-                // quiz
-                //  questions:
-                //    "54bwai": {},
-                //    "ret67q": {}
-                Object.keys(prop.value).forEach( (k) => shallowValue[k] = {});
-                assignByPropertyString(res, prop.path, {
-                    ...shallowValue,
-                    _orderedIds: prop.value._orderedIds
-                });
-            }
-            else {
-                assignByPropertyString(res, prop.path, prop.value);
-            }
-        });
+        const desc = schema.getDescription(selector);
+        if (desc.serialize !== false) {
+            const propsToSerialize = getPropertiesBySelector(st, selector);
+            propsToSerialize.forEach((prop) => {
+                if (isHashlistInstance(prop.value)) {
+                    let shallowValue = {};
+                    // Prepare hashlist with empty items (only keys and orders)
+                    // quiz
+                    //  questions:
+                    //    "54bwai": {},
+                    //    "ret67q": {}
+                    Object.keys(prop.value).forEach( (k) => shallowValue[k] = {});
+                    assignByPropertyString(res, prop.path, {
+                        ...shallowValue,
+                        _orderedIds: prop.value._orderedIds
+                    });
+                }
+                else {
+                    assignByPropertyString(res, prop.path, prop.value);
+                }
+            });
+        }
     });
     return JSON.stringify(res);
 }
@@ -944,7 +949,7 @@ remix.deserialize2 = deserialize2;
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
 remix.setMode = setMode;
-remix.getMode = () => mode;
+remix.getMode = () => store.getState().session.mode;
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
 remix.clearTriggersAndEvents = clearTriggersAndEvents;
