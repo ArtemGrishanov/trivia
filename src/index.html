@@ -20,7 +20,7 @@
         function checkAndReply(loaded) {
             if (loaded) loadStatus++;
             // send 'embedded' back to RemixContainer
-            if (loadStatus === loadStuff) {
+            if (cntSource && loadStatus === loadStuff) {
               cntSource.postMessage({ method: 'embedded' }, cntOrigin);
             }
         }
@@ -67,16 +67,42 @@
                     origin: origin,
                     source: source
                 });
-                cntSource.postMessage({
-                    method: 'inited',
-                    initialProperties: Remix.getProperties(),
-                    schema: Remix._getSchema(),
-                    state: Remix.serialize2(),
-                    screens: Remix.getScreens(),
-                }, cntOrigin);
+                if (cntSource) {
+                    cntSource.postMessage({
+                        method: 'inited',
+                        initialProperties: Remix.getProperties(),
+                        schema: Remix._getSchema(),
+                        state: Remix.serialize2(),
+                        screens: Remix.getScreens(),
+                    }, cntOrigin);
+                }
             }
         }
-        window.addEventListener("message", receiveMessage, false);
+        if (window.location.search.indexOf('testlocal') >= 0) {
+            // run in browser 'http://localhost:8082/?testlocal'
+            // runs as single app, no editor. Expect main + defaults on the same host
+            receiveMessage({data:{
+                method: 'embed',
+                script: window.location.origin+'/main.js'
+            }})
+            setTimeout(function() {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', window.location.origin+'/defaults.json');
+                xhr.send()
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
+                        receiveMessage({data:{
+                            method: 'init',
+                            defaults: xhr.responseText
+                        }});
+                    }
+                }
+            },500)
+        }
+        else {
+            // normal launch in RContainer
+            window.addEventListener("message", receiveMessage, false);
+        }
     </script>
   </body>
 </html>
