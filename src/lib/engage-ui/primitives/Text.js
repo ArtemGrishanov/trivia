@@ -1,6 +1,9 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
+import CKEditor from '@ckeditor/ckeditor5-react';
+//TODO try import @ckeditor/ckeditor5-build-balloon
+import BaloonEditor from '@ckeditor/ckeditor5-build-balloon-block';
 
 // Text animation ideas https://tobiasahlin.com/moving-letters/
 
@@ -42,7 +45,29 @@ class Text extends React.Component {
             st.fontWeight = 'bold';
         }
         const text = (this.props.animationOnAppearance === 'none') ? this.props.text: this.state.animatedText;
-        return <p className="rmx-text" style={st}>{text}</p>
+        // return <p className="rmx-text" style={st}>{text}</p>
+        return (
+            <div className="rmx-text" style={st}>
+                <CKEditor
+                    editor={ BaloonEditor }
+                    data={ text }
+                    onInit={ editor => {
+                        // You can store the "editor" and use when it is needed.
+                        console.log( 'Editor is ready to use!', editor );
+                    } }
+                    onChange={ ( event, editor ) => {
+                        const data = editor.getData();
+                        console.log( { event, editor, data } );
+                    } }
+                    onBlur={ ( event, editor ) => {
+                        console.log( 'Blur.', editor );
+                    } }
+                    onFocus={ ( event, editor ) => {
+                        console.log( 'Focus.', editor );
+                    } }
+                />
+            </div>
+        )
     }
 
     componentDidMount() {

@@ -62,9 +62,11 @@ const refs = {};
             this.timeoutId = null;
             const markupData = {};
             Object.keys(refs).forEach( (screenId) => {
-                const sm = refs[screenId].current.innerHTML;
-                if (this.props.screens[screenId].staticMarkup != sm) {
-                    markupData[`router.screens.${screenId}.staticMarkup`] = sm;
+                if (refs[screenId].current) {
+                    const sm = refs[screenId].current.innerHTML;
+                    if (this.props.screens[screenId].staticMarkup != sm) {
+                        markupData[`router.screens.${screenId}.staticMarkup`] = sm;
+                    }
                 }
             })
             if (Object.keys(markupData).length > 0) {
