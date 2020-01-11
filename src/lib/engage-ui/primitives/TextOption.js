@@ -32,7 +32,7 @@ class TextOption extends React.Component {
         const withIndic = this.props.correctIndicator !== 'none';
         const withPercent = this.props.percent > 0;
         return (
-            <div className={'rmx-option' + (withIndic ? ' withIndic': '') + (withPercent ? ' withPercent': '')} style={st}>
+            <div className={'rmx-component rmx-option' + (withIndic ? ' withIndic': '') + (withPercent ? ' withPercent': '')} style={st}>
                 {this.props.percent > 0 &&
                     <div className='rmx-percent_info'>
                         <div className='rmx-pb_wr'>
@@ -45,7 +45,7 @@ class TextOption extends React.Component {
                 }
                 {this.props.correctIndicator !== 'none' &&
                     <div className={'rmx-option_indicator ' + (withPercent ? 'withPercent': '')}>
-                        <CorrectIcon mod={this.props.correctIndicator}/>
+                        <CorrectIcon left={0} top={0} width={24} height={24} mod={this.props.correctIndicator}/>
                     </div>
                 }
                 {this.props.text}

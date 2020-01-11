@@ -10,8 +10,9 @@ const componentClassMap = {};
 export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     'id': {
         type: 'string',
-        minLength: 4,
+        minLength: 1,
         maxLength: 1024,
+        //TODO default generate id
         default: 'none'
     },
     'tags': {
@@ -35,26 +36,41 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     'width': {
         type: 'number',
         min: 1,
-        max: 100,
-        default: 30
+        max: 9999,
+        default: 50
+    },
+    'widthStrategy': {
+        type: 'string',
+        enum: ['fixed', 'dynamic'],
+        default: 'fixed'
     },
     'height': {
         type: 'number',
         min: 1,
-        max: 100,
-        default: 30
+        max: 9999,
+        default: 50
     },
     'left': {
         type: 'number',
-        min: -50,
-        max: 150,
-        default: 11
+        min: -1000,
+        max: 9999,
+        default: 100
+    },
+    'leftStrategy': {
+        type: 'string',
+        enum: ['dynamic', 'fixed'],
+        default: 'dynamic'
     },
     'top': {
         type: 'number',
-        min: -100,
-        max: 3000,
-        default: 11
+        min: -1000,
+        max: 9999,
+        default: 100
+    },
+    'displayType': {
+        type: 'string',
+        enum: ['flow','decor'],
+        default: 'flow'
     }
 };
 
@@ -77,7 +93,7 @@ export default (Component, Schema, DisplayName) => {
         default: {
             composed = compose(
                 LayoutItem(),
-                sizeMe({monitorHeight: true, noPlaceholder: true}),
+                // sizeMe({monitorHeight: true, noPlaceholder: true}),
                 //TODO It works without componentConnect Is screenConnect sufficient?
                 //componentConnect(),
                 withPropNormalizer(Schema, DisplayName)

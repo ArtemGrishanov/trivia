@@ -3,7 +3,7 @@ import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 
 function Button({text="Button title", colorMod = "blue", sizeMod = "normal"}) {
-    return <button className={`rmx-button __${colorMod} __${sizeMod}`}>{text}</button>
+    return <button className={`rmx-component rmx-button __${colorMod} __${sizeMod}`}>{text}</button>
 }
 
 /**

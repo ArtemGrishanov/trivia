@@ -21,7 +21,6 @@ const REVEAL_ANIM_TIME = 1000; // slightly larger then 1s transition in tstx_pro
 class ProgressiveImage extends React.Component {
 
     static getImageState({image, maxWidth, maxHeight}) {
-        let imgRatio = image.naturalWidth / image.naturalHeight;
         let w = maxWidth, h = maxHeight;
         if (maxWidth > 0) {
             w = maxWidth;
@@ -50,6 +49,7 @@ class ProgressiveImage extends React.Component {
         //     height: h
         // });
         return {
+            imageRatio: image.naturalWidth / image.naturalHeight,
             image: image,
             step: STATE_REVEALING,
             width: w,
@@ -187,13 +187,22 @@ class ProgressiveImage extends React.Component {
     render() {
         const showThumb = this.isThumbLoaded() && (this.state.step === STATE_LOADING || this.state.step === STATE_REVEALING);
         const showOriginal = this.isLoaded() && (this.state.step === STATE_REVEALING || this.state.step === STATE_SHOW);
-        const cntSt = {
-            width: '100%',
-            height: '100%',
-            maxWidth: this.state.width+"px"
-        };
-        if (this.state.height > 0) {
-            cntSt.height = this.state.height+"px";
+        const originImgStyle = {};
+        if (this.props.backgroundSize === 'cover') {
+            // originImgStyle['marginLeft'] = '-100%';
+            // originImgStyle['marginRight'] = '-100%';
+            // console.log(`Progr Img render w=${this.props.width} h=${this.props.height}`)
+            if (this.state.imageRatio > this.props.width / this.props.height) {
+                originImgStyle['maxWidth'] = 'none';
+                originImgStyle['height'] = '100%';
+            }
+            else {
+                originImgStyle['maxHeight'] = 'none';
+                originImgStyle['width'] = '100%';
+            }
+        }
+        else if (this.props.backgroundSize === 'contain') {
+
         }
         const alignCntSt = {
             lineHeight: (this.state.height-3)+"px" //TODO -3 determine this later
@@ -211,8 +220,7 @@ class ProgressiveImage extends React.Component {
         }
         let thumbImgCl = this.state.thumbImageMods;
         return (
-            <div className={"image_cnt " + cntCl} style={cntSt} onClick={this.onClick}>
-
+            <div className={`rmx-component image_cnt ${cntCl}`} /*style={cntSt}*/ onClick={this.onClick}>
                     {showThumb &&
                         <div className="image_align_cnt" style={alignCntSt}>
                             <img alt="" className={"preview " + thumbImgCl} src={this.props.srcThumb}/>
@@ -224,7 +232,7 @@ class ProgressiveImage extends React.Component {
                     }
                     {showOriginal &&
                         <div className="image_align_cnt" style={alignCntSt}>
-                            <img alt="" className={"original " + mainImgCl} src={this.props.src}/>
+                            <img alt="" className={"original " + mainImgCl} src={this.props.src} style={originImgStyle}/>
                             {this.state.blur &&
                                 <div className="cursor_wr">
                                     <svg id="pb-cp-icon-hand-press-lg" viewBox="0 0 94.2691 104.3058" width="100%" height="100%">
@@ -257,17 +265,22 @@ class ProgressiveImage extends React.Component {
 }
 
 export const Schema = new DataSchema({
-    "maxWidth": {
+    "width": {
         type: 'number',
         min: 10,
         max: 2000,
         default: 400
     },
-    "maxHeight": {
+    "height": {
         type: 'number',
         min: 10,
         max: 2000,
         default: 300
+    },
+    "backgroundSize": {
+        type: 'string',
+        enum: ['cover', 'contain'],
+        default: 'cover'
     },
     "blur": {
         type: 'boolean',

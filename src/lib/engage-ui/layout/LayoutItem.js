@@ -3,38 +3,9 @@ import { connect } from 'react-redux';
 import Remix from '../../../lib/remix'
 import { selectComponent, setComponentPosition } from '../../../lib/remix'
 
-//TODO minContentWidth minContentHeight определяется на ширине контента 1x1 px
-// но оказывается что некоторые компоненты например TextOption имеют наименьшую высоту при ширине более чем 70px, а не при ширине 1px
-// подумать над другой логикой
-// это нужно для того чтобы понимать насколько можно уменьшать компонент при ресайзе
-// возможно придется отвечать на вопрос можем ли мы уменьшить компонент прямо во время процедуры ресайза:
-// - пробуем уменьшить ширину компонента и смотрим на то как "ответит" компонент - уменьшится ли или нет. Если нет - возвращаем контейнер в исходное состояние
-
-//TODO если слева уменьшаем ширину компонента или сверху уменьшаем ширину то компонент смещается при достижении минимальной ширины
-// надо сделать так: когда ширина/высота достигла минимального значения то не менять left/top
-
-//TODO Element {children} не определяет корректно размер контента
-
-//TODO add align properties: vertical and horizonal, when content less then LayoutItem
-
-
-/**
- * Обладает свойствами:
- * - содержит один элемент (со статичными или динамичными размерами width:100%)
- * - измеряет размер контента который внутри.
- * - измеряет минимальный размер контента
- * - поддерживается перетаскивание
- * - ресайз: можно попытаться расширить или сжать, потянув за уголки
- * - Не меньше чем реальный размер контента или чем 30х20 пикселей. Если LayoutItem больше контента то контент центрируется внутри
- * - Устанавливает размер в % относительно контейнера LayoutContainer
- * - контент центрируется
- * - Показывается рамка обозначающая границы контента и LayoutItem
- *
- *
- */
-const MIN_WIDTH = 30; // px
+const MIN_WIDTH = 20; // px
 const MIN_HEIGHT = 20; // px
-const MAGNET_DISTANCE = 10; // px
+const MAGNET_DISTANCE = 7; // px
 
 function toPercent(widthPx, containerWidth) {
     if (widthPx >= 0 && containerWidth >= 0) {
@@ -57,10 +28,6 @@ function calcState({
         propWidth,
         propHeight,
         propContainerWidth,
-        contentWidth,
-        contentHeight,
-        contentMinWidth,
-        contentMinHeight,
         left,
         top,
         width,
@@ -68,18 +35,14 @@ function calcState({
 
         propMagnetsVertical
     }) {
-
-        if (width === undefined || state.prevPropWidth != propWidth) {
+        const isPercent = typeof propWidth === 'string' && propWidth.length > 2 ? propWidth[propWidth.length-1] === '%': false;
+        const newPropWidth = parseInt(propWidth);
+        if (width === undefined || state.prevPropWidth != newPropWidth) {
             // auto width
-            if (propWidth >= 0) {
+            if (newPropWidth >= 0) {
                 // props имеют наибольший приоритет при изначальной установке
                 // в props передаются размеры при десериализации
-                width = propWidth;
-            }
-            else if (contentWidth > 0 && state.contentWidth === undefined && propContainerWidth > 0) {
-                // как только определился размер контента, устанавливаем ширину LayoutItem равной контенту
-                // при условии что в props не указана ширина
-                width = toPercent(contentWidth, propContainerWidth);
+                width = newPropWidth;
             }
         }
 
@@ -88,43 +51,22 @@ function calcState({
             if (propHeight >= 0) {
                 height = propHeight;
             }
-            else if (contentHeight > 0 && state.contentHeight === undefined) {
-                // как только определен размер контента ставим высоту
-                height = contentHeight;
-            }
-        }
-
-        // set min width first time
-        if (contentMinWidth === undefined && contentWidth >= 0) {
-            //TODO
-            // минимальный размер контента пока определяется не всегда корректно
-            //contentMinWidth = contentWidth;
-        }
-
-        // set min width first time
-        if (contentMinHeight === undefined && contentHeight >= 0) {
-            //TODO
-            // минимальный размер контента пока определяется не всегда корректно
-            //contentMinHeight = contentHeight;
-        }
-
-        // width cannot be less then min content
-        if (contentMinWidth > 0 && toPx(width, propContainerWidth) < contentMinWidth) {
-            width = toPercent(contentMinWidth, propContainerWidth);
         }
 
         // width normalization
-        if (toPx(width, propContainerWidth) < MIN_WIDTH) {
-            width = toPercent(MIN_WIDTH, propContainerWidth);
+        if (isPercent) {
+            const wpx = toPx(width, propContainerWidth);
+            if (wpx < MIN_WIDTH || wpx === undefined) {
+                // wpx === undefined when width is not set in props
+                width = toPercent(MIN_WIDTH, propContainerWidth);
+            }
         }
-
-        // height cannot be less then content
-        if (contentMinHeight > 0 && height < contentMinHeight) {
-            height = contentMinHeight;
+        else if (width < MIN_WIDTH) {
+            width = MIN_WIDTH;
         }
 
         // height normalization
-        if (height < MIN_HEIGHT) {
+        if (height < MIN_HEIGHT || height === undefined) {
             height = MIN_HEIGHT;
         }
 
@@ -139,6 +81,7 @@ function calcState({
         }
 
         // trying to find an appropriate magnet to align 'left'
+        //TODO magnets with no type
         if (propMagnetsVertical) {
             const magnet = propMagnetsVertical.find( (mv) => {
                 let ll = left;
@@ -148,7 +91,7 @@ function calcState({
                 else if (mv.type === 'right') {
                     ll += width;
                 }
-                return Math.abs(mv.left - ll) < toPercent(MAGNET_DISTANCE, propContainerWidth)
+                return Math.abs(mv.left - ll) < MAGNET_DISTANCE //MAGNET_DISTANCE, propContainerWidth)
             });
             if (magnet) {
                 if (magnet.type === 'center') {
@@ -168,10 +111,6 @@ function calcState({
             left: left,
             width: width,
             height: height,
-            contentWidth: contentWidth,
-            contentHeight: contentHeight,
-            contentMinWidth: contentMinWidth,
-            contentMinHeight: contentMinHeight,
 
             prevPropTop: propTop,
             prevPropLeft: propLeft,
@@ -201,20 +140,15 @@ export default function LayoutItem() {
                         propWidth: props.width,
                         propHeight: props.height,
                         propContainerWidth: props.containerWidth,
-                        contentWidth: state.contentWidth,
-                        contentHeight: state.contentHeight,
                         width: state.width,
                         height: state.height,
                         top: state.top,
-                        left: state.left,
-                        contentMinWidth: state.contentMinWidth,
-                        contentMinHeight: state.contentMinHeight
+                        left: state.left
                     })
                 }
             }
 
             static defaultProps = {
-                mod: 'absolute',
                 left: 33,
                 top: 50,
                 width: undefined,
@@ -224,7 +158,6 @@ export default function LayoutItem() {
             }
 
             constructor(props) {
-                //TODO props чтобы задать начальную позицию для компонента а не 33 50
                 super(props);
                 this.state = {
                     top: undefined,
@@ -235,6 +168,7 @@ export default function LayoutItem() {
                     contentHeight: undefined
                 }
                 this.thisRef = React.createRef();
+                this.childCntRef = React.createRef();
                 this.contentObserver = null;
 
                 // dragging/resizing
@@ -248,17 +182,28 @@ export default function LayoutItem() {
                 this.onWindowMouseMove = this.onWindowMouseMove.bind(this);
                 this.onWindowMouseUp = this.onWindowMouseUp.bind(this);
                 this.onClick = this.onClick.bind(this);
+                this.mouseDownRecently = false;
+                this.doubleClicked = false;
+                this.minWidthPx = null;
             }
 
             onMouseDown(e) {
-                if (Remix.getMode() === 'edit') {
+                if (this.props.editable) {
                     // use selection mode for external services (like Editor)
                     // and keep element selected (show selection border)
                     selectComponent(this.props.id);
                     this.itemNode = this.thisRef.current;
-                    if (this.itemNode) {
+                    this.doubleClicked = false;
+                    if (this.mouseDownRecently) {
+                        this.doubleClicked = true;
+                        console.log('dblclicked');
+                    }
+                    this.mouseDownRecently = true;
+                    setTimeout(() => {
+                        this.mouseDownRecently = false;
+                    }, 200);
+                    if (this.itemNode && !this.doubleClicked) {
                         this.markerId = e.currentTarget.getAttribute('datamarker');
-                        e.stopPropagation();
                         this.isItemMouseDown = true;
                         // TODO force select (hover) while dragging or resizing
                         if (this.itemNode.style.left.indexOf('px') > 0) {
@@ -272,9 +217,11 @@ export default function LayoutItem() {
                             height: parseFloat(this.state.height)
                         }
                         this.mouseStartPosition = {
-                            left: toPercent(e.clientX, this.props.containerWidth),
+                            left: e.clientX, //toPercent(e.clientX, this.props.containerWidth),
                             top: e.clientY
                         }
+                        this.minWidthPx = toPercent(MIN_WIDTH, this.props.containerWidth);
+                        e.stopPropagation();
                     }
                 }
             }
@@ -286,7 +233,7 @@ export default function LayoutItem() {
             onWindowMouseMove(e) {
                 if (this.isItemMouseDown) {
                     this.isDragging = true;
-                    const dx = toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
+                    const dx = e.clientX - this.mouseStartPosition.left;//toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
                     const dy = e.clientY - this.mouseStartPosition.top; // px
                     let l, t, w, h;
                     if (this.markerId == 9) {
@@ -298,31 +245,23 @@ export default function LayoutItem() {
                     }
                     else if (this.markerId == 1 || this.markerId == 7 || this.markerId == 8) {
                         w = this.startAttr.width - dx;
-                        // ????
-                        l = this.startAttr.left + dx;
-                        // if (w !== this.itemNode.style.width) {
-                        //     this.itemNode.style.width = w;
-                        //     this.itemNode.style.left = (this.startAttr.left + dx) + '%';
-                        // }
+                        if (w > this.minWidthPx) {
+                            l = this.startAttr.left + dx;
+                        }
                     }
                     else if (this.markerId == 6) {
                         h = this.startAttr.height + dy;
                     }
                     else if (this.markerId == 2) {
                         h = this.startAttr.height - dy;
-                        t = this.startAttr.top + dy;
-                        // ????
-                        // if (h !== this.itemNode.style.height) {
-                        //     this.itemNode.style.height = h;
-                        //     this.itemNode.style.top = (this.startAttr.top + dy) + 'px';
-                        // }
+                        if (h > MIN_HEIGHT) {
+                            t = this.startAttr.top + dy;
+                        }
                     }
                     if (l !== undefined || t !== undefined || w !== undefined || h != undefined) {
                         this.setState({
                             ...calcState({
                                 state: this.state,
-                                contentWidth: this.state.contentWidth,
-                                contentHeight: this.state.contentHeight,
                                 propContainerWidth: this.props.containerWidth,
                                 propLeft: this.props.left,
                                 propTop: this.props.top,
@@ -332,8 +271,6 @@ export default function LayoutItem() {
                                 height: h === undefined ? this.state.height: h,
                                 top: t === undefined ? this.state.top: t,
                                 left: l === undefined ? this.state.left: l,
-                                contentMinWidth: this.state.contentMinWidth,
-                                contentMinHeight: this.state.contentMinHeight,
 
                                 propMagnetsVertical: this.props.magnetsVertical
                             })
@@ -369,30 +306,13 @@ export default function LayoutItem() {
             }
 
             onContentSize(size) {
-
-                //console.log('onContentSize', size);
-                this.setState({
-                    ...calcState({
-                        state: this.state,
-                        contentWidth: size.width,
-                        contentHeight: size.height,
-                        propLeft: this.props.left,
-                        propTop: this.props.top,
-                        propContainerWidth: this.props.containerWidth,
-                        propWidth: this.props.width,
-                        propHeight: this.props.height,
-                        width: this.state.width,
-                        height: this.state.height,
-                        top: this.state.top,
-                        left: this.state.left,
-                        contentMinWidth: this.state.contentMinWidth,
-                        contentMinHeight: this.state.contentMinHeight
-                    })
-                });
+                // if (!this.props.editable) {
+                //     this.checkVerticalOverflow();
+                // }
             }
 
             onClick() {
-                if (Remix.getMode() === 'edit') {
+                if (this.props.editable) {
 
                 }
                 else {
@@ -402,9 +322,9 @@ export default function LayoutItem() {
 
             render() {
                 const st = {
-                    left: this.state.left+'%',
+                    left: this.state.left+'px',
                     top: this.state.top+'px',
-                    width: this.state.width+'%',
+                    width: this.state.width+'px',
                     height: this.state.height+'px'
                 };
                 // align child inside container
@@ -425,14 +345,14 @@ export default function LayoutItem() {
                 // }
                 //TODO
 
-                const editing = Remix.getMode() === 'edit';
                 const sizemsg = Math.round(toPx(this.state.width, this.props.containerWidth)) + 'x' + Math.round(this.state.height);
                 return (
-                    <div ref={this.thisRef} className={"rmx-layout_item __"+this.props.mod} style={st} datamarker="9" onMouseDown={this.onMouseDown} onClick={this.onClick}>
-                        <div className="rmx-l_child_cnt" style={cst}>
-                            <Component {...this.props} onSize={this.onContentSize.bind(this)}></Component>
+                    <div ref={this.thisRef} dataid={this.props.id} className="rmx-layout_item" style={st} datamarker="9" onMouseDown={this.onMouseDown} onClick={this.onClick}>
+                        <div ref={this.props.setRef} className="rmx-l_child_cnt" style={cst}>
+                            {/* Передать измененные width,height из this.state которые пользователь изменил при перетаскивании и ресайзе */}
+                            <Component {...this.props} {...this.state} /*onSize={this.onContentSize.bind(this)}*/></Component>
                         </div>
-                        {editing &&
+                        {this.props.editable &&
                             <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}>
                                 {/* TODO uncomment */}
                                 {/* <p className="rmx-l-info">{sizemsg}</p> */}

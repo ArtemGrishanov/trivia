@@ -1,5 +1,5 @@
 
-export default class Flow {
+export default class Sequence {
     getNextPositionForElement({componentType, id}) {
 
     }

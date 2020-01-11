@@ -29,6 +29,11 @@ class Text extends React.Component {
             animatedText: '',
             animationOnAppearance: 'none'
         }
+        this.onMouseDown = this.onMouseDown.bind(this);
+    }
+
+    onMouseDown() {
+        console.log('text mousedown');
     }
 
     render() {
@@ -47,26 +52,35 @@ class Text extends React.Component {
         const text = (this.props.animationOnAppearance === 'none') ? this.props.text: this.state.animatedText;
         // return <p className="rmx-text" style={st}>{text}</p>
         return (
-            <div className="rmx-text" style={st}>
-                <CKEditor
-                    editor={ BaloonEditor }
-                    data={ text }
-                    onInit={ editor => {
-                        // You can store the "editor" and use when it is needed.
-                        console.log( 'Editor is ready to use!', editor );
-                    } }
-                    onChange={ ( event, editor ) => {
-                        const data = editor.getData();
-                        console.log( { event, editor, data } );
-                    } }
-                    onBlur={ ( event, editor ) => {
-                        console.log( 'Blur.', editor );
-                    } }
-                    onFocus={ ( event, editor ) => {
-                        console.log( 'Focus.', editor );
-                    } }
-                />
-            </div>
+            <>
+                {!this.props.editing &&
+                    <p className="rmx-component rmx-text" style={st} onMouseDown={this.onMouseDown}>{text}</p>
+                }
+                {this.props.editing &&
+                    <div className="rmx-component rmx-text" style={st}>
+                        <CKEditor
+                            //LayoutItem UI blocks CKEditor UI
+                            //TODO set changed text to the remix store
+                            editor={ BaloonEditor }
+                            data={ text }
+                            onInit={ editor => {
+                                // You can store the "editor" and use when it is needed.
+                                console.log( 'Editor is ready to use!', editor );
+                            } }
+                            onChange={ ( event, editor ) => {
+                                const data = editor.getData();
+                                console.log( { event, editor, data } );
+                            } }
+                            onBlur={ ( event, editor ) => {
+                                console.log( 'Blur.', editor );
+                            } }
+                            onFocus={ ( event, editor ) => {
+                                console.log( 'Focus.', editor );
+                            } }
+                        />
+                    </div>
+                }
+            </>
         )
     }
 
@@ -102,6 +116,11 @@ class Text extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
+    'editing': {
+        serialize: 'false',
+        type: 'boolean',
+        default: false
+    },
     'text': {
         type: 'string',
         minLength: 1,

@@ -24,6 +24,18 @@ Open file dist/main.css and copy content. Paste into project 'editor.config.js' 
 
 -----
 
+# Localhost dev run
+Run in browser 'http://localhost:8082/?testlocal'
+This command runs as single app, no editor. Expect main + defaults on the same host
+
+-----
+
+See different run options in packeage.json/scripts
+For example,run UI components demo page:
+`npm run ui-demo`
+
+-----
+
 
 'screens_updated' event
 added:Array - some screens have been created

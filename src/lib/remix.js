@@ -949,7 +949,7 @@ remix.deserialize2 = deserialize2;
 remix.dispatchAction = dispatchAction;
 remix.addTrigger = addTrigger;
 remix.setMode = setMode;
-remix.getMode = () => store.getState().session.mode;
+remix.getMode = () => store ? store.getState().session.mode: 'none';
 remix.fireEvent = fireEvent;
 remix.setCurrentScreen = setCurrentScreen;
 remix.clearTriggersAndEvents = clearTriggersAndEvents;

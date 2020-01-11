@@ -8,9 +8,13 @@ export default function PropsNormalizer(Schema) {
         return class extends React.Component {
 
             static getDerivedStateFromProps(props, state) {
+                const np = n.process({...props});
+                if (props.normalizerRef) {
+                    props.normalizerRef(np);
+                }
                 return {
                     ...state,
-                    normalizedProps: n.process({...props})
+                    normalizedProps: np
                 }
             }
 

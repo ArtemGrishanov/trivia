@@ -13,7 +13,7 @@ function onClick() {
 }
 
 function FbButton({shareText="Share", sizeMod = "normal"}) {
-    return <button className={`rmx-fb_button __${sizeMod}`} onClick={onClick}>
+    return <button className={`rmx-component rmx-fb_button __${sizeMod}`} onClick={onClick}>
             <span className='rmx-btn-i'>{icon}</span>{shareText}
         </button>;
 }
