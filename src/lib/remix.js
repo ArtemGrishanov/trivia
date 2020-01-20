@@ -117,7 +117,8 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         }
     }
     if (data.method === 'select') {
-        selectComponent(data.componentId);
+        // postMessage=false, we dont need to notify container as has just got message from it
+        selectComponents(data.componentIds, {}, {postMessage: false});
     }
 }
 
@@ -618,8 +619,7 @@ function session(state = { triggers: [], events: [], selectedComponentIds: [], m
         case REMIX_SELECT_COMPONENT: {
             return {
                 ...state,
-                selectedComponentIds: action.componentId ? [action.componentId]: []
-                //...state.selectedComponentIds, TODO multiselect mode
+                selectedComponentIds: action.componentIds || []
             }
         }
         case REMIX_SET_MODE: {
@@ -705,14 +705,27 @@ export function postMessage(method, data) {
  * Select a component on the screen
  * User can select some components
  *
- * @param {string} componentId
+ * @param {Array} componentIds - because we need support multiselect
+ * @param {object} data - selected component props, screen props, dom rects, etc...
+ * @param {boolean} options.postMessage - option to send or not notification back to container
  */
-export function selectComponent(componentId) {
-    store.dispatch({
-        type: REMIX_SELECT_COMPONENT,
-        componentId
-    });
-    postMessage('selected', { componentId });
+export function selectComponents(componentIds = [], data = {}, options = {postMessage: true}) {
+    if (componentIds === null) {
+        componentIds = [];
+    }
+    const state = store.getState();
+    // check if arrays contain the same ids
+    // use this comparison method as arrays contain strings only
+    if (JSON.stringify(state.router.selectedComponentIds) !== JSON.stringify(componentIds)) {
+        store.dispatch({
+            type: REMIX_SELECT_COMPONENT,
+            componentIds
+        });
+        if (options.postMessage) {
+            // deep data clone is needed before postMessage
+            postMessage('selected', {componentIds, ...clone(data)});
+        }
+    }
 }
 
 export function setMode(mode) {
@@ -738,6 +751,24 @@ export function setComponentPosition({id, top, left, width, height}) {
         if (height !== undefined) props.height = height;
         setComponentProps(screenId, id, props);
     }
+}
+
+/**
+ * Returns active screen id stored in router
+ */
+export function getActiveScreenId() {
+    return store.getState().router.currentScreenId;
+}
+
+/**
+ * Return active screen properties
+ */
+export function getActiveScreen() {
+    const state = store.getState();
+    if (state.router.currentScreenId) {
+        return state.router.screens[state.router.currentScreenId];
+    }
+    return null;
 }
 
 /**

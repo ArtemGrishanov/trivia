@@ -21,6 +21,7 @@
     "build": "webpack --config webpack.prod.js",
     "css": "webpack --config webpack.css.js",
     "ui-demo": "webpack-dev-server --open --config webpack.ui-demo.js",
+    "ui-demo-build": "webpack --config webpack.ui-demo.js",
     "babel": "babel --presets es2015 js/main.js -o build/main.bundle.js",
     "start": "webpack-dev-server --open --config webpack.dev.js",
     "eject": "react-scripts eject"

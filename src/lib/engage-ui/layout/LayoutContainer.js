@@ -31,7 +31,7 @@ class LayoutContainer extends React.Component {
         if (props.globalTestId) {
             window[props.globalTestId] = this;
         }
-        this.childRefs = [];
+        this.childRefs = {};
         this.userDefinedNormalizedProps = {};
     }
 
@@ -63,10 +63,10 @@ class LayoutContainer extends React.Component {
     setRef(componentId, element) {
         if (componentId) {
             this.childRefs[componentId] = element;
-            //TODO zombie components?
-            if (this.props.children.length < Object.keys(this.childRefs).length) {
-                throw new Error('Zombie components, check pls');
-            }
+            //TODO zombie components? Подумать нужна ли здесь эта проверка
+            // if (this.props.children.length < Object.keys(this.childRefs).length) {
+            //     throw new Error('Zombie components, check pls');
+            // }
         }
     }
 

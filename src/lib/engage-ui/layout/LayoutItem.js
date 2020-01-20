@@ -1,7 +1,12 @@
 import React from 'react'
 import { connect } from 'react-redux';
 import Remix from '../../../lib/remix'
-import { selectComponent, setComponentPosition } from '../../../lib/remix'
+import {
+    selectComponents,
+    setComponentPosition,
+    getActiveScreenId,
+    getActiveScreen
+} from '../../../lib/remix'
 
 const MIN_WIDTH = 20; // px
 const MIN_HEIGHT = 20; // px
@@ -189,9 +194,7 @@ export default function LayoutItem() {
 
             onMouseDown(e) {
                 if (this.props.editable) {
-                    // use selection mode for external services (like Editor)
-                    // and keep element selected (show selection border)
-                    selectComponent(this.props.id);
+                    selectComponents([]);
                     this.itemNode = this.thisRef.current;
                     this.doubleClicked = false;
                     if (this.mouseDownRecently) {
@@ -280,29 +283,45 @@ export default function LayoutItem() {
                 }
             }
 
-            onWindowMouseUp() {
-                if (this.isDragging) {
-                    this.isDragging = false;
-                    // save size and position after dragging
-                    setComponentPosition({
-                        id: this.props.id,
-                        top: this.state.top,
-                        left: this.state.left,
-                        width: this.state.width,
-                        height: this.state.height
-                    });
+            onWindowMouseUp(e) {
+                if (this.props.editable) {
+                    if (this.isDragging) {
+                        this.isDragging = false;
+                        // save size and position after dragging
+                        setComponentPosition({
+                            id: this.props.id,
+                            top: this.state.top,
+                            left: this.state.left,
+                            width: this.state.width,
+                            height: this.state.height
+                        });
+                    }
+                    else if (this.isItemMouseDown) {
+                        // use selection mode for external services (like Editor)
+                        // and keep element selected (show selection border)
+                        selectComponents([this.props.id], {
+                            componentProps: {[this.props.id]: {...this.props}},
+                            clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect(): {},
+                            screenProps: {...getActiveScreen()},
+                            screenId: getActiveScreenId()
+                        });
+                    }
+                    this.isItemMouseDown = false;
                 }
-                this.isItemMouseDown = false;
             }
 
             componentDidMount() {
-                window.addEventListener('mousemove', this.onWindowMouseMove);
-                window.addEventListener('mouseup', this.onWindowMouseUp);
+                if (this.props.editable) {
+                    window.addEventListener('mousemove', this.onWindowMouseMove);
+                    window.addEventListener('mouseup', this.onWindowMouseUp);
+                }
             }
 
             componentWillUnmount() {
-                window.removeEventListener('mousemove', this.onWindowMouseMove);
-                window.removeEventListener('mouseup', this.onWindowMouseUp);
+                if (this.props.editable) {
+                    window.removeEventListener('mousemove', this.onWindowMouseMove);
+                    window.removeEventListener('mouseup', this.onWindowMouseUp);
+                }
             }
 
             onContentSize(size) {
