@@ -1,4 +1,4 @@
-import { isHashlistInstance } from '../util/util.js'
+import { isHashlistInstance, getScreenIdFromPath, getComponentIdFromPath } from '../util/util.js'
 import { getPropertiesBySelector, deserialize } from '../../object-path.js'
 import { init } from '../../../actions.js';
 
@@ -31,7 +31,7 @@ const diffMiddleware = (store) => (next) => (action) => {
     if (changed) {
         // in 'edit' mode Remix send out event messages to RemixContainer
         if (Remix.getMode() === 'edit') {
-            Remix._putOuterEventInQueue('properties_updated', { diff: lastUpdDiff });
+            Remix._putOuterEventInQueue('properties_updated', { diff: lastUpdDiff, screens: Remix.getScreens() });
             Remix._sendOuterEvents();
             if (lastUpdDiff.routerScreensUpdates || Object.keys(lastUpdDiff.updatedScreens).length > 0) {
                 const screensDiff = diffHashlist(prevState.router.screens, nextState.router.screens);
@@ -97,7 +97,6 @@ function diff(schema = null, prevState = {}, nextState = {}) {
         routerScreensUpdates: false, // 'router.screens' elements were updated: added, changed, deleted
         updatedScreens: {} // includes screens, if some child properties of the screen were updated. Example: 'router.screens.z6z9sh.components.emeh5f.text' changed, and this array will hold 'z6z9sh' screen id
     };
-    const regex = /^router\.screens\.([A-z0-9]+)/g;
     schema.selectorsInProcessOrder.forEach( (selector) => {
         const isRouterScreens = selector === 'router.[screens HashList]';
         // get all possible pathes in state for this selector
@@ -106,9 +105,8 @@ function diff(schema = null, prevState = {}, nextState = {}) {
         for (let i = 0; i < nsRes.length; i++) {
             const nsProp = nsRes[i]
             const psProp = (psRes.length > 0) ? getPropAndDelete(psRes, nsProp.path): null;
-            regex.lastIndex = 0;
-            const m = regex.exec(nsProp.path),
-                screenId = (m && m[0] && m[1]) ? m[1]: null;
+            const screenId = getScreenIdFromPath(nsProp.path),
+                componentId = getComponentIdFromPath(nsProp.path);
             if (psProp) {
                 // this property exists in both states, check for modification
                 if (isHashlistInstance(psProp.value) && isHashlistInstance(nsProp.value)) {
@@ -128,15 +126,17 @@ function diff(schema = null, prevState = {}, nextState = {}) {
             }
             else {
                 // new property
-                result.added.push(nsProp);
+                result.added.push({
+                    ...nsProp,
+                    componentId,
+                    screenId,
+                });
                 if (isRouterScreens) result.routerScreensUpdates = true;
                 if (screenId && !result.updatedScreens[screenId]) result.updatedScreens[screenId] = nextState.router.screens[screenId];
             }
         }
         for (let i = 0; i < psRes.length; i++) {
-            regex.lastIndex = 0;
-            const m = regex.exec(psRes[i].path),
-                screenId = (m && m[0] && m[1]) ? m[1]: null;
+            const screenId = getScreenIdFromPath(psRes[i].path);
             result.deleted.push(psRes[i]);
             if (isRouterScreens) result.routerScreensUpdates = true;
             if (screenId && !result.updatedScreens[screenId]) result.updatedScreens[screenId] = prevState.router.screens[screenId];

@@ -48,7 +48,7 @@ export default class Row {
             const originProps = this.originalComponentProps[c.id],
                 ow = parseInt(originProps.width),
                 r1 = (this.containerWidth - this.originalContainerWidth) / this.originalContainerWidth;
-            // 600: { left: 10px, leftStrategy: '%' } // leftStrategy: 'fixed' by default
+            // 800: { left: 10px, leftStrategy: '%' } // leftStrategy: 'fixed' by default
             // 400: { left: 5px, leftStrategy: 'fixed' }
             if (c.widthStrategy === 'fixed') {
                 // do nothing

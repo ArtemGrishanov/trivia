@@ -40,7 +40,7 @@ initScreenProgress({
 
 initQuizPoints({
     remix: Remix,
-    pointElementTag: 'option'
+    tag: 'option'
 });
 
 /**

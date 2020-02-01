@@ -229,8 +229,13 @@ export class Selector {
             if (ti.filter && ti.filter.key) {
                 // key=value filter checking
                 let match = false;
-                if (obj[cname].hasOwnProperty(ti.filter.key) && obj[cname][ti.filter.key] == ti.filter.value) {
+
+                if (ti.filter.operand === 'equal' && obj[cname].hasOwnProperty(ti.filter.key) && obj[cname][ti.filter.key] == ti.filter.value) {
                     // OK, it matches
+                    match = true;
+                }
+                else if (ti.filter.operand === 'indexOf' && obj[cname][ti.filter.key].indexOf && obj[cname][ti.filter.key].indexOf(ti.filter.value) >= 0) {
+                    // Array or string 'ti.filter.key' contains value, it matches
                     match = true;
                 }
                 if (!match) {
@@ -271,7 +276,8 @@ export class Selector {
                 filter = {};
                 const f = pair[1].split('=');
                 filter.key = f[0];
-                filter.value = f[1];
+                filter.operand = f[1][0] === '~' ? 'indexOf': 'equal';
+                filter.value = f[1].replace('~', '');
             }
             else {
                 // type filter

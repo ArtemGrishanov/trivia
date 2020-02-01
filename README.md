@@ -1,44 +1,44 @@
 npm install webpack webpack-cli --save-dev
 create webpack.config.js
-
 npm i @babel/core babel-loader @babel/preset-env @babel/preset-react @babel/plugin-proposal-class-properties --save-dev
 Create .babelrc
-
 npm i react react-dom
 npm i redux react-redux
 npm install --save-dev css-loader
 npm i html-webpack-plugin html-loader --save-dev
 npm install --save-dev webpack-dev-server
-
 Try to run "npm run"
+
+--------
 
 # Project build
 `npm run build`
 
-----
+--------
 
 # Build css styles as a separate file
 We need styles to copy and paste them into editor.config.js project file. For screen previews
 `npm run css`
 Open file dist/main.css and copy content. Paste into project 'editor.config.js' file
 
------
+---------
 
-# Localhost dev run
-Run in browser 'http://localhost:8082/?testlocal'
-This command runs as single app, no editor. Expect main + defaults on the same host
+# Localhost development run
+`npm start`
+Open in browser 'http://localhost:8080/?testlocal'
+This command runs as a single app, no editor.
+The following files will be requested:
+http://localhost:8080/main.js
+http://localhost:8080/defaults.js
+on the same host (in 'dist' folder)
 
------
+# Localhost troubleshooting
+0) Допустим в редакторе возникла какая-то ошибка в приложением, exception. Как можно поступить.
+1) Запустить локально "Localhost development run". Приложение станет доступно на http://localhost:8080
+2) Используя LOCAL_OVERRIDE_TYPES в Editor.js прописать там script и подебажить.
+
+---------
 
 See different run options in packeage.json/scripts
 For example,run UI components demo page:
 `npm run ui-demo`
-
------
-
-
-'screens_updated' event
-added:Array - some screens have been created
-deleted:Array - some screens have been deleted
-updated:Array - some screens have been updated. Update means that one of children components' properties changed.
-Example: Text was changed ('router.screens.z6z9sh.components.emeh5f.text' = 'New text value') on the screen, and the screen has been updated.

@@ -149,7 +149,8 @@ export const Schema = new DataSchema({
     },
     "currentScreenId": {
         type: 'string',
-        default: null
+        default: null,
+        serialize: false
     }
 });
 

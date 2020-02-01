@@ -12,6 +12,30 @@ export function isHashlistInstance(obj) {
 }
 
 /**
+ * Parses property path and returns screen id
+ *
+ * @param {string} path, property path, example 'router.screens.8wruuz.components.zbnkhy.fontShadow'
+ * @return {string} screenId, example 8wruuz
+ */
+export function getScreenIdFromPath(path) {
+    const regex = /^router\.screens\.([A-z0-9]+)/g,
+        m = regex.exec(path);
+    return (m && m[0] && m[1]) ? m[1]: null;
+}
+
+/**
+ * Parses property path and returns component id
+ *
+ * @param {string} path, property path, example 'router.screens.8wruuz.components.zbnkhy.fontShadow'
+ * @return {string} screenId, example zbnkhy
+ */
+export function getComponentIdFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+.components\.([A-z0-9]+)/g,
+        m = regex.exec(path);
+    return (m && m[0] && m[1]) ? m[1]: null;
+}
+
+/**
  * From https://github.com/reduxjs/redux/blob/master/src/combineReducers.js
  * TODO import normally
  * This function for automated tests

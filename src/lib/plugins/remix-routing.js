@@ -171,7 +171,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
 
     remix.addTrigger({
         when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'router.screens'} },
-        then: { actionType: 'build_route'}
+        then: { actionType: ['build_route', 'restart']}
     });
 
     if (nextTag) {

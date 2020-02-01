@@ -45,8 +45,8 @@ class LayoutContainer extends React.Component {
         if (Remix.getMode() !== 'edit') {
             this.setState({
                 adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, {
-                    //TODO 600
-                    origCntWidth: 600,
+                    //TODO 800
+                    origCntWidth: 800,
                     userDefinedNormalizedProps: this.userDefinedNormalizedProps,
                     containerWidth: this.props.size.width
                 })

@@ -221,6 +221,25 @@ describe('Selector', function() {
             chai.assert.equal(s2.fetch(obj).length, 0);
         });
 
+        it('fetch with attribute "indexOf" filter', function() {
+            const s1 = new Selector("app.[component tags=~component].tags");
+            const s2 = new Selector("app.[component tags=~no_component].tags"); // no result
+
+            const obj = {
+                app: {
+                    component: {
+                        displayName: 'Text',
+                        tags: 'text component remix',
+                        data: 'some data'
+                    }
+                }
+            };
+            chai.assert.equal(s1.fetch(obj).length, 1);
+            chai.assert.equal(s1.fetch(obj)[0].value, 'text component remix');
+
+            chai.assert.equal(s2.fetch(obj).length, 0);
+        });
+
         it('fetch with attribute filter and regexp', function() {
             const s1 = new Selector("app./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Text].tags");
             const s2 = new Selector("app./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Image].tags");

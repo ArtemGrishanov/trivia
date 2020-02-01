@@ -7,7 +7,9 @@ import {
 import {
     getUniqueId,
     isHashlistInstance,
-    combineReducers
+    combineReducers,
+    getScreenIdFromPath,
+    getComponentIdFromPath
 } from './remix/util/util.js'
 // import { getLastDiff } from './remix/middleware/diff.js'
 
@@ -943,24 +945,29 @@ function getScreens(filter = {}) {
 
 /**
  * Returns all dynamic properties with additional information from this remix app
+ * Additional information: screenId, componentId if relevant
+ * Example: property 'router.screens.8wruuz.components.zbnkhy.fontShadow' has relevant 'screenId' and 'componentId'
+ *      but property 'router.screens.f5n509.tags' only 'screenId'
  *
  * @return {Array}
  */
 function getProperties() {
-    const res = [];
-    const regex = /^router\.screens\.([A-z0-9]+)/g;
-    let st = store.getState();
+    const
+        res = [],
+        st = store.getState();
     if (!st) {
         return;
     }
     schema.selectorsInProcessOrder.forEach((selector) => {
         const propsToSerialize = getPropertiesBySelector(st, selector);
         propsToSerialize.forEach((prop) => {
-            // Also try to detect 'screenId' which holds this property. It's an additional data for filtering in external services, like editors, etc..
-            regex.lastIndex = 0;
-            const m = regex.exec(prop.path),
-                screenId = (m && m[0] && m[1]) ? m[1]: null;
-            res.push({path: prop.path, value: prop.value, screenId});
+            // Also try to detect 'screenId', 'componentId' which holds this property. It's an additional data for filtering in external services, like editors, etc..
+            res.push({
+                path: prop.path,
+                value: prop.value,
+                screenId: getScreenIdFromPath(prop.path),
+                componentId: getComponentIdFromPath(prop.path)
+            });
         });
     });
     return res;

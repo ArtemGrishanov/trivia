@@ -23,7 +23,7 @@ const COMPONENTS = [
     </Control>
     ,
     <Control id={501} schema={TextSchema} width={800}>
-        <Text id={'text2'} top={10} left={10} width={600} height={60}
+        <Text id={'text2'} top={10} left={10} width={800} height={60}
             fontSize={24}
             color='black'
             backgroundColor={'yellow'}
@@ -32,31 +32,31 @@ const COMPONENTS = [
         ></Text>
     </Control>
     ,
-    <Control id={502} schema={TextOptionSchema} width={600} height={200}>
+    <Control id={502} schema={TextOptionSchema} width={800} height={200}>
         <TextOption id={'textoption1'} percent={55} height={60} width={200}/>
     </Control>
     ,
-    <Control id={503} schema={TextOptionSchema} width={600} height={200}>
+    <Control id={503} schema={TextOptionSchema} width={800} height={200}>
         <TextOption id={'textoption2'} width={400} height={120} correctIndicator='correct' percent={44} text='У меня работают умные сотрудники! Пусть придумают алгоритм создания паролей и на него ориентируются. Главное, не забыть схему.'/>
     </Control>
     ,
-    <Control id={504} schema={TextOptionSchema} width={600} height={200}>
+    <Control id={504} schema={TextOptionSchema} width={800} height={200}>
         <TextOption id={'textoption2'} width={200} height={50} correctIndicator='wrong' align='center' borderRadius={0} percent={88}/>
     </Control>
     ,
-    <Control id={505} schema={ButtonSchema} width={600} height={300}>
+    <Control id={505} schema={ButtonSchema} width={800} height={300}>
         <Button id={'button1'} width={100} height={40} />
     </Control>
     ,
-    <Control id={506} schema={ButtonSchema} width={600} height={300}>
+    <Control id={506} schema={ButtonSchema} width={800} height={300}>
         <Button id={'button2'} colorMod="white" sizeMod="small" width={150} height={30}/>
     </Control>
     ,
-    <Control id={507} schema={FbButtonSchema} width={600} height={300}>
+    <Control id={507} schema={FbButtonSchema} width={800} height={300}>
         <FbButton id={'fbbutton1'} width={150}/>
     </Control>
     ,
-    <Control id={508} schema={ProgressiveImageSchema} width={600} height={300}>
+    <Control id={508} schema={ProgressiveImageSchema} width={800} height={300}>
         <ProgressiveImage
             id={'img1'}
             width={450}
@@ -66,7 +66,7 @@ const COMPONENTS = [
             animation="zoom"/>
     </Control>
     ,
-    <Control id={509} schema={ProgressiveImageSchema} width={600} height={300}>
+    <Control id={509} schema={ProgressiveImageSchema} width={800} height={300}>
         <ProgressiveImage
             id={'img2'}
             width={250}
@@ -77,7 +77,7 @@ const COMPONENTS = [
             blur={true}/>
     </Control>
     ,
-    <Control id={510} schema={ProgressiveImageSchema} width={600} height={600}>
+    <Control id={510} schema={ProgressiveImageSchema} width={800} height={600}>
         <ProgressiveImage
             id={'img3'}
             blur={false}
@@ -89,7 +89,7 @@ const COMPONENTS = [
             />
     </Control>
     ,
-    <Control id={511} schema={ProgressiveImageSchema} width={600} height={400}>
+    <Control id={511} schema={ProgressiveImageSchema} width={800} height={400}>
         <ProgressiveImage
             id={'img4'}
             blur={false}

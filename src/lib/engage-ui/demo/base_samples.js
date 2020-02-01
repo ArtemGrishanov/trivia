@@ -4,25 +4,25 @@ import Button from '../primitives/Button'
 import ProgressiveImage from '../primitives/ProgressiveImage'
 
 const BASE_SAMPLES = [
-        <Control id={1} width={600} height={200} label="left - fixed, width - fixed">
-            <ProgressiveImage id={'img101'} backgroundSize={'cover'} left={0} leftStrategy={'fixed'} top={0} width={600} widthStrategy={ 'dynamic'} height={200} displayType={'decor'} src='//p.testix.me/temp/celebrations.jpg'></ProgressiveImage>
+        <Control id={1} width={800} height={200} label="left - fixed, width - fixed">
+            <ProgressiveImage id={'img101'} backgroundSize={'cover'} left={0} leftStrategy={'fixed'} top={0} width={800} widthStrategy={ 'dynamic'} height={200} displayType={'decor'} src='//p.testix.me/temp/celebrations.jpg'></ProgressiveImage>
             <ProgressiveImage id={'img102'} left={500} leftStrategy={'dynamic'} top={-10} width={100} height={100} displayType={'decor'} src='//p.testix.me/temp/xmas-icon.png'></ProgressiveImage>
             <Button id={'b1'} text={'long component'} left={50} leftStrategy={'fixed'} top={30} width={500} widthStrategy={'fixed'} height={60}/>
         </Control>
 ,
-        <Control id={2} width={600} height={200} label="left - fixed, width - dynamic">
+        <Control id={2} width={800} height={200} label="left - fixed, width - dynamic">
             <Button id={'b1'} text={'long component'} left={50} leftStrategy={'fixed'} top={30} width={500} widthStrategy={ 'dynamic'} height={60}/>
         </Control>
 ,
-        <Control id={7} width={600} height={200} label="left - dynamic, width - fixed">
+        <Control id={7} width={800} height={200} label="left - dynamic, width - fixed">
             <Button id={'b1'} text={'long component'} left={50} leftStrategy={ 'dynamic'} top={30} width={500} widthStrategy={'fixed'} height={60}/>
         </Control>
 ,
-        <Control id={8} width={600} height={200} label="left - dynamic, width - dynamic">
+        <Control id={8} width={800} height={200} label="left - dynamic, width - dynamic">
             <Button id={'b1'} text={'long component'} left={50} leftStrategy={ 'dynamic'} top={30} width={500} widthStrategy={ 'dynamic'} height={60}/>
         </Control>
 ,
-        <Control id={4} width={600} height={300} label="left - fixed">
+        <Control id={4} width={800} height={300} label="left - fixed">
             <Button id={'b1'} text={'1'} left={10} leftStrategy={'fixed'} top={10} width={60} height={60}/>
             <Button id={'b2'} text={'2'} left={80} leftStrategy={'fixed'} top={10} width={60} height={60}/>
             <Button id={'b3'} text={'3'} left={150} leftStrategy={'fixed'} top={10} width={60} height={60}/>
@@ -33,7 +33,7 @@ const BASE_SAMPLES = [
             <Button id={'b8'} text={'8'} left={500} leftStrategy={'fixed'} top={10} width={60} height={60}/>
         </Control>
 ,
-        <Control id={5} width={600} height={400} label="left - fixed">
+        <Control id={5} width={800} height={400} label="left - fixed">
             <Button id={'b1'} text={'1'} left={10} leftStrategy={'fixed'} top={10} width={60} height={60}/>
             <Button id={'b2'} text={'2'} left={80} leftStrategy={'fixed'} top={10} width={60} height={60}/>
             <Button id={'b3'} text={'3'} left={150} leftStrategy={'fixed'} top={10} width={60} height={60}/>
@@ -52,7 +52,7 @@ const BASE_SAMPLES = [
             <Button id={'b16'} text={'16'} left={500} leftStrategy={'fixed'} top={80} width={60} height={60}/>
         </Control>
 ,
-        <Control id={6} width={600} height={300} label="left - dynamic">
+        <Control id={6} width={800} height={300} label="left - dynamic">
             <Button id={'b1'} text={'1'} left={10} leftStrategy={'dynamic'} top={10} width={60} height={60}/>
             <Button id={'b2'} text={'2'} left={90} leftStrategy={'dynamic'} top={10} width={60} height={60}/>
             <Button id={'b3'} text={'3'} left={170} leftStrategy={'dynamic'} top={10} width={60} height={60}/>
