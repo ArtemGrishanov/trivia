@@ -2,7 +2,7 @@ import '../style/rmx-options.css'
 import React from 'react'
 import DataSchema from '../../schema'
 import CorrectIcon from './CorrectIcon';
-import TextEditor from '../helpers/TextEditor';
+import TextEditor from '../bricks/TextEditor';
 import RemixWrapper from '../RemixWrapper';
 
 class TextOption extends React.Component {

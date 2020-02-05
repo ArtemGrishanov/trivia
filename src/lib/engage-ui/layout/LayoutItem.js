@@ -197,9 +197,6 @@ export default function LayoutItem() {
                 if (this.props.editable) {
                     selectComponents([]);
                     this.itemNode = this.thisRef.current;
-                    if (this.props.noDrag) {
-                        console.log('NoDrag')
-                    }
                     if (this.mouseDownRecently) {
                         // режим двойного нажатия - перетаскивания не будет
                         this.isDragging = false;
@@ -207,7 +204,7 @@ export default function LayoutItem() {
                         this.setState({doubleClicked: true});
                         console.log('dblclicked');
                     }
-                    else if (this.itemNode && !this.state.doubleClicked && !this.props.noDrag) {
+                    else if (this.itemNode && !this.state.doubleClicked) {
                         // одно нажатие - подготовка к перетаскиваю
                         this.markerId = e.currentTarget.getAttribute('datamarker');
                         this.isItemMouseDown = true;
@@ -299,7 +296,6 @@ export default function LayoutItem() {
 
             onWindowMouseUp(e) {
                 if (this.props.editable) {
-                    console.log('onWindowMouseUp')
                     if (this.state.doubleClicked) {
                         this.setState({doubleClicked: false});
                     }
@@ -361,16 +357,11 @@ export default function LayoutItem() {
                     height: this.state.height+'px'
                 };
                 // align child inside container
-                const cst = {
-
-                    //TODO trying to prevent progressive image overflow
-                    //maxHeight: this.state.height+'px'
-
-                    // left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
-                    // top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
-                }
+                const cst = {};
                 if (this.state.doubleClicked) {
-                    // need to show text editor, it may be larger then component
+                    // goes to doubleclick mode. Component may use this mode or not.
+                    // This doubleclick mode considered as 'component editing' and all content is visible
+                    // Example: TextOption use TextEditor.js, it may be larger then a layout item container
                     cst.overflow = 'visible';
                 }
 
@@ -395,8 +386,6 @@ export default function LayoutItem() {
                         </div>
                         {this.props.editable && !this.state.doubleClicked &&
                             <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}>
-                                {/* TODO uncomment */}
-                                {/* <p className="rmx-l-info">{sizemsg}</p> */}
                                 <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>
                                 <div className="rmx-l-sel-m __2" datamarker="2" onMouseDown={this.onMouseDown}></div>
                                 <div className="rmx-l-sel-m __3" datamarker="3" onMouseDown={this.onMouseDown}></div>
@@ -409,15 +398,6 @@ export default function LayoutItem() {
                         }
                     </div>
                 )
-            }
-
-            exportLayout() {
-                return {
-                    top: this.state.top,
-                    left: this.state.left,
-                    width: this.state.width,
-                    height: this.state.height
-                }
             }
         });
     }
