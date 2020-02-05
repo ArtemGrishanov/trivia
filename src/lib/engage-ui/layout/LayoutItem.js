@@ -170,7 +170,8 @@ export default function LayoutItem() {
                     width: undefined,
                     height: undefined,
                     contentWidth: undefined,
-                    contentHeight: undefined
+                    contentHeight: undefined,
+                    doubleClicked: false
                 }
                 this.thisRef = React.createRef();
                 this.childCntRef = React.createRef();
@@ -184,11 +185,11 @@ export default function LayoutItem() {
                 this.startAttr = null;
                 this.mouseStartPosition = null;
                 this.onMouseDown = this.onMouseDown.bind(this);
+                this.onMouseUp = this.onMouseUp.bind(this);
                 this.onWindowMouseMove = this.onWindowMouseMove.bind(this);
                 this.onWindowMouseUp = this.onWindowMouseUp.bind(this);
                 this.onClick = this.onClick.bind(this);
                 this.mouseDownRecently = false;
-                this.doubleClicked = false;
                 this.minWidthPx = null;
             }
 
@@ -196,16 +197,18 @@ export default function LayoutItem() {
                 if (this.props.editable) {
                     selectComponents([]);
                     this.itemNode = this.thisRef.current;
-                    this.doubleClicked = false;
+                    if (this.props.noDrag) {
+                        console.log('NoDrag')
+                    }
                     if (this.mouseDownRecently) {
-                        this.doubleClicked = true;
+                        // режим двойного нажатия - перетаскивания не будет
+                        this.isDragging = false;
+                        this.isItemMouseDown = false;
+                        this.setState({doubleClicked: true});
                         console.log('dblclicked');
                     }
-                    this.mouseDownRecently = true;
-                    setTimeout(() => {
-                        this.mouseDownRecently = false;
-                    }, 200);
-                    if (this.itemNode && !this.doubleClicked) {
+                    else if (this.itemNode && !this.state.doubleClicked && !this.props.noDrag) {
+                        // одно нажатие - подготовка к перетаскиваю
                         this.markerId = e.currentTarget.getAttribute('datamarker');
                         this.isItemMouseDown = true;
                         // TODO force select (hover) while dragging or resizing
@@ -226,6 +229,17 @@ export default function LayoutItem() {
                         this.minWidthPx = toPercent(MIN_WIDTH, this.props.containerWidth);
                         e.stopPropagation();
                     }
+
+                    this.mouseDownRecently = true;
+                    setTimeout(() => {
+                        this.mouseDownRecently = false;
+                    }, 200);
+                }
+            }
+
+            onMouseUp(e) {
+                if (this.props.editable && this.state.doubleClicked) {
+                    e.stopPropagation();
                 }
             }
 
@@ -234,7 +248,7 @@ export default function LayoutItem() {
             }
 
             onWindowMouseMove(e) {
-                if (this.isItemMouseDown) {
+                if (this.props.editable && this.isItemMouseDown) {
                     this.isDragging = true;
                     const dx = e.clientX - this.mouseStartPosition.left;//toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
                     const dy = e.clientY - this.mouseStartPosition.top; // px
@@ -285,6 +299,10 @@ export default function LayoutItem() {
 
             onWindowMouseUp(e) {
                 if (this.props.editable) {
+                    console.log('onWindowMouseUp')
+                    if (this.state.doubleClicked) {
+                        this.setState({doubleClicked: false});
+                    }
                     if (this.isDragging) {
                         this.isDragging = false;
                         // save size and position after dragging
@@ -311,17 +329,13 @@ export default function LayoutItem() {
             }
 
             componentDidMount() {
-                if (this.props.editable) {
-                    window.addEventListener('mousemove', this.onWindowMouseMove);
-                    window.addEventListener('mouseup', this.onWindowMouseUp);
-                }
+                window.addEventListener('mousemove', this.onWindowMouseMove);
+                window.addEventListener('mouseup', this.onWindowMouseUp);
             }
 
             componentWillUnmount() {
-                if (this.props.editable) {
-                    window.removeEventListener('mousemove', this.onWindowMouseMove);
-                    window.removeEventListener('mouseup', this.onWindowMouseUp);
-                }
+                window.removeEventListener('mousemove', this.onWindowMouseMove);
+                window.removeEventListener('mouseup', this.onWindowMouseUp);
             }
 
             onContentSize(size) {
@@ -348,11 +362,16 @@ export default function LayoutItem() {
                 };
                 // align child inside container
                 const cst = {
+
                     //TODO trying to prevent progressive image overflow
                     //maxHeight: this.state.height+'px'
 
                     // left: Math.round((toPx(this.state.width, this.props.containerWidth) - this.state.contentWidth) / 2) + 'px',
                     // top: Math.round((this.state.height - this.state.contentHeight) / 2) + 'px'
+                }
+                if (this.state.doubleClicked) {
+                    // need to show text editor, it may be larger then component
+                    cst.overflow = 'visible';
                 }
 
                 //TODO
@@ -366,12 +385,15 @@ export default function LayoutItem() {
 
                 const sizemsg = Math.round(toPx(this.state.width, this.props.containerWidth)) + 'x' + Math.round(this.state.height);
                 return (
-                    <div ref={this.thisRef} dataid={this.props.id} className="rmx-layout_item" style={st} datamarker="9" onMouseDown={this.onMouseDown} onClick={this.onClick}>
+                    <div ref={this.thisRef} dataid={this.props.id} className="rmx-layout_item" style={st} datamarker="9" onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp} onClick={this.onClick}>
+                        {this.props.editable && this.state.doubleClicked &&
+                            <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}></div>
+                        }
                         <div ref={this.props.setRef} className="rmx-l_child_cnt" style={cst}>
                             {/* Передать измененные width,height из this.state которые пользователь изменил при перетаскивании и ресайзе */}
                             <Component {...this.props} {...this.state} /*onSize={this.onContentSize.bind(this)}*/></Component>
                         </div>
-                        {this.props.editable &&
+                        {this.props.editable && !this.state.doubleClicked &&
                             <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}>
                                 {/* TODO uncomment */}
                                 {/* <p className="rmx-l-info">{sizemsg}</p> */}

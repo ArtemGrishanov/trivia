@@ -13,13 +13,14 @@ Try to run "npm run"
 
 # Project build
 `npm run build`
+Use this files to create a new product type version
 
 --------
 
 # Build css styles as a separate file
 We need styles to copy and paste them into editor.config.js project file. For screen previews
 `npm run css`
-Open file dist/main.css and copy content. Paste into project 'editor.config.js' file
+Use this file to create a new product type version
 
 ---------
 

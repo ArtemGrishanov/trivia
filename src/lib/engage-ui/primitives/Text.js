@@ -1,9 +1,10 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
-import CKEditor from '@ckeditor/ckeditor5-react';
-//TODO try import @ckeditor/ckeditor5-build-balloon
-import BaloonEditor from '@ckeditor/ckeditor5-build-balloon-block';
+
+// https://github.com/zenoamaro/react-quill
+import ReactQuill from 'react-quill'
+import 'react-quill/dist/quill.snow.css'
 
 // Text animation ideas https://tobiasahlin.com/moving-letters/
 
@@ -14,6 +15,7 @@ class Text extends React.Component {
         if (props.animationOnAppearance !== state.animationOnAppearance) {
             return {
                 ...state,
+                stateText: props.text,
                 animatedText: '',
                 animationOnAppearance: props.animationOnAppearance
             }
@@ -26,22 +28,41 @@ class Text extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            stateText: props.text,
             animatedText: '',
             animationOnAppearance: 'none'
         }
         this.onMouseDown = this.onMouseDown.bind(this);
+        this.handleChange = this.handleChange.bind(this)
     }
 
     onMouseDown() {
         console.log('text mousedown');
     }
 
+    handleChange(value) {
+        this.setState({ stateText: value })
+        console.log('Content was updated:', value);
+    }
+
+    modules = {
+        toolbar: [
+            ['bold', 'italic', 'underline'],        // toggled buttons
+            [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
+            [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+            [{ 'font': [] }],
+            [{ 'align': [] }],
+            ['link', 'clean']
+        ]
+    }
+
     render() {
         const st = {
-            fontSize: this.props.fontSize+'px',
-            color: this.props.color,
-            backgroundColor: this.props.backgroundColor,
-            padding: this.props.padding+'px'
+            // fontSize: this.props.fontSize+'px',
+            // color: this.props.color,
+            // backgroundColor: this.props.backgroundColor,
+            padding: this.props.padding+'px',
+            textAlign: 'initial'
         };
         if (this.props.fontShadow) {
             st.textShadow = `${this.props.fontShadowDistance}px ${this.props.fontShadowDistance}px 0px ${this.props.fontShadowColor}`;
@@ -49,37 +70,28 @@ class Text extends React.Component {
         if (this.props.bold) {
             st.fontWeight = 'bold';
         }
-        const text = (this.props.animationOnAppearance === 'none') ? this.props.text: this.state.animatedText;
-        // return <p className="rmx-text" style={st}>{text}</p>
+        const text = (this.props.animationOnAppearance === 'none') ? this.state.stateText: this.state.animatedText;
         return (
             <>
-                {!this.props.editing &&
-                    <p className="rmx-component rmx-text" style={st} onMouseDown={this.onMouseDown}>{text}</p>
-                }
-                {this.props.editing &&
-                    <div className="rmx-component rmx-text" style={st}>
-                        <CKEditor
-                            //LayoutItem UI blocks CKEditor UI
-                            //TODO set changed text to the remix store
-                            editor={ BaloonEditor }
-                            data={ text }
-                            onInit={ editor => {
-                                // You can store the "editor" and use when it is needed.
-                                console.log( 'Editor is ready to use!', editor );
-                            } }
-                            onChange={ ( event, editor ) => {
-                                const data = editor.getData();
-                                console.log( { event, editor, data } );
-                            } }
-                            onBlur={ ( event, editor ) => {
-                                console.log( 'Blur.', editor );
-                            } }
-                            onFocus={ ( event, editor ) => {
-                                console.log( 'Focus.', editor );
-                            } }
-                        />
+                {/* TODO use post html processor on the server or use a own parser here on UI */}
+                {/* {!this.props.doubleClicked &&
+                    <p className="rmx-component rmx-text" style={st} onMouseDown={this.onMouseDown} dangerouslySetInnerHTML={{__html: text}}></p>
+                } */}
+                {/* {this.props.doubleClicked &&
+                    <div className="rmx-component">
+                        <ReactQuill modules={this.modules}
+                                    value={this.state.stateText}
+                                    onChange={this.handleChange} />
+
                     </div>
-                }
+                } */}
+                    <div className="rmx-component">
+                        <ReactQuill readOnly = {!this.props.doubleClicked}
+                                    modules={this.modules}
+                                    value={this.state.stateText}
+                                    onChange={this.handleChange} />
+
+                    </div>
             </>
         )
     }
@@ -116,11 +128,11 @@ class Text extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
-    'editing': {
-        serialize: 'false',
-        type: 'boolean',
-        default: false
-    },
+    // 'editing': {
+    //     serialize: 'false',
+    //     type: 'boolean',
+    //     default: false
+    // },
     'text': {
         type: 'string',
         minLength: 1,

@@ -744,7 +744,6 @@ export function setMode(mode) {
  */
 export function setComponentPosition({id, top, left, width, height}) {
     const screenId = store.getState().router.currentScreenId;
-    //TODO наиболее правильно было бы соотнести и хранить ид экрана в компоненте
     if (screenId) {
         const props = {};
         if (top !== undefined) props.top = top;

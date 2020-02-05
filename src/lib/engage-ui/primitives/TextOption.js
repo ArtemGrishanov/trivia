@@ -2,6 +2,7 @@ import '../style/rmx-options.css'
 import React from 'react'
 import DataSchema from '../../schema'
 import CorrectIcon from './CorrectIcon';
+import TextEditor from '../helpers/TextEditor';
 import RemixWrapper from '../RemixWrapper';
 
 class TextOption extends React.Component {
@@ -13,12 +14,21 @@ class TextOption extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            stateText: props.text
         };
         this.onClick = this.onClick.bind(this);
+        this.onOptionTextEdited = this.onOptionTextEdited.bind(this);
     }
 
     onClick() {
 
+    }
+
+    onOptionTextEdited(value) {
+        this.setState({
+            stateText: value
+        });
+        //TODO set text in remix
     }
 
     render() {
@@ -48,7 +58,7 @@ class TextOption extends React.Component {
                         <CorrectIcon left={0} top={0} width={24} height={24} mod={this.props.correctIndicator}/>
                     </div>
                 }
-                {this.props.text}
+                <TextEditor readOnly={!this.props.doubleClicked} onChange={this.onOptionTextEdited} text={this.state.stateText}></TextEditor>
             </div>
         )
     }

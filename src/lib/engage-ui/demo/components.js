@@ -18,8 +18,8 @@ import FbButton from '../primitives/social/FbButton'
 import { Schema as FbButtonSchema } from '../primitives/social/FbButton'
 
 const COMPONENTS = [
-    <Control id={500} schema={TextSchema} width={500} height={300}>
-        <Text id={'text1'} width={360} height={60} fontSize={50} color='red' text='Text example'></Text>
+    <Control id={500} schema={TextSchema} width={800} height={300}>
+        <Text id={'text1'} width={360} height={160} fontSize={50} color='red' text='Text example'></Text>
     </Control>
     ,
     <Control id={501} schema={TextSchema} width={800}>

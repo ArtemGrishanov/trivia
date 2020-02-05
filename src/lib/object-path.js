@@ -234,7 +234,7 @@ export class Selector {
                     // OK, it matches
                     match = true;
                 }
-                else if (ti.filter.operand === 'indexOf' && obj[cname][ti.filter.key].indexOf && obj[cname][ti.filter.key].indexOf(ti.filter.value) >= 0) {
+                else if (ti.filter.operand === 'indexOf' && obj[cname][ti.filter.key] && obj[cname][ti.filter.key].indexOf && obj[cname][ti.filter.key].indexOf(ti.filter.value) >= 0) {
                     // Array or string 'ti.filter.key' contains value, it matches
                     match = true;
                 }

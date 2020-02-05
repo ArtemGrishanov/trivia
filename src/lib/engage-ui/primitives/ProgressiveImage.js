@@ -101,7 +101,15 @@ class ProgressiveImage extends React.Component {
         this.onClick = this.onClick.bind(this);
     }
 
+    componentDidUpdate() {
+        this.startLoading();
+    }
+
     componentDidMount() {
+        this.startLoading();
+    }
+
+    startLoading() {
         if (!this.isLoaded()) {
             this.loadThumbImage()
                 .then( () => this.loadFullImage() )
@@ -294,6 +302,14 @@ export const Schema = new DataSchema({
         type: 'string',
         enum: ['none','zoom','eight'],
         default: 'none'
+    },
+    'src': {
+        type: 'string',
+        default: 'https://p.testix.me/images/products/common/i/Placeholder.png'
+    },
+    'srcThumb': {
+        type: 'string',
+        default: ''
     }
 });
 

@@ -120,3 +120,19 @@ p {
     word-break: break-word;
     white-space: normal;
 }
+
+/* quill text editor */
+.quill {
+    margin-top: -54px !important;
+}
+.ql-toolbar {
+    white-space: nowrap !important;
+    background-color: beige;
+    width: max-content;
+}
+.ql-container.ql-snow {
+    border: none !important;
+}
+.rmx-text-editor.__readonly .ql-toolbar {
+    visibility: hidden;
+}
