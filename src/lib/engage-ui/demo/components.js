@@ -19,19 +19,22 @@ import { Schema as FbButtonSchema } from '../primitives/social/FbButton'
 
 const COMPONENTS = [
     <Control id={500} schema={TextSchema} width={800} height={300}>
-        <Text id={'text1'} width={360} height={160} fontSize={50} color='red' text='Text example'></Text>
+        <Text id={'text1'} width={360} height={160} fontSize={50} color='red'
+            text='<p class="ql-align-center"><br/></p><p class="ql-align-center"><br/></p><p class="ql-align-center"><span style="color: rgb(230, 0, 0);">Text</span> <strong>ex</strong><strong style="background-color: rgb(0, 138, 0);">amp</strong><strong>le</strong></p>'>
+        </Text>
     </Control>
     ,
-    <Control id={501} schema={TextSchema} width={800}>
-        <Text id={'text2'} top={10} left={10} width={800} height={60}
-            fontSize={24}
-            color='black'
-            backgroundColor={'yellow'}
-            text='Long text with typing effect. The user is printing this text on his keyboard.'
-            //animationOnAppearance='typing'
-        ></Text>
-    </Control>
-    ,
+    // not implemented yet
+    // <Control id={501} schema={TextSchema} width={800}>
+    //     <Text id={'text2'} top={10} left={10} width={800} height={60}
+    //         fontSize={24}
+    //         color='black'
+    //         backgroundColor={'yellow'}
+    //         text='Long text with typing effect. The user is printing this text on his keyboard.'
+    //         //animationOnAppearance='typing'
+    //     ></Text>
+    // </Control>
+    // ,
     <Control id={502} schema={TextOptionSchema} width={800} height={200}>
         <TextOption id={'textoption1'} percent={55} height={60} width={200}/>
     </Control>

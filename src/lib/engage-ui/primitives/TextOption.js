@@ -28,7 +28,7 @@ class TextOption extends React.Component {
         this.setState({
             stateText: value
         });
-        //TODO set text in remix
+        //TODO set text in remix inside TextEditor ?
     }
 
     render() {
