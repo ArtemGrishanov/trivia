@@ -1,10 +1,11 @@
 
 .rmx-option {
     position: relative;
+    width: 100%;
+    height: 100%;
     box-sizing: border-box;
     min-width: 150px;
-    padding: 16px 60px 17px;
-    background-color: #fff;
+    padding: 16px 56px 17px;
     line-height: 18px;
     font-size: 18px;
     text-align: left;
@@ -113,4 +114,12 @@
 }
 .rmx-option-pct.__wrong {
     color: #ff5656;
+}
+
+.rmx-option_backimg_wr {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
 }

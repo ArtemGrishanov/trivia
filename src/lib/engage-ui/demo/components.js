@@ -47,6 +47,20 @@ const COMPONENTS = [
         <TextOption id={'textoption2'} width={200} height={50} correctIndicator='wrong' align='center' borderRadius={0} percent={88}/>
     </Control>
     ,
+    <Control id={517} schema={TextOptionSchema} width={800} height={200}>
+        <TextOption id={'textoption2'} width={250} height={150} top={20} correctIndicator='correct' align='center' borderRadius={20} percent={68}
+            imageSrc={'https://interactive-examples.mdn.mozilla.net/media/examples/grapefruit-slice-332-332.jpg'}
+            text={'<p><span style="color: rgb(255, 255, 255);">option</span></p><p><span style="color: rgb(255, 255, 255);">with</span></p><p><span style="color: rgb(255, 255, 255);">background</span></p><p><span style="color: rgb(255, 255, 255);">image</span></p>'}
+            />
+    </Control>
+    ,
+    <Control id={518} schema={TextOptionSchema} width={800} height={200}>
+        <TextOption id={'textoption2'} width={250} height={150} top={20} correctIndicator='correct' align='center' borderRadius={10} percent={68}
+            backgroundColor={'blue'}
+            text={'<p><span style="color: rgb(255, 255, 255);">option</span></p><p><span style="color: rgb(255, 255, 255);">with</span></p><p><span style="color: rgb(255, 255, 255);">background</span></p><p><span style="color: rgb(255, 255, 255);">color</span></p>'}
+            />
+    </Control>
+    ,
     <Control id={505} schema={ButtonSchema} width={800} height={300}>
         <Button id={'button1'} width={100} height={40} />
     </Control>

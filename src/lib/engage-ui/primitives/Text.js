@@ -2,6 +2,7 @@ import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 import TextEditor from '../bricks/TextEditor';
+import { setComponentProps } from '../../remix';
 
 // Text animation ideas https://tobiasahlin.com/moving-letters/
 
@@ -33,6 +34,9 @@ class Text extends React.Component {
 
     handleChange(value) {
         this.setState({ stateText: value })
+        if (this.props.editable) {
+            setComponentProps(null, this.props.id, {text: value});
+        }
     }
 
     render() {

@@ -1062,12 +1062,17 @@ remix.deleteScreenComponent = function(screenId, componentId) {
  * Set existing component props
  */
 export function setComponentProps(screenId, componentId, props) {
-    let path = `router.screens.${screenId}.components.${componentId}.`;
-    const data = {};
-    Object.keys(props).forEach( (prop) => {
-        data[path+prop] = props[prop];
-    })
-    setData(data);
+    if (!screenId) {
+        screenId = store.getState().router.currentScreenId;
+    }
+    if (screenId) {
+        let path = `router.screens.${screenId}.components.${componentId}.`;
+        const data = {};
+        Object.keys(props).forEach( (prop) => {
+            data[path+prop] = props[prop];
+        })
+        setData(data);
+    }
 }
 
 remix.setComponentProps = setComponentProps;
