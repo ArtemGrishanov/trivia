@@ -128,7 +128,11 @@ function compose(...enhancers) {
 function routerConnect() {
     return connect(
         (state) => {
-            return { ...state.router, mode: state.session.mode }
+            return {
+                ...state.router,
+                screens: state.router.screens.filter(s => !s.disabled),
+                mode: state.session.mode
+            }
         },
         (dispatch) => {
             return {

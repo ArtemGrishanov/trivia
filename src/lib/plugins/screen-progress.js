@@ -16,10 +16,10 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
      */
     remix.extendSchema({
         // add or hide component from all screens
-        // Remix.setData({'app.quiz.showQuestionProgress': false});
-        // Remix.setData({'app.quiz.showQuestionProgress': true});
+        // Remix.setData({'app.screenProgress.showQuestionProgress': false});
+        // Remix.setData({'app.screenProgress.showQuestionProgress': true});
         //
-        'app.quiz.showQuestionProgress': {
+        'app.screenProgress.showQuestionProgress': {
             type: 'boolean',
             default: true
         }
@@ -27,7 +27,7 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
 
     Remix.registerTriggerAction('screen-progress:update_progress_components', (event) => {
         const state = event.remix.getState(),
-              showProgress = state.app.quiz.showQuestionProgress,
+              showProgress = state.app.screenProgress.showQuestionProgress,
               scrs = event.remix.getScreens({tag: screenTag});
         scrs.forEach((scr, i) => {
             let pc = getProgressComponent(scr);
@@ -70,7 +70,12 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
     });
 
     remix.addTrigger({
-        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.quiz.showQuestionProgress'} },
+        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.screenProgress.showQuestionProgress'} },
+        then: { actionType: 'screen-progress:update_progress_components'}
+    });
+
+    remix.addTrigger({
+        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.disabled'} },
         then: { actionType: 'screen-progress:update_progress_components'}
     });
 

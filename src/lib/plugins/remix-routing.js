@@ -61,6 +61,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
      * Actions will be added to remix
      */
     remix.registerTriggerAction('build_route', (event) => {
+        console.log('remix-routing plugin: build_route')
         const state = event.remix.getState();
         const routingMode = state.router.routingMode;
         if (routingMode === 'linear' || routingMode === 'linear_random') {
@@ -68,7 +69,7 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
             screenRoute.forEach((range) => {
                 let localIds;
                 if (range.tag) {
-                    localIds = getScreensIdsByTag(state, range.tag);
+                    localIds = event.remix.getScreens({tag: range.tag}).map(s => s.hashlistId);
                 }
                 else if (typeof range.idByFunction === 'string') {
                     // function will be called and return next screen id
@@ -150,13 +151,6 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
         remix.setCurrentScreen(screenIds[0]);
     });
 
-    // Build a screen route when app started (including app deserialization)
-    // TODO убрать совсем? подписки на изменение свойств экранов достаточно?
-    // remix.addTrigger({
-    //     when: { eventType: 'app_start' },
-    //     then: { actionType: 'build_route'}
-    // });
-
     if (restartTag) {
         remix.addTrigger({
             when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: restartTag} },
@@ -174,18 +168,15 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
         then: { actionType: ['build_route', 'restart']}
     });
 
+    remix.addTrigger({
+        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.disabled'} },
+        then: { actionType: ['build_route', 'restart']}
+    });
+
     if (nextTag) {
         remix.addTrigger({
             when: { eventType: 'onclick', condition: {prop: 'tags', clause: 'CONTAINS', value: nextTag} },
             then: { actionType: 'go_next_screen'}
         });
     }
-
-    function getScreensIdsByTag(state, tag) {
-        return state.router.screens
-            .toArray()
-            .filter( (s) => s.tags && s.tags.indexOf(tag) >= 0 )
-            .map( (s, i) => state.router.screens.getId(i) );
-    }
-
 }

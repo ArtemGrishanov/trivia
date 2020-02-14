@@ -128,9 +128,12 @@ function receiveMessage({origin = null, data = {}, source = null}) {
 /**
 * Assign new property values to store
 *
-* @param {object} data
+* @param {object} data, exmaple {'path.to.the.property': 'newvalue'}
 */
 export function setData(data, forceFeedback) {
+    if (typeof data !== 'object') {
+        throw new Error(`You must pass data object as first argument, example {'path.to.the.property': 123}`);
+    }
     store.dispatch({
         type: REMIX_UPDATE_ACTION,
         data,
@@ -933,11 +936,17 @@ export function deserialize2(json) {
  * Get some screens by criteria
  *
  * @param {string} filter.tag
+ * @param {boolean} filter.includeDisabled
  */
 function getScreens(filter = {}) {
     return store.getState().router.screens
         .toArray()
-        .filter( (s) => filter.tag ? (s.tags && s.tags.indexOf(filter.tag) >= 0): true );
+        .filter( (s) => {
+            if (s.disabled && !filter.includeDisabled) {
+                return false;
+            }
+            return filter.tag ? (s.tags && s.tags.indexOf(filter.tag) >= 0): true
+        });
 }
 
 /**

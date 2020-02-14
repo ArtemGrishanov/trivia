@@ -1,7 +1,8 @@
-import { select, put, takeLatest } from 'redux-saga/effects'
-//const { select, put, takeLatest } = ReduxSaga.effects; //dont delete, for tests
+import { select, put, takeLatest } from 'redux-saga/effects' // COMMENT FOR TESTS
+//const { select, put, takeLatest } = ReduxSaga.effects; // UNCOMMENT FOR TESTS, dont delete, for tests
 import { REMIX_EVENT_FIRED } from '../../remix.js'
 import { getUniqueId } from '../util/util.js'
+import { matchPropertyPath } from '../../object-path.js'
 
 const executedTransactionIds = [];
 const processedEventIds = {};
@@ -94,7 +95,7 @@ function getTriggersToExecute(triggers, event) {
     return toExec;
 }
 
-const validClauses = ['contains', 'equals'];
+const validClauses = ['contains', 'equals', 'match'];
 
 function conditionWorks(event, trigger) {
     const c = trigger.when.condition;
@@ -147,8 +148,11 @@ function _condition(event, triggerCondition) {
  */
 function _conditionPropertyUpdated(event, triggerCondition) {
     if (triggerCondition.clause.toLowerCase() === 'equals') {
-        //TODO diff.deleted - can not be deleted
+        // diff.deleted - property can not be deleted in current remix implementation
         return !!event.eventData.diff.changed.find( (p) => p.path == triggerCondition.value) || !!event.eventData.diff.added.find( (p) => p.path == triggerCondition.value);
+    }
+    else if (triggerCondition.clause.toLowerCase() === 'match') {
+        return !!event.eventData.diff.changed.find( (p) => matchPropertyPath(p.path, triggerCondition.value)) || !!event.eventData.diff.added.find( (p) => matchPropertyPath(p.path, triggerCondition.value));
     }
     return false;
 }

@@ -309,6 +309,22 @@ class HashList {
     }
 
     /**
+     * Returns a new filtered instance
+     *
+     * @param {function} fn - filter clause
+     */
+    filter(fn) {
+        const filtered = new HashList();
+        this._orderedIds.forEach( (id) => {
+            if (fn(this[id])) {
+                filtered._orderedIds.push(id);
+                filtered[id] = this[id]
+            }
+        })
+        return filtered;
+    }
+
+    /**
      *
      * @param obj
      * @param result

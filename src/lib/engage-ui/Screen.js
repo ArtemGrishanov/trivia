@@ -83,6 +83,11 @@ export const Schema = new DataSchema({
         maxLength: 32000,
         default: '',
         serialize: false
+    },
+    // ability to disable screen
+    'disabled': {
+        type: 'boolean',
+        default: false
     }
 });
 

@@ -1,28 +1,18 @@
 import { isHashlistInstance, getScreenIdFromPath, getComponentIdFromPath } from '../util/util.js'
 import { getPropertiesBySelector, deserialize } from '../../object-path.js'
-import { init } from '../../../actions.js';
 
 /**
  * This middleware calcultes a diff between previous and new states
  * and fires events property changes
  *
  */
-
-//let lastUpdDiff = null;
-//let prevState = null;
-
 const diffMiddleware = (store) => (next) => (action) => {
-    //TODO с помощью этой проверки в начале старта приложения создаются свойствва и мы теряем эти события получается.. reducer создается и запускается а store еще не создан
-    //...
-
     // console.log('Diff middleware begin');
-    //const firstDiff = prevState === null;
     const prevState = store.getState();
     const result = next(action);
     const nextState = store.getState();
     const lastUpdDiff = diff(Remix._getSchema(), prevState, nextState);
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0;
-
     // Важное замечание
     // Даже при самом первом запуске этой функции diff начальный стейт уже содержит нормализованные по схеме свойства, поскольку @@redux/INIT action запускается без middleware
     // Происходит нормализация в remix high order reducer. Получается стейт который содержит все свойства приложения по схеме, но мы еще не разу не оказались в diffMiddleware (здесь)

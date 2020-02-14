@@ -3,7 +3,7 @@ import eventSaga from '../remix/sagas/triggerExecutor.js'
 import diffMiddleware from '../remix/middleware/diff.js'
 import schema from '../remix/schemas/events.js'
 import DataSchema from '../schema.js';
-//TODO define remix common schema not trivia specific
+import HashList from '../hashlist.js';
 
 var testSchema = new DataSchema({
     'app.my.property': {
@@ -18,6 +18,18 @@ var testSchema = new DataSchema({
         min: 0,
         max: 9999
     },
+    "app.screens": {
+        type: 'hashlist',
+        default: new HashList()
+    },
+    "app.[screens HashList]./^[0-9a-z]+$/.name": {
+        type: 'string',
+        default: ''
+    },
+    "app.[screens HashList]./^[0-9a-z]+$/.tag": {
+        type: 'string',
+        default: '-'
+    }
 })
 testSchema.extend(schema);
 
@@ -35,11 +47,7 @@ const store = Redux.createStore(
 );
 sagaMiddleware.run(eventSaga);
 window.store = store; // for debug: inspect storage state in browser console
-
-Remix.init({
-    appStore: store,
-    container: document.getElementById('root')
-});
+Remix.setStore(store);
 
 describe('Remix', function() {
 
@@ -224,15 +232,33 @@ describe('Remix', function() {
             chai.assert.equal(c2, 1);
         });
 
-        it('property_updated diff.add', function() {
+        it('MATCH clause', function() {
             Remix.clearTriggersAndEvents();
 
-            //tests with diff.add
+            let c1 = 0;
 
-            //невозможно подписаться не создание так как оно происходит сразу же до всего??
-            //может и не надо этого
+            chai.assert.equal(store.getState().session.events.length, 0);
 
-            //и удаление не надо делать
+            Remix.addTrigger({
+                when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'MATCH', value: 'app.[screens HashList]./^[0-9a-z]+$/.name'} },
+                then: Remix.registerTriggerAction('MATCH_TRIGGER', (evt) => {
+                    chai.assert.equal(evt.trigger.when.condition.clause === 'MATCH', true, 'trigger activated');
+                    chai.assert.equal(evt.trigger.when.condition.value === 'app.[screens HashList]./^[0-9a-z]+$/.name', true, 'trigger activated');
+                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated');
+                    c1++;
+                })
+            });
+
+            chai.assert.equal(store.getState().session.events.length, 0);
+
+            Remix.setData({'app.screens': new HashList()});
+            Remix.addHashlistElement('app.screens', undefined, {newElement: {name: 'screen1name'}}); // MATCH_TRIGGER new value
+
+            const scrId = Remix.getState().app.screens.getId(0);
+            Remix.setData({[`app.screens.${scrId}.tag`]: 'tagggggs'}); // no trigger
+            Remix.setData({[`app.screens.${scrId}.name`]: 'edited_name'}); // // MATCH_TRIGGER again
+
+            chai.assert.equal(c1, 2, 'Trigger executed two times');
         });
 
     });

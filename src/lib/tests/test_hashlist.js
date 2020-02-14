@@ -77,13 +77,12 @@ describe('HashList', function() {
     });
 
     describe('#shuffle', function() {
-        const list = new HashList([11,22,33,44,55,66]);
+        const list = new HashList([11,22,33,44,55,66,77,88,99,100,101,102]);
 
         it('shuffle', function() {
             list.shuffle();
             const arr = list.toArray();
-            chai.assert.equal(arr[0] === 11, false);
-            chai.assert.equal(arr.indexOf(11) > 0, true);
+            chai.assert.equal(arr[0] === 11 && arr[1] === 22 && arr[2] === 33, false);
         });
     });
 
@@ -201,5 +200,29 @@ describe('HashList', function() {
         });
     });
 
+    describe('#filter', function() {
+        const list = new HashList([-1, 2, -3]);
+        const listObj = new HashList([
+            {disabled: false},
+            {disabled: false},
+            {disabled: true}
+        ]);
+
+        it('Filter', function() {
+            const f1 = list.filter( e => e > 0 );
+            chai.assert.equal(!!f1._orderedIds, true);
+            chai.assert.equal(list !== f1, true);
+            chai.assert.equal(f1.length, 1);
+            chai.assert.equal(f1.getByIndex(0), 2);
+
+            // empty hashlist as a result
+            chai.assert.equal(list.filter( e => e > 100 ).length, 0);
+
+            const f2 = listObj.filter( e => !e.disabled );
+            chai.assert.equal(listObj !== f2, true);
+            chai.assert.equal(f2.length, 2);
+        });
+
+    });
 
 });

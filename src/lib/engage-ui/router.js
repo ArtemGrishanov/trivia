@@ -89,14 +89,12 @@ const refs = {};
                 {/* Render all screens first time in 'edit' */}
                 {this.props.mode === 'edit' &&
                     this.props.screens.toArray().map( (s) => {
-                        //if (s.hashlistId !== this.props.currentScreenId) {
-                            if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef();
-                            return (
-                                <div key={s.hashlistId} ref={refs[s.hashlistId]} className="rmx-scr_container_item">
-                                    <Screen {...scr} id={s.hashlistId}></Screen>
-                                </div>
-                            )
-                        //}
+                        if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef();
+                        return (
+                            <div key={s.hashlistId} ref={refs[s.hashlistId]} className="rmx-scr_container_item">
+                                <Screen {...scr} id={s.hashlistId}></Screen>
+                            </div>
+                        )
                     })
                 }
                 {this.state.showPrevScreen && prevScr &&
