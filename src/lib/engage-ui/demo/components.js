@@ -16,6 +16,7 @@ import Text from '../primitives/Text'
 import { Schema as TextSchema } from '../primitives/Text'
 import FbButton from '../primitives/social/FbButton'
 import { Schema as FbButtonSchema } from '../primitives/social/FbButton'
+import Screen from '../Screen'
 
 const COMPONENTS = [
     <Control id={500} schema={TextSchema} width={800} height={300}>
@@ -44,18 +45,18 @@ const COMPONENTS = [
     </Control>
     ,
     <Control id={504} schema={TextOptionSchema} width={800} height={200}>
-        <TextOption id={'textoption2'} width={200} height={50} correctIndicator='wrong' align='center' borderRadius={0} percent={88}/>
+        <TextOption id={'textoption3'} width={200} height={50} correctIndicator='wrong' align='center' borderRadius={0} percent={88}/>
     </Control>
     ,
     <Control id={517} schema={TextOptionSchema} width={800} height={200}>
-        <TextOption id={'textoption2'} width={250} height={150} top={20} correctIndicator='correct' align='center' borderRadius={20} percent={68}
+        <TextOption id={'textoption4'} width={250} height={150} top={20} correctIndicator='correct' align='center' borderRadius={20} percent={68}
             imageSrc={'https://interactive-examples.mdn.mozilla.net/media/examples/grapefruit-slice-332-332.jpg'}
             text={'<p><span style="color: rgb(255, 255, 255);">option</span></p><p><span style="color: rgb(255, 255, 255);">with</span></p><p><span style="color: rgb(255, 255, 255);">background</span></p><p><span style="color: rgb(255, 255, 255);">image</span></p>'}
             />
     </Control>
     ,
     <Control id={518} schema={TextOptionSchema} width={800} height={200}>
-        <TextOption id={'textoption2'} width={250} height={150} top={20} correctIndicator='correct' align='center' borderRadius={10} percent={68}
+        <TextOption id={'textoption5'} width={250} height={150} top={20} correctIndicator='correct' align='center' borderRadius={10} percent={68}
             backgroundColor={'blue'}
             text={'<p><span style="color: rgb(255, 255, 255);">option</span></p><p><span style="color: rgb(255, 255, 255);">with</span></p><p><span style="color: rgb(255, 255, 255);">background</span></p><p><span style="color: rgb(255, 255, 255);">color</span></p>'}
             />
@@ -143,6 +144,18 @@ const COMPONENTS = [
     ,
     <Control id={515} schema={CorrectIconSchema}>
         <CorrectIcon id={'icon4'} mod='correct'/>
+    </Control>
+    ,
+    <Control id={519} schema={TextOptionSchema} width={800} height={600}>
+        <Screen id={'screen1'} width={800} height={600} top={0}
+            backgroundColor={'#a7a7d2'}
+            />
+    </Control>
+    ,
+    <Control id={520} schema={TextOptionSchema} width={800} height={600}>
+        <Screen id={'screen2'} width={800} height={600} top={0}
+            backgroundImage={'https://cdn.thinglink.me/gfx/pages16/images/frontpage/march2019/landing-image-03-04@2x.jpg'}
+            />
     </Control>
 ];
 

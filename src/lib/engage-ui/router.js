@@ -3,7 +3,6 @@ import RemixWrapper from './RemixWrapper'
 import DataSchema from '../schema'
 import HashList from '../hashlist'
 import Screen from './Screen'
-import { setData } from '../remix'
 
 const refs = {};
 

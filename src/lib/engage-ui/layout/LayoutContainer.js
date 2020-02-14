@@ -85,7 +85,6 @@ class LayoutContainer extends React.Component {
     }
 
     render() {
-        console.log('render()')
         const st = {
                 border: (this.props.border) ? '1px solid black': 'none'
             },
@@ -127,7 +126,6 @@ class LayoutContainer extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        console.log('componentDidUpdate');
         if (this.props.size.width !== prevProps.size.width) {
             this.adaptateToNewViewportSize();
         }

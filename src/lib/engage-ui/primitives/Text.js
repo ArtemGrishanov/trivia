@@ -35,7 +35,7 @@ class Text extends React.Component {
     handleChange(value) {
         this.setState({ stateText: value })
         if (this.props.editable) {
-            setComponentProps(null, this.props.id, {text: value});
+            setComponentProps(this.props.id, {text: value});
         }
     }
 

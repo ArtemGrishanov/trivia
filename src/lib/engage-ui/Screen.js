@@ -5,6 +5,7 @@ import DataSchema from '../schema'
 import HashList from '../hashlist'
 import RemixWrapper from './RemixWrapper';
 import { getComponentClass } from './RemixWrapper'
+import BasicImage from './bricks/BasicImage';
 
 /**
  * Это контейнер визуальных элементов,
@@ -32,10 +33,12 @@ class Screen extends React.Component {
         });
         return (
             <div style={s} className="rmx-screen" data-id={this.props.id}>
-                {/* <p>{this.props.id}</p> */}
+                {this.props.backgroundImage &&
+                    <div className="rmx-screen_back_wr">
+                        <BasicImage width={this.props.width} height={this.props.height} src={this.props.backgroundImage} backgroundSize='cover'></BasicImage>
+                    </div>
+                }
                 <LayoutContainer>
-                    {/* TODO how about children? */}
-                    {/* {this.props.children} */}
                     {components}
                 </LayoutContainer>
             </div>
@@ -49,6 +52,10 @@ class Screen extends React.Component {
  */
 export const Schema = new DataSchema({
     'backgroundColor': {
+        type: 'string',
+        default: ''
+    },
+    'backgroundImage': {
         type: 'string',
         default: ''
     },

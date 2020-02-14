@@ -5,6 +5,7 @@ import CorrectIcon from './CorrectIcon';
 import TextEditor from '../bricks/TextEditor';
 import RemixWrapper from '../RemixWrapper';
 import BasicImage from '../bricks/BasicImage';
+import { setComponentProps } from '../../remix'
 
 class TextOption extends React.Component {
 
@@ -25,7 +26,7 @@ class TextOption extends React.Component {
             stateText: value
         });
         if (this.props.editable) {
-            setComponentProps(null, this.props.id, {text: value});
+            setComponentProps(this.props.id, {text: value});
         }
     }
 

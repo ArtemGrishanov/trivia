@@ -48,6 +48,7 @@ let root = null;
 let _outerEvents = [];
 let _orderCounter = 0;
 let _triggerActions = {};
+let _componentIdToScreenId = {};
 
 // establish communication with RContainer
 window.addEventListener("message", receiveMessage, false);
@@ -743,15 +744,12 @@ export function setMode(mode) {
  * @param {string} id component id
  */
 export function setComponentPosition({id, top, left, width, height}) {
-    const screenId = store.getState().router.currentScreenId;
-    if (screenId) {
-        const props = {};
-        if (top !== undefined) props.top = top;
-        if (left !== undefined) props.left = left;
-        if (width !== undefined) props.width = width;
-        if (height !== undefined) props.height = height;
-        setComponentProps(screenId, id, props);
-    }
+    const props = {};
+    if (top !== undefined) props.top = top;
+    if (left !== undefined) props.left = left;
+    if (width !== undefined) props.width = width;
+    if (height !== undefined) props.height = height;
+    setComponentProps(id, props);
 }
 
 /**
@@ -1061,10 +1059,11 @@ remix.deleteScreenComponent = function(screenId, componentId) {
  * Helper method
  * Set existing component props
  */
-export function setComponentProps(screenId, componentId, props) {
-    if (!screenId) {
-        screenId = store.getState().router.currentScreenId;
+export function setComponentProps(componentId, props) {
+    if (!_componentIdToScreenId[componentId]) {
+        calcComponentIdScreenIdHash(store.getState().router.screens);
     }
+    const screenId = _componentIdToScreenId[componentId];
     if (screenId) {
         let path = `router.screens.${screenId}.components.${componentId}.`;
         const data = {};
@@ -1073,6 +1072,15 @@ export function setComponentProps(screenId, componentId, props) {
         })
         setData(data);
     }
+}
+
+function calcComponentIdScreenIdHash(screens) {
+    _componentIdToScreenId = {};
+    screens.toArray().forEach( (scr) => {
+        scr.components.toArray().forEach( (cmp) => {
+            _componentIdToScreenId[cmp.hashlistId] = scr.hashlistId;
+        })
+    })
 }
 
 remix.setComponentProps = setComponentProps;
