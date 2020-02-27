@@ -8,9 +8,12 @@ import {
     getActiveScreen
 } from '../../../lib/remix'
 
-const MIN_WIDTH = 20; // px
-const MIN_HEIGHT = 20; // px
-const MAGNET_DISTANCE = 7; // px
+const
+    MIN_WIDTH = 20, // px
+    MIN_HEIGHT = 20, // px
+    MAGNET_DISTANCE = 7, // px
+    CAN_LEAVE_CONTAINER_HOR_PRC = 50, // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
+    CAN_LEAVE_CONTAINER_VERT_PRC = 50;  // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
 
 function toPercent(widthPx, containerWidth) {
     if (widthPx >= 0 && containerWidth >= 0) {
@@ -33,11 +36,11 @@ function calcState({
         propWidth,
         propHeight,
         propContainerWidth,
+        propContainerHeight,
         left,
         top,
         width,
         height,
-
         propMagnetsVertical
     }) {
         const isPercent = typeof propWidth === 'string' && propWidth.length > 2 ? propWidth[propWidth.length-1] === '%': false;
@@ -111,11 +114,26 @@ function calcState({
             }
         }
 
+        // component cannot leave container and became invisible
+        // normalize left and top
+        if (left > propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
+            left = propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100;
+        }
+        else if (left < -width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
+            left = -width * CAN_LEAVE_CONTAINER_HOR_PRC / 100;
+        }
+        if (top > propContainerHeight - height * CAN_LEAVE_CONTAINER_VERT_PRC / 100) {
+            top = propContainerHeight - height * CAN_LEAVE_CONTAINER_VERT_PRC / 100;
+        }
+        else if (top < -height * CAN_LEAVE_CONTAINER_VERT_PRC / 100) {
+            top = -height * CAN_LEAVE_CONTAINER_VERT_PRC / 100;
+        }
+
         return {
-            top: top,
-            left: left,
-            width: width,
-            height: height,
+            top,
+            left,
+            width,
+            height,
 
             prevPropTop: propTop,
             prevPropLeft: propLeft,
@@ -145,6 +163,7 @@ export default function LayoutItem() {
                         propWidth: props.width,
                         propHeight: props.height,
                         propContainerWidth: props.containerWidth,
+                        propContainerHeight: props.containerHeight,
                         width: state.width,
                         height: state.height,
                         top: state.top,
@@ -159,6 +178,7 @@ export default function LayoutItem() {
                 width: undefined,
                 height: undefined,
                 containerWidth: undefined,
+                containerHeight: undefined,
                 magnetsVertical: null
             }
 
@@ -254,22 +274,26 @@ export default function LayoutItem() {
                         l = this.startAttr.left + dx;
                         t = this.startAttr.top + dy;
                     }
-                    else if (this.markerId == 3 || this.markerId == 4 || this.markerId == 5) {
-                        w = this.startAttr.width + dx;
-                    }
-                    else if (this.markerId == 1 || this.markerId == 7 || this.markerId == 8) {
-                        w = this.startAttr.width - dx;
-                        if (w > this.minWidthPx) {
-                            l = this.startAttr.left + dx;
+                    else {
+                        // change left / width
+                        if (this.markerId == 3 || this.markerId == 4 || this.markerId == 5) {
+                            w = this.startAttr.width + dx;
                         }
-                    }
-                    else if (this.markerId == 6) {
-                        h = this.startAttr.height + dy;
-                    }
-                    else if (this.markerId == 2) {
-                        h = this.startAttr.height - dy;
-                        if (h > MIN_HEIGHT) {
-                            t = this.startAttr.top + dy;
+                        else if (this.markerId == 1 || this.markerId == 7 || this.markerId == 8) {
+                            w = this.startAttr.width - dx;
+                            if (w > this.minWidthPx) {
+                                l = this.startAttr.left + dx;
+                            }
+                        }
+                        // change top / height
+                        if (this.markerId == 5 || this.markerId == 6 || this.markerId == 7) {
+                            h = this.startAttr.height + dy;
+                        }
+                        else if (this.markerId == 1 || this.markerId == 2 || this.markerId == 3) {
+                            h = this.startAttr.height - dy;
+                            if (h > MIN_HEIGHT) {
+                                t = this.startAttr.top + dy;
+                            }
                         }
                     }
                     if (l !== undefined || t !== undefined || w !== undefined || h != undefined) {

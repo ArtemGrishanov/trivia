@@ -94,6 +94,22 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         _putOuterEventInQueue('serialized', {state: serialize2()});
         _sendOuterEvents();
     }
+    if (data.method === 'getshareentities') {
+        _putOuterEventInQueue('share_entities', {entities: [
+            //TODO mock share_entities
+            {
+                "title": "Some title 1",
+                "description": "Some description 1",
+                "imageId": 623039
+            },
+            {
+                "title": "Some title 2",
+                "description": "Some description 2",
+                "imageId": 623032
+            }
+        ]});
+        _sendOuterEvents();
+    }
     if (data.method === 'setsize') {
         // сообщение от контейнера по установке размера не имеет смысла
         // так как remix-приложение всегда width:100%;height:100% а реальный размер ставится в параметрах контейнера
@@ -106,7 +122,16 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         cloneHashlistElement(data.propertyPath, data.elementId);
     }
     if (data.method === 'changepositioninhashlist') {
-        changePositionInHashlist(data.propertyPath, data.elementIndex, data.newElementIndex);
+        let index = data.elementIndex,
+            newIndex = data.newElementIndex;
+        if (data.elementId) {
+            const hl = fetchHashlist(store.getState(), data.propertyPath);
+            index = hl.getIndex(data.elementId);
+        }
+        if (data.delta) {
+            newIndex = index + data.delta;
+        }
+        changePositionInHashlist(data.propertyPath, index, newIndex);
     }
     if (data.method === 'deletehashlistelement') {
         deleteHashlistElement(data.propertyPath, {

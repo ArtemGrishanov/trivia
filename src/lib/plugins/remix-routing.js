@@ -148,7 +148,9 @@ export default function initRemixRouting(options = {remix: null, screenRoute: []
     });
 
     Remix.registerTriggerAction('restart', (event) => {
-        remix.setCurrentScreen(screenIds[0]);
+        if (remix.getMode() !== 'edit') {
+            remix.setCurrentScreen(screenIds[0]);
+        }
     });
 
     if (restartTag) {
