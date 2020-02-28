@@ -92,7 +92,7 @@ export const Schema = new DataSchema({
     'text': {
         type: 'string',
         minLength: 1,
-        maxLength: 1024,
+        maxLength: 4096,
         default: 'Some text'
     },
     // Implemented in TextEditor.js

@@ -63,11 +63,11 @@ const COMPONENTS = [
     </Control>
     ,
     <Control id={505} schema={ButtonSchema} width={800} height={300}>
-        <Button id={'button1'} width={100} height={40} />
+        <Button id={'button1'} width={180} height={60} text='<p class="ql-align-center"><em class="ql-size-large" style="color: rgb(255, 255, 255);">Button</em><span class="ql-size-large"> </span><span class="ql-size-large" style="background-color: rgb(230, 0, 0); color: rgb(255, 255, 102);">text</span></p>'/>
     </Control>
     ,
     <Control id={506} schema={ButtonSchema} width={800} height={300}>
-        <Button id={'button2'} colorMod="white" sizeMod="small" width={150} height={30}/>
+        <Button id={'button2'} colorMod="white" sizeMod="small" width={150} height={30} text='<p class="ql-align-center">Button text</p>'/>
     </Control>
     ,
     <Control id={507} schema={FbButtonSchema} width={800} height={300}>

@@ -79,7 +79,7 @@ export const Schema = new DataSchema({
     'text': {
         type: 'string',
         minLength: 1,
-        maxLength: 1000,
+        maxLength: 4096,
         default: 'input text'
     },
     'correctIndicator': {

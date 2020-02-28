@@ -3,6 +3,7 @@ import sizeMe from 'react-sizeme'
 import React from 'react';
 import DataSchema from '../../schema';
 import { getAdaptedChildrenProps } from './LayoutAdapter'
+import { selectComponents } from '../../../lib/remix'
 
 //TODO hide/show magnet lines when operation in action
 
@@ -33,6 +34,13 @@ class LayoutContainer extends React.Component {
         }
         this.childRefs = {};
         this.userDefinedNormalizedProps = {};
+        this.onMouseDown = this.onMouseDown.bind(this);
+    }
+
+    onMouseDown(e) {
+        if (this.props.editable) {
+            selectComponents([]);
+        }
     }
 
     /**
@@ -42,7 +50,7 @@ class LayoutContainer extends React.Component {
     adaptateToNewViewportSize() {
         console.log(`AdaptateToNewViewportSize. Size w=${this.props.size.width} h=${this.props.size.height}`);
         // только для НЕредакирования. В 'edit' пользователь только настраивает положение элементов
-        if (Remix.getMode() !== 'edit') {
+        if (!this.props.editable) {
             this.setState({
                 adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, {
                     //TODO 800
@@ -87,8 +95,7 @@ class LayoutContainer extends React.Component {
     render() {
         const st = {
                 border: (this.props.border) ? '1px solid black': 'none'
-            },
-            isEditMode = Remix.getMode() === 'edit';
+            };
         let childrenWithProps = null;
         // state.width comes from 'sizeMe' wrapper
         if (this.state.width > 0 && this.state.height > 0) {
@@ -96,7 +103,7 @@ class LayoutContainer extends React.Component {
             // we can render children now
             this.childRefs = {};
             childrenWithProps = React.Children.map(this.props.children, child => {
-                const aProps = (!isEditMode && child.props.id && this.state.adaptedChildrenProps[child.props.id]) ? this.state.adaptedChildrenProps[child.props.id]: {};
+                const aProps = (!this.props.editable && child.props.id && this.state.adaptedChildrenProps[child.props.id]) ? this.state.adaptedChildrenProps[child.props.id]: {};
                 return React.cloneElement(child, {
                     setRef: this.setRef.bind(this, child.props.id),
                     normalizerRef: this.setNormalizedProps.bind(this, child.props.id),
@@ -104,16 +111,16 @@ class LayoutContainer extends React.Component {
                     containerHeight: this.state.height,
                     magnetsVertical: this.state.magnetsVertical,
                     // 'editable' означает что LayoutItem поддерживает режим редактирования (показ рамки, ресайз и тд). Таким образом, для вложенных друг в друга LayoutItem становится не активным (например иконка внутри TextOption)
-                    editable: isEditMode,
+                    editable: this.props.editable,
                     ...aProps
                 })
             });
         }
 
         return (
-            <div style={st} className="rmx-layout_container">
+            <div style={st} className="rmx-layout_container" onMouseDown={this.onMouseDown}>
                 {childrenWithProps}
-                {isEditMode && this.state.magnetsVertical && this.state.magnetsVertical.map( (mv) => {
+                {this.props.editable && this.state.magnetsVertical && this.state.magnetsVertical.map( (mv) => {
                     if (mv.hide !== true)
                         return <div key={'mv_'+mv.left} className="rmx-l_mgn" style={{left:mv.left+'%'}}></div>
                 })}

@@ -131,7 +131,12 @@ p {
 
 /* quill text editor */
 .quill {
-    margin-top: -54px !important;
+    /* shift component up to show .ql-toolbar in edit mode */
+    margin-top: -42px !important;
+    position: relative;
+}
+.rmx-text-editor.__readonly .quill {
+    margin-top: 0 !important;
 }
 .ql-editor {
     padding: 10px 0 !important;
@@ -145,5 +150,5 @@ p {
     border: none !important;
 }
 .rmx-text-editor.__readonly .ql-toolbar {
-    visibility: hidden;
+    display: none;
 }
