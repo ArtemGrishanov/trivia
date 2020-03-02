@@ -40,8 +40,7 @@ function calcState({
         left,
         top,
         width,
-        height,
-        propMagnetsVertical
+        height
     }) {
         const isPercent = typeof propWidth === 'string' && propWidth.length > 2 ? propWidth[propWidth.length-1] === '%': false;
         const newPropWidth = parseInt(propWidth);
@@ -88,32 +87,6 @@ function calcState({
             left = propLeft;
         }
 
-        // trying to find an appropriate magnet to align 'left'
-        //TODO magnets with no type
-        if (propMagnetsVertical) {
-            const magnet = propMagnetsVertical.find( (mv) => {
-                let ll = left;
-                if (mv.type === 'center') {
-                    ll += width/2;
-                }
-                else if (mv.type === 'right') {
-                    ll += width;
-                }
-                return Math.abs(mv.left - ll) < MAGNET_DISTANCE //MAGNET_DISTANCE, propContainerWidth)
-            });
-            if (magnet) {
-                if (magnet.type === 'center') {
-                    left = magnet.left - width/2;
-                }
-                else if (magnet.type === 'right') {
-                    left = magnet.left - width;
-                }
-                else {
-                    left = magnet.left;
-                }
-            }
-        }
-
         // component cannot leave container and became invisible
         // normalize left and top
         if (left > propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
@@ -130,16 +103,49 @@ function calcState({
         }
 
         return {
-            top,
-            left,
-            width,
-            height,
+            top: top,
+            left: left,
+            width: width,
+            height: height,
 
             prevPropTop: propTop,
             prevPropLeft: propLeft,
             prevPropWidth: propWidth,
             prevPropHeight: propHeight
         }
+}
+
+function tryToMagnet(left, width, id, propMagnetsVertical) {
+    // trying to find an appropriate magnet to align 'left'
+    // магнит тип edge - за эти линии компонент может зацепляться только левым или правым краем. Для середины существует тип center
+    let magnets = null;
+    if (propMagnetsVertical) {
+        const magnet = propMagnetsVertical.find( (mv) => {
+            if (id !== mv.componentId) {
+                if (mv.type === 'center' && Math.abs(mv.left - (left+width/2)) < MAGNET_DISTANCE) {
+                    left = mv.left - width/2;
+                    return mv;
+                }
+                else if (mv.type === 'edge') {
+                    if (Math.abs(mv.left - left) < MAGNET_DISTANCE) {
+                        // компонент левым краем зацепился за магнит типа edge
+                        left = mv.left;
+                        return mv;
+                    }
+                    else if (Math.abs(mv.left - (left+width)) < MAGNET_DISTANCE) {
+                        // компонент правым краем зацепился за магнит типа edge
+                        left = mv.left - width;
+                        return mv;
+                    }
+                }
+            }
+        });
+        if (magnet) {
+            // сделано с заделом на несколько магнитов, возможно будем отобразать несколько - добавятся горизонтальные
+            magnets = [magnet];
+        }
+    }
+    return {left, magnets};
 }
 
 const mapStateToProps = (state, ownProps) => {
@@ -167,7 +173,8 @@ export default function LayoutItem() {
                         width: state.width,
                         height: state.height,
                         top: state.top,
-                        left: state.left
+                        left: state.left,
+                        id: props.id
                     })
                 }
             }
@@ -222,7 +229,6 @@ export default function LayoutItem() {
                         this.isDragging = false;
                         this.isItemMouseDown = false;
                         this.setState({doubleClicked: true});
-                        console.log('dblclicked');
                     }
                     else if (this.itemNode && !this.state.doubleClicked) {
                         // одно нажатие - подготовка к перетаскиваю
@@ -297,24 +303,33 @@ export default function LayoutItem() {
                         }
                     }
                     if (l !== undefined || t !== undefined || w !== undefined || h != undefined) {
-                        this.setState({
-                            ...calcState({
-                                state: this.state,
-                                propContainerWidth: this.props.containerWidth,
-                                propLeft: this.props.left,
-                                propTop: this.props.top,
-                                propWidth: this.props.width,
-                                propHeight: this.props.height,
-                                width: w === undefined ? this.state.width: w,
-                                height: h === undefined ? this.state.height: h,
-                                top: t === undefined ? this.state.top: t,
-                                left: l === undefined ? this.state.left: l,
+                        // this.setState({
+                        //     ...calcState({
+                        //         state: this.state,
+                        //         propContainerWidth: this.props.containerWidth,
+                        //         propLeft: this.props.left,
+                        //         propTop: this.props.top,
+                        //         propWidth: this.props.width,
+                        //         propHeight: this.props.height,
+                        //         width: w === undefined ? this.state.width: w,
+                        //         height: h === undefined ? this.state.height: h,
+                        //         top: t === undefined ? this.state.top: t,
+                        //         left: l === undefined ? this.state.left: l,
+                        //         propMagnetsVertical: this.props.magnetsVertical
+                        //     })
+                        // });
+                        l = l === undefined ? this.state.left: l;
+                        w = w === undefined ? this.state.width: w;
 
-                                propMagnetsVertical: this.props.magnetsVertical
-                            })
+                        const {left, magnets} = tryToMagnet(l, w, this.props.id, this.props.magnetsVertical);
+                        this.setState({
+                            width: w,
+                            height: h === undefined ? this.state.height: h,
+                            top: t === undefined ? this.state.top: t,
+                            left: left,
+                            magnets
                         });
                     }
-                    //TODO check LayoutItemWidth cannot be less than content width, but text can collapse: break by words and letters
                 }
             }
 
@@ -351,6 +366,28 @@ export default function LayoutItem() {
             componentDidMount() {
                 window.addEventListener('mousemove', this.onWindowMouseMove);
                 window.addEventListener('mouseup', this.onWindowMouseUp);
+                if (this.props.onLayoutItemUpdate) {
+                    this.props.onLayoutItemUpdate(this);
+                }
+            }
+
+            componentDidUpdate(prevProps, prevState) {
+                if (this.props.onLayoutItemUpdate) {
+                    this.props.onLayoutItemUpdate(this);
+                }
+                if (this.props.onDragAndMagnetsAttached) {
+                    if (this.state.magnets) {
+                        if (this.isDragging) {
+                            this.props.onDragAndMagnetsAttached(this.state.magnets, this)
+                        }
+                        else {
+                            this.props.onDragAndMagnetsAttached(null, this);
+                        }
+                    }
+                    else if (prevState.magnets) {
+                        this.props.onDragAndMagnetsAttached(null, this);
+                    }
+                }
             }
 
             componentWillUnmount() {
@@ -408,6 +445,9 @@ export default function LayoutItem() {
                             {/* Передать измененные width,height из this.state которые пользователь изменил при перетаскивании и ресайзе */}
                             <Component {...this.props} {...this.state} /*onSize={this.onContentSize.bind(this)}*/></Component>
                         </div>
+                        {this.props.bordered &&
+                            <div className={"rmx-layout_item_selection_cnt __selected"}></div>
+                        }
                         {this.props.editable && !this.state.doubleClicked &&
                             <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}>
                                 <div className="rmx-l-sel-m __1" datamarker="1" onMouseDown={this.onMouseDown}></div>

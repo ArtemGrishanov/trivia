@@ -39,7 +39,7 @@ class Screen extends React.Component {
                         <BasicImage width={this.props.width} height={this.props.height} src={this.props.backgroundImage} backgroundSize='cover'></BasicImage>
                     </div>
                 }
-                <LayoutContainer editable={isEditMode}>
+                <LayoutContainer editable={isEditMode} id={'__lc_of_screen_'+this.props.id}>
                     {components}
                 </LayoutContainer>
             </div>
