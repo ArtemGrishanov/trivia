@@ -128,27 +128,3 @@ p {
     word-break: break-word;
     white-space: normal;
 }
-
-/* quill text editor */
-.quill {
-    /* shift component up to show .ql-toolbar in edit mode */
-    margin-top: -42px !important;
-    position: relative;
-}
-.rmx-text-editor.__readonly .quill {
-    margin-top: 0 !important;
-}
-.ql-editor {
-    padding: 10px 0 !important;
-}
-.ql-toolbar {
-    white-space: nowrap !important;
-    background-color: #fff;
-    width: max-content;
-}
-.ql-container.ql-snow {
-    border: none !important;
-}
-.rmx-text-editor.__readonly .ql-toolbar {
-    display: none;
-}

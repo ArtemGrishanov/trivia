@@ -1,0 +1,72 @@
+/* quill text editor */
+.quill {
+    /* shift component up to show .ql-toolbar in edit mode */
+    margin-top: -42px !important;
+    position: relative;
+}
+.rmx-text-editor.__readonly .quill {
+    margin-top: 0 !important;
+}
+.ql-editor {
+    padding: 10px 0 !important;
+}
+.ql-toolbar {
+    white-space: nowrap !important;
+    background-color: #fff;
+    width: max-content;
+}
+.ql-container.ql-snow {
+    border: none !important;
+}
+.rmx-text-editor.__readonly .ql-toolbar {
+    display: none;
+}
+/* /quill text editor */
+
+
+/* quill custom fonts */
+/* @import url('https://fonts.googleapis.com/css2?family=Ubuntu'); */
+ /* text=Ubuntu */
+.ql-font span[data-value='Ubuntu']::before {
+    font-family: 'Ubuntu';
+    content: 'Ubuntu' !important;
+}
+.ql-font-Ubuntu {
+    font-family: 'Ubuntu';
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Inconsolata'); */
+.ql-font span[data-value='Inconsolata']::before {
+    font-family: 'Inconsolata';
+    content: 'Inconsolata' !important;
+}
+.ql-font-Inconsolata {
+    font-family: 'Inconsolata';
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto'); */
+.ql-font span[data-value='Roboto']::before {
+    font-family: 'Roboto';
+    content: 'Roboto' !important;
+}
+.ql-font-Roboto {
+    font-family: 'Roboto';
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Mirza'); */
+.ql-font span[data-value='Mirza']::before {
+    font-family: 'Mirza';
+    content: 'Mirza' !important;
+}
+.ql-font-Mirza {
+    font-family: 'Mirza';
+}
+
+.ql-font span[data-value='Arial']::before {
+    font-family: 'Arial';
+    content: 'Arial' !important;
+}
+.ql-font-Arial {
+    font-family: 'Arial';
+}
+/* /quill custom fonts */
