@@ -18,24 +18,34 @@ class Text extends React.Component {
             }
         }
         return {
-            ...state
+            ...state,
+            prevPropText: props.text,
+            stateText: state.prevPropText !== props.text ? props.text: state.stateText
         }
     }
 
     constructor(props) {
         super(props);
         this.state = {
+            prevPropText: props.text,
             stateText: props.text,
             animatedText: '',
             animationOnAppearance: 'none'
         }
         this.handleChange = this.handleChange.bind(this)
+        this.onEditCompleted = this.onEditCompleted.bind(this);
     }
 
     handleChange(value) {
         this.setState({ stateText: value })
+        // if (this.props.editable) {
+            //setComponentProps(this.props.id, {text: value});
+        // }
+    }
+
+    onEditCompleted(value) {
         if (this.props.editable) {
-            setComponentProps(this.props.id, {text: value});
+            setComponentProps(this.props.id, {text: value}, {putStateHistory: true});
         }
     }
 
@@ -52,7 +62,7 @@ class Text extends React.Component {
         //const text = (this.props.animationOnAppearance === 'none') ? this.state.stateText: this.state.animatedText;
         return (
             <div className="rmx-component" style={st}>
-                <TextEditor readOnly={!this.props.doubleClicked} onChange={this.handleChange} text={this.state.stateText}></TextEditor>
+                <TextEditor readOnly={!this.props.doubleClicked} onChange={this.handleChange} onEditCompleted={this.onEditCompleted} text={this.state.stateText}></TextEditor>
             </div>
         )
     }

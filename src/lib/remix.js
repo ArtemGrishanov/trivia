@@ -11,7 +11,6 @@ import {
     getScreenIdFromPath,
     getComponentIdFromPath
 } from './remix/util/util.js'
-// import { getLastDiff } from './remix/middleware/diff.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -27,31 +26,44 @@ export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
 
-const remix = {};
-
 //TODO specify origin during publishing?
 //const containerOrigin = "http://localhost:8080";
 const EXPECTED_CONTAINER_ORIGIN = null;
 const MODE_SET = new Set(['none', 'edit', 'preview', 'published']);
 const LOG_BY_DEFAULT = false;
 
-let logging = LOG_BY_DEFAULT;
-let containerOrigin = null;
-let containerWindow = null;
-let store = null;
-let schema = null;
-let customFunctions = {};
-let normalizer = null;
-let extActions = null;
-let root = null;
-// let _lastUpdDiff = null;
-let _outerEvents = [];
-let _orderCounter = 0;
-let _triggerActions = {};
-let _componentIdToScreenId = {};
+let logging = LOG_BY_DEFAULT,
+    containerOrigin = null,
+    containerWindow = null,
+    store = null,
+    schema = null,
+    customFunctions = {},
+    normalizer = null,
+    extActions = null,
+    stateHistoryIndex = 0,
+    stateHistory = [],
+    _outerEvents = [],
+    _orderCounter = 0,
+    _triggerActions = {},
+    _componentIdToScreenId = {};
 
-// establish communication with RContainer
-window.addEventListener("message", receiveMessage, false);
+// establish communication with RemixContainer
+window.addEventListener('message', receiveMessage, false);
+window.addEventListener('keydown', onKeyDown, false);
+
+function onKeyDown(e) {
+    if (getMode() === 'edit') {
+        if (e.metaKey || e.ctrlKey) {
+            const k = String.fromCharCode(e.keyCode);
+            if (e.shiftKey && k === 'Z') {
+                redo();
+            }
+            else if (k === 'Z') {
+                undo();
+            }
+        }
+    }
+}
 
 /**
  * Получить и обработать сообщение
@@ -64,31 +76,12 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     if (EXPECTED_CONTAINER_ORIGIN && origin !== EXPECTED_CONTAINER_ORIGIN) {
         return;
     }
-    // if (data.method === 'init') {
-    //     containerOrigin = origin;
-    //     containerWindow = source;
-    //     setMode(data.mode);
-    //     logging = typeof data.log === "boolean" ? data.log: LOG_BY_DEFAULT;
+    // method 'init' - managed by index.html
+    // method 'embed' - managed by index.html
 
-    //     _putOuterEventInQueue('inited', {
-    //         schema: schema,
-    //         css: "TODO: pass css string from project to container.",
-    //         screens: getScreens(),
-    //         state: serialize2()
-    //     }, 0);
-    //     // before this 'init' we may already have some events in queue
-    //     _sendOuterEvents();
-    // }
-    // else
-    if (data.method === 'run') {
-
-        setData(data.properties, data.forceFeedback);
-
-        //TODO start ?
-        //window.start();
-    }
     if (data.method === 'setdata') {
         setData(data.data, data.forceFeedback);
+        putStateHistory();
     }
     if (data.method === 'serialize') {
         _putOuterEventInQueue('serialized', {state: serialize2()});
@@ -117,9 +110,11 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     }
     if (data.method === 'addhashlistelement') {
         addHashlistElement(data.propertyPath, data.index, { newElement: data.newElement });
+        putStateHistory();
     }
     if (data.method === 'clonehashlistelement') {
         cloneHashlistElement(data.propertyPath, data.elementId);
+        putStateHistory();
     }
     if (data.method === 'changepositioninhashlist') {
         let index = data.elementIndex,
@@ -132,21 +127,30 @@ function receiveMessage({origin = null, data = {}, source = null}) {
             newIndex = index + data.delta;
         }
         changePositionInHashlist(data.propertyPath, index, newIndex);
+        putStateHistory();
     }
     if (data.method === 'deletehashlistelement') {
         deleteHashlistElement(data.propertyPath, {
             elementId: data.elementId,
             index: data.index
         });
+        putStateHistory();
     }
     if (data.method === 'setcurrentscreen') {
         if (data.screenId) {
             setCurrentScreen(data.screenId);
+            putStateHistory();
         }
     }
     if (data.method === 'select') {
         // postMessage=false, we dont need to notify container as has just got message from it
         selectComponents(data.componentIds, {}, {postMessage: false});
+    }
+    if (data.method === 'undo') {
+        undo();
+    }
+    if (data.method === 'redo') {
+        redo();
     }
 }
 
@@ -249,18 +253,6 @@ function addTrigger({when = {}, then = null}) {
         trigger: {when, then, order: ++_orderCounter}
     });
 }
-
-/**
- * Mark some triggers as executed
- *
- * @param {string} transactionIds
- */
-// function markAsExecuted(transactionIds) {
-//     store.dispatch({
-//         type: REMIX_MARK_AS_EXECUTED,
-//         transactionIds: transactionIds
-//     });
-// }
 
 /**
  * Event happend in Remix app
@@ -400,9 +392,7 @@ export function setStore(astore) {
  * Inites remix framework
  * Method for external init in index.html
  */
-function init({/*appStore = null, */externalActions = [], container = null, mode = 'none', defaultProperties = '', origin, source, log}) {
-    //store = appStore;
-    root = container;
+function init({externalActions = [], container = null, mode = 'none', defaultProperties = '', origin, source, log}) {
     containerOrigin = origin;
     containerWindow = source;
     logging = typeof log === "boolean" ? log: LOG_BY_DEFAULT;
@@ -425,6 +415,8 @@ function init({/*appStore = null, */externalActions = [], container = null, mode
     // mode устанавливаем после десериализации. Чтобы во время десериализации не рассылать события об изменении свойств
     // это произойдет потом единым событием
     setMode(mode);
+    stateHistory = [];
+    putStateHistory();
 }
 
 /**
@@ -617,19 +609,10 @@ function session(state = { triggers: [], events: [], selectedComponentIds: [], m
                 time: Date.now(),
                 order: ++_orderCounter
             };
-            const texec = []; //getTriggersToExecute(state.triggers.toArray(), event);
-            // const newActivatedTriggers = [
-            //     ...state.activatedTriggers,
-            //     ...texec
-            // ];
             const newHistory = [
                 ...state.events,
                 event
             ];
-            // const toExecute = [
-            //     ...state.toExecute,
-            //     ...texec
-            // ]
             return {
                 ...state,
                 events: newHistory
@@ -766,18 +749,22 @@ export function setMode(mode) {
     });
 }
 
+export function getMode() {
+    return store ? store.getState().session.mode: 'none';
+}
+
 /**
  * Sets component position and size
  *
  * @param {string} id component id
  */
-export function setComponentPosition({id, top, left, width, height}) {
+export function setComponentPosition({id, top, left, width, height}, options) {
     const props = {};
     if (top !== undefined) props.top = top;
     if (left !== undefined) props.left = left;
     if (width !== undefined) props.width = width;
     if (height !== undefined) props.height = height;
-    setComponentProps(id, props);
+    setComponentProps(id, props, options);
 }
 
 /**
@@ -1004,62 +991,66 @@ function getProperties() {
     return res;
 }
 
-// public methods
-remix.init = init;
-remix.setData = setData;
-remix.setSize = setSize;
-remix.addHashlistElement = addHashlistElement;
-remix.changePositionInHashlist = changePositionInHashlist;
-remix.deleteHashlistElement = deleteHashlistElement;
-remix.serialize = serialize;
-remix.serialize2 = serialize2;
-remix.deserialize = deserialize;
-remix.deserialize2 = deserialize2;
-remix.dispatchAction = dispatchAction;
-remix.addTrigger = addTrigger;
-remix.setMode = setMode;
-remix.getMode = () => store ? store.getState().session.mode: 'none';
-remix.fireEvent = fireEvent;
-remix.setCurrentScreen = setCurrentScreen;
-remix.clearTriggersAndEvents = clearTriggersAndEvents;
-// remix._getLastUpdateDiff = _getLastUpdateDiff;
-remix._setScreenEvents = _setScreenEvents;
-remix._triggerActions = _triggerActions;
-remix._getSchema = () => schema;
-remix._putOuterEventInQueue = _putOuterEventInQueue;
-remix._sendOuterEvents = _sendOuterEvents;
-remix.getProperties = getProperties;
-remix._setCss = () => {
-    //TODO set project css styles
-    // maybe use to-string-loader https://github.com/webpack-contrib/css-loader#tostring
-};
-remix.registerTriggerAction = registerTriggerAction;
-remix.getState = () => store.getState();
-remix.setStore = setStore;
+/**
+ * Сохранить текущий стейт в историю операций
+ */
+function putStateHistory() {
+    if (stateHistoryIndex < stateHistory.length-1) {
+        // это значит были произведены undo операции ранее, а теперь новое редактирование
+        // с созданием новой версии, изменения который были "впереди" удаляются насовсем. Им нельзя сделать redo
+        stateHistory.splice(stateHistoryIndex + 1, stateHistory.length);
+    }
+    stateHistory.push(store.getState());
+    stateHistoryIndex = stateHistory.length-1;
+}
+
+/**
+ * Отменить предыдущую операцию
+ */
+export function undo() {
+    if (stateHistoryIndex > 0) {
+        --stateHistoryIndex;
+        deserialize2(serialize2(stateHistory[stateHistoryIndex]));
+    }
+}
+
+/**
+ * Повторить отмененную операцию
+ */
+export function redo() {
+    if (stateHistoryIndex < stateHistory.length - 1) {
+        ++stateHistoryIndex;
+        deserialize2(serialize2(stateHistory[stateHistoryIndex]));
+    }
+}
+
 /**
  * Add new properties descriptions to app schema
  * Plugins may use this method
  */
-remix.extendSchema = (schm) => {
+function extendSchema(schm) {
     schema = schema.extend(schm);
     normalizer = new Normalizer(schema);
 }
+
 /**
  * App and plugin authors can declare function to use in applications, triggers etc..
  * Call by name later..
  */
-remix.addCustomFunction = (fnName, fn) => {
+function addCustomFunction(fnName, fn) {
     customFunctions[fnName] = fn;
 }
+
 /**
  * Call the declared custom function
  */
-remix.callCustomFunction = (fnName) => {
+function callCustomFunction(fnName) {
     if (customFunctions[fnName]) {
         return customFunctions[fnName].call(remix);
     }
     throw new Error(`custom function not found ${fnName}`);
 }
+
 /**
  * Helper method.
  * Add component from the screen
@@ -1077,7 +1068,7 @@ remix.callCustomFunction = (fnName) => {
     }
  *
  */
-remix.addScreenComponent = function(screenId, componentProps) {
+function addScreenComponent(screenId, componentProps) {
     let path = `router.screens.${screenId}.components`;
     this.addHashlistElement(path, undefined, {newElement: componentProps});
 }
@@ -1085,15 +1076,19 @@ remix.addScreenComponent = function(screenId, componentProps) {
  * Helper method.
  * Delete component from the screen
  */
-remix.deleteScreenComponent = function(screenId, componentId) {
+function deleteScreenComponent(screenId, componentId) {
     let path = `router.screens.${screenId}.components`;
     this.deleteHashlistElement(path, {elementId: componentId});
 }
 /**
  * Helper method
  * Set existing component props
+ *
+ * @param {string} componentId
+ * @param {object} props
+ * @param {boolean} options.putStateHistory
  */
-export function setComponentProps(componentId, props) {
+export function setComponentProps(componentId, props, options) {
     if (!_componentIdToScreenId[componentId]) {
         calcComponentIdScreenIdHash(store.getState().router.screens);
     }
@@ -1106,6 +1101,9 @@ export function setComponentProps(componentId, props) {
         })
         setData(data);
     }
+    if (options && options.putStateHistory === true) {
+        putStateHistory();
+    }
 }
 
 function calcComponentIdScreenIdHash(screens) {
@@ -1117,8 +1115,49 @@ function calcComponentIdScreenIdHash(screens) {
     })
 }
 
-remix.setComponentProps = setComponentProps;
-remix.getScreens = getScreens;
+
+const remix = {
+    // public methods
+    init,
+    extendSchema,
+    addCustomFunction,
+    callCustomFunction,
+    addScreenComponent,
+    deleteScreenComponent,
+    setData,
+    setSize,
+    getScreens,
+    addHashlistElement,
+    changePositionInHashlist,
+    deleteHashlistElement,
+    serialize,
+    serialize2,
+    deserialize,
+    deserialize2,
+    dispatchAction,
+    addTrigger,
+    registerTriggerAction,
+    setMode,
+    getMode,
+    fireEvent,
+    setCurrentScreen,
+    clearTriggersAndEvents,
+    getProperties,
+    setStore,
+    setComponentProps,
+    undo,
+    redo,
+
+    // for debug
+    _setScreenEvents,
+    _triggerActions,
+    _getSchema: () => schema,
+    _putOuterEventInQueue,
+    _sendOuterEvents,
+    getState: () => store.getState(),
+    _getStateHistory: () => stateHistory
+}
 
 export default remix
+
 window.Remix = remix; // for debug

@@ -97,10 +97,13 @@ class TextEditor extends React.Component {
 
     }
 
-    componentDidUpdate() {
+    componentDidUpdate(prevProps) {
         if (!this.props.readOnly) {
             // import all fonts in edit mode
             fonts.forEach( f => addFont(f));
+        }
+        if (!prevProps.readOnly && this.props.readOnly && this.props.onEditCompleted) {
+            this.props.onEditCompleted(this.state.stateText);
         }
     }
 }

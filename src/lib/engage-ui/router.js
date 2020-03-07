@@ -54,25 +54,25 @@ const refs = {};
     }
 
     renderStaticMarkup() {
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId);
-        }
-        this.timeoutId = setTimeout( () => {
-            this.timeoutId = null;
-            const markupData = {};
-            Object.keys(refs).forEach( (screenId) => {
-                if (refs[screenId].current) {
-                    const sm = refs[screenId].current.innerHTML;
-                    if (this.props.screens[screenId].staticMarkup != sm) {
-                        markupData[`router.screens.${screenId}.staticMarkup`] = sm;
-                    }
-                }
-            })
-            if (Object.keys(markupData).length > 0) {
-                this.props.setData(markupData);
-            }
-        },
-        3000) // don't render too often. User can perform many microoperations: dragging, resizing, changing colors etc...
+        // if (this.timeoutId) {
+        //     clearTimeout(this.timeoutId);
+        // }
+        // this.timeoutId = setTimeout( () => {
+        //     this.timeoutId = null;
+        //     const markupData = {};
+        //     Object.keys(refs).forEach( (screenId) => {
+        //         if (refs[screenId].current) {
+        //             const sm = refs[screenId].current.innerHTML;
+        //             if (this.props.screens[screenId].staticMarkup != sm) {
+        //                 markupData[`router.screens.${screenId}.staticMarkup`] = sm;
+        //             }
+        //         }
+        //     })
+        //     if (Object.keys(markupData).length > 0) {
+        //         this.props.setData(markupData);
+        //     }
+        // },
+        // 3000) // don't render too often. User can perform many microoperations: dragging, resizing, changing colors etc...
     }
 
     render() {

@@ -347,6 +347,8 @@ export default function LayoutItem() {
                             left: this.state.left,
                             width: this.state.width,
                             height: this.state.height
+                        }, {
+                            putStateHistory: true
                         });
                     }
                     else if (this.isItemMouseDown) {
