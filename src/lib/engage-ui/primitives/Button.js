@@ -2,22 +2,12 @@ import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 import TextEditor from '../bricks/TextEditor';
-import { setComponentProps } from '../../remix';
 
 class Button extends React.Component {
 
     constructor(props) {
         super(props);
         this.state = {
-            stateText: props.text
-        }
-        this.handleChange = this.handleChange.bind(this)
-    }
-
-    handleChange(value) {
-        this.setState({ stateText: value })
-        if (this.props.editable) {
-            setComponentProps(this.props.id, {text: value});
         }
     }
 
@@ -27,7 +17,7 @@ class Button extends React.Component {
         };
         return (
             <button className={`rmx-component rmx-button __${this.props.colorMod} __${this.props.sizeMod}`} style={st}>
-                <TextEditor readOnly={!this.props.doubleClicked} onChange={this.handleChange} text={this.state.stateText}></TextEditor>
+                <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
             </button>
         )
     }

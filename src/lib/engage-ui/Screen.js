@@ -31,7 +31,6 @@ class Screen extends React.Component {
             const RemixComponent = getComponentClass(cmpn.displayName);
             return ( <RemixComponent {...cmpn} id={cmpnId} key={cmpnId}/> )
         });
-        const isEditMode = Remix.getMode() === 'edit';
         return (
             <div style={s} className="rmx-screen" data-id={this.props.id}>
                 {this.props.backgroundImage &&
@@ -39,7 +38,7 @@ class Screen extends React.Component {
                         <BasicImage width={this.props.width} height={this.props.height} src={this.props.backgroundImage} backgroundSize='cover'></BasicImage>
                     </div>
                 }
-                <LayoutContainer editable={isEditMode} id={'__lc_of_screen_'+this.props.id}>
+                <LayoutContainer editable={this.props.editable} id={'__lc_of_screen_'+this.props.id}>
                     {components}
                 </LayoutContainer>
             </div>

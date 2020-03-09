@@ -1,4 +1,5 @@
 import React from 'react'
+import { setComponentProps } from '../../remix';
 
 // https://github.com/zenoamaro/react-quill
 import ReactQuill from 'react-quill'
@@ -39,28 +40,22 @@ class TextEditor extends React.Component {
     static getDerivedStateFromProps(props, state) {
         return {
             ...state,
-            // props.onChange - значит родитель извне управляет текстом
-            stateText: props.onChange ? props.text: state.stateText
+            prevPropText: props.text,
+            stateText: state.prevPropText !== props.text ? props.text: state.stateText
         }
     }
 
     constructor(props) {
         super(props);
         this.state = {
-            stateText: props.text
+            stateText: props.text,
+            prevPropText: props.text
         }
         this.handleChange = this.handleChange.bind(this)
     }
 
     handleChange(value) {
-        if (this.props.onChange) {
-            // отправить изменение вверх родительскому компоненту
-            // он позаботится о сохранении значения и вернет его через props.text
-            this.props.onChange(value);
-        }
-        else {
-            this.setState({ stateText: value })
-        }
+        this.setState({ stateText: value })
         // import font which is used in app
         fonts.forEach( f => {
             if (value.indexOf(`ql-font-${f}`) >= 0) {
@@ -102,8 +97,9 @@ class TextEditor extends React.Component {
             // import all fonts in edit mode
             fonts.forEach( f => addFont(f));
         }
-        if (!prevProps.readOnly && this.props.readOnly && this.props.onEditCompleted) {
-            this.props.onEditCompleted(this.state.stateText);
+        if (!prevProps.readOnly && this.props.readOnly) {
+            // выход из режима ввода текста - делаем сохранение в remix
+            setComponentProps(this.props.parentId, {text: this.state.stateText}, {putStateHistory: true});
         }
     }
 }

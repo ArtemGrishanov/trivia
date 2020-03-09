@@ -5,7 +5,6 @@ import CorrectIcon from './CorrectIcon';
 import TextEditor from '../bricks/TextEditor';
 import RemixWrapper from '../RemixWrapper';
 import BasicImage from '../bricks/BasicImage';
-import { setComponentProps } from '../../remix'
 
 class TextOption extends React.Component {
 
@@ -16,18 +15,7 @@ class TextOption extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            stateText: props.text
         };
-        this.onOptionTextEdited = this.onOptionTextEdited.bind(this);
-    }
-
-    onOptionTextEdited(value) {
-        this.setState({
-            stateText: value
-        });
-        if (this.props.editable) {
-            setComponentProps(this.props.id, {text: value});
-        }
     }
 
     render() {
@@ -68,7 +56,7 @@ class TextOption extends React.Component {
                             <CorrectIcon left={0} top={0} width={24} height={24} mod={this.props.correctIndicator}/>
                         </div>
                     }
-                    <TextEditor readOnly={!this.props.doubleClicked} onChange={this.onOptionTextEdited} text={this.state.stateText}></TextEditor>
+                    <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
                 </div>
             </div>
         )

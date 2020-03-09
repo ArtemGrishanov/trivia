@@ -845,6 +845,8 @@ export function serialize(state) {
 
 /**
  *
+ * @param options.serializeAll - сериализовать все свойства схема. даже те которые помечены как несериализуемые
+ * для операция undo/redo это важно. Пример currentScreen важно при редактировании. А при обычном сохранении проекта в апи - не нужно сохранять
  *
  * @result {string} json tree, only dynamic properties are included in this tree.
  * "app": {
@@ -866,7 +868,7 @@ export function serialize(state) {
  *
  * In this algorithm there is no duplicate values. Good for micro Editor. Moreover it is shorter.
  */
-export function serialize2(state) {
+export function serialize2(state, options = {}) {
     const res = {};
     let st = state;
     if (!st) {
@@ -877,7 +879,7 @@ export function serialize2(state) {
     }
     schema.selectorsInProcessOrder.forEach((selector) => {
         const desc = schema.getDescription(selector);
-        if (desc.serialize !== false) {
+        if (options.serializeAll || desc.serialize !== false) {
             const propsToSerialize = getPropertiesBySelector(st, selector);
             propsToSerialize.forEach((prop) => {
                 if (isHashlistInstance(prop.value)) {
@@ -1010,7 +1012,7 @@ function putStateHistory() {
 export function undo() {
     if (stateHistoryIndex > 0) {
         --stateHistoryIndex;
-        deserialize2(serialize2(stateHistory[stateHistoryIndex]));
+        deserialize2(serialize2(stateHistory[stateHistoryIndex], {serializeAll: true}));
     }
 }
 
@@ -1020,7 +1022,7 @@ export function undo() {
 export function redo() {
     if (stateHistoryIndex < stateHistory.length - 1) {
         ++stateHistoryIndex;
-        deserialize2(serialize2(stateHistory[stateHistoryIndex]));
+        deserialize2(serialize2(stateHistory[stateHistoryIndex], {serializeAll: true}));
     }
 }
 

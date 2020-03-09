@@ -156,7 +156,6 @@ class LayoutContainer extends React.Component {
     setNormalizedProps(componentId, props) {
         //TODO когда именно и сколько раз надо устанавливать оригинальные нормализованные свойства?
         if (componentId && this.userDefinedNormalizedProps[componentId] === undefined) {
-            console.log('setNormalizedProps');
             // установить изначальные нормализованные свойства
             this.userDefinedNormalizedProps[componentId] = {...props};
         }

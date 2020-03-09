@@ -2,7 +2,6 @@ import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 import TextEditor from '../bricks/TextEditor';
-import { setComponentProps } from '../../remix';
 
 // Text animation ideas https://tobiasahlin.com/moving-letters/
 
@@ -12,40 +11,20 @@ class Text extends React.Component {
         if (props.animationOnAppearance !== state.animationOnAppearance) {
             return {
                 ...state,
-                stateText: props.text,
                 animatedText: '',
                 animationOnAppearance: props.animationOnAppearance
             }
         }
         return {
-            ...state,
-            prevPropText: props.text,
-            stateText: state.prevPropText !== props.text ? props.text: state.stateText
+            ...state
         }
     }
 
     constructor(props) {
         super(props);
         this.state = {
-            prevPropText: props.text,
-            stateText: props.text,
             animatedText: '',
             animationOnAppearance: 'none'
-        }
-        this.handleChange = this.handleChange.bind(this)
-        this.onEditCompleted = this.onEditCompleted.bind(this);
-    }
-
-    handleChange(value) {
-        this.setState({ stateText: value })
-        // if (this.props.editable) {
-            //setComponentProps(this.props.id, {text: value});
-        // }
-    }
-
-    onEditCompleted(value) {
-        if (this.props.editable) {
-            setComponentProps(this.props.id, {text: value}, {putStateHistory: true});
         }
     }
 
@@ -62,7 +41,7 @@ class Text extends React.Component {
         //const text = (this.props.animationOnAppearance === 'none') ? this.state.stateText: this.state.animatedText;
         return (
             <div className="rmx-component" style={st}>
-                <TextEditor readOnly={!this.props.doubleClicked} onChange={this.handleChange} onEditCompleted={this.onEditCompleted} text={this.state.stateText}></TextEditor>
+                <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
             </div>
         )
     }

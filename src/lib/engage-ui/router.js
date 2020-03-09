@@ -80,14 +80,15 @@ const refs = {};
             backgroundColor: this.props.backgroundColor
         };
         const scr = this.props.currentScreenId ? this.props.screens[this.props.currentScreenId]: null,
-              prevScr = this.state.prevScreenId ? this.props.screens[this.state.prevScreenId]: null;
+              prevScr = this.state.prevScreenId ? this.props.screens[this.state.prevScreenId]: null,
+              editable = this.props.mode === 'edit';
         return (
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 &&
                     <p>no screens</p>
                 }
                 {/* Render all screens first time in 'edit' */}
-                {this.props.mode === 'edit' &&
+                {editable &&
                     this.props.screens.toArray().map( (s) => {
                         if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef();
                         return (
@@ -97,14 +98,14 @@ const refs = {};
                         )
                     })
                 }
-                {this.state.showPrevScreen && prevScr &&
+                {!editable && this.state.showPrevScreen && prevScr &&
                     <div className="rmx-scr_container_item">
                         <Screen {...prevScr} id={this.state.prevScreenId}></Screen>
                     </div>
                 }
                 {scr &&
                     <div className={"rmx-scr_container_item " + (this.state.transition ? '__transition': '')} style={{transform: 'translateX('+this.state.scrLeft+'px)'}}>
-                        <Screen {...scr} id={this.props.currentScreenId}></Screen>
+                        <Screen {...scr} id={this.props.currentScreenId} editable={editable}></Screen>
                     </div>
                 }
             </div>
