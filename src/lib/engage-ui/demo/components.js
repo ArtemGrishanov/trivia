@@ -130,22 +130,22 @@ const COMPONENTS = [
             src='//p.testix.me/temp/celebrations.jpg' />
     </Control>
     ,
-    <Control id={512} schema={CorrectIconSchema}>
-        <CorrectIcon id={'icon1'} mod='wrong_gray'/>
-    </Control>
-    ,
-    <Control id={513} schema={CorrectIconSchema}>
-        <CorrectIcon id={'icon2'} mod='wrong'/>
-    </Control>
-    ,
-    <Control id={514} schema={CorrectIconSchema}>
-        <CorrectIcon id={'icon3'} mod='empty'/>
-    </Control>
-    ,
-    <Control id={515} schema={CorrectIconSchema}>
-        <CorrectIcon id={'icon4'} mod='correct'/>
-    </Control>
-    ,
+    // <Control id={512} schema={CorrectIconSchema}>
+    //     <CorrectIcon id={'icon1'} mod='wrong_gray'/>
+    // </Control>
+    // ,
+    // <Control id={513} schema={CorrectIconSchema}>
+    //     <CorrectIcon id={'icon2'} mod='wrong'/>
+    // </Control>
+    // ,
+    // <Control id={514} schema={CorrectIconSchema}>
+    //     <CorrectIcon id={'icon3'} mod='empty'/>
+    // </Control>
+    // ,
+    // <Control id={515} schema={CorrectIconSchema}>
+    //     <CorrectIcon id={'icon4'} mod='correct'/>
+    // </Control>
+    // ,
     <Control id={519} schema={TextOptionSchema} width={800} height={600}>
         <Screen id={'screen1'} width={800} height={600} top={0}
             backgroundColor={'#a7a7d2'}
