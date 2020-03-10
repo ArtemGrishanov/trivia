@@ -9,6 +9,9 @@ div.image_cnt {
 div.image_cnt.__border {
     border: 1px solid #999;
 }
+div.image_cnt.__dropShadow {
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+}
 
 /* align it inside image_cnt vertically and horizontally */
 /* it contains img and thumb img */
@@ -51,6 +54,11 @@ div.image_cnt img.__eight {
 div.image_cnt img.__blur {
     -webkit-filter: blur(10px);
     filter: blur(10px);
+}
+
+div.image_cnt img.__grayscale {
+    -webkit-filter: grayscale(1);
+    filter: grayscale(1);
 }
 
 div.image_cnt img.reveal {

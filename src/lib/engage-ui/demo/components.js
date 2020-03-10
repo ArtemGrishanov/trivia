@@ -119,6 +119,23 @@ const COMPONENTS = [
             />
     </Control>
     ,
+    <Control id={512} schema={ProgressiveImageSchema} width={800} height={500}>
+    <ProgressiveImage
+        id={'img45'}
+        blur={false}
+        grayscale={true}
+        border={true}
+        borderWidth={4}
+        borderRadius={400}
+        borderColor='#fff'
+        width={400}
+        height={400}
+        animation={"eight"}
+        src="http://p.testix.me/temp/1000x611.jpg"
+        srcThumb="http://p.testix.me/temp/4000x2443_thumb.jpg"
+        />
+    </Control>
+    ,
     <Control id={516} schema={ProgressiveImageSchema}  width={770} height={200}>
         <ProgressiveImage id={'img5'}
             left={0}

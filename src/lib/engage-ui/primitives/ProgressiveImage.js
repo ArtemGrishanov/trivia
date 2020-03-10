@@ -41,9 +41,33 @@ export const Schema = new DataSchema({
         type: 'boolean',
         default: false
     },
+    "grayscale": {
+        type: 'boolean',
+        default: false
+    },
+    "dropShadow": {
+        type: 'boolean',
+        default: false
+    },
     "border": {
         type: 'boolean',
         default: false
+    },
+    "borderWidth": {
+        type: 'number',
+        min: 1,
+        max: 400,
+        default: 1
+    },
+    "borderRadius": {
+        type: 'number',
+        min: 0,
+        max: 1000,
+        default: 0
+    },
+    "borderColor": {
+        type: 'string',
+        default: '#999'
     },
     "animation": {
         type: 'string',

@@ -170,19 +170,44 @@ class BasicImage extends React.Component {
             lineHeight: (this.state.height-3)+"px" //TODO -3 determine this later
         };
         let cntCl = "";
+        const cntSt = {};
         if (this.props.border && (showThumb || showOriginal)) {
             cntCl += " __border"
+
+            const borderSt = {
+                boxSizing: 'border-box',
+                ...Object.fromEntries(
+                    ['borderRadius', 'borderWidth', 'borderColor']
+                        .map(prop => [prop, this.props[prop]])
+                        .filter(([_, value]) => value !== void 0)
+                        .map(([prop, value]) => {
+                            switch (typeof value) {
+                                case 'number':
+                                    return [prop, `${value}px`]
+                                default:
+                                    return [prop, value]
+                            }
+                        })
+                )
+            }
+            Object.assign(cntSt, borderSt)
+        }
+        if (this.props.dropShadow) {
+            cntCl += " __dropShadow"
         }
         let mainImgCl = this.state.imageMods;
         if (this.state.blur) {
             mainImgCl += " __blur";
+        }
+        if (this.props.grayscale) {
+            mainImgCl += " __grayscale";
         }
         if (this.props.animation) {
             mainImgCl += " __"+this.props.animation;
         }
         let thumbImgCl = this.state.thumbImageMods;
         return (
-            <div className={`image_cnt ${cntCl}`} /*style={cntSt}*/ onClick={this.onClick}>
+            <div className={`image_cnt ${cntCl}`} style={cntSt} onClick={this.onClick}>
                 {showThumb &&
                     <div className="image_align_cnt" style={alignCntSt}>
                         <img alt="" className={"preview " + thumbImgCl} src={this.props.srcThumb}/>
