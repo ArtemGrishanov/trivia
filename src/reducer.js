@@ -3,7 +3,7 @@ import { remixReducer } from './lib/remix'
 import schema from './appStoreDataSchema'
 import actions from './actions'
 import { getOption, getQuestionIdByOption, calcResult } from './helper'
-import Trigger from './Trigger'
+import Trigger from './trigger'
 
 const initialState = {
     // app specific data tree

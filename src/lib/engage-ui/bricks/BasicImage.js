@@ -170,19 +170,40 @@ class BasicImage extends React.Component {
             lineHeight: (this.state.height-3)+"px" //TODO -3 determine this later
         };
         let cntCl = "";
-        if (this.props.border && (showThumb || showOriginal)) {
-            cntCl += " __border"
+        const cntSt = {
+            boxSizing: 'border-box',
+            borderStyle: 'solid',
+            ...Object.fromEntries(
+                ['borderRadius', 'borderWidth', 'borderColor']
+                    .map(prop => [prop, this.props[prop]])
+                    .filter(([_, value]) => value !== void 0)
+                    .map(([prop, value]) => {
+                        switch (typeof value) {
+                            case 'number':
+                                return [prop, `${value}px`];
+                            default:
+                                return [prop, value];
+                        }
+                    })
+            )
+        };
+        if (this.props.dropShadow) {
+            cntCl += " __dropShadow";
         }
         let mainImgCl = this.state.imageMods;
-        if (this.state.blur) {
-            mainImgCl += " __blur";
-        }
         if (this.props.animation) {
             mainImgCl += " __"+this.props.animation;
         }
+        let filter = '';
+        if (this.state.blur) {
+            filter += ' blur(10px)';
+        }
+        if (this.props.grayscale) {
+            filter += ' grayscale(1)';
+        }
         let thumbImgCl = this.state.thumbImageMods;
         return (
-            <div className={`image_cnt ${cntCl}`} /*style={cntSt}*/ onClick={this.onClick}>
+            <div className={`image_cnt ${cntCl}`} style={cntSt} onClick={this.onClick}>
                 {showThumb &&
                     <div className="image_align_cnt" style={alignCntSt}>
                         <img alt="" className={"preview " + thumbImgCl} src={this.props.srcThumb}/>
@@ -190,11 +211,11 @@ class BasicImage extends React.Component {
                 }
                 {showOriginal && this.state.height === undefined &&
                     // automatic height
-                    <img alt="" style={{visibility:"hidden"}} className={"original " + mainImgCl} src={this.props.src}/>
+                    <img alt="" style={{visibility:"hidden", filter}} className={"original " + mainImgCl} src={this.props.src}/>
                 }
                 {showOriginal &&
                     <div className="image_align_cnt" style={alignCntSt}>
-                        <img alt="" className={"original " + mainImgCl} src={this.props.src} style={originImgStyle}/>
+                        <img alt="" className={"original " + mainImgCl} src={this.props.src} style={{filter, ...originImgStyle}}/>
                         {this.state.blur &&
                             <div className="cursor_wr">
                                 <svg id="pb-cp-icon-hand-press-lg" viewBox="0 0 94.2691 104.3058" width="100%" height="100%">
