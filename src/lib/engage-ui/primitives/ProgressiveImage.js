@@ -49,15 +49,11 @@ export const Schema = new DataSchema({
         type: 'boolean',
         default: false
     },
-    "border": {
-        type: 'boolean',
-        default: false
-    },
     "borderWidth": {
         type: 'number',
-        min: 1,
+        min: 0,
         max: 400,
-        default: 1
+        default: 0
     },
     "borderRadius": {
         type: 'number',
