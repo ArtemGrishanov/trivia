@@ -13,7 +13,8 @@ const
     MIN_HEIGHT = 20, // px
     MAGNET_DISTANCE = 7, // px
     CAN_LEAVE_CONTAINER_HOR_PRC = 50, // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
-    CAN_LEAVE_CONTAINER_VERT_PRC = 50;  // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
+    CAN_LEAVE_CONTAINER_VERT_PRC = 50,  // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
+    DRAG_Z_INDEX = 9999; // z-index на время перетаскивания
 
 function toPercent(widthPx, containerWidth) {
     if (widthPx >= 0 && containerWidth >= 0) {
@@ -162,6 +163,7 @@ export default function LayoutItem() {
             static getDerivedStateFromProps(props, state) {
                 return {
                     ...state,
+                    doubleClicked: !props.selected ? false: state.doubleClicked,
                     ...calcState({
                         state: state,
                         propLeft: props.left,
@@ -198,7 +200,8 @@ export default function LayoutItem() {
                     height: undefined,
                     contentWidth: undefined,
                     contentHeight: undefined,
-                    doubleClicked: false
+                    doubleClicked: false,
+                    zIndex: 0
                 }
                 this.thisRef = React.createRef();
                 this.childCntRef = React.createRef();
@@ -221,6 +224,12 @@ export default function LayoutItem() {
             }
 
             onMouseDown(e) {
+                if (this.state.doubleClicked) {
+                    // компонент находится в режиме двойного нажатия (для текстовых компонентов это редактирование текста)
+                    // ничего не делать и не давать родительским компонентам сбрасывать селект LayoutContainer.onMouseDown()
+                    e.stopPropagation();
+                    return;
+                }
                 if (this.props.editable) {
                     selectComponents([]);
                     this.itemNode = this.thisRef.current;
@@ -229,6 +238,14 @@ export default function LayoutItem() {
                         this.isDragging = false;
                         this.isItemMouseDown = false;
                         this.setState({doubleClicked: true});
+                        selectComponents([this.props.id], {
+                            componentProps: {[this.props.id]: {...this.props}},
+                            clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect(): {},
+                            screenProps: {...getActiveScreen()},
+                            screenId: getActiveScreenId(),
+                            doubleClicked: true
+                        });
+                        e.stopPropagation();
                     }
                     else if (this.itemNode && !this.state.doubleClicked) {
                         // одно нажатие - подготовка к перетаскиваю
@@ -273,8 +290,8 @@ export default function LayoutItem() {
             onWindowMouseMove(e) {
                 if (this.props.editable && this.isItemMouseDown) {
                     this.isDragging = true;
-                    const dx = e.clientX - this.mouseStartPosition.left;//toPercent(e.clientX, this.props.containerWidth) - this.mouseStartPosition.left; // percents
-                    const dy = e.clientY - this.mouseStartPosition.top; // px
+                    const dx = e.clientX - this.mouseStartPosition.left;
+                    const dy = e.clientY - this.mouseStartPosition.top;
                     let l, t, w, h;
                     if (this.markerId == 9) {
                         l = this.startAttr.left + dx;
@@ -327,7 +344,8 @@ export default function LayoutItem() {
                             height: h === undefined ? this.state.height: h,
                             top: t === undefined ? this.state.top: t,
                             left: left,
-                            magnets
+                            magnets,
+                            zIndex: DRAG_Z_INDEX
                         });
                     }
                 }
@@ -349,6 +367,9 @@ export default function LayoutItem() {
                             height: this.state.height
                         }, {
                             putStateHistory: true
+                        });
+                        this.setState({
+                            zIndex: 0
                         });
                     }
                     else if (this.isItemMouseDown) {
@@ -417,8 +438,11 @@ export default function LayoutItem() {
                     left: this.state.left+'px',
                     top: this.state.top+'px',
                     width: this.state.width+'px',
-                    height: this.state.height+'px'
+                    height: this.state.height+'px',
                 };
+                if (this.state.zIndex > 0) {
+                    st.zIndex = this.state.zIndex;
+                }
                 // align child inside container
                 const cst = {};
                 if (this.state.doubleClicked) {
