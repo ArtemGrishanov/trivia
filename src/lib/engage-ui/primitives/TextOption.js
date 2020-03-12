@@ -20,9 +20,24 @@ class TextOption extends React.Component {
 
     render() {
         const st = {
-            borderRadius: this.props.borderRadius+'px',
-            textAlign: this.props.textAlign,
-            backgroundColor: this.props.backgroundColor
+            boxSizing: 'border-box',
+            borderStyle: 'solid',
+            ...Object.fromEntries(
+                ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor', 'textAlign']
+                    .map(prop => {
+                        const value = this.props[prop]
+
+                        switch (typeof value) {
+                            case 'number':
+                                return [prop, `${value}px`];
+                            default:
+                                return [prop, value];
+                        }
+                    })
+            )
+        }
+        if (this.props.dropShadow) {
+            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.1)';
         }
         if (this.props.doubleClicked) {
             // in edit mode we must see a TextEditor toolbars
@@ -92,6 +107,20 @@ export const Schema = new DataSchema({
         max: 100,
         default: 4
     },
+    'borderWidth': {
+        type: 'number',
+        min: 0,
+        max: 400,
+        default: 1
+    },
+    'borderColor': {
+        type: 'string',
+        default: '#d8d8d8'
+    },
+    'dropShadow': {
+        type: 'boolean',
+        default: false
+    },
     'backgroundColor': {
         type: 'string',
         default: ''
@@ -99,7 +128,8 @@ export const Schema = new DataSchema({
     'imageSrc': {
         type: 'string',
         default: ''
-    }
+    },
+    
 });
 
 export default RemixWrapper(TextOption, Schema, 'TextOption')
