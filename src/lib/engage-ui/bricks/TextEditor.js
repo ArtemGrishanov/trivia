@@ -10,7 +10,13 @@ const
     // To add a new font:
     // 1. Add font into this array
     // 2. Add classes in rmx-text_editor.css
-    fonts = ['Ubuntu', 'Inconsolata', 'Roboto', 'Mirza', 'Arial'],
+    fonts = [
+        'Roboto', 'Roboto Condensed', 'Open Sans', 'Lato',
+        'Montserrat', 'Oswald', 'Merriweather', 'Ubuntu',
+        'Lobster', 'Pacifico', 'Vollkorn', 'Cuprum',
+        'Alegreya Sans', 'Russo One', 'Playfair Display SC', 'Alice',
+        'Press Start 2P', 'Bad Script', 'Yeseva One', 'Marmelad', 'Rubik Mono One'
+    ],
     importedFonts = {
         // 'Ubuntu': true | false
         // ...
@@ -58,7 +64,7 @@ class TextEditor extends React.Component {
         this.setState({ stateText: value })
         // import font which is used in app
         fonts.forEach( f => {
-            if (value.indexOf(`ql-font-${f}`) >= 0) {
+            if (value.indexOf(`ql-font-${f.split(' ').join('-')}`) >= 0) {
                 addFont(f);
             }
         })
@@ -69,7 +75,7 @@ class TextEditor extends React.Component {
             ['bold', 'italic', 'underline'],                   // toggled buttons
             [{ 'size': ['small', false, 'large', 'huge' ] }],  // custom dropdown
             [{ 'color': [] }, { 'background': [] }],           // dropdown with defaults from theme
-            [{ 'font': [ 'Ubuntu', 'Inconsolata', 'Roboto', 'Mirza', 'Arial' ] }],
+            [{ 'font': fonts }],
             [{ 'align': [] }],
             ['link', 'clean']
         ]

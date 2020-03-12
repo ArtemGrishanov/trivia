@@ -1,72 +1,236 @@
 /* quill text editor */
 .quill {
-    /* shift component up to show .ql-toolbar in edit mode */
-    margin-top: -42px !important;
-    position: relative;
+  /* shift component up to show .ql-toolbar in edit mode */
+  margin-top: -42px !important;
+  position: relative;
 }
 .rmx-text-editor.__readonly .quill {
-    margin-top: 0 !important;
+  margin-top: 0 !important;
 }
 .ql-editor {
-    padding: 10px 0 !important;
+  padding: 10px 0 !important;
 }
 .ql-toolbar {
-    white-space: nowrap !important;
-    background-color: #fff;
-    width: max-content;
+  white-space: nowrap !important;
+  background-color: #fff;
+  width: max-content;
 }
 .ql-container.ql-snow {
-    border: none !important;
+  border: none !important;
 }
 .rmx-text-editor.__readonly .ql-toolbar {
-    display: none;
+  display: none;
 }
 /* /quill text editor */
 
-
 /* quill custom fonts */
-/* @import url('https://fonts.googleapis.com/css2?family=Ubuntu'); */
- /* text=Ubuntu */
-.ql-font span[data-value='Ubuntu']::before {
-    font-family: 'Ubuntu';
-    content: 'Ubuntu' !important;
-}
-.ql-font-Ubuntu {
-    font-family: 'Ubuntu';
-}
-
-/* @import url('https://fonts.googleapis.com/css2?family=Inconsolata'); */
-.ql-font span[data-value='Inconsolata']::before {
-    font-family: 'Inconsolata';
-    content: 'Inconsolata' !important;
-}
-.ql-font-Inconsolata {
-    font-family: 'Inconsolata';
-}
-
 /* @import url('https://fonts.googleapis.com/css2?family=Roboto'); */
-.ql-font span[data-value='Roboto']::before {
-    font-family: 'Roboto';
-    content: 'Roboto' !important;
+/* text=Roboto */
+.ql-font span[data-value="Roboto"]::before {
+  font-family: "Roboto";
+  content: "Roboto" !important;
 }
 .ql-font-Roboto {
-    font-family: 'Roboto';
+  font-family: "Roboto";
 }
 
-/* @import url('https://fonts.googleapis.com/css2?family=Mirza'); */
-.ql-font span[data-value='Mirza']::before {
-    font-family: 'Mirza';
-    content: 'Mirza' !important;
+/* @import url('https://fonts.googleapis.com/css2?family=Roboto Condensed'); */
+/* text=Roboto Condensed */
+.ql-font span[data-value="Roboto Condensed"]::before {
+  font-family: "Roboto Condensed";
+  content: "Roboto Condensed" !important;
 }
-.ql-font-Mirza {
-    font-family: 'Mirza';
+.ql-font-Roboto-Condensed {
+  font-family: "Roboto Condensed";
 }
 
-.ql-font span[data-value='Arial']::before {
-    font-family: 'Arial';
-    content: 'Arial' !important;
+/* @import url('https://fonts.googleapis.com/css2?family=Open Sans'); */
+/* text=Open Sans */
+.ql-font span[data-value="Open Sans"]::before {
+  font-family: "Open Sans";
+  content: "Open Sans" !important;
 }
-.ql-font-Arial {
-    font-family: 'Arial';
+.ql-font-Open-Sans {
+  font-family: "Open Sans";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Lato'); */
+/* text=Lato */
+.ql-font span[data-value="Lato"]::before {
+  font-family: "Lato";
+  content: "Lato" !important;
+}
+.ql-font-Lato {
+  font-family: "Lato";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat'); */
+/* text=Montserrat */
+.ql-font span[data-value="Montserrat"]::before {
+  font-family: "Montserrat";
+  content: "Montserrat" !important;
+}
+.ql-font-Montserrat {
+  font-family: "Montserrat";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Oswald'); */
+/* text=Oswald */
+.ql-font span[data-value="Oswald"]::before {
+  font-family: "Oswald";
+  content: "Oswald" !important;
+}
+.ql-font-Oswald {
+  font-family: "Oswald";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Merriweather'); */
+/* text=Merriweather */
+.ql-font span[data-value="Merriweather"]::before {
+  font-family: "Merriweather";
+  content: "Merriweather" !important;
+}
+.ql-font-Merriweather {
+  font-family: "Merriweather";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Ubuntu'); */
+/* text=Ubuntu */
+.ql-font span[data-value="Ubuntu"]::before {
+  font-family: "Ubuntu";
+  content: "Ubuntu" !important;
+}
+.ql-font-Ubuntu {
+  font-family: "Ubuntu";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Lobster'); */
+/* text=Lobster */
+.ql-font span[data-value="Lobster"]::before {
+  font-family: "Lobster";
+  content: "Lobster" !important;
+}
+.ql-font-Lobster {
+  font-family: "Lobster";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Pacifico'); */
+/* text=Pacifico */
+.ql-font span[data-value="Pacifico"]::before {
+  font-family: "Pacifico";
+  content: "Pacifico" !important;
+}
+.ql-font-Pacifico {
+  font-family: "Pacifico";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Vollkorn'); */
+/* text=Vollkorn */
+.ql-font span[data-value="Vollkorn"]::before {
+  font-family: "Vollkorn";
+  content: "Vollkorn" !important;
+}
+.ql-font-Vollkorn {
+  font-family: "Vollkorn";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Cuprum'); */
+/* text=Cuprum */
+.ql-font span[data-value="Cuprum"]::before {
+  font-family: "Cuprum";
+  content: "Cuprum" !important;
+}
+.ql-font-Cuprum {
+  font-family: "Cuprum";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Alegreya Sans'); */
+/* text=Alegreya Sans */
+.ql-font span[data-value="Alegreya Sans"]::before {
+  font-family: "Alegreya Sans";
+  content: "Alegreya Sans" !important;
+}
+.ql-font-Alegreya-Sans {
+  font-family: "Alegreya Sans";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Russo One'); */
+/* text=Russo One */
+.ql-font span[data-value="Russo One"]::before {
+  font-family: "Russo One";
+  content: "Russo One" !important;
+}
+.ql-font-Russo-One {
+  font-family: "Russo One";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Playfair Display SC'); */
+/* text=Playfair Display SC */
+.ql-font span[data-value="Playfair Display SC"]::before {
+  font-family: "Playfair Display SC";
+  content: "Playfair Display SC" !important;
+}
+.ql-font-Playfair-Display-SC {
+  font-family: "Playfair Display SC";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Alice'); */
+/* text=Alice */
+.ql-font span[data-value="Alice"]::before {
+  font-family: "Alice";
+  content: "Alice" !important;
+}
+.ql-font-Alice {
+  font-family: "Alice";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Press Start 2P'); */
+/* text=Press Start 2P */
+.ql-font span[data-value="Press Start 2P"]::before {
+  font-family: "Press Start 2P";
+  content: "Press Start 2P" !important;
+}
+.ql-font-Press-Start-2P {
+  font-family: "Press Start 2P";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Bad Script'); */
+/* text=Bad Script */
+.ql-font span[data-value="Bad Script"]::before {
+  font-family: "Bad Script";
+  content: "Bad Script" !important;
+}
+.ql-font-Bad-Script {
+  font-family: "Bad Script";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Yeseva One'); */
+/* text=Yeseva One */
+.ql-font span[data-value="Yeseva One"]::before {
+  font-family: "Yeseva One";
+  content: "Yeseva One" !important;
+}
+.ql-font-Yeseva-One {
+  font-family: "Yeseva One";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Marmelad'); */
+/* text=Marmelad */
+.ql-font span[data-value="Marmelad"]::before {
+  font-family: "Marmelad";
+  content: "Marmelad" !important;
+}
+.ql-font-Marmelad {
+  font-family: "Marmelad";
+}
+
+/* @import url('https://fonts.googleapis.com/css2?family=Rubik Mono One'); */
+/* text=Rubik Mono One */
+.ql-font span[data-value="Rubik Mono One"]::before {
+  font-family: "Rubik Mono One";
+  content: "Rubik Mono One" !important;
+}
+.ql-font-Rubik-Mono-One {
+  font-family: "Rubik Mono One";
 }
 /* /quill custom fonts */
