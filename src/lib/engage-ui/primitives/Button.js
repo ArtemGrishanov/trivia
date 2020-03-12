@@ -34,7 +34,7 @@ class Button extends React.Component {
             st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.1)';
         }
         return (
-            <button className={`rmx-component rmx-button __${this.props.colorMod} __${this.props.sizeMod}`} style={st}>
+            <button className={`rmx-component rmx-button  __${this.props.sizeMod}`} style={st}>
                 <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
             </button>
         )
@@ -56,11 +56,6 @@ export const Schema = new DataSchema({
         type: 'string',
         enum: ['small', 'normal'],
         default: 'normal'
-    },
-    "colorMod": {
-        type: 'string',
-        enum: ['blue','white'],
-        default: 'blue'
     },
     "borderRadius": {
         type: 'number',
