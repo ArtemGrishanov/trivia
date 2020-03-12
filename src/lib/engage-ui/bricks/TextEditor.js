@@ -16,7 +16,7 @@ const
         'Lobster', 'Pacifico', 'Vollkorn', 'Cuprum',
         'Alegreya Sans', 'Russo One', 'Playfair Display SC', 'Alice',
         'Press Start 2P', 'Bad Script', 'Yeseva One', 'Marmelad', 'Rubik Mono One'
-    ],
+    ].map(f => f.split(' ').join('-')),
     importedFonts = {
         // 'Ubuntu': true | false
         // ...
@@ -28,7 +28,7 @@ Font.whitelist = [...fonts];
 ReactQuill.Quill.register(Font, true);
 
 function getStylesheetLink(family) {
-    return `https://fonts.googleapis.com/css?family=${family}`;
+    return `https://fonts.googleapis.com/css?family=${family.split('-').join(' ')}`;
 }
 
 function addFont(family) {
@@ -47,7 +47,7 @@ class TextEditor extends React.Component {
         return {
             ...state,
             prevPropText: props.text,
-            stateText: state.prevPropText !== props.text ? props.text: state.stateText
+            stateText: state.prevPropText !== props.text ? props.text : state.stateText
         }
     }
 
@@ -63,8 +63,8 @@ class TextEditor extends React.Component {
     handleChange(value) {
         this.setState({ stateText: value })
         // import font which is used in app
-        fonts.forEach( f => {
-            if (value.indexOf(`ql-font-${f.split(' ').join('-')}`) >= 0) {
+        fonts.forEach(f => {
+            if (value.indexOf(`ql-font-${f}`) >= 0) {
                 addFont(f);
             }
         })
@@ -73,7 +73,7 @@ class TextEditor extends React.Component {
     modules = {
         toolbar: [
             ['bold', 'italic', 'underline'],                   // toggled buttons
-            [{ 'size': ['small', false, 'large', 'huge' ] }],  // custom dropdown
+            [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
             [{ 'color': [] }, { 'background': [] }],           // dropdown with defaults from theme
             [{ 'font': fonts }],
             [{ 'align': [] }],
@@ -87,9 +87,9 @@ class TextEditor extends React.Component {
         return (
             <div className={`rmx-text-editor ${this.props.readOnly ? '__readonly' : ''}`}>
                 <ReactQuill readOnly={this.props.readOnly}
-                            modules={this.modules}
-                            value={this.state.stateText}
-                            onChange={this.handleChange} />
+                    modules={this.modules}
+                    value={this.state.stateText}
+                    onChange={this.handleChange} />
             </div>
         )
     }
@@ -101,11 +101,11 @@ class TextEditor extends React.Component {
     componentDidUpdate(prevProps) {
         if (!this.props.readOnly) {
             // import all fonts in edit mode
-            fonts.forEach( f => addFont(f));
+            fonts.forEach(f => addFont(f));
         }
         if (!prevProps.readOnly && this.props.readOnly) {
             // выход из режима ввода текста - делаем сохранение в remix
-            setComponentProps(this.props.parentId, {text: this.state.stateText}, {putStateHistory: true});
+            setComponentProps(this.props.parentId, { text: this.state.stateText }, { putStateHistory: true });
         }
     }
 }
