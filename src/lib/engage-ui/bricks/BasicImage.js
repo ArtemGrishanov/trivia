@@ -175,9 +175,9 @@ class BasicImage extends React.Component {
             borderStyle: 'solid',
             ...Object.fromEntries(
                 ['borderRadius', 'borderWidth', 'borderColor']
-                    .map(prop => [prop, this.props[prop]])
-                    .filter(([_, value]) => value !== void 0)
-                    .map(([prop, value]) => {
+                    .map(prop => {
+                        const value = this.props[prop]
+
                         switch (typeof value) {
                             case 'number':
                                 return [prop, `${value}px`];
@@ -188,7 +188,7 @@ class BasicImage extends React.Component {
             )
         };
         if (this.props.dropShadow) {
-            cntCl += " __dropShadow";
+            cntCl += ' __dropShadow';
         }
         let mainImgCl = this.state.imageMods;
         if (this.props.animation) {
