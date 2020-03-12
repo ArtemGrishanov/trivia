@@ -17,7 +17,7 @@ class Button extends React.Component {
             boxSizing: 'border-box',
             borderStyle: 'solid',
             ...Object.fromEntries(
-                ['borderRadius', 'borderWidth', 'borderColor']
+                ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor']
                     .map(prop => {
                         const value = this.props[prop]
 
@@ -81,6 +81,10 @@ export const Schema = new DataSchema({
     "dropShadow": {
         type: 'boolean',
         default: false
+    },
+    "backgroundColor": {
+        type: 'string',
+        default: 'blue'
     },
     //TODO color format for strings, +tests
 });
