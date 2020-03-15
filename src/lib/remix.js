@@ -898,8 +898,7 @@ export function serialize2(state, options = {}) {
                 else {
                     let v = prop.value;
                     if (typeof v === "string") {
-                        // replace all `"` -> `'` symbols for valid JSON deserialization
-                        v = v.replace(/\"/g, '\'');
+                        v = htmlEncode(v)
                     }
                     assignByPropertyString(res, prop.path, v);
                 }
@@ -907,6 +906,24 @@ export function serialize2(state, options = {}) {
         }
     });
     return JSON.stringify(res);
+}
+
+const encodeChars = [`\n`,`\r`,`\``,`'`,`"`,`<`,`>`];
+
+function htmlEncode(html) {
+    encodeChars.forEach( (char) => {
+        const reg = new RegExp(char, 'g');
+        html = html.replace(reg, `U+${char.charCodeAt(0)};`)
+    });
+    return html;
+}
+
+function htmlDecode(str) {
+    encodeChars.forEach( (char) => {
+        const reg = new RegExp(`U\\+${char.charCodeAt(0)};`, 'g');
+        str = str.replace(reg, char)
+    });
+    return str;
 }
 
 /**
@@ -939,7 +956,11 @@ export function deserialize2(json) {
                 }
             });
             props.forEach((p) => {
-                data[p.path] = p.value;
+                let v = p.value;
+                if (typeof v === "string") {
+                    v = htmlDecode(v)
+                }
+                data[p.path] = v;
             });
         });
         log('deserialize2:', data);
