@@ -93,12 +93,12 @@ function receiveMessage({origin = null, data = {}, source = null}) {
             {
                 "title": "Some title 1",
                 "description": "Some description 1",
-                "imageId": 623039
+                "imageId": 701230 // 623039
             },
             {
                 "title": "Some title 2",
                 "description": "Some description 2",
-                "imageId": 623032
+                "imageId": 623032 // 623032
             }
         ]});
         _sendOuterEvents();
@@ -409,7 +409,7 @@ function init({externalActions = [], container = null, mode = 'none', defaultPro
             deserialize2(window.__REMIX_DEFAULT_PROPERTIES__);
         }
         catch(err) {
-            //console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message);
+            console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message);
         }
     }
     // mode устанавливаем после десериализации. Чтобы во время десериализации не рассылать события об изменении свойств
@@ -896,7 +896,12 @@ export function serialize2(state, options = {}) {
                     });
                 }
                 else {
-                    assignByPropertyString(res, prop.path, prop.value);
+                    let v = prop.value;
+                    if (typeof v === "string") {
+                        // replace all `"` -> `'` symbols for valid JSON deserialization
+                        v = v.replace(/\"/g, '\'');
+                    }
+                    assignByPropertyString(res, prop.path, v);
                 }
             });
         }
