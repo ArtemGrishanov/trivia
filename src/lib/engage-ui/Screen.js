@@ -23,7 +23,8 @@ class Screen extends React.Component {
 
     render() {
         const s = {
-            backgroundColor: this.props.backgroundColor
+            backgroundColor: this.props.backgroundColor,
+            overflow: this.props.overflowHidden ? 'hidden': 'initial'
         };
         const components = this.props.components.toArray().map( (cmpn, i) => {
             // Screen produces components based in their displayName and props saved in state

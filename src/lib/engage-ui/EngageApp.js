@@ -39,19 +39,7 @@ class EngageApp extends React.Component {
         this.state = {
             message: null
         };
-        // this.executedTransactionIds = {};
         this.screens = [];
-    }
-
-    sendRequest() {
-        //TODO saga
-
-        // network request?
-
-        // network.send({
-        //     type: 'engagement',
-        //     value: 10
-        // });
     }
 
     componentDidMount() {
@@ -59,7 +47,6 @@ class EngageApp extends React.Component {
     }
 
     componentDidUpdate() {
-        //this.syncScreens();
     }
 
     // syncScreens() {
@@ -118,40 +105,11 @@ class EngageApp extends React.Component {
         return screenArr.find( (scr) => scr.screenId === id);
     }
 
-    emitEvents() {}
-
-    // renderOld() {
-
-    //     const appSt = {
-    //         width: this.props.width + "px",
-    //         minHeight: this.props.height + "px"
-    //     }
-
-    //     // only Screen children expected
-    //     //TODO move to componentwillreceive props ?
-    //     const filteredChildren = this.props.children ? this.props.children.flat().filter( (screen) => !!screen.props.if() ): null;
-
-    //     return (
-    //         <div className="eng-app" style={appSt}>
-    //             {/* only Screen children expected */}
-    //             {filteredChildren &&
-    //                 filteredChildren}
-    //             {!filteredChildren && <p>no content</p>}
-    //             {/*this.props.messages.length > 0 &&
-    //                 <MessageBox message="Application is not supported"/>
-    //             */}
-
-    //             {/*<Banner></Banner>*/}
-    //         </div>
-    //     )
-    // }
-
     render() {
         const appSt = {
             width: '100%',
             height: '100%',
-            position: 'absolute',
-            overflow: 'hidden'
+            overflow: this.props.editable ? 'initial': 'hidden'
         }
         return (
             <div className="rmx-app" style={appSt}>
@@ -164,7 +122,8 @@ class EngageApp extends React.Component {
 const mapStateToProps = (state) => {
     return {
         width: state.app.size.width,
-        height: state.app.size.height
+        height: state.app.size.height,
+        editable: state.session.mode === 'edit'
     }
 }
 

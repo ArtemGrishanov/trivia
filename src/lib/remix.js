@@ -87,6 +87,12 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         _putOuterEventInQueue('serialized', {state: serialize2()});
         _sendOuterEvents();
     }
+    if (data.method === 'getappboundingclientrect') {
+        _putOuterEventInQueue('app_bounding_client_rect', {
+            rect: document.getElementById('remix-app-root').getBoundingClientRect()
+        });
+        _sendOuterEvents();
+    }
     if (data.method === 'getshareentities') {
         _putOuterEventInQueue('share_entities', {entities: [
             //TODO mock share_entities
