@@ -482,7 +482,7 @@ export default function LayoutItem() {
                         {this.props.editable && this.state.doubleClicked &&
                             <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}></div>
                         }
-                        <div ref={this.props.setRef} className="rmx-l_child_cnt" style={cst}>
+                        <div ref={this.props.setRef} className={`rmx-l_child_cnt` + (this.state.doubleClicked ? ' __dblClick': '')} style={cst}>
                             {/* Передать измененные width,height из this.state которые пользователь изменил при перетаскивании и ресайзе */}
                             <Component {...this.props} {...this.state} /*onSize={this.onContentSize.bind(this)}*/></Component>
                         </div>

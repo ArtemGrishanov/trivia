@@ -20,24 +20,24 @@ class TextOption extends React.Component {
 
     render() {
         const st = {
-            boxSizing: 'border-box',
-            borderStyle: 'solid',
-            ...Object.fromEntries(
-                ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor', 'textAlign']
-                    .map(prop => {
-                        const value = this.props[prop]
+                boxSizing: 'border-box',
+                borderStyle: 'solid',
+                ...Object.fromEntries(
+                    ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor', 'textAlign']
+                        .map(prop => {
+                            const value = this.props[prop]
 
-                        switch (typeof value) {
-                            case 'number':
-                                return [prop, `${value}px`];
-                            default:
-                                return [prop, value];
-                        }
-                    })
-            )
-        }
+                            switch (typeof value) {
+                                case 'number':
+                                    return [prop, `${value}px`];
+                                default:
+                                    return [prop, value];
+                            }
+                        })
+                )
+            };
         if (this.props.dropShadow) {
-            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.1)';
+            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)';
         }
         if (this.props.doubleClicked) {
             // in edit mode we must see a TextEditor toolbars
@@ -49,29 +49,31 @@ class TextOption extends React.Component {
         const withIndic = this.props.correctIndicator !== 'none';
         const withPercent = this.props.percent > 0;
         return (
-            <div className='rmx-component'>
-                <div className={'rmx-option' + (withIndic ? ' withIndic': '') + (withPercent ? ' withPercent': '')} style={st}>
-                    {this.props.imageSrc &&
-                        <div className='rmx-option_backimg_wr'>
-                            <BasicImage width={this.props.width} height={this.props.height} src={this.props.imageSrc} backgroundSize={'cover'}></BasicImage>
-                        </div>
-                    }
-                    {this.props.percent > 0 &&
-                        <div className='rmx-percent_info'>
-                            <div className='rmx-pb_wr'>
-                                <div className={'rmx-option-pb __' + this.props.correctIndicator} style={pbActive}></div>
+            <div className='rmx-component' >
+                <div className='clipped' style={st}>
+                    <div className={'rmx-option' + (withIndic ? ' withIndic': '') + (withPercent ? ' withPercent': '')}>
+                        {this.props.imageSrc &&
+                            <div className='rmx-option_backimg_wr'>
+                                <BasicImage width={this.props.width} height={this.props.height} src={this.props.imageSrc} backgroundSize={'cover'}></BasicImage>
                             </div>
-                            <p className={'rmx-option-pct __' + this.props.correctIndicator}>
-                                {this.props.percent+'%'}
-                            </p>
-                        </div>
-                    }
-                    {this.props.correctIndicator !== 'none' &&
-                        <div className={'rmx-option_indicator ' + (withPercent ? 'withPercent': '')}>
-                            <CorrectIcon left={0} top={0} width={24} height={24} mod={this.props.correctIndicator}/>
-                        </div>
-                    }
-                    <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                        }
+                        {this.props.percent > 0 &&
+                            <div className='rmx-percent_info'>
+                                <div className='rmx-pb_wr'>
+                                    <div className={'rmx-option-pb __' + this.props.correctIndicator} style={pbActive}></div>
+                                </div>
+                                <p className={'rmx-option-pct __' + this.props.correctIndicator}>
+                                    {this.props.percent+'%'}
+                                </p>
+                            </div>
+                        }
+                        {this.props.correctIndicator !== 'none' &&
+                            <div className={'rmx-option_indicator ' + (withPercent ? 'withPercent': '')}>
+                                <CorrectIcon left={0} top={0} width={24} height={24} mod={this.props.correctIndicator}/>
+                            </div>
+                        }
+                        <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                    </div>
                 </div>
             </div>
         )
@@ -129,7 +131,7 @@ export const Schema = new DataSchema({
         type: 'string',
         default: ''
     },
-    
+
 });
 
 export default RemixWrapper(TextOption, Schema, 'TextOption')

@@ -1,8 +1,18 @@
+.rmx-text-editor {
+    position: relative;
+}
 /* quill text editor */
 .quill {
   /* shift component up to show .ql-toolbar in edit mode */
   margin-top: -42px !important;
   position: relative;
+}
+.rmx-l_child_cnt.__dblClick .quill {
+    margin-top: 0 !important;
+    position: absolute;
+    top: -42px;
+    left: 0;
+    width: 100%;
 }
 .rmx-text-editor.__readonly .quill {
   margin-top: 0 !important;
