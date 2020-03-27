@@ -54,25 +54,25 @@ const refs = {};
     }
 
     renderStaticMarkup() {
-        // if (this.timeoutId) {
-        //     clearTimeout(this.timeoutId);
-        // }
-        // this.timeoutId = setTimeout( () => {
-        //     this.timeoutId = null;
-        //     const markupData = {};
-        //     Object.keys(refs).forEach( (screenId) => {
-        //         if (refs[screenId].current) {
-        //             const sm = refs[screenId].current.innerHTML;
-        //             if (this.props.screens[screenId].staticMarkup != sm) {
-        //                 markupData[`router.screens.${screenId}.staticMarkup`] = sm;
-        //             }
-        //         }
-        //     })
-        //     if (Object.keys(markupData).length > 0) {
-        //         this.props.setData(markupData);
-        //     }
-        // },
-        // 3000) // don't render too often. User can perform many microoperations: dragging, resizing, changing colors etc...
+        if (this.timeoutId) {
+            clearTimeout(this.timeoutId);
+        }
+        this.timeoutId = setTimeout( () => {
+            this.timeoutId = null;
+            const markupData = {};
+            Object.keys(refs).forEach( (screenId) => {
+                if (refs[screenId].current) {
+                    const sm = refs[screenId].current.innerHTML;
+                    if (this.props.screens[screenId].staticMarkup != sm) {
+                        markupData[`router.screens.${screenId}.staticMarkup`] = sm;
+                    }
+                }
+            })
+            if (Object.keys(markupData).length > 0) {
+                this.props.setData(markupData);
+            }
+        },
+        3000) // don't render too often. User can perform many microoperations: dragging, resizing, changing colors etc...
     }
 
     render() {
@@ -82,6 +82,13 @@ const refs = {};
         const scr = this.props.currentScreenId ? this.props.screens[this.props.currentScreenId]: null,
               prevScr = this.state.prevScreenId ? this.props.screens[this.state.prevScreenId]: null,
               editable = this.props.mode === 'edit';
+
+        if (editable) {
+            this.props.screens.toArray().forEach((s) => {
+                if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef();
+            });
+        }
+
         return (
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 &&
@@ -90,10 +97,10 @@ const refs = {};
                 {/* Render all screens first time in 'edit' */}
                 {editable &&
                     this.props.screens.toArray().map( (s) => {
-                        if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef();
+                        if (s.hashlistId === this.props.currentScreenId) return;
                         return (
                             <div key={s.hashlistId} ref={refs[s.hashlistId]} className="rmx-scr_container_item">
-                                <Screen {...scr} id={s.hashlistId}></Screen>
+                                <Screen {...scr} id={s.hashlistId} overflowHidden={true}></Screen>
                             </div>
                         )
                     })
@@ -104,7 +111,7 @@ const refs = {};
                     </div>
                 }
                 {scr &&
-                    <div className={"rmx-scr_container_item " + (this.state.transition ? '__transition': '')} style={{transform: 'translateX('+this.state.scrLeft+'px)'}}>
+                    <div ref={refs[this.props.currentScreenId]} className={"rmx-scr_container_item " + (this.state.transition ? '__transition': '')} style={{transform: 'translateX('+this.state.scrLeft+'px)'}}>
                         <Screen {...scr} id={this.props.currentScreenId} editable={editable}></Screen>
                     </div>
                 }

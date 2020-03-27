@@ -9,6 +9,17 @@
     <meta name="theme-color" content="#000000" />
     <title>Trivia App</title>
     <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+        }
+        #remix-app-root {
+            margin: 0px auto;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+    <style>
         /* styles for preview generation */
         {{STYLES}}
     </style>
@@ -82,9 +93,19 @@
                     throw new Error('Remix app not loaded! Be sure you passed correct script url.');
                 }
                 inited = true;
+                var root = document.getElementById('remix-app-root');
+                if (data.width) {
+                    root.style.width = data.width;
+                }
+                if (data.height) {
+                    root.style.height = data.height;
+                }
+                if (data.marginTop) {
+                    root.style.marginTop = data.marginTop;
+                }
                 Remix.init({
                     appStore: store,
-                    container: document.getElementById('remix-app-root'),
+                    container: root,
                     mode: data.mode,
                     log: data.log,
                     defaultProperties: data.defaults,

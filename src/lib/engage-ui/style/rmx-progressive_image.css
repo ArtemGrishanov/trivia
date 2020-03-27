@@ -7,7 +7,7 @@ div.image_cnt {
     overflow: hidden;
 }
 div.image_cnt.__dropShadow {
-    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* align it inside image_cnt vertically and horizontally */

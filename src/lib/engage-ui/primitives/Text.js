@@ -40,8 +40,10 @@ class Text extends React.Component {
         }
         //const text = (this.props.animationOnAppearance === 'none') ? this.state.stateText: this.state.animatedText;
         return (
-            <div className="rmx-component" style={st}>
-                <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+            <div className='rmx-component' style={st}>
+                <div className='clipped'>
+                    <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                </div>
             </div>
         )
     }

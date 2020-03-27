@@ -31,11 +31,13 @@ class Button extends React.Component {
             )
         };
         if (this.props.dropShadow) {
-            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.1)';
+            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)';
         }
         return (
             <button className={`rmx-component rmx-button  __${this.props.sizeMod}`} style={st}>
-                <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                <div className='clipped'>
+                    <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                </div>
             </button>
         )
     }

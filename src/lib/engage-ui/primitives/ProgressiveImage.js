@@ -12,7 +12,7 @@ class ProgressiveImage extends React.Component {
 
     render() {
         return (
-            <div className={`rmx-component`}>
+            <div className='rmx-component'>
                 <BasicImage {...this.props}></BasicImage>
             </div>
         )

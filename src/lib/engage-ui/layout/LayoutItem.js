@@ -164,6 +164,7 @@ export default function LayoutItem() {
                 return {
                     ...state,
                     doubleClicked: !props.selected ? false: state.doubleClicked,
+                    zIndex: !props.selected && !state.doubleClicked ? 0: state.zIndex,
                     ...calcState({
                         state: state,
                         propLeft: props.left,
@@ -237,14 +238,11 @@ export default function LayoutItem() {
                         // режим двойного нажатия - перетаскивания не будет
                         this.isDragging = false;
                         this.isItemMouseDown = false;
-                        this.setState({doubleClicked: true});
-                        selectComponents([this.props.id], {
-                            componentProps: {[this.props.id]: {...this.props}},
-                            clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect(): {},
-                            screenProps: {...getActiveScreen()},
-                            screenId: getActiveScreenId(),
-                            doubleClicked: true
+                        this.setState({
+                            doubleClicked: true,
+                            zIndex: DRAG_Z_INDEX
                         });
+                        this.selectThisComponent(true);
                         e.stopPropagation();
                     }
                     else if (this.itemNode && !this.state.doubleClicked) {
@@ -289,7 +287,10 @@ export default function LayoutItem() {
 
             onWindowMouseMove(e) {
                 if (this.props.editable && this.isItemMouseDown) {
-                    this.isDragging = true;
+                    if (!this.isDragging) {
+                        this.selectThisComponent(false, true);
+                        this.isDragging = true;
+                    }
                     const dx = e.clientX - this.mouseStartPosition.left;
                     const dy = e.clientY - this.mouseStartPosition.top;
                     let l, t, w, h;
@@ -351,11 +352,21 @@ export default function LayoutItem() {
                 }
             }
 
+            selectThisComponent(doubleClicked = false, dragging = false) {
+                // use selection mode for external services (like Editor)
+                // and keep element selected (show selection border)
+                selectComponents([this.props.id], {
+                    componentProps: {[this.props.id]: {...this.props}},
+                    clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect(): {},
+                    screenProps: {...getActiveScreen()},
+                    screenId: getActiveScreenId(),
+                    doubleClicked,
+                    dragging
+                });
+            }
+
             onWindowMouseUp(e) {
                 if (this.props.editable) {
-                    if (this.state.doubleClicked) {
-                        this.setState({doubleClicked: false});
-                    }
                     if (this.isDragging) {
                         this.isDragging = false;
                         // save size and position after dragging
@@ -373,14 +384,18 @@ export default function LayoutItem() {
                         });
                     }
                     else if (this.isItemMouseDown) {
-                        // use selection mode for external services (like Editor)
-                        // and keep element selected (show selection border)
-                        selectComponents([this.props.id], {
-                            componentProps: {[this.props.id]: {...this.props}},
-                            clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect(): {},
-                            screenProps: {...getActiveScreen()},
-                            screenId: getActiveScreenId()
+                        this.selectThisComponent();
+                    }
+                    else if (this.state.doubleClicked) {
+                        // простой клик на окно все компонента должен закрывать текстовый редактор
+                        this.setState({
+                            doubleClicked: false,
+                            zIndex: 0
                         });
+                        selectComponents([]);
+                    }
+                    else if (this.props.selected) {
+                        selectComponents([]);
                     }
                     this.isItemMouseDown = false;
                 }
@@ -467,7 +482,7 @@ export default function LayoutItem() {
                         {this.props.editable && this.state.doubleClicked &&
                             <div className={"rmx-layout_item_selection_cnt " + (this.props.selected ? '__selected': '')}></div>
                         }
-                        <div ref={this.props.setRef} className="rmx-l_child_cnt" style={cst}>
+                        <div ref={this.props.setRef} className={`rmx-l_child_cnt` + (this.state.doubleClicked ? ' __dblClick': '')} style={cst}>
                             {/* Передать измененные width,height из this.state которые пользователь изменил при перетаскивании и ресайзе */}
                             <Component {...this.props} {...this.state} /*onSize={this.onContentSize.bind(this)}*/></Component>
                         </div>

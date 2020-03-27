@@ -48,9 +48,9 @@ class LayoutContainer extends React.Component {
     }
 
     onMouseDown(e) {
-        if (this.props.editable) {
-            selectComponents([]);
-        }
+        // if (this.props.editable) {
+        //     selectComponents([]);
+        // }
     }
 
     /**
