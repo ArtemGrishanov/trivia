@@ -1152,6 +1152,13 @@ export function getState() {
     return store.getState();
 }
 
+export function getProperty(path) {
+    const r = getPropertiesBySelector(store.getState(), path);
+    if (r.length > 0) {
+        return r[0].value;
+    }
+    return undefined;
+}
 
 const remix = {
     // public methods

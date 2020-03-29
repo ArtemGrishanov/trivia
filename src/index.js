@@ -12,6 +12,7 @@ import initScreenProgress from './lib/plugins/screen-progress'
 import initQuizPoints from './lib/plugins/quiz-points'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
+import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 
 Remix.setStore(store);
 
@@ -47,6 +48,8 @@ initShare({
     remix: Remix,
     displayTypes: ['FbButton']
 });
+
+initGoogleAnalytics({ remix: Remix });
 
 /**
  * Trivia quiz custom result calculation
