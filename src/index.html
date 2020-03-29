@@ -108,7 +108,7 @@
                         schema: Remix._getSchema(),
                         state: Remix.serialize2(),
                         screens: Remix.getScreens(),
-                        appId: appId, 
+                        appId: appId,
                     }, cntOrigin);
                 }
             }
@@ -162,16 +162,5 @@
         }
         catch(err) {}
     </script>
-    <script>
-        window.fbAsyncInit = function() {
-            FB.init({
-                appId            : '213320349753425', // Interacty.me facebook app
-                autoLogAppEvents : true,
-                xfbml            : true,
-                version          : 'v6.0'
-            });
-        };
-    </script>
-    <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
   </body>
 </html>

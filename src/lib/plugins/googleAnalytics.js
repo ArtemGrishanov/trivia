@@ -4,9 +4,8 @@
  */
 export default function initGoogleAnalytics(options = {}) {
 
-    const
-        trackingCodeEmbedded = false,
-        remix = options.remix;
+    let trackingCodeEmbedded = false;
+    const remix = options.remix;
 
     /**
      *

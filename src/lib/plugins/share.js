@@ -12,6 +12,8 @@ import { getScreenIdFromPath, debounce } from "../remix/util/util";
  */
 export default function initShare(options = {}) {
 
+    let fbApiEmbedded = false;
+
     const
         DEBOUNCE_UPDATE_DELAY = 1500,
         displayTypes = options.displayTypes,
@@ -53,7 +55,28 @@ export default function initShare(options = {}) {
             })
             remix.setData({'app.share.entities': new HashList(newEntities)});
 
+            if (!fbApiEmbedded && newEntities.length > 0) {
+                embedFbCode();
+                fbApiEmbedded = true
+            }
+
         }, DEBOUNCE_UPDATE_DELAY);
+
+    function embedFbCode() {
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId            : '213320349753425', // Interacty.me facebook app
+                autoLogAppEvents : true,
+                xfbml            : true,
+                version          : 'v6.0'
+            });
+        };
+        const script = document.createElement('script');
+        script.src = 'https://connect.facebook.net/en_US/sdk.js';
+        script.async = true;
+        script.defer = true;
+        document.body.appendChild(script);
+    }
 
     /**
      * Add new properties to app schema for additional plugin functionality
