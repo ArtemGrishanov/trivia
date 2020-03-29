@@ -101,7 +101,8 @@ export class Selector {
             if (next.done && next.parentObj.hasOwnProperty(next.propName)) {
                 result.push({
                     path: next.path,
-                    value: next.value
+                    value: next.value,
+                    propName: next.propName
                 })
             }
         };
