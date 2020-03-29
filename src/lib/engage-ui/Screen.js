@@ -36,7 +36,7 @@ class Screen extends React.Component {
             <div style={s} className="rmx-screen" data-id={this.props.id}>
                 {this.props.backgroundImage &&
                     <div className="rmx-screen_back_wr">
-                        <BasicImage width={this.props.width} height={this.props.height} src={this.props.backgroundImage} backgroundSize='cover'></BasicImage>
+                        <BasicImage borderWidth={0} width={this.props.width} height={this.props.height} src={this.props.backgroundImage} backgroundSize='cover'></BasicImage>
                     </div>
                 }
                 <LayoutContainer editable={this.props.editable} id={'__lc_of_screen_'+this.props.id}>
