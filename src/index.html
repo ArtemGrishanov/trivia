@@ -163,5 +163,16 @@
         }
         catch(err) {}
     </script>
+    <script>
+        window.fbAsyncInit = function() {
+            FB.init({
+                appId            : '213320349753425', // Interacty.me facebook app
+                autoLogAppEvents : true,
+                xfbml            : true,
+                version          : 'v6.0'
+            });
+        };
+    </script>
+    <script async defer src="https://connect.facebook.net/en_US/sdk.js"></script>
   </body>
 </html>

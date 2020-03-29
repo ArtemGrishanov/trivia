@@ -9,7 +9,8 @@ import {
     isHashlistInstance,
     combineReducers,
     getScreenIdFromPath,
-    getComponentIdFromPath
+    getComponentIdFromPath,
+    flattenProperties
 } from './remix/util/util.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';
@@ -45,7 +46,8 @@ let logging = LOG_BY_DEFAULT,
     _outerEvents = [],
     _orderCounter = 0,
     _triggerActions = {},
-    _componentIdToScreenId = {};
+    _componentIdToScreenId = {},
+    _externalListeners = {};
 
 // establish communication with RemixContainer
 window.addEventListener('message', receiveMessage, false);
@@ -91,22 +93,6 @@ function receiveMessage({origin = null, data = {}, source = null}) {
         _putOuterEventInQueue('app_bounding_client_rect', {
             rect: document.getElementById('remix-app-root').getBoundingClientRect()
         });
-        _sendOuterEvents();
-    }
-    if (data.method === 'getshareentities') {
-        _putOuterEventInQueue('share_entities', {entities: [
-            //TODO mock share_entities
-            {
-                "title": "Some title 1",
-                "description": "Some description 1",
-                "imageId": 701230 // 623039
-            },
-            {
-                "title": "Some title 2",
-                "description": "Some description 2",
-                "imageId": 623032 // 623032
-            }
-        ]});
         _sendOuterEvents();
     }
     if (data.method === 'setsize') {
@@ -157,6 +143,14 @@ function receiveMessage({origin = null, data = {}, source = null}) {
     }
     if (data.method === 'redo') {
         redo();
+    }
+    if (_externalListeners[data.method]) {
+        // Ability to add specific message listeners for each plugin
+        const r = _externalListeners[data.method].call(this, data);
+        if (r && r.message) {
+            _putOuterEventInQueue(r.message, r.data);
+            _sendOuterEvents();
+        }
     }
 }
 
@@ -225,6 +219,10 @@ function setSize(width, height) {
 function registerTriggerAction(name, fn) {
     _triggerActions[name] = fn;
     return { actionType: name }
+}
+
+function addMessageListener(message, fn) {
+    _externalListeners[message] = fn;
 }
 
 /**
@@ -423,6 +421,7 @@ function init({externalActions = [], container = null, mode = 'none', defaultPro
     setMode(mode);
     stateHistory = [];
     putStateHistory();
+    Remix.fireEvent('remix_inited');
 }
 
 /**
@@ -1149,6 +1148,17 @@ function calcComponentIdScreenIdHash(screens) {
     })
 }
 
+export function getState() {
+    return store.getState();
+}
+
+export function getProperty(path) {
+    const r = getPropertiesBySelector(store.getState(), path);
+    if (r.length > 0) {
+        return r[0].value;
+    }
+    return undefined;
+}
 
 const remix = {
     // public methods
@@ -1171,6 +1181,7 @@ const remix = {
     dispatchAction,
     addTrigger,
     registerTriggerAction,
+    addMessageListener,
     setMode,
     getMode,
     fireEvent,
@@ -1186,9 +1197,9 @@ const remix = {
     _setScreenEvents,
     _triggerActions,
     _getSchema: () => schema,
+    getState: () => store.getState(),
     _putOuterEventInQueue,
     _sendOuterEvents,
-    getState: () => store.getState(),
     _getStateHistory: () => stateHistory
 }
 

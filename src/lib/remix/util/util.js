@@ -74,3 +74,55 @@ export function combineReducers(reducers) {
       return hasChanged ? nextState : state
     }
 }
+
+/**
+ * Flattens object and returns property path object. Example below
+ *
+ * Input:
+ * {
+ *     prop: 'val',
+ *     app: {
+ *          other: 123
+ *     }
+ * }
+ *
+ * Output:
+ * {
+ *      'prop': 'val',
+ *      'app.other': 123
+ * }
+ *
+ * @param {*} obj
+ */
+export function flattenProperties(obj = {}, path = '', result = {}) {
+    path = path.length > 0 ? path + '.': path;
+    Object.keys(obj).forEach(k => {
+        if (typeof obj[k] === 'object') {
+            flattenProperties(obj[k], path + k, result);
+        }
+        else {
+            result[path + k] = obj[k];
+        }
+    })
+    return result;
+}
+
+export function debounce(func, wait, immediate) {
+	let timeout;
+	return function() {
+        let context = this,
+            args = arguments;
+        let later = function() {
+			timeout = null;
+			if (!immediate) {
+                func.apply(context, args);
+            }
+		};
+		let callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) {
+            func.apply(context, args);
+        }
+	};
+};
