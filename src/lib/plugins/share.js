@@ -48,8 +48,9 @@ export default function initShare(options = {}) {
                     componentId,
                     title: 'title',
                     description: 'description',
-                    imageId: null,
-                    href: null,
+                    imageId: '',
+                    imageUrl: '',
+                    href: '',
                     ...oldEntities[componentId]
                 })
             })
@@ -102,6 +103,10 @@ export default function initShare(options = {}) {
             default: ''
         },
         'app.share.[entities HashList]./^[0-9a-z]+$/.imageId': {
+            type: 'string',
+            default: ''
+        },
+        'app.share.[entities HashList]./^[0-9a-z]+$/.imageUrl': {
             type: 'string',
             default: ''
         },
