@@ -55,7 +55,7 @@ export class Selector {
      * @param {string} propertyPath
      * @return {boolean}
      */
-    match(propertyPath, filtrationData, startTokenIndex = 0) {
+    match(propertyPath, startTokenIndex = 0) {
         if (propertyPath === this._selector)
             return true;
         if (propertyPath === "" && startTokenIndex === this._tokens.length)
@@ -68,15 +68,14 @@ export class Selector {
             const pathElems = propertyPath.split('.');
             const ppart0 = pathElems[0];
             const ti = this._getSelectorTokenInfo(this._tokens[startTokenIndex]);
-            const filtered = ti.filter === null ? true : (filtrationData !== void 0 && this._filter(ti.filter, filtrationData[ppart0]));
             if (ti.name === ppart0) {
-                return this.match(pathElems.slice(1).join('.'), filtrationData, startTokenIndex + 1) && filtered;
+                return this.match(pathElems.slice(1).join('.'), startTokenIndex+1);
             }
             // regex check. Expression expected in slashes /.../
             if (this._isRegExpString(ti.name)) {
                 const reg = new RegExp(ti.name.substring(1,ti.name.length-1));
                 if (reg.exec(ppart0)) {
-                    return this.match(pathElems.slice(1).join('.'), filtrationData, startTokenIndex + 1) && filtered;
+                    return this.match(pathElems.slice(1).join('.'), startTokenIndex+1);
                 }
                 return false;
             }
@@ -293,21 +292,6 @@ export class Selector {
             filter: filter
         }
     }
-
-    _filter({ key, value, operand }, data) {
-        if (data[key] === void 0) {
-            return false;
-        }
-
-        switch (operand) {
-            case 'indexOf':
-                return data[key].indexOf(value);
-            case 'equal':
-                return data[key] === value;
-            default:
-                throw Error('undescribed case');
-        }
-    }
 }
 
 /**
@@ -347,7 +331,44 @@ export function getPathes(obj, selector, resolvedPathesOnly = false) {
  *
  * @return {boolean}
  */
-export function matchPropertyPath(propertyPath, selector, filtrationData) {
+export function matchPropertyPath(propertyPath, selector) {
     const s = new Selector(selector);
-    return s.match(propertyPath, filtrationData);
+    return s.match(propertyPath);
+    // if (propertyPath === selector) return true;
+    // if (!propertyPath || !selector) {
+    //     return false;
+    // }
+    // try {
+    //     const pathElems = propertyPath.split('.');
+    //     const selectorElems = selector.split('.');
+
+    //     const ppart0 = pathElems[0];
+    //     const spart0 = selectorElems[0];
+    //     if (spart0 === ppart0) {
+    //         return matchPropertyPath(pathElems.slice(1).join('.'), selectorElems.slice(1).join('.'));
+    //     }
+    //     // regex check. Expression expected in slashes /.../
+    //     if (spart0[0] === "/" && spart0[spart0.length-1] === "/") {
+    //         const reg = new RegExp(spart0.substring(1,spart0.length-1));
+    //         if (reg.exec(ppart0)) {
+    //             return matchPropertyPath(pathElems.slice(1).join('.'), selectorElems.slice(1).join('.'));
+    //         }
+    //         return false;
+    //     }
+    //     if (spart0[0] === "[" && spart0[spart0.length-1] === "]") {
+    //         // description with type found: "[myProperty Type]"
+    //         const pair = spart0.substring(1,spart0.length-1).split(' ');
+    //         const objName = pair[0]; // ex: "questions"
+    //         const objType = pair[1]; // ex: "Hashlist"
+    //         const ppart1 = pathElems[1]; // ex: "ugltc7"
+    //         if (objName === ppart0 && objType === "HashList") {
+    //             //TODO тип Hashlist проверить не можем
+    //             //TODO как видим пока жестко зашита поддержка одного типа HashList для эксперимента. Подумать, расширить.
+    //             return matchPropertyPath(pathElems.slice(1).join('.'), selectorElems.slice(1).join('.'));
+    //         }
+    //     }
+    // }
+    // catch(e) {
+    // }
+    // return false;
 }
