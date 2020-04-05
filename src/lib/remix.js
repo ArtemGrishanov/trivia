@@ -10,7 +10,6 @@ import {
     combineReducers,
     getScreenIdFromPath,
     getComponentIdFromPath,
-    flattenProperties,
     callOncePerTime,
 } from './remix/util/util.js'
 
