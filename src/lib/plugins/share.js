@@ -1,6 +1,6 @@
 import { getPropertiesBySelector } from "../object-path"
 import HashList from '../hashlist'
-import { getScreenIdFromPath, debounce } from "../remix/util/util";
+import { getScreenIdFromPath, debounce, flattenProperties } from "../remix/util/util";
 
 /**
  * Плагин отслеживает все шаринг кнопки и создает сущности для шаринга в свойства app.share.entities
@@ -39,20 +39,27 @@ export default function initShare(options = {}) {
             sharingButtons.forEach( (button) => {
                 const
                     screenId = getScreenIdFromPath(button.path),
-                    componentId = button.propName;
-                newEntities.push({
-                    screen: {
-                        id: screenId,
-                        tags: state.router.screens[screenId].tags
-                    },
-                    componentId,
-                    title: 'title',
-                    description: 'description',
-                    imageId: '',
-                    imageUrl: '',
-                    href: '',
-                    ...oldEntities[componentId]
-                })
+                    componentId = button.propName,
+                    ne = {
+                        screen: {
+                            id: screenId,
+                            tags: state.router.screens[screenId].tags
+                        },
+                        componentId,
+                        title: '',
+                        description: '',
+                        imageId: '',
+                        imageUrl: '',
+                        href: '',
+                        ...Object.values(oldEntities).find( e => e.componentId === componentId)
+                    };
+                if (!ne.title) {
+                    ne.title = 'Project title';
+                }
+                if (!ne.description) {
+                    ne.description = 'Project description';
+                }
+                newEntities.push(ne);
             })
             remix.setData({'app.share.entities': new HashList(newEntities)});
 

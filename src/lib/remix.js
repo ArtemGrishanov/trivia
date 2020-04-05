@@ -9,8 +9,7 @@ import {
     isHashlistInstance,
     combineReducers,
     getScreenIdFromPath,
-    getComponentIdFromPath,
-    flattenProperties
+    getComponentIdFromPath
 } from './remix/util/util.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__';

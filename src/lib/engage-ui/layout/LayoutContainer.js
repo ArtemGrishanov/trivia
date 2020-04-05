@@ -118,19 +118,19 @@ class LayoutContainer extends React.Component {
      * Иметь одно событие (onSize в LayoutContainer) для запуска этой функции очень удобно, вместо установки колбеков на все LayoutItem
      */
     adaptateToNewViewportSize() {
-        // console.log(`AdaptateToNewViewportSize. Size w=${this.props.size.width} h=${this.props.size.height}`);
-        // // только для НЕредакирования. В 'edit' пользователь только настраивает положение элементов
-        // if (!this.props.editable && this.props.size.width !== 800) {
-        //     this.setState({
-        //         adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, {
-        //             //TODO 800
-        //             origCntWidth: 800,
-        //             userDefinedNormalizedProps: this.userDefinedNormalizedProps,
-        //             containerWidth: this.props.size.width
-        //         })
-        //     })
-        //     //TODO увеличение высоты самого контейнера (и приложения?) при необходимости
-        // }
+        console.log(`AdaptateToNewViewportSize. Size w=${this.props.size.width} h=${this.props.size.height}`);
+        // только для НЕредакирования. В 'edit' пользователь только настраивает положение элементов
+        if (!this.props.editable && this.props.size.width !== 800) {
+            this.setState({
+                adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, {
+                    //TODO 800
+                    origCntWidth: 800,
+                    userDefinedNormalizedProps: this.userDefinedNormalizedProps,
+                    containerWidth: this.props.size.width
+                })
+            })
+            //TODO увеличение высоты самого контейнера (и приложения?) при необходимости
+        }
     }
 
     /**
