@@ -13,28 +13,25 @@
  * @constructor
  */
 class HashList {
-
     constructor(initialValue, options = { generateNewIds: false }) {
-        this._orderedIds = [];
+        this._orderedIds = []
         if (initialValue !== undefined) {
             if (Array.isArray(initialValue)) {
                 for (let i = 0; i < initialValue.length; i++) {
-                    const id = this._getUniqueId();
-                    this._orderedIds.push(id);
-                    this[id] = initialValue[i];
+                    const id = this._getUniqueId()
+                    this._orderedIds.push(id)
+                    this[id] = initialValue[i]
                 }
-            }
-            else if (typeof initialValue === "object" && Array.isArray(initialValue._orderedIds)) {
+            } else if (typeof initialValue === 'object' && Array.isArray(initialValue._orderedIds)) {
                 if (options.generateNewIds) {
-                    initialValue._orderedIds.forEach( (id) => {
-                        const newid = this._getUniqueId();
-                        this[newid] = initialValue[id];
-                        this._orderedIds.push(newid);
-                    });
-                }
-                else {
-                    this._orderedIds = initialValue._orderedIds;
-                    this._orderedIds.forEach( (id) => this[id] = initialValue[id]);
+                    initialValue._orderedIds.forEach(id => {
+                        const newid = this._getUniqueId()
+                        this[newid] = initialValue[id]
+                        this._orderedIds.push(newid)
+                    })
+                } else {
+                    this._orderedIds = initialValue._orderedIds
+                    this._orderedIds.forEach(id => (this[id] = initialValue[id]))
                 }
             }
             // else if (this._validateDataType(initialValue) && Array.isArray(param._orderedIds) === true) {
@@ -43,7 +40,7 @@ class HashList {
             //     this. ? = this._normalizeValue(param.value);
             // }
             else {
-                throw new Error('Unsupported value type');
+                throw new Error('Unsupported value type')
             }
         }
     }
@@ -52,7 +49,7 @@ class HashList {
      * Returns list length
      */
     get length() {
-        return this._orderedIds.length;
+        return this._orderedIds.length
     }
 
     /**
@@ -60,11 +57,11 @@ class HashList {
      * https://stackoverflow.com/questions/6248666/how-to-generate-short-uid-like-ax4j9z-in-js
      */
     _getUniqueId() {
-        var firstPart = (Math.random() * 46656) | 0;
-        var secondPart = (Math.random() * 46656) | 0;
-        firstPart = ("000" + firstPart.toString(36)).slice(-3);
-        secondPart = ("000" + secondPart.toString(36)).slice(-3);
-        return firstPart + secondPart;
+        var firstPart = (Math.random() * 46656) | 0
+        var secondPart = (Math.random() * 46656) | 0
+        firstPart = ('000' + firstPart.toString(36)).slice(-3)
+        secondPart = ('000' + secondPart.toString(36)).slice(-3)
+        return firstPart + secondPart
     }
 
     /**
@@ -75,12 +72,12 @@ class HashList {
      * @return {Array}
      */
     toArray() {
-        return this._orderedIds.map( (id) => {
+        return this._orderedIds.map(id => {
             if (typeof this[id] === 'object') {
-                return {...this[id], hashlistId: id}
+                return { ...this[id], hashlistId: id }
             }
-            return this[id];
-        });
+            return this[id]
+        })
     }
 
     /**
@@ -91,9 +88,9 @@ class HashList {
      */
     getId(index) {
         if (Number.isInteger(index) === false || index < 0 || index >= this._orderedIds.length) {
-            return undefined;
+            return undefined
         }
-        return this._orderedIds[index];
+        return this._orderedIds[index]
     }
 
     /**
@@ -104,9 +101,9 @@ class HashList {
      */
     getIndex(id) {
         for (let i = 0; i < this._orderedIds.length; i++) {
-            if (this._orderedIds[i] === id) return i;
+            if (this._orderedIds[i] === id) return i
         }
-        return -1;
+        return -1
     }
 
     /**
@@ -115,7 +112,7 @@ class HashList {
      * @param {number} index
      */
     getByIndex(index) {
-        return this[this._orderedIds[index]];
+        return this[this._orderedIds[index]]
     }
 
     /**
@@ -127,15 +124,15 @@ class HashList {
      */
     addElement(element, position, newElementId) {
         if (Number.isInteger(position) === false || position < 0) {
-            position = this._orderedIds.length;
+            position = this._orderedIds.length
         }
         // id - постоянный на всё время работы и сериализации приложения
-        if (typeof newElementId !== "string") {
-            newElementId = this._getUniqueId();
+        if (typeof newElementId !== 'string') {
+            newElementId = this._getUniqueId()
         }
-        this._orderedIds.splice(position, -1, newElementId);
-        this[newElementId] = element;
-        return this;
+        this._orderedIds.splice(position, -1, newElementId)
+        this[newElementId] = element
+        return this
     }
 
     /**
@@ -147,16 +144,16 @@ class HashList {
      */
     changePosition(elementIndex, newElementIndex) {
         if (Number.isInteger(elementIndex) === false || elementIndex < 0 || elementIndex >= this._orderedIds.length) {
-            throw new Error('Illegal elementIndex param');
+            throw new Error('Illegal elementIndex param')
         }
         if (Number.isInteger(newElementIndex) === false || newElementIndex < 0) {
-            throw new Error('Illegal newElementIndex param');
+            throw new Error('Illegal newElementIndex param')
         }
         if (newElementIndex >= this._orderedIds.length) {
-            newElementIndex = this._orderedIds.length-1;
+            newElementIndex = this._orderedIds.length - 1
         }
-        const movedElem = this._orderedIds.splice(elementIndex, 1)[0];
-        this._orderedIds.splice(newElementIndex, -1, movedElem);
+        const movedElem = this._orderedIds.splice(elementIndex, 1)[0]
+        this._orderedIds.splice(newElementIndex, -1, movedElem)
     }
 
     /**
@@ -165,8 +162,8 @@ class HashList {
      */
     shuffle() {
         for (let i = this._orderedIds.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [this._orderedIds[i], this._orderedIds[j]] = [this._orderedIds[j], this._orderedIds[i]];
+            const j = Math.floor(Math.random() * (i + 1))
+            ;[this._orderedIds[i], this._orderedIds[j]] = [this._orderedIds[j], this._orderedIds[i]]
         }
     }
 
@@ -177,12 +174,12 @@ class HashList {
      */
     deleteElement(index) {
         if (Number.isInteger(index) === false || index < 0) {
-            throw new Error('deleteElement: index must be specified');
+            throw new Error('deleteElement: index must be specified')
         }
         if (index >= this._orderedIds.length) {
-            index = this._orderedIds.length-1;
+            index = this._orderedIds.length - 1
         }
-        const deletedId = this._orderedIds[index];
+        const deletedId = this._orderedIds[index]
         // const deletedElement = this[deletedId];
         // согласно допущениям по документации ссылка на один MutAppProperty может быть объявлена только в одном месте в приложении
         // исследуем удаляемый элемент масива на то, что внутри могут быть MutAppProperty которые также надо теперь удалить
@@ -193,10 +190,10 @@ class HashList {
         //     }
         // }
         // после того как удалили сабпроперти можно удалить и сам элемент
-        this._orderedIds.splice(index, 1);
-        const res = this[deletedId];
-        delete this[deletedId];
-        return res;
+        this._orderedIds.splice(index, 1)
+        const res = this[deletedId]
+        delete this[deletedId]
+        return res
     }
 
     /**
@@ -204,11 +201,11 @@ class HashList {
      * @param {string} id
      */
     deleteElementById(id) {
-        const index = this.getIndex(id);
+        const index = this.getIndex(id)
         if (index >= 0) {
-            return this.deleteElement(index);
+            return this.deleteElement(index)
         }
-        return null;
+        return null
     }
 
     /**
@@ -216,31 +213,31 @@ class HashList {
      * @param {number} index
      * @param {boolean} options.cloneChildHashlists, default 'false'
      */
-    getElementCopy(index, options = {cloneChildHashlists: false}) {
+    getElementCopy(index, options = { cloneChildHashlists: false }) {
         if (Number.isInteger(index) === false || index < 0 || index >= this._orderedIds.length) {
-            throw new Error('getElementCopy: illegal index');
+            throw new Error('getElementCopy: illegal index')
         }
-        const newElem = JSON.parse(JSON.stringify(this[this._orderedIds[index]]));
+        const newElem = JSON.parse(JSON.stringify(this[this._orderedIds[index]]))
         if (options.cloneChildHashlists && typeof newElem === 'object') {
-            this._cloneAllHashlistsInObject(newElem);
+            this._cloneAllHashlistsInObject(newElem)
         }
-        return newElem;
+        return newElem
     }
 
     /**
      * Рекурсивно пройти по всем свойствам объекта и создать новый инстантсы hashlist с новыми id
      */
     _cloneAllHashlistsInObject(obj) {
-        Object.keys(obj).forEach( (key) => {
+        Object.keys(obj).forEach(key => {
             if (obj[key] && typeof obj[key] === 'object') {
                 if (this._isHashlistInstance(obj[key])) {
                     // creating new HL with new element ids
-                    obj[key] = new HashList(obj[key], { generateNewIds: true });
+                    obj[key] = new HashList(obj[key], { generateNewIds: true })
                 }
-                this._cloneAllHashlistsInObject(obj[key]);
+                this._cloneAllHashlistsInObject(obj[key])
             }
-        });
-        return obj;
+        })
+        return obj
     }
 
     /**
@@ -248,7 +245,7 @@ class HashList {
      * @param {*} obj
      */
     _isHashlistInstance(obj) {
-        return obj && obj._orderedIds && obj._orderedIds.length >= 0;
+        return obj && obj._orderedIds && obj._orderedIds.length >= 0
     }
 
     /**
@@ -263,7 +260,13 @@ class HashList {
     // }
 
     _isPrimitive(value) {
-        return value === undefined || value === null || typeof value === 'number' || typeof value === 'string' || typeof value === 'boolean';
+        return (
+            value === undefined ||
+            value === null ||
+            typeof value === 'number' ||
+            typeof value === 'string' ||
+            typeof value === 'boolean'
+        )
     }
 
     /**
@@ -272,40 +275,40 @@ class HashList {
      */
     equal(otherHashlist) {
         if (this.length !== otherHashlist.length) {
-            return false;
+            return false
         }
-        const arr = otherHashlist.toArray();
+        const arr = otherHashlist.toArray()
         for (let i = 0; i < arr.length; i++) {
-            const otid = otherHashlist.getId(i);
-            const id = this.getId(i);
+            const otid = otherHashlist.getId(i)
+            const id = this.getId(i)
             if (otid !== id) {
                 // compare id order
-                return false;
+                return false
             }
             // кажется, что достаточно будет сравнить только ids двух hashlists так как они уникальны
             // и не сравнивать значения внутри списков
             // сравнение значений внутри будет произведено отдельно в remix.diff()
         }
-        return true;
+        return true
     }
 
     /**
      * Create a clone with the same ids and value instances
      */
     shallowClone() {
-        const cloned = new HashList();
-        cloned._orderedIds = this._orderedIds.slice();
-        cloned._orderedIds.forEach( (id) => cloned[id] = this[id])
-        return cloned;
+        const cloned = new HashList()
+        cloned._orderedIds = this._orderedIds.slice()
+        cloned._orderedIds.forEach(id => (cloned[id] = this[id]))
+        return cloned
     }
 
     /**
      * Use different ids for cloning
      */
     clone() {
-        const cloned = new HashList();
-        this._orderedIds.forEach( (id) => cloned.addElement( JSON.parse(JSON.stringify(this[id])) ));
-        return cloned;
+        const cloned = new HashList()
+        this._orderedIds.forEach(id => cloned.addElement(JSON.parse(JSON.stringify(this[id]))))
+        return cloned
     }
 
     /**
@@ -314,14 +317,14 @@ class HashList {
      * @param {function} fn - filter clause
      */
     filter(fn) {
-        const filtered = new HashList();
-        this._orderedIds.forEach( (id) => {
+        const filtered = new HashList()
+        this._orderedIds.forEach(id => {
             if (fn(this[id])) {
-                filtered._orderedIds.push(id);
+                filtered._orderedIds.push(id)
                 filtered[id] = this[id]
             }
         })
-        return filtered;
+        return filtered
     }
 
     /**
@@ -335,17 +338,15 @@ class HashList {
         for (let key in obj) {
             if (obj.hasOwnProperty(key) === true) {
                 if (this._isPrimitive(obj[key])) {
-                    result[key] = obj[key];
-                }
-                else if (Array.isArray(obj[key]) === true) {
-                    result[key] = this._serializeSubProperty(obj[key], []);
-                }
-                else {
-                    result[key] = this._serializeSubProperty(obj[key]);
+                    result[key] = obj[key]
+                } else if (Array.isArray(obj[key]) === true) {
+                    result[key] = this._serializeSubProperty(obj[key], [])
+                } else {
+                    result[key] = this._serializeSubProperty(obj[key])
                 }
             }
         }
-        return result;
+        return result
     }
 
     /**
@@ -365,13 +366,13 @@ class HashList {
         //     }
         // }
         if (typeof data === 'string') {
-            data = JSON.parse(data);
+            data = JSON.parse(data)
         }
         // предполагается, что в data только валидные значения. Проверки не делаются
-        this.id = data.id;
-        this._deserializeSubProperty(data.value); // значение массива это сложный объект, внутри могут быть другие MutAppProperty
+        this.id = data.id
+        this._deserializeSubProperty(data.value) // значение массива это сложный объект, внутри могут быть другие MutAppProperty
         //this._value = this._normalizeValue(data.value);
-        this._orderedIds = data._orderedIds;
+        this._orderedIds = data._orderedIds
     }
 
     /**
@@ -418,7 +419,6 @@ class HashList {
         //     }
         // }
     }
-
 }
 
 export default HashList

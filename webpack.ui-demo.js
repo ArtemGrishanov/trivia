@@ -1,4 +1,4 @@
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+const HtmlWebPackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     mode: 'development',
@@ -7,7 +7,7 @@ module.exports = {
         contentBase: './dist',
     },
     entry: {
-        demo: './src/lib/engage-ui/demo/index.js'
+        demo: './src/lib/engage-ui/demo/index.js',
     },
     module: {
         rules: [
@@ -15,26 +15,26 @@ module.exports = {
                 test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: {
-                    loader: "babel-loader"
-                }
+                    loader: 'babel-loader',
+                },
             },
             {
                 test: /\.css$/i,
-                use: ['style-loader','css-loader']
+                use: ['style-loader', 'css-loader'],
             },
             {
                 test: /\.(html)$/,
                 use: {
-                    loader: 'html-loader'
-                }
-            }
-        ]
+                    loader: 'html-loader',
+                },
+            },
+        ],
     },
     plugins: [
         new HtmlWebPackPlugin({
-            template: "./src/lib/engage-ui/demo/index.html",
-            filename: "./index.html",
-            inject: true
-        })
-    ]
-};
+            template: './src/lib/engage-ui/demo/index.html',
+            filename: './index.html',
+            inject: true,
+        }),
+    ],
+}

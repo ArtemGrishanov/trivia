@@ -1,78 +1,95 @@
 import '../style/rmx-options.css'
 import React from 'react'
 import DataSchema from '../../schema'
-import CorrectIcon from './CorrectIcon';
-import TextEditor from '../bricks/TextEditor';
-import RemixWrapper from '../RemixWrapper';
-import BasicImage from '../bricks/BasicImage';
+import CorrectIcon from './CorrectIcon'
+import TextEditor from '../bricks/TextEditor'
+import RemixWrapper from '../RemixWrapper'
+import BasicImage from '../bricks/BasicImage'
 
 class TextOption extends React.Component {
-
     static getDerivedStateFromProps(props, state) {
-        return state;
+        return state
     }
 
     constructor(props) {
-        super(props);
-        this.state = {
-        };
+        super(props)
+        this.state = {}
     }
 
     render() {
         const st = {
-                boxSizing: 'border-box',
-                borderStyle: 'solid',
-                ...Object.fromEntries(
-                    ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor', 'textAlign']
-                        .map(prop => {
-                            const value = this.props[prop]
+            boxSizing: 'border-box',
+            borderStyle: 'solid',
+            ...Object.fromEntries(
+                ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor', 'textAlign'].map(prop => {
+                    const value = this.props[prop]
 
-                            switch (typeof value) {
-                                case 'number':
-                                    return [prop, `${value}px`];
-                                default:
-                                    return [prop, value];
-                            }
-                        })
-                )
-            };
+                    switch (typeof value) {
+                        case 'number':
+                            return [prop, `${value}px`]
+                        default:
+                            return [prop, value]
+                    }
+                }),
+            ),
+        }
         if (this.props.dropShadow) {
-            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)';
+            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)'
         }
         if (this.props.doubleClicked) {
             // in edit mode we must see a TextEditor toolbars
-            st.overflow = 'visible';
+            st.overflow = 'visible'
         }
         const pbActive = {
-            width: this.props.percent+'%'
+            width: this.props.percent + '%',
         }
-        const withIndic = this.props.correctIndicator !== 'none';
-        const withPercent = this.props.percent > 0;
+        const withIndic = this.props.correctIndicator !== 'none'
+        const withPercent = this.props.percent > 0
         return (
-            <div className='rmx-component' >
-                <div className='clipped' style={st}>
-                    <div className={'rmx-option' + (withIndic ? ' withIndic': '') + (withPercent ? ' withPercent': '')}>
-                        {this.props.imageSrc &&
-                            <div className='rmx-option_backimg_wr'>
-                                <BasicImage width={this.props.width} height={this.props.height} src={this.props.imageSrc} backgroundSize={'cover'}></BasicImage>
+            <div className="rmx-component">
+                <div className="clipped" style={st}>
+                    <div
+                        className={'rmx-option' + (withIndic ? ' withIndic' : '') + (withPercent ? ' withPercent' : '')}
+                    >
+                        {this.props.imageSrc && (
+                            <div className="rmx-option_backimg_wr">
+                                <BasicImage
+                                    width={this.props.width}
+                                    height={this.props.height}
+                                    src={this.props.imageSrc}
+                                    backgroundSize={'cover'}
+                                ></BasicImage>
                             </div>
-                        }
-                        {this.props.percent > 0 &&
-                            <div className='rmx-percent_info'>
-                                <div className='rmx-pb_wr'>
-                                    <div className={'rmx-option-pb __' + this.props.correctIndicator} style={pbActive}></div>
+                        )}
+                        {this.props.percent > 0 && (
+                            <div className="rmx-percent_info">
+                                <div className="rmx-pb_wr">
+                                    <div
+                                        className={'rmx-option-pb __' + this.props.correctIndicator}
+                                        style={pbActive}
+                                    ></div>
                                 </div>
                                 <p className={'rmx-option-pct __' + this.props.correctIndicator}>
-                                    {this.props.percent+'%'}
+                                    {this.props.percent + '%'}
                                 </p>
                             </div>
-                        }
-                        {this.props.correctIndicator !== 'none' &&
-                            <div className={'rmx-option_indicator ' + (withPercent ? 'withPercent': '')}>
-                                <CorrectIcon left={0} top={0} width={24} height={24} mod={this.props.correctIndicator}/>
+                        )}
+                        {this.props.correctIndicator !== 'none' && (
+                            <div className={'rmx-option_indicator ' + (withPercent ? 'withPercent' : '')}>
+                                <CorrectIcon
+                                    left={0}
+                                    top={0}
+                                    width={24}
+                                    height={24}
+                                    mod={this.props.correctIndicator}
+                                />
                             </div>
-                        }
-                        <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                        )}
+                        <TextEditor
+                            parentId={this.props.id}
+                            readOnly={!this.props.doubleClicked}
+                            text={this.props.text}
+                        ></TextEditor>
                     </div>
                 </div>
             </div>
@@ -81,57 +98,56 @@ class TextOption extends React.Component {
 }
 
 export const Schema = new DataSchema({
-    'text': {
+    text: {
         type: 'string',
         minLength: 1,
         maxLength: 4096,
-        default: 'input text'
+        default: 'input text',
     },
-    'correctIndicator': {
+    correctIndicator: {
         type: 'string',
         enum: ['none', 'empty', 'correct', 'wrong', 'wrong_gray'],
-        default: 'none'
+        default: 'none',
     },
-    'percent': {
+    percent: {
         type: 'number',
         min: 0,
         max: 100,
-        default: 0
+        default: 0,
     },
-    'textAlign': {
+    textAlign: {
         type: 'string',
-        enum: ['left','center','right'],
-        default: 'left'
+        enum: ['left', 'center', 'right'],
+        default: 'left',
     },
-    'borderRadius': {
+    borderRadius: {
         type: 'number',
         min: 0,
         max: 100,
-        default: 4
+        default: 4,
     },
-    'borderWidth': {
+    borderWidth: {
         type: 'number',
         min: 0,
         max: 400,
-        default: 1
+        default: 1,
     },
-    'borderColor': {
+    borderColor: {
         type: 'string',
-        default: '#d8d8d8'
+        default: '#d8d8d8',
     },
-    'dropShadow': {
+    dropShadow: {
         type: 'boolean',
-        default: false
+        default: false,
     },
-    'backgroundColor': {
+    backgroundColor: {
         type: 'string',
-        default: ''
+        default: '',
     },
-    'imageSrc': {
+    imageSrc: {
         type: 'string',
-        default: ''
+        default: '',
     },
-
-});
+})
 
 export default RemixWrapper(TextOption, Schema, 'TextOption')

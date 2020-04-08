@@ -1,61 +1,75 @@
 import React from 'react'
-import { setComponentProps } from '../../remix';
+import { setComponentProps } from '../../remix'
 
 // https://github.com/zenoamaro/react-quill
 import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
-import '../style/rmx-text_editor.css';
+import '../style/rmx-text_editor.css'
 
-const
-    // To add a new font:
+const // To add a new font:
     // 1. Add font into this array
     // 2. Add classes in rmx-text_editor.css
     fonts = [
-        'Roboto', 'Roboto Condensed', 'Open Sans', 'Lato',
-        'Montserrat', 'Oswald', 'Merriweather', 'Ubuntu',
-        'Lobster', 'Pacifico', 'Vollkorn', 'Cuprum',
-        'Alegreya Sans', 'Russo One', 'Playfair Display SC', 'Alice',
-        'Press Start 2P', 'Bad Script', 'Yeseva One', 'Marmelad', 'Rubik Mono One'
+        'Roboto',
+        'Roboto Condensed',
+        'Open Sans',
+        'Lato',
+        'Montserrat',
+        'Oswald',
+        'Merriweather',
+        'Ubuntu',
+        'Lobster',
+        'Pacifico',
+        'Vollkorn',
+        'Cuprum',
+        'Alegreya Sans',
+        'Russo One',
+        'Playfair Display SC',
+        'Alice',
+        'Press Start 2P',
+        'Bad Script',
+        'Yeseva One',
+        'Marmelad',
+        'Rubik Mono One',
     ].map(f => f.split(' ').join('-')),
     importedFonts = {
         // 'Ubuntu': true | false
         // ...
-    };
+    }
 
 // https://github.com/zenoamaro/react-quill/issues/273
-const Font = ReactQuill.Quill.import('formats/font');
-Font.whitelist = [...fonts];
-ReactQuill.Quill.register(Font, true);
+const Font = ReactQuill.Quill.import('formats/font')
+Font.whitelist = [...fonts]
+ReactQuill.Quill.register(Font, true)
 
 function getStylesheetLink(family) {
-    return `https://fonts.googleapis.com/css?family=${family.split('-').join(' ')}`;
+    return `https://fonts.googleapis.com/css?family=${family.split('-').join(' ')}`
 }
 
 function addFont(family) {
     if (!importedFonts[family]) {
-        const link = document.createElement('link');
-        link.href = getStylesheetLink(family);
-        link.rel = 'stylesheet';
-        document.getElementsByTagName('head')[0].append(link);
-        importedFonts[family] = true;
+        const link = document.createElement('link')
+        link.href = getStylesheetLink(family)
+        link.rel = 'stylesheet'
+        document.getElementsByTagName('head')[0].append(link)
+        importedFonts[family] = true
     }
 }
 
 class TextEditor extends React.Component {
-
     static getDerivedStateFromProps(props, state) {
         return {
             ...state,
             prevPropText: props.text,
-            stateText: state.prevPropText !== props.text ? props.text : state.stateText
+            stateText: state.prevPropText !== props.text ? props.text : state.stateText,
         }
     }
 
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             stateText: props.text,
-            prevPropText: props.text
+            prevPropText: props.text,
         }
         this.handleChange = this.handleChange.bind(this)
     }
@@ -65,20 +79,20 @@ class TextEditor extends React.Component {
         // import font which is used in app
         fonts.forEach(f => {
             if (value.indexOf(`ql-font-${f}`) >= 0) {
-                addFont(f);
+                addFont(f)
             }
         })
     }
 
     modules = {
         toolbar: [
-            ['bold', 'italic', 'underline'],                   // toggled buttons
-            [{ 'size': ['small', false, 'large', 'huge'] }],  // custom dropdown
-            [{ 'color': [] }, { 'background': [] }],           // dropdown with defaults from theme
-            [{ 'font': fonts }],
-            [{ 'align': [] }],
-            ['link', 'clean']
-        ]
+            ['bold', 'italic', 'underline'], // toggled buttons
+            [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+            [{ color: [] }, { background: [] }], // dropdown with defaults from theme
+            [{ font: fonts }],
+            [{ align: [] }],
+            ['link', 'clean'],
+        ],
     }
 
     // 1. when you open editor first time in edit mode import all fonts
@@ -86,26 +100,26 @@ class TextEditor extends React.Component {
     render() {
         return (
             <div className={`rmx-text-editor ${this.props.readOnly ? '__readonly' : ''}`}>
-                <ReactQuill readOnly={this.props.readOnly}
+                <ReactQuill
+                    readOnly={this.props.readOnly}
                     modules={this.modules}
                     value={this.state.stateText}
-                    onChange={this.handleChange} />
+                    onChange={this.handleChange}
+                />
             </div>
         )
     }
 
-    componentDidMount() {
-
-    }
+    componentDidMount() {}
 
     componentDidUpdate(prevProps) {
         if (!this.props.readOnly) {
             // import all fonts in edit mode
-            fonts.forEach(f => addFont(f));
+            fonts.forEach(f => addFont(f))
         }
         if (!prevProps.readOnly && this.props.readOnly) {
             // выход из режима ввода текста - делаем сохранение в remix
-            setComponentProps(this.props.parentId, { text: this.state.stateText }, { putStateHistory: true });
+            setComponentProps(this.props.parentId, { text: this.state.stateText }, { putStateHistory: true })
         }
     }
 }

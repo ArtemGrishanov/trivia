@@ -1,18 +1,17 @@
 import React from 'react'
 import DataSchema from '../../schema'
-import RemixWrapper from '../RemixWrapper';
-import BasicImage from '../bricks/BasicImage';
+import RemixWrapper from '../RemixWrapper'
+import BasicImage from '../bricks/BasicImage'
 
 class ProgressiveImage extends React.Component {
-
     constructor(props) {
-        super(props);
-        this.state = {};
+        super(props)
+        this.state = {}
     }
 
     render() {
         return (
-            <div className='rmx-component'>
+            <div className="rmx-component">
                 <BasicImage {...this.props}></BasicImage>
             </div>
         )
@@ -20,64 +19,64 @@ class ProgressiveImage extends React.Component {
 }
 
 export const Schema = new DataSchema({
-    "width": {
+    width: {
         type: 'number',
         min: 10,
         max: 2000,
-        default: 400
+        default: 400,
     },
-    "height": {
+    height: {
         type: 'number',
         min: 10,
         max: 2000,
-        default: 300
+        default: 300,
     },
-    "backgroundSize": {
+    backgroundSize: {
         type: 'string',
         enum: ['cover', 'contain'],
-        default: 'cover'
+        default: 'cover',
     },
-    "blur": {
+    blur: {
         type: 'boolean',
-        default: false
+        default: false,
     },
-    "grayscale": {
+    grayscale: {
         type: 'boolean',
-        default: false
+        default: false,
     },
-    "dropShadow": {
+    dropShadow: {
         type: 'boolean',
-        default: false
+        default: false,
     },
-    "borderWidth": {
+    borderWidth: {
         type: 'number',
         min: 0,
         max: 400,
-        default: 0
+        default: 0,
     },
-    "borderRadius": {
+    borderRadius: {
         type: 'number',
         min: 0,
         max: 1000,
-        default: 0
+        default: 0,
     },
-    "borderColor": {
+    borderColor: {
         type: 'string',
-        default: '#999'
+        default: '#999',
     },
-    "animation": {
+    animation: {
         type: 'string',
-        enum: ['none','zoom','eight'],
-        default: 'none'
+        enum: ['none', 'zoom', 'eight'],
+        default: 'none',
     },
-    'src': {
+    src: {
         type: 'string',
-        default: 'https://p.testix.me/images/products/common/i/Placeholder.png'
+        default: 'https://p.testix.me/images/products/common/i/Placeholder.png',
     },
-    'srcThumb': {
+    srcThumb: {
         type: 'string',
-        default: ''
-    }
-});
+        default: '',
+    },
+})
 
 export default RemixWrapper(ProgressiveImage, Schema, 'ProgressiveImage')

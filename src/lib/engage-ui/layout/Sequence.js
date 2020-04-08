@@ -1,8 +1,5 @@
-
 export default class Sequence {
-    getNextPositionForElement({componentType, id}) {
-
-    }
+    getNextPositionForElement({ componentType, id }) {}
 
     /**
      * Найти следующий член последовательности на основе выявления закономерностей
@@ -12,11 +9,7 @@ export default class Sequence {
      */
     findNext(array) {
         //TODO autotests
-
         //TODO liner progression recognition
-
         //TODO more complex pattern recognition algorithms
-
     }
-
 }
