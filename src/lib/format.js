@@ -1,11 +1,7 @@
 const Format = {
-    Color: {
+  Color: {},
 
-    },
-
-    Url: {
-
-    }
+  Url: {},
 }
 
-export default Format;
+export default Format

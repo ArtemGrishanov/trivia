@@ -25,7 +25,26 @@
     "ui-demo-build": "webpack --config webpack.ui-demo.js",
     "babel": "babel --presets es2015 js/main.js -o build/main.bundle.js",
     "start": "webpack-dev-server --open --config webpack.dev.js",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "prettier:base": "./node_modules/.bin/prettier --write",
+    "prettier": "npm run prettier:base -- \"{*.{js,json},{src}/**/*.{js,jsx,css,scss,less,json,yaml,yml,md}}\"",
+    "precommit": "lint-staged"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "npm run precommit",
+      "post-commit": "git update-index --again"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.(js|jsx)": [
+      "npm run prettier:base --",
+      "git add"
+    ],
+    "**/*.{css,scss,md}": [
+      "npm run prettier:base --",
+      "git add"
+    ]
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -45,7 +64,10 @@
     "css-loader": "^3.0.0",
     "html-loader": "^0.5.5",
     "html-webpack-plugin": "^3.2.0",
+    "husky": "4.2.3",
+    "lint-staged": "10.1.2",
     "mini-css-extract-plugin": "^0.8.0",
+    "prettier": "2.0.4",
     "react-router-dom": "^5.1.2",
     "webpack": "^4.35.3",
     "webpack-cli": "^3.3.6",

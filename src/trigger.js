@@ -1,12 +1,11 @@
-
 export default class Trigger {
-    constructor({eventType, conditions, thenActions}) {
-        this._eventType = eventType;
-        this._conditions = conditions;
-        this._thenActions = thenActions;
-    }
+  constructor({ eventType, conditions, thenActions }) {
+    this._eventType = eventType
+    this._conditions = conditions
+    this._thenActions = thenActions
+  }
 
-    get eventType() {
-        return this._eventType;
-    }
+  get eventType() {
+    return this._eventType
+  }
 }

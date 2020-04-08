@@ -2,112 +2,111 @@ import sizeMe from 'react-sizeme'
 import PropsNormalizer from './PropsNormalizer'
 import { getPropertiesBySelector } from '../object-path'
 import { connect } from 'react-redux'
-import LayoutItem from './layout/LayoutItem';
+import LayoutItem from './layout/LayoutItem'
 import { setData } from '../remix'
 
-const componentClassMap = {};
+const componentClassMap = {}
 
 export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
-    'id': {
-        type: 'string',
-        minLength: 1,
-        maxLength: 1024,
-        //TODO default generate id
-        default: 'none'
-    },
-    'tags': {
-        type: 'string',
-        minLength: 0,
-        maxLength: 1024,
-        default: 'remixcomponent'
-    },
-    'displayName': {
-        type: 'string',
-        minLength: 1,
-        default: 'RemixComponent'
-    },
-    // это не строка это объект в котором плагины размещают различные данные для своих нужд
-    // 'data': {
-    //     type: 'string',
-    //     minLength: 0,
-    //     maxLength: 4096,
-    //     default: ''
-    // },
-    'width': {
-        type: 'number',
-        min: 1,
-        max: 9999,
-        default: 50
-    },
-    'widthStrategy': {
-        type: 'string',
-        enum: ['fixed', 'dynamic'],
-        default: 'fixed'
-    },
-    'height': {
-        type: 'number',
-        min: 1,
-        max: 9999,
-        default: 50
-    },
-    'left': {
-        type: 'number',
-        min: -1000,
-        max: 9999,
-        default: 100
-    },
-    'leftStrategy': {
-        type: 'string',
-        enum: ['dynamic', 'fixed'],
-        default: 'dynamic'
-    },
-    'top': {
-        type: 'number',
-        min: -1000,
-        max: 9999,
-        default: 100
-    },
-    'displayType': {
-        type: 'string',
-        enum: ['flow','decor'],
-        default: 'flow'
-    }
-};
-
-export default (Component, Schema, DisplayName) => {
-    if (!DisplayName) {
-        throw new Error('RemixWrapper: you must specify DisplayName for each component. Usually it matches the class name');
-    }
-
-    let composed = null;
-
-    switch (DisplayName) {
-        case 'Router': {
-            composed = compose( routerConnect(), withPropNormalizer(Schema, DisplayName) )(Component);
-            break;
-        }
-        case 'Screen': {
-            composed = compose( screenConnect(), withPropNormalizer(Schema, DisplayName) )(Component);
-            break;
-        }
-        default: {
-            composed = compose(
-                LayoutItem(),
-                // sizeMe({monitorHeight: true, noPlaceholder: true}),
-                //TODO It works without componentConnect Is screenConnect sufficient?
-                //componentConnect(),
-                withPropNormalizer(Schema, DisplayName)
-
-            )(Component);
-        }
-    }
-
-    componentClassMap[DisplayName] = composed;
-    return composed;
+  id: {
+    type: 'string',
+    minLength: 1,
+    maxLength: 1024,
+    //TODO default generate id
+    default: 'none',
+  },
+  tags: {
+    type: 'string',
+    minLength: 0,
+    maxLength: 1024,
+    default: 'remixcomponent',
+  },
+  displayName: {
+    type: 'string',
+    minLength: 1,
+    default: 'RemixComponent',
+  },
+  // это не строка это объект в котором плагины размещают различные данные для своих нужд
+  // 'data': {
+  //     type: 'string',
+  //     minLength: 0,
+  //     maxLength: 4096,
+  //     default: ''
+  // },
+  width: {
+    type: 'number',
+    min: 1,
+    max: 9999,
+    default: 50,
+  },
+  widthStrategy: {
+    type: 'string',
+    enum: ['fixed', 'dynamic'],
+    default: 'fixed',
+  },
+  height: {
+    type: 'number',
+    min: 1,
+    max: 9999,
+    default: 50,
+  },
+  left: {
+    type: 'number',
+    min: -1000,
+    max: 9999,
+    default: 100,
+  },
+  leftStrategy: {
+    type: 'string',
+    enum: ['dynamic', 'fixed'],
+    default: 'dynamic',
+  },
+  top: {
+    type: 'number',
+    min: -1000,
+    max: 9999,
+    default: 100,
+  },
+  displayType: {
+    type: 'string',
+    enum: ['flow', 'decor'],
+    default: 'flow',
+  },
 }
 
-export const getComponentClass = (DisplayName) => {
-    return componentClassMap[DisplayName];
+export default (Component, Schema, DisplayName) => {
+  if (!DisplayName) {
+    throw new Error('RemixWrapper: you must specify DisplayName for each component. Usually it matches the class name')
+  }
+
+  let composed = null
+
+  switch (DisplayName) {
+    case 'Router': {
+      composed = compose(routerConnect(), withPropNormalizer(Schema, DisplayName))(Component)
+      break
+    }
+    case 'Screen': {
+      composed = compose(screenConnect(), withPropNormalizer(Schema, DisplayName))(Component)
+      break
+    }
+    default: {
+      composed = compose(
+        LayoutItem(),
+        // sizeMe({monitorHeight: true, noPlaceholder: true}),
+        //TODO It works without componentConnect Is screenConnect sufficient?
+        //componentConnect(),
+        withPropNormalizer(Schema, DisplayName),
+      )(Component)
+    }
+  }
+
+  componentClassMap[DisplayName] = composed
+  return composed
+}
+
+export const getComponentClass = DisplayName => {
+  return componentClassMap[DisplayName]
 }
 
 /**
@@ -116,55 +115,53 @@ export const getComponentClass = (DisplayName) => {
  * @param  {...function} enhancers - functions to compose
  */
 function compose(...enhancers) {
-    if (enhancers.length === 0) {
-        return arg => arg
-    }
-    if (enhancers.length === 1) {
-        return enhancers[0]
-    }
-    return enhancers.reduce((a, b) => (...args) => a(b(...args)))
+  if (enhancers.length === 0) {
+    return arg => arg
+  }
+  if (enhancers.length === 1) {
+    return enhancers[0]
+  }
+  return enhancers.reduce((a, b) => (...args) => a(b(...args)))
 }
 
 function routerConnect() {
-    return connect(
-        (state) => {
-            return {
-                ...state.router,
-                screens: state.router.screens.filter(s => !s.disabled),
-                mode: state.session.mode
-            }
-        },
-        (dispatch) => {
-            return {
-                setData
-            }
-        }
-    );
+  return connect(
+    state => {
+      return {
+        ...state.router,
+        screens: state.router.screens.filter(s => !s.disabled),
+        mode: state.session.mode,
+      }
+    },
+    dispatch => {
+      return {
+        setData,
+      }
+    },
+  )
 }
 
 function screenConnect() {
-    return connect(
-        (state, ownProps) => {
-            if (ownProps.id && state.router.screens[ownProps.id]) {
-                return state.router.screens[ownProps.id];
-            }
-            return {}
-        }
-    )
+  return connect((state, ownProps) => {
+    if (ownProps.id && state.router.screens[ownProps.id]) {
+      return state.router.screens[ownProps.id]
+    }
+    return {}
+  })
 }
 
 function componentConnect() {
-    return connect(
-        (state, ownProps) => {
-            //TODO find and return component state in global state
-            return {}
-        }
-    )
+  return connect((state, ownProps) => {
+    //TODO find and return component state in global state
+    return {}
+  })
 }
 
 function withPropNormalizer(Schema, DisplayName) {
-    return PropsNormalizer(Schema.extend({
-        ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
-        ...{'displayName': {...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{'default': DisplayName}}} // use specific displayName for each Component type
-    }));
+  return PropsNormalizer(
+    Schema.extend({
+      ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
+      ...{ displayName: { ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{ default: DisplayName } } }, // use specific displayName for each Component type
+    }),
+  )
 }

@@ -6,53 +6,53 @@ import { getOption, getQuestionIdByOption, calcResult } from './helper'
 import Trigger from './trigger'
 
 const initialState = {
-    // app specific data tree
-    // can be different on projects
-    // main: {
-    //     slides: new HashList([1])
-    // },
-    app: {
-        // size: {
-        //     // width: undefined,
-        //     // height: undefined
-        // }
-    },
-    // quiz: {
-    //     // questions: Hashlist,
-    //     // results: Hashlist,
-    // },
-    // style: {
-
-    // },
-    // screens: {
-    //     /*
-    //     'questionScreen_1': {
-    //         'staticElements': [ ], // components wich were added by user
-    //         'layout': 'string with layout',
-    //         'triggers': [ ]
-    //     }
-    //     */
-
-    //     /**
-    //      * before_screen_show, calcRes
-    //      */
-    // },
-    // triggers: {
-    //     history: []
-    // },
-    // session: {
-    //     startClientTime: new Date().getTime(),
-    //     questionIds: [],
-    //     currentQuestionIndex: 0,
-    //     answers: {
-    //         // <questionId>: <points>,
-    //         // "werq123": 1,
-    //         // ""
-    //         // calc current step
-    //         // calc result in the end
-    //     },
-    //     result: null // result: <resultId>
+  // app specific data tree
+  // can be different on projects
+  // main: {
+  //     slides: new HashList([1])
+  // },
+  app: {
+    // size: {
+    //     // width: undefined,
+    //     // height: undefined
     // }
+  },
+  // quiz: {
+  //     // questions: Hashlist,
+  //     // results: Hashlist,
+  // },
+  // style: {
+
+  // },
+  // screens: {
+  //     /*
+  //     'questionScreen_1': {
+  //         'staticElements': [ ], // components wich were added by user
+  //         'layout': 'string with layout',
+  //         'triggers': [ ]
+  //     }
+  //     */
+
+  //     /**
+  //      * before_screen_show, calcRes
+  //      */
+  // },
+  // triggers: {
+  //     history: []
+  // },
+  // session: {
+  //     startClientTime: new Date().getTime(),
+  //     questionIds: [],
+  //     currentQuestionIndex: 0,
+  //     answers: {
+  //         // <questionId>: <points>,
+  //         // "werq123": 1,
+  //         // ""
+  //         // calc current step
+  //         // calc result in the end
+  //     },
+  //     result: null // result: <resultId>
+  // }
 }
 
 // function app(state = initialState.app, action) {
@@ -177,9 +177,11 @@ const initialState = {
 // }
 
 const reducer = remixReducer({
-    // some client reducers
-    reducers: {/*app, quiz, style, session, triggers*/},
-    dataSchema: schema
-});
+  // some client reducers
+  reducers: {
+    /*app, quiz, style, session, triggers*/
+  },
+  dataSchema: schema,
+})
 
 export default reducer
