@@ -124,3 +124,18 @@ export function debounce(func, wait, immediate) {
     }
   }
 }
+
+export function callOncePerTime(func, wait) {
+  let timeout = null
+  return function () {
+    let context = this,
+      args = arguments
+    let later = function () {
+      timeout = null
+      func.apply(context, args)
+    }
+    if (timeout === null) {
+      timeout = setTimeout(later, wait)
+    }
+  }
+}

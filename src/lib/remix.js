@@ -8,6 +8,7 @@ import {
   getScreenIdFromPath,
   getComponentIdFromPath,
   flattenProperties,
+  callOncePerTime,
 } from './remix/util/util.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
@@ -29,6 +30,7 @@ export const REMIX_SET_MODE = '__Remix_set_mode__'
 const EXPECTED_CONTAINER_ORIGIN = null
 const MODE_SET = new Set(['none', 'edit', 'preview', 'published'])
 const LOG_BY_DEFAULT = false
+const USER_ACTIVITY_EVENTS = ['mousemove', 'keydown']
 
 let logging = LOG_BY_DEFAULT,
   containerOrigin = null,
@@ -49,6 +51,12 @@ let logging = LOG_BY_DEFAULT,
 // establish communication with RemixContainer
 window.addEventListener('message', receiveMessage, false)
 window.addEventListener('keydown', onKeyDown, false)
+
+USER_ACTIVITY_EVENTS.forEach(eventType => {
+  const activity = () => containerWindow && containerOrigin && containerWindow.postMessage({ method: 'user-activity' })
+
+  window.addEventListener(eventType, callOncePerTime(activity, 5000))
+})
 
 function onKeyDown(e) {
   if (getMode() === 'edit') {
