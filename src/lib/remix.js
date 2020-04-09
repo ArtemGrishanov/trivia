@@ -25,6 +25,7 @@ export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
+export const REMIX_PRE_RENDER = '__Remix_pre_render__'
 
 //TODO specify origin during publishing?
 //const containerOrigin = "http://localhost:8080";
@@ -212,20 +213,59 @@ export function setSize(width, height) {
     }
 
     // это хорошо, но как быть с vertical overflow когда компонент по вертикали не будет умещаться?
+        // перенос текста это единственная такая ситуация? и больше ничего не надо учесть?
+        // change lines count event?
+        //     если я меряю линии то это однозначно считает высоту?
+        // scrollTop - нет дом элемента
+        // запретить переносить и делать шрифт меньше размером?
 
-    getAdaptedChildrenProps(this.props.children, this.childRefs, {
-        //TODO 800
-        origCntWidth: 800,
+        // ACTUAL HEIGHT: 112 px on MOB instead of 55 px on web     (and 66 on MOB - BUGGED)
 
-        //TODO userDefinedNormalizedProps чем отличается от свойств с стейта просто?
-        userDefinedNormalizedProps: this.userDefinedNormalizedProps,
-        containerWidth: width
-    })
+        //     есть свойства текста в стейте, определить сколько он будет занимать реально по высоте при какой-то произвольной ширине!
+    // сделать бранч, коммит
+
+    // и начать новый коммит с этим экспериментом
+
+    // getAdaptedChildrenProps(this.props.children, this.childRefs, {
+    //     //TODO 800
+    //     origCntWidth: 800,
+
+    //     //TODO userDefinedNormalizedProps чем отличается от свойств с стейта просто?     Думаю можно обойтись
+    //     userDefinedNormalizedProps: this.userDefinedNormalizedProps,
+    //     containerWidth: width
+    // })
     //TODO delete size-me если не определяем размер контейнера а четко ставим его?
 
     if (Object.keys(data).length > 0) {
         setData(data);
     }
+
+    requestComponentsBoundingRect()
+}
+
+function requestComponentsBoundingRect() {
+    const components = [];
+
+    getState().router.screens.toArray().forEach( (scr) => {
+        scr.components.toArray().forEach( c => components.push(c) )
+    })
+
+    // найти все объекты которые могут изменить свой размер из-за нового размера приложения
+    store.dispatch({
+        type: REMIX_PRE_RENDER,
+        components
+    });
+}
+
+export function setComponentsRects(rects) {
+    // продолжение адаптации по вертикали
+    const {width, height} = getState().app.size;
+
+    // теперь остается только нормализовать компоненты по вертикали
+    // getAdaptedChildrenProps(this.props.children, rects, {
+    //     origCntWidth: 800,
+    //     containerWidth: width
+    // })
 }
 
 function registerTriggerAction(name, fn) {
@@ -605,7 +645,7 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function session(state = { triggers: [], events: [], selectedComponentIds: [], mode: 'none' }, action) {
+function session(state = { triggers: [], events: [], selectedComponentIds: [], mode: 'none', prerender: {} }, action) {
     switch(action.type) {
         case REMIX_ADD_TRIGGER: {
             //const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
@@ -658,6 +698,14 @@ function session(state = { triggers: [], events: [], selectedComponentIds: [], m
                 return { ...state, mode: action.mode }
             }
             return state;
+        }
+        case REMIX_PRE_RENDER: {
+            return {
+                ...state,
+                prerender: {
+                    components: action.components
+                }
+            }
         }
         default:
             return state;
