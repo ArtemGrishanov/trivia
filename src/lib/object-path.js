@@ -56,6 +56,7 @@ export class Selector {
      * @return {boolean}
      */
     match(propertyPath, startTokenIndex = 0) {
+    //match(propertyPath, filtrationData, startTokenIndex = 0) {
         if (propertyPath === this._selector)
             return true;
         if (propertyPath === "" && startTokenIndex === this._tokens.length)
@@ -68,14 +69,17 @@ export class Selector {
             const pathElems = propertyPath.split('.');
             const ppart0 = pathElems[0];
             const ti = this._getSelectorTokenInfo(this._tokens[startTokenIndex]);
+            // const filtered = ti.filter === null ? true : (filtrationData !== void 0 && this._filter(ti.filter, filtrationData[ppart0]));
             if (ti.name === ppart0) {
                 return this.match(pathElems.slice(1).join('.'), startTokenIndex+1);
+                // return this.match(pathElems.slice(1).join('.'), filtrationData, startTokenIndex + 1) && filtered;
             }
             // regex check. Expression expected in slashes /.../
             if (this._isRegExpString(ti.name)) {
                 const reg = new RegExp(ti.name.substring(1,ti.name.length-1));
                 if (reg.exec(ppart0)) {
                     return this.match(pathElems.slice(1).join('.'), startTokenIndex+1);
+                    // return this.match(pathElems.slice(1).join('.'), filtrationData, startTokenIndex + 1) && filtered;
                 }
                 return false;
             }
@@ -292,6 +296,21 @@ export class Selector {
             filter: filter
         }
     }
+
+    // _filter({ key, value, operand }, data) {
+    //     if (data[key] === void 0) {
+    //         return false;
+    //     }
+
+    //     switch (operand) {
+    //         case 'indexOf':
+    //             return data[key].indexOf(value);
+    //         case 'equal':
+    //             return data[key] === value;
+    //         default:
+    //             throw Error('undescribed case');
+    //     }
+    // }
 }
 
 /**

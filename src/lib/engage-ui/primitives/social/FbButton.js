@@ -12,6 +12,7 @@ class FbButton extends React.Component {
 
     constructor(props) {
         super(props);
+        this.onClick = this.onClick.bind(this);
     }
 
     onClick() {
