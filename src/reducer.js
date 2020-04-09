@@ -178,8 +178,10 @@ const initialState = {
 
 const reducer = remixReducer({
     // some client reducers
-    reducers: {/*app, quiz, style, session, triggers*/},
-    dataSchema: schema
-});
+    reducers: {
+        /*app, quiz, style, session, triggers*/
+    },
+    dataSchema: schema,
+})
 
 export default reducer

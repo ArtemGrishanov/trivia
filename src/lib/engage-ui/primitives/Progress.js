@@ -3,20 +3,22 @@ import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 
 class Progress extends React.Component {
-
     constructor(props) {
-        super(props);
-        this.state = {
-        }
+        super(props)
+        this.state = {}
     }
 
     render() {
         const st = {
-            fontSize: this.props.fontSize+'px',
-            color: this.props.color
-        };
-        const text = this.props.step + '/' + this.props.max;
-        return <p className="rmx-text" style={st}>{text}</p>
+            fontSize: this.props.fontSize + 'px',
+            color: this.props.color,
+        }
+        const text = this.props.step + '/' + this.props.max
+        return (
+            <p className="rmx-text" style={st}>
+                {text}
+            </p>
+        )
     }
 }
 
@@ -25,28 +27,28 @@ class Progress extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
-    'step': {
+    step: {
         type: 'number',
         min: 1,
         max: 1000,
-        default: 1
+        default: 1,
     },
-    'max': {
+    max: {
         type: 'number',
         min: 1,
         max: 1000,
-        default: 10
+        default: 10,
     },
-    'fontSize': {
+    fontSize: {
         type: 'number',
         min: 8,
         max: 80,
-        default: 14
+        default: 14,
     },
-    'color': {
+    color: {
         type: 'string',
-        default: '#333'
-    }
-});
+        default: '#333',
+    },
+})
 
 export default RemixWrapper(Progress, Schema, 'Progress')

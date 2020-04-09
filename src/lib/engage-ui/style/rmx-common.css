@@ -76,10 +76,9 @@ p {
     background-color: #fafafa;
 }
 
-
 .rmx-control {
     margin: 5px;
-    color:#333;
+    color: #333;
     white-space: nowrap;
 }
 .rmx-control_elem_wr {

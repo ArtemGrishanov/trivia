@@ -1,11 +1,11 @@
 import React from 'react'
-import ReactDOMServer from 'react-dom/server';
+import ReactDOMServer from 'react-dom/server'
 import { connect } from 'react-redux'
 import DataSchema from '../schema'
 import Remix from '../remix'
 import Router from './router'
 
-import stylll from './style/rmx-common.css';
+import stylll from './style/rmx-common.css'
 
 /**
  * TODO
@@ -33,21 +33,19 @@ import stylll from './style/rmx-common.css';
  * -
  */
 class EngageApp extends React.Component {
-
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
-            message: null
-        };
-        this.screens = [];
+            message: null,
+        }
+        this.screens = []
     }
 
     componentDidMount() {
-        Remix.fireEvent('app_start');
+        Remix.fireEvent('app_start')
     }
 
-    componentDidUpdate() {
-    }
+    componentDidUpdate() {}
 
     // syncScreens() {
     //     const prevScrs = this.screens;
@@ -102,53 +100,52 @@ class EngageApp extends React.Component {
     // }
 
     getScreenById(screenArr = [], id) {
-        return screenArr.find( (scr) => scr.screenId === id);
+        return screenArr.find(scr => scr.screenId === id)
     }
 
     render() {
         const appSt = {
             width: '100%',
             height: '100%',
-            overflow: this.props.editable ? 'initial': 'hidden'
+            overflow: this.props.editable ? 'initial' : 'hidden',
         }
         return (
             <div className="rmx-app" style={appSt}>
                 <Router></Router>
             </div>
-        );
+        )
     }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
     return {
         width: state.app.size.width,
         height: state.app.size.height,
-        editable: state.session.mode === 'edit'
+        editable: state.session.mode === 'edit',
     }
 }
 
-const mapDispatchToProps = {
-}
+const mapDispatchToProps = {}
 
 /**
  * Props schema
  * Which props could be edited and how (types, range and other rules)
  */
 export const EngageAppSchema = new DataSchema({
-    "width": {
+    width: {
         type: 'number',
         min: 80,
         max: 4000,
         default: 444,
-        appWidthProperty: true
+        appWidthProperty: true,
     },
-    "height": {
+    height: {
         type: 'number',
         min: 18,
         max: 12000,
         default: 444,
-        appHeightProperty: true
-    }
-});
+        appHeightProperty: true,
+    },
+})
 
-export default connect(mapStateToProps, mapDispatchToProps)(EngageApp);
+export default connect(mapStateToProps, mapDispatchToProps)(EngageApp)

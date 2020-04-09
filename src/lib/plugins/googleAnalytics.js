@@ -3,9 +3,8 @@
  *
  */
 export default function initGoogleAnalytics(options = {}) {
-
-    let trackingCodeEmbedded = false;
-    const remix = options.remix;
+    let trackingCodeEmbedded = false
+    const remix = options.remix
 
     /**
      *
@@ -13,16 +12,16 @@ export default function initGoogleAnalytics(options = {}) {
      * example 'UA-88595022-4'
      */
     function embedCode(trackingId) {
-        const script = document.createElement('script');
-        script.src = `https://www.googletagmanager.com/gtag/js?id=${trackingId}`;
-        script.async = true;
-        document.body.appendChild(script);
-        window.dataLayer = window.dataLayer || [];
+        const script = document.createElement('script')
+        script.src = `https://www.googletagmanager.com/gtag/js?id=${trackingId}`
+        script.async = true
+        document.body.appendChild(script)
+        window.dataLayer = window.dataLayer || []
         function gtag() {
-            dataLayer.push(arguments);
+            dataLayer.push(arguments)
         }
-        gtag('js', new Date());
-        gtag('config', trackingId);
+        gtag('js', new Date())
+        gtag('config', trackingId)
     }
 
     /**
@@ -32,31 +31,32 @@ export default function initGoogleAnalytics(options = {}) {
     remix.extendSchema({
         'app.google.trackingId': {
             type: 'string',
-            default: ''
-        }
-    });
+            default: '',
+        },
+    })
 
     if (remix.getMode() === 'published') {
-
-        remix.registerTriggerAction('ga:embed_code', (event) => {
+        remix.registerTriggerAction('ga:embed_code', event => {
             if (!trackingCodeEmbedded) {
-                const trackingId = event.remix.getProperty('app.google.trackingId');
+                const trackingId = event.remix.getProperty('app.google.trackingId')
                 if (trackingId) {
-                    embedCode();
-                    trackingCodeEmbedded = true;
+                    embedCode()
+                    trackingCodeEmbedded = true
                 }
             }
-        });
+        })
 
         remix.addTrigger({
             when: { eventType: 'remix_inited' },
-            then: { actionType: 'ga:embed_code'}
-        });
+            then: { actionType: 'ga:embed_code' },
+        })
 
         remix.addTrigger({
-            when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.google.trackingId'} },
-            then: { actionType: 'ga:embed_code'}
-        });
-
+            when: {
+                eventType: 'property_updated',
+                condition: { prop: 'path', clause: 'EQUALS', value: 'app.google.trackingId' },
+            },
+            then: { actionType: 'ga:embed_code' },
+        })
     }
 }

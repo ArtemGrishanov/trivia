@@ -35,6 +35,6 @@ const schema = new DataSchema({
     //     type: 'string',
     //     default: ''
     // }
-});
+})
 
-export default schema;
+export default schema
