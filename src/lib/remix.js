@@ -10,7 +10,6 @@ import {
     combineReducers,
     getScreenIdFromPath,
     getComponentIdFromPath,
-    flattenProperties,
     callOncePerTime,
 } from './remix/util/util.js'
 
@@ -56,9 +55,9 @@ window.addEventListener('message', receiveMessage, false);
 window.addEventListener('keydown', onKeyDown, false);
 
 USER_ACTIVITY_EVENTS.forEach(eventType => {
-  const activity = () => containerWindow && containerOrigin && containerWindow.postMessage({ method: 'user-activity' })
+    const activity = () => containerWindow && containerOrigin && containerWindow.postMessage({ method: 'user-activity' }, containerOrigin)
 
-  window.addEventListener(eventType, callOncePerTime(activity, 5000))
+    window.addEventListener(eventType, callOncePerTime(activity, 5000))
 })
 
 function onKeyDown(e) {
