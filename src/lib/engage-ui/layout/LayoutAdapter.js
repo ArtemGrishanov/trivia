@@ -2,12 +2,15 @@ import Row from './Row'
 
 /**
  * Получить новые props для компонентов в соответствии с параметрами пережаннами в init
+ *
  * @param {array} components
+ * @param {object} refs
  */
-export function getAdaptedChildrenProps(components, {
+export function getAdaptedChildrenProps(components, refs, {
     userDefinedNormalizedProps,
     origCntWidth,
     containerWidth,
+    HORIZ_ROW_DEVIATION = 9, // разброс координат в этих пределах - считается одним и рем же рядом
     HORIZ_MARGIN = 6,
     VERTICAL_MARGIN = 12,
     // отклонение по координате top при котором элементы все равно считаются одним рядом
@@ -18,10 +21,9 @@ export function getAdaptedChildrenProps(components, {
     // userDefinedNormalizedProps = get for specific origCntWidth
 
     // отсортируем все компоненты children сверху вниз
-    const { rows, decorRows } = createInitialRows(components, userDefinedNormalizedProps, origCntWidth, containerWidth, HORIZ_MARGIN);
+    const { rows, decorRows } = createInitialRows(components, userDefinedNormalizedProps, origCntWidth, containerWidth, HORIZ_MARGIN, refs, HORIZ_ROW_DEVIATION);
 
     //TODO set component id if not specified
-
 
     // декоративные компоненты ровняем по ширине просто. Пользуемся тем же кодом что и для блочных, но для декора один компонент - один ряд
     for (let i = 0; i < decorRows.length; i++) {
@@ -31,12 +33,10 @@ export function getAdaptedChildrenProps(components, {
     let droppedComponents = [];
     for (let i = 0; i < rows.length; i++) {
         droppedComponents = rows[i].resize(containerWidth);
-        if (droppedComponents.length > 0) {
-            rows[i].center();
-        }
+
         // если выбывшие компоненты являются родственными тем что на след ряду, то пытаемся поместить туда
         // это полезно для реализации сеток
-        if (droppedComponents.length > 0 && i + 1 < rows.length) {
+        if (droppedComponents.length > 0 && i+1 < rows.length && rows[i+1].canAdd(droppedComponents[0])) {
             //TODO isRelated ?
             while (droppedComponents.length > 0) rows[i+1].add(droppedComponents.pop(), 0)
         }
@@ -44,7 +44,7 @@ export function getAdaptedChildrenProps(components, {
         // создать новые ряды из неуместившихся компонентов
         while (droppedComponents.length > 0) {
             i++
-            const newRow = new Row(userDefinedNormalizedProps, origCntWidth, containerWidth, HORIZ_MARGIN);
+            const newRow = new Row(userDefinedNormalizedProps, origCntWidth, containerWidth, HORIZ_MARGIN, refs);
             rows.splice(i, -1, newRow);
             newRow.add(droppedComponents.shift());
             while (droppedComponents.length > 0 && newRow.canAdd(droppedComponents[0])) {
@@ -56,19 +56,19 @@ export function getAdaptedChildrenProps(components, {
 
     // выстроить ряды по вертикали
     // пока не достигнем ряда, подвергшегося переносу сохраняем вертикальные координаты
-    let t, optimize = false;
-    for (let i = 0; i < rows.length; i++) {
-        if (optimize) {
-            t += rows[i].getHeight() + VERTICAL_MARGIN;
-            rows[i].setTop(t);
-        }
-        else if (rows[i].resized()) {
-            // нашли ряд который "пострадал" от изменения ширины, возникли переносы
-            // значит все нижние ряды будем перестраивать по вертикали
-            optimize = true;
-            t = rows[i].getTop();
-        }
+    let t = rows.length > 0 ? rows[0].getTop(): 0;
+    for (let i = 1; i < rows.length; i++) {
+        t += rows[i-1].getHeight() + VERTICAL_MARGIN;
+        rows[i].setTop(t);
     }
+
+    // t = 0;
+    // for (let i = 0; i < rows.length; i++) {
+    //     if (rows[i].getVerticalOverflow() > 0) {
+    //         t += rows[i].getHeight() + VERTICAL_MARGIN;
+    //     }
+    //     rows[i].setTop(t);
+    // }
 
     // всегда сбрысываем прежние изменения в adaptedChildrenProps
     const adaptedChildrenProps = cloneObject(userDefinedNormalizedProps);
@@ -139,7 +139,7 @@ export function cloneLayoutItemProps(props) {
     }
 }
 
-function createInitialRows(components, userDefinedNormalizedProps, origCntWidth, containerWidth, horizMargin) {
+function createInitialRows(components, userDefinedNormalizedProps, origCntWidth, containerWidth, horizMargin, refs, horizDeviation) {
     const rows = [], decorRows = [];
     const sortedTopLeft = components.filter( c => userDefinedNormalizedProps[c.props.id].displayType === 'flow')
         .sort( (c1,  c2) => {
@@ -148,15 +148,15 @@ function createInitialRows(components, userDefinedNormalizedProps, origCntWidth,
     let row;
     sortedTopLeft.forEach( (c) => {
         //TODO deviation models rowTopDeviation
-        if (!row || (row.getTop() !== undefined && row.getTop() !== c.props.top)) {
-            row = new Row(userDefinedNormalizedProps, origCntWidth, containerWidth, horizMargin);
+        if ( !row || (row.getTop() !== undefined && Math.abs(row.getTop() - c.props.top) > horizDeviation) ) {
+            row = new Row(userDefinedNormalizedProps, origCntWidth, containerWidth, horizMargin, refs);
             rows.push(row);
         }
         row.add({...userDefinedNormalizedProps[c.props.id], ...c.props}, undefined, false);
     });
     components.forEach( c => {
         if (userDefinedNormalizedProps[c.props.id].displayType === 'decor') {
-            const dr = new Row(userDefinedNormalizedProps, origCntWidth, containerWidth, horizMargin);
+            const dr = new Row(userDefinedNormalizedProps, origCntWidth, containerWidth, horizMargin, refs);
             dr.add({...userDefinedNormalizedProps[c.props.id], ...c.props}, undefined, false);
             decorRows.push(dr);
         }

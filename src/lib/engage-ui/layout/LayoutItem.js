@@ -41,7 +41,8 @@ function calcState({
         left,
         top,
         width,
-        height
+        height,
+        editable
     }) {
         const isPercent = typeof propWidth === 'string' && propWidth.length > 2 ? propWidth[propWidth.length-1] === '%': false;
         const newPropWidth = parseInt(propWidth);
@@ -88,19 +89,21 @@ function calcState({
             left = propLeft;
         }
 
-        // component cannot leave container and became invisible
-        // normalize left and top
-        if (left > propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
-            left = propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100;
-        }
-        else if (left < -width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
-            left = -width * CAN_LEAVE_CONTAINER_HOR_PRC / 100;
-        }
-        if (top > propContainerHeight - height * CAN_LEAVE_CONTAINER_VERT_PRC / 100) {
-            top = propContainerHeight - height * CAN_LEAVE_CONTAINER_VERT_PRC / 100;
-        }
-        else if (top < -height * CAN_LEAVE_CONTAINER_VERT_PRC / 100) {
-            top = -height * CAN_LEAVE_CONTAINER_VERT_PRC / 100;
+        if (editable) {
+            // component cannot leave container and became invisible in edit mode
+            // normalize left and top
+            if (left > propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
+                left = propContainerWidth - width * CAN_LEAVE_CONTAINER_HOR_PRC / 100;
+            }
+            else if (left < -width * CAN_LEAVE_CONTAINER_HOR_PRC / 100) {
+                left = -width * CAN_LEAVE_CONTAINER_HOR_PRC / 100;
+            }
+            if (top > propContainerHeight - height * CAN_LEAVE_CONTAINER_VERT_PRC / 100) {
+                top = propContainerHeight - height * CAN_LEAVE_CONTAINER_VERT_PRC / 100;
+            }
+            else if (top < -height * CAN_LEAVE_CONTAINER_VERT_PRC / 100) {
+                top = -height * CAN_LEAVE_CONTAINER_VERT_PRC / 100;
+            }
         }
 
         return {
@@ -177,7 +180,8 @@ export default function LayoutItem() {
                         height: state.height,
                         top: state.top,
                         left: state.left,
-                        id: props.id
+                        id: props.id,
+                        editable: props.editable
                     })
                 }
             }

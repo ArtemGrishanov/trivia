@@ -3,7 +3,7 @@ import sizeMe from 'react-sizeme'
 import React from 'react';
 import DataSchema from '../../schema';
 import { getAdaptedChildrenProps } from './LayoutAdapter'
-import { selectComponents } from '../../../lib/remix'
+import { debounce } from '../../remix/util/util';
 
 class LayoutContainer extends React.Component {
 
@@ -30,6 +30,7 @@ class LayoutContainer extends React.Component {
             height: undefined,
             visibleMagnets: null,
             adaptedChildrenProps: {},
+            adaptedHeight: undefined,
             // магниты созданные компонентами, края и середина компонента создают магниты - всего 3 вертикальных магнита
             magnets: {},
             // компоненты вокруг которых показать рамку для их подсветки
@@ -45,6 +46,8 @@ class LayoutContainer extends React.Component {
         this.onLayoutItemUpdate = this.onLayoutItemUpdate.bind(this);
         // магниты видимые в данный момент, те которых коснулся перетаскиваемый компонент
         this.visibleMagnetsComponents = {};
+        this.adaptateToNewViewportSize = debounce(this.adaptateToNewViewportSize, 500);
+        this.unmounted = false;
     }
 
     onMouseDown(e) {
@@ -118,18 +121,29 @@ class LayoutContainer extends React.Component {
      * Иметь одно событие (onSize в LayoutContainer) для запуска этой функции очень удобно, вместо установки колбеков на все LayoutItem
      */
     adaptateToNewViewportSize() {
-        console.log(`AdaptateToNewViewportSize. Size w=${this.props.size.width} h=${this.props.size.height}`);
         // только для НЕредакирования. В 'edit' пользователь только настраивает положение элементов
-        if (!this.props.editable && this.props.size.width !== 800) {
-            this.setState({
-                adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, {
-                    //TODO 800
-                    origCntWidth: 800,
-                    userDefinedNormalizedProps: this.userDefinedNormalizedProps,
-                    containerWidth: this.props.size.width
+        if (!this.unmounted && !this.props.editable && this.props.size.width > 0) {
+            if (this.props.size.width === 800) {
+                this.setState({
+                    adaptedChildrenProps: {}
+                });
+            }
+            else {
+                console.log(`adaptateToNewViewportSize(). Size w=${this.props.size.width} h=${this.props.size.height}`);
+                if (990 > 800) {
+                    //TODO
+                    //setAppSize(990)
+                }
+                this.setState({
+                    adaptedHeight: 990, //TODO return from getAdaptedChildrenProps()
+                    adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, this.childRefs, {
+                        //TODO 800
+                        origCntWidth: 800,
+                        userDefinedNormalizedProps: this.userDefinedNormalizedProps,
+                        containerWidth: this.props.size.width
+                    })
                 })
-            })
-            //TODO увеличение высоты самого контейнера (и приложения?) при необходимости
+            }
         }
     }
 
@@ -165,12 +179,18 @@ class LayoutContainer extends React.Component {
         const st = {
                 border: (this.props.border) ? '1px solid black': 'none'
             };
+        if (this.state.adaptedHeight) {
+            st.height = this.state.adaptedHeight+'px'
+        }
         let childrenWithProps = null;
         // state.width comes from 'sizeMe' wrapper
         if (this.state.width > 0 && this.state.height > 0) {
             // container inited and measured
             // we can render children now
-            this.childRefs = {};
+
+            //TODO 05.04.2020 эксперимент по удалению - зачем это обнуление нужно было? Так как для adaptateToNewViewportSize нужен childRefs и его нельзя обнулять
+            //this.childRefs = {};
+
             const magnetsVertical = Object.values(this.state.magnets).flat();
             childrenWithProps = React.Children.map(this.props.children, child => {
                 const aProps = (!this.props.editable && child.props.id && this.state.adaptedChildrenProps[child.props.id]) ? this.state.adaptedChildrenProps[child.props.id]: {};
@@ -203,7 +223,7 @@ class LayoutContainer extends React.Component {
     }
 
     componentDidMount() {
-
+        this.adaptateToNewViewportSize();
     }
 
     componentDidUpdate(prevProps) {
@@ -221,9 +241,18 @@ class LayoutContainer extends React.Component {
                 }
             });
         }
-        if (this.props.size.width > 0 && this.props.size.width !== prevProps.size.width) {
+        //this.props.size.width !== prevProps.size.width - cyclic adaptateToNewViewportSize
+
+        // but when we update current screen we must apadt again
+
+        if (!this.editable && this.props.size.width > 0 && (this.props.size.width !== prevProps.size.width || this.props.id !== prevProps.id)) {
             this.adaptateToNewViewportSize();
         }
+    }
+
+
+    componentWillUnmount() {
+        this.unmounted = true;
     }
 }
 

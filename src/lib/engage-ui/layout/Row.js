@@ -9,11 +9,12 @@ export default class Row {
      *
      * @param  {...any} components
      */
-    constructor(originalComponentsProps, originalContainerWidth, containerWidth, horizMargin) {
+    constructor(originalComponentsProps, originalContainerWidth, containerWidth, horizMargin, refs) {
         this.originalComponentProps = originalComponentsProps;
         this.originalContainerWidth = originalContainerWidth;
         this.containerWidth = containerWidth;
         this.horizMargin = horizMargin || 1;
+        this.refs = refs;
         this.components = [];
         this._allComponentsWidth = 0;
         this._height = 0;
@@ -36,7 +37,8 @@ export default class Row {
         const droppedComponents = [];
         // move 'left' coordinate depending in current size.width
         // будет автоматически смещена пропорционально изменению ширины экрана
-        let minLeft;
+        let minLeft,
+            sumWidth = 0;
 
         if (this.components.length > 0 && this.components[0].left < 0) {
             // не допустить уход ряда влево в минус
@@ -44,10 +46,8 @@ export default class Row {
             this.components.forEach( c => c.left += dl )
         }
 
+        // ШАГ 1 - поменять ширину в зависимости от стратегии компонентов
         this.components.forEach( (c) => {
-            const originProps = this.originalComponentProps[c.id],
-                ow = parseInt(originProps.width),
-                r1 = (this.containerWidth - this.originalContainerWidth) / this.originalContainerWidth;
             // 800: { left: 10px, leftStrategy: '%' } // leftStrategy: 'fixed' by default
             // 400: { left: 5px, leftStrategy: 'fixed' }
             if (c.widthStrategy === 'fixed') {
@@ -56,6 +56,15 @@ export default class Row {
             else {
                 c.width = Math.round(c.width * (this.containerWidth / this.originalContainerWidth));
             }
+            sumWidth += c.width;
+        });
+
+        // ШАГ 2 - сдвинуть left в завосомости от стратегии компонентов
+        this.components.forEach( (c) => {
+            //const
+                //originProps = this.originalComponentProps[c.id],
+                //ow = parseInt(originProps.width),
+                //r1 = (this.containerWidth - this.originalContainerWidth) / this.originalContainerWidth;
             if (c.leftStrategy === 'fixed') {
                 // do nothing
             }
@@ -66,18 +75,36 @@ export default class Row {
                     r = this.containerWidth / this.originalContainerWidth;
                 if (c.widthStrategy === 'fixed') {
                     // ширина остается постоянной, и значит мы сильнее сдвигаем left для выравнивания
-                    c.left = Math.round(l * r + (c.width * r1) / 2);
+                    //c.left = Math.round(l * r + (c.width * r1) / 2); // 1 element
+                    //c.left = Math.round(l * r + c.width * r1 / (2/this.components.length) );
+
+                    //const ww = c.widthStrategy === 'fixed' ? c.width*r : c.width;
+                    c.left = Math.round((l + c.width/2) * r - c.width/2);
                 }
                 else {
                     // ширина уже изменилась (см выше)
                     c.left = Math.round(l * r);
                 }
+                if (c.left < 0) {
+                    c.left = 0;
+                }
                 // чтобы сохранить минимальный отступ между элементами и не лепить вплотную
-                c.left = minLeft > 0 && minLeft > c.left? minLeft: c.left;
-                minLeft = c.left + c.width + this.horizMargin;
+                //TODO uncomment?
+                // c.left = minLeft > 0 && minLeft > c.left? minLeft: c.left;
+                // minLeft = c.left + c.width + this.horizMargin;
             }
         });
 
+        // ШАГ 3 - определить есть ли пересечения в ряду и если есть отцентровать все элементы (уже не пытаемся сохранить прежнее положение элементов по горизонтали)
+        for (let i = 1; i < this.components.length; i++) {
+            let prev = this.components[i-1];
+            if (prev.left + prev.width + this.horizMargin > this.components[i].left) {
+                this.center();
+                break;
+            }
+        }
+
+        // ШАГ 4 - проверяем что все компоненты уместились. Если нет, удаляем компоненты справа
         // так как мы не лепим компоненты близко к друг другу и всегда сохраняем this.horizMargin
         // то проверять компоненты которые не умещаются можно только с правой стороны
         // i > 0 - как минимум один компонент должен остаться
@@ -85,6 +112,7 @@ export default class Row {
             const c = this.components[i];
             if (c.left + c.width >= this.containerWidth) {
                 droppedComponents.push(this.deleteRightComponent());
+                this.center();
             }
             else {
                 // остальные слева должны умещаться. выходим
@@ -92,6 +120,7 @@ export default class Row {
             }
         }
 
+        // ШАГ 5 - когда остался один компонент проверяем что его ширина не больше ширины котейнера
         if (this.components.length === 1) {
             const c = this.components[0];
             if (c.left + c.width >= this.containerWidth) {
@@ -104,9 +133,52 @@ export default class Row {
                 }
             }
         }
+        else if (droppedComponents.length > 0) {
+            this.center();
+        }
+
+        // ШАГ 6 определяем воозможные vertical overflows и изменяем высоту
+        this.components.forEach( (c) => {
+            const ref = this.refs[c.id];
+            if (ref) {
+                //TODO однажды увеличив высоту scrollHeight уже не уменьшится - проверить что обратно возвращается
+                const ov = this.getElementOverflowHeight(ref, c.height);
+                if (ov > 0) {
+                    c.height += ov;
+                    this._height = Math.max(this._height, c.height);
+                    console.log(`overflow ${c.id} overflow = ${ov}`)
+                }
+            }
+            else {
+                console.error(`No ref was found for ${c.id}. Can not detect vertical overflow`);
+            }
+        });
 
         this._resized = droppedComponents.length > 0;
         return droppedComponents.reverse();
+    }
+
+    /**
+     * Возвращает overflow по высоте который мог возникнуть. Если нет, то вернет 0
+     * Логика просто: рекурсивно класс 'clipped' и по нему определяем vertical overflow. Это стандартный класс для многих remix ui элементов
+     * Если эта логика покажет себя плохо, потребуется написание функции для каждого компонента из библиотеки для определения overflow индивидуально
+     * Например для текста реально считать его высоту
+     *
+     * @param {HTMLElement} element
+     * @param {number} height
+     */
+    getElementOverflowHeight(element, height, depth = 0) {
+        if (depth === 3) return 0;
+        if (element.classList.contains('clipped') && element.scrollHeight > height) {
+            return element.scrollHeight - height;
+        }
+        for (let i = 0; i < element.children.length; i++) {
+            const ov = this.getElementOverflowHeight(element.children[i], height, depth+1);
+            if (ov > 0) {
+                return ov;
+            }
+        }
+        return 0;
     }
 
     /**
@@ -128,13 +200,6 @@ export default class Row {
 
     getTop() {
         return this.components.length ? this.components[0].top: undefined;
-    }
-
-    /**
-     * Получить ширину ряда
-     */
-    getWidth() {
-
     }
 
     /**
@@ -195,6 +260,6 @@ export default class Row {
      * @returns {boolean}
      */
     isRelated(component) {
-
+        //TODO
     }
 }

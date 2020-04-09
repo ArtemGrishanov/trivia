@@ -185,7 +185,7 @@ function setCurrentScreen(screenId) {
  * @param {number} width
  * @param {number} height
  */
-function setSize(width, height) {
+export function setSize(width, height) {
     // find propertes in schema responsible for width and height
     const data = {};
     if (width !== undefined) {
@@ -210,6 +210,19 @@ function setSize(width, height) {
             }
         }
     }
+
+    // это хорошо, но как быть с vertical overflow когда компонент по вертикали не будет умещаться?
+
+    getAdaptedChildrenProps(this.props.children, this.childRefs, {
+        //TODO 800
+        origCntWidth: 800,
+
+        //TODO userDefinedNormalizedProps чем отличается от свойств с стейта просто?
+        userDefinedNormalizedProps: this.userDefinedNormalizedProps,
+        containerWidth: width
+    })
+    //TODO delete size-me если не определяем размер контейнера а четко ставим его?
+
     if (Object.keys(data).length > 0) {
         setData(data);
     }
