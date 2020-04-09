@@ -1,30 +1,29 @@
 import '../style/rmx-layout.css'
 import sizeMe from 'react-sizeme'
-import React from 'react';
-import DataSchema from '../../schema';
+import React from 'react'
+import DataSchema from '../../schema'
 import { getAdaptedChildrenProps } from './LayoutAdapter'
 import { selectComponents } from '../../../lib/remix'
 
 class LayoutContainer extends React.Component {
-
     static getDerivedStateFromProps(props, state) {
-        Object.keys(state.magnets).forEach( id => {
-            if (id !== 'default' && !props.children.find( c => c.props.id === id)) {
+        Object.keys(state.magnets).forEach(id => {
+            if (id !== 'default' && !props.children.find(c => c.props.id === id)) {
                 // children deleted, so delete children related magnets
-                delete state.magnets[id];
+                delete state.magnets[id]
                 // new children will send us a callback in onLayoutItemUpdate() and we'll create magnets
             }
         })
         return {
             ...state,
-            magnets: {...state.magnets},
-            width: props.size.width >= 0 ? props.size.width: state.width,
-            height: props.size.height >= 0 ? props.size.height: state.height
+            magnets: { ...state.magnets },
+            width: props.size.width >= 0 ? props.size.width : state.width,
+            height: props.size.height >= 0 ? props.size.height : state.height,
         }
     }
 
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
             width: undefined,
             height: undefined,
@@ -33,18 +32,18 @@ class LayoutContainer extends React.Component {
             // магниты созданные компонентами, края и середина компонента создают магниты - всего 3 вертикальных магнита
             magnets: {},
             // компоненты вокруг которых показать рамку для их подсветки
-            borderedComponents: []
+            borderedComponents: [],
         }
         if (props.globalTestId) {
-            window[props.globalTestId] = this;
+            window[props.globalTestId] = this
         }
-        this.childRefs = {};
-        this.userDefinedNormalizedProps = {};
-        this.onMouseDown = this.onMouseDown.bind(this);
-        this.onDragAndMagnetsAttached = this.onDragAndMagnetsAttached.bind(this);
-        this.onLayoutItemUpdate = this.onLayoutItemUpdate.bind(this);
+        this.childRefs = {}
+        this.userDefinedNormalizedProps = {}
+        this.onMouseDown = this.onMouseDown.bind(this)
+        this.onDragAndMagnetsAttached = this.onDragAndMagnetsAttached.bind(this)
+        this.onLayoutItemUpdate = this.onLayoutItemUpdate.bind(this)
         // магниты видимые в данный момент, те которых коснулся перетаскиваемый компонент
-        this.visibleMagnetsComponents = {};
+        this.visibleMagnetsComponents = {}
     }
 
     onMouseDown(e) {
@@ -60,29 +59,32 @@ class LayoutContainer extends React.Component {
      * @param {*} component
      */
     onDragAndMagnetsAttached(magnets, component) {
-        const
-            prev = Object.values(this.visibleMagnetsComponents).flat(),
-            prevJson = JSON.stringify(prev);
+        const prev = Object.values(this.visibleMagnetsComponents).flat(),
+            prevJson = JSON.stringify(prev)
         if (magnets && magnets.length > 0) {
-            this.visibleMagnetsComponents[component.props.id] = magnets;
+            this.visibleMagnetsComponents[component.props.id] = magnets
+        } else if (this.visibleMagnetsComponents.hasOwnProperty(component.props.id)) {
+            delete this.visibleMagnetsComponents[component.props.id]
         }
-        else if (this.visibleMagnetsComponents.hasOwnProperty(component.props.id)) {
-            delete this.visibleMagnetsComponents[component.props.id];
-        }
-        const next = Object.values(this.visibleMagnetsComponents).flat();
+        const next = Object.values(this.visibleMagnetsComponents).flat()
         if (prev.length !== next.length || prevJson != JSON.stringify(next)) {
-
             this.setState((state, props) => {
                 return {
                     visibleMagnets: next,
-                    borderedComponents: next.length === 1 ?
-                        Object.values(state.magnets)
-                        .flat()
-                        .filter( m => m.left === next[0].left && m.type === next[0].type && m.componentId !== component.props.id)
-                        .map( m => m.componentId )
-                        : []
+                    borderedComponents:
+                        next.length === 1
+                            ? Object.values(state.magnets)
+                                  .flat()
+                                  .filter(
+                                      m =>
+                                          m.left === next[0].left &&
+                                          m.type === next[0].type &&
+                                          m.componentId !== component.props.id,
+                                  )
+                                  .map(m => m.componentId)
+                            : [],
                 }
-            });
+            })
         }
     }
 
@@ -98,19 +100,19 @@ class LayoutContainer extends React.Component {
             const ccms = state.magnets[component.props.id],
                 l1 = component.state.left,
                 l2 = component.state.left + component.state.width / 2,
-                l3 = component.state.left + component.state.width;
+                l3 = component.state.left + component.state.width
 
             if (!ccms || ccms[0].left !== l1 || ccms[1].left !== l2 || ccms[2].left !== l3) {
                 state.magnets[component.props.id] = [
-                    {left: l1, type: 'edge', componentId: component.props.id},
-                    {left: l2, type: 'center', componentId: component.props.id},
-                    {left: l3, type: 'edge', componentId: component.props.id}
-                ];
+                    { left: l1, type: 'edge', componentId: component.props.id },
+                    { left: l2, type: 'center', componentId: component.props.id },
+                    { left: l3, type: 'edge', componentId: component.props.id },
+                ]
                 return {
-                    magnets: {...state.magnets}
+                    magnets: { ...state.magnets },
                 }
             }
-        });
+        })
     }
 
     /**
@@ -140,7 +142,7 @@ class LayoutContainer extends React.Component {
      */
     setRef(componentId, element) {
         if (componentId) {
-            this.childRefs[componentId] = element;
+            this.childRefs[componentId] = element
             //TODO zombie components? Подумать нужна ли здесь эта проверка
             // if (this.props.children.length < Object.keys(this.childRefs).length) {
             //     throw new Error('Zombie components, check pls');
@@ -157,23 +159,26 @@ class LayoutContainer extends React.Component {
         //TODO когда именно и сколько раз надо устанавливать оригинальные нормализованные свойства?
         if (componentId && this.userDefinedNormalizedProps[componentId] === undefined) {
             // установить изначальные нормализованные свойства
-            this.userDefinedNormalizedProps[componentId] = {...props};
+            this.userDefinedNormalizedProps[componentId] = { ...props }
         }
     }
 
     render() {
         const st = {
-                border: (this.props.border) ? '1px solid black': 'none'
-            };
-        let childrenWithProps = null;
+            border: this.props.border ? '1px solid black' : 'none',
+        }
+        let childrenWithProps = null
         // state.width comes from 'sizeMe' wrapper
         if (this.state.width > 0 && this.state.height > 0) {
             // container inited and measured
             // we can render children now
-            this.childRefs = {};
-            const magnetsVertical = Object.values(this.state.magnets).flat();
+            this.childRefs = {}
+            const magnetsVertical = Object.values(this.state.magnets).flat()
             childrenWithProps = React.Children.map(this.props.children, child => {
-                const aProps = (!this.props.editable && child.props.id && this.state.adaptedChildrenProps[child.props.id]) ? this.state.adaptedChildrenProps[child.props.id]: {};
+                const aProps =
+                    !this.props.editable && child.props.id && this.state.adaptedChildrenProps[child.props.id]
+                        ? this.state.adaptedChildrenProps[child.props.id]
+                        : {}
                 return React.cloneElement(child, {
                     setRef: this.setRef.bind(this, child.props.id),
                     normalizerRef: this.setNormalizedProps.bind(this, child.props.id),
@@ -185,26 +190,28 @@ class LayoutContainer extends React.Component {
                     onDragAndMagnetsAttached: this.onDragAndMagnetsAttached,
                     onLayoutItemUpdate: this.onLayoutItemUpdate,
                     bordered: this.state.borderedComponents.includes(child.props.id),
-                    ...aProps
+                    ...aProps,
                 })
-            });
+            })
         }
 
         return (
             <div style={st} className="rmx-layout_container" onMouseDown={this.onMouseDown}>
                 {childrenWithProps}
-                {this.props.editable && this.state.visibleMagnets && this.state.visibleMagnets.map( (mv) => {
-                    if (mv.hide !== true) {
-                        return (<div key={'mv_'+mv.left} className="rmx-l_mgn" style={{left:mv.left+'px'}}></div>)
-                    }
-                })}
+                {this.props.editable &&
+                    this.state.visibleMagnets &&
+                    this.state.visibleMagnets.map(mv => {
+                        if (mv.hide !== true) {
+                            return (
+                                <div key={'mv_' + mv.left} className="rmx-l_mgn" style={{ left: mv.left + 'px' }}></div>
+                            )
+                        }
+                    })}
             </div>
         )
     }
 
-    componentDidMount() {
-
-    }
+    componentDidMount() {}
 
     componentDidUpdate(prevProps) {
         if (this.props.size.width >= 0 && !this.state.magnets['default']) {
@@ -212,31 +219,31 @@ class LayoutContainer extends React.Component {
                 return {
                     magnets: {
                         ...state.magnets,
-                        'default': [
-                            {left: 0, type: 'edge', componentId: null},
-                            {left: this.props.size.width / 2, type: 'center', componentId: null},
-                            {left: this.props.size.width-1, type: 'edge', componentId: null}
-                        ]
-                    }
+                        default: [
+                            { left: 0, type: 'edge', componentId: null },
+                            { left: this.props.size.width / 2, type: 'center', componentId: null },
+                            { left: this.props.size.width - 1, type: 'edge', componentId: null },
+                        ],
+                    },
                 }
-            });
+            })
         }
         if (this.props.size.width > 0 && this.props.size.width !== prevProps.size.width) {
-            this.adaptateToNewViewportSize();
+            this.adaptateToNewViewportSize()
         }
     }
 }
 
 export const Schema = new DataSchema({
-    'border': {
+    border: {
         type: 'boolean',
-        default: false
-    }
-});
+        default: false,
+    },
+})
 
 export default sizeMe({
     refreshMode: 'debounce',
     refreshRate: 400,
     monitorHeight: true,
-    noPlaceholder: true
+    noPlaceholder: true,
 })(LayoutContainer)
