@@ -247,7 +247,7 @@ function requestComponentsBoundingRect() {
     const components = [];
 
     getState().router.screens.toArray().forEach( (scr) => {
-        scr.components.toArray().forEach( c => components.push(c) )
+        scr.components.toArray().forEach( c => c.displayName === 'Text' ? components.push(c): null )
     })
 
     // найти все объекты которые могут изменить свой размер из-за нового размера приложения

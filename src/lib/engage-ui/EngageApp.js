@@ -13,7 +13,7 @@ class EngageApp extends React.Component {
         this.state = {
             message: null
         };
-        this.preRenderRefs = {};
+        this.preRenderRects = {};
     }
 
     componentDidMount() {
@@ -21,15 +21,24 @@ class EngageApp extends React.Component {
     }
 
     componentDidUpdate() {
-        if (this.props.preRenderComponents) {
-            const rects = {}
-            this.props.preRenderComponents.forEach( c => {
-                if (this.preRenderRefs[c.hashlistId] && this.preRenderRefs[c.hashlistId].current)
-                    rects[c.hashlistId] = this.preRenderRefs[c.hashlistId].current.getBoundingClientRect();
-                else
-                    console.error(`Prerender components: cannot find a ref for a ${c.hashlistId} component`)
-            })
-            setComponentsRects(rects);
+        // if (this.props.preRenderComponents) {
+            // const rects = {}
+            // this.props.preRenderComponents.forEach( c => {
+            //     if (this.preRenderRefs[c.hashlistId] && this.preRenderRefs[c.hashlistId].current)
+            //         rects[c.hashlistId] = this.preRenderRefs[c.hashlistId].current.getBoundingClientRect();
+            //     else
+            //         console.error(`Prerender components: cannot find a ref for a ${c.hashlistId} component`)
+            // })
+        //     setComponentsRects(rects);
+        // }
+    }
+
+    getContentRect(id, rect) {
+        console.log('getContentRect', id, rect);
+        this.preRenderRects[id] = rect;
+        //TODO max time waiting
+        if (Object.keys(this.preRenderRects).length === this.props.preRenderComponents.length) {
+            setComponentsRects(this.preRenderRects);
         }
     }
 
@@ -45,9 +54,8 @@ class EngageApp extends React.Component {
                 <div>
                     {this.props.preRenderComponents &&
                         this.props.preRenderComponents.map( cmpn => {
-                            this.preRenderRefs[cmpn.hashlistId] = React.createRef();
                             const RemixComponent = getComponentClass(cmpn.displayName);
-                            return <RemixComponent {...cmpn} id={cmpn.hashlistId} key={cmpn.hashlistId}></RemixComponent>;
+                            return <RemixComponent {...cmpn} id={cmpn.hashlistId} key={cmpn.hashlistId} getContentRect={this.getContentRect.bind(this, cmpn.hashlistId)}></RemixComponent>;
                         })
                     }
                 </div>

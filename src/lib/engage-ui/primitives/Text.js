@@ -42,7 +42,7 @@ class Text extends React.Component {
         return (
             <div className='rmx-component' style={st}>
                 <div className='clipped'>
-                    <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text}></TextEditor>
+                    <TextEditor parentId={this.props.id} readOnly={!this.props.doubleClicked} text={this.props.text} getContentRect={this.props.getContentRect}></TextEditor>
                 </div>
             </div>
         )
