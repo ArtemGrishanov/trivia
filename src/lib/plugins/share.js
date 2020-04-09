@@ -1,6 +1,6 @@
 import { getPropertiesBySelector } from "../object-path"
 import HashList from '../hashlist'
-import { getScreenIdFromPath, debounce } from "../remix/util/util";
+import { getScreenIdFromPath, debounce, flattenProperties } from "../remix/util/util";
 
 /**
  * Плагин отслеживает все шаринг кнопки и создает сущности для шаринга в свойства app.share.entities
@@ -33,10 +33,10 @@ export default function initShare(options = {}) {
             }
 
             // fetch all sharing buttons from the app
-            displayTypes.forEach( (type) => {
+            displayTypes.forEach((type) => {
                 sharingButtons = sharingButtons.concat(getPropertiesBySelector(state, `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=${type}]`));
             })
-            sharingButtons.forEach( (button) => {
+            sharingButtons.forEach((button) => {
                 const
                     screenId = getScreenIdFromPath(button.path),
                     componentId = button.propName;
@@ -54,7 +54,7 @@ export default function initShare(options = {}) {
                     ...oldEntities[componentId]
                 })
             })
-            remix.setData({'app.share.entities': new HashList(newEntities)});
+            remix.setData({ 'app.share.entities': new HashList(newEntities) });
 
             if (!fbApiEmbedded && newEntities.length > 0) {
                 embedFbCode();
@@ -64,12 +64,12 @@ export default function initShare(options = {}) {
         }, DEBOUNCE_UPDATE_DELAY);
 
     function embedFbCode() {
-        window.fbAsyncInit = function() {
+        window.fbAsyncInit = function () {
             FB.init({
-                appId            : '213320349753425', // Interacty.me facebook app
-                autoLogAppEvents : true,
-                xfbml            : true,
-                version          : 'v6.0'
+                appId: '213320349753425', // Interacty.me facebook app
+                autoLogAppEvents: true,
+                xfbml: true,
+                version: 'v6.0'
             });
         };
         const script = document.createElement('script');
@@ -139,7 +139,7 @@ export default function initShare(options = {}) {
     Remix.addMessageListener('setshareentities', (data) => {
         const share = Remix.getState().app.share;
         if (share) {
-            Remix.setData({...flattenProperties(data.data, 'app.share')});
+            Remix.setData({ ...flattenProperties(data.data, 'app.share') });
         }
     })
 
@@ -161,12 +161,12 @@ export default function initShare(options = {}) {
 
     remix.addTrigger({
         when: { eventType: 'remix_inited' },
-        then: { actionType: 'share:update_share_entities'}
+        then: { actionType: 'share:update_share_entities' }
     });
 
     // мы должны знать обо всех добавлениях и удалениях sharing кнопок в приложении
     remix.addTrigger({
-        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.components'} },
-        then: { actionType: 'share:update_share_entities'}
+        when: { eventType: 'property_updated', condition: { prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.components' } },
+        then: { actionType: 'share:update_share_entities' }
     });
 }
