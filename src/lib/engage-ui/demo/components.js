@@ -218,6 +218,74 @@ const COMPONENTS = [
             }
         />
     </Control>,
+    <Control id={521} schema={ButtonSchema} width={800} height={200}>
+        <Button
+            id={'ar-button1'}
+            isArrow={true}
+            arrowColor='#000'
+            arrowType='thin'
+            arrowPosition='center'
+            arrowDirection='right'
+            colorMod="white"
+            sizeMod="small"
+            width={42}
+            height={64}
+            backgroundColor={'#fff'}
+            text='<p class="ql-align-center"></p>'
+        />
+    </Control>,
+    <Control id={522} schema={ButtonSchema} width={800} height={200}>
+        <Button
+            id={'ar-button2'}
+            isArrow={true}
+            arrowType='triangle'
+            arrowPosition='center'
+            arrowDirection='left'
+            arrowColor='#000'
+            colorMod="white"
+            sizeMod="small"
+            width={44}
+            height={44}
+            backgroundColor='#fff00000'
+            text='<p class="ql-align-center"></p>'
+        />
+    </Control>,
+    <Control id={523} schema={ButtonSchema} width={800} height={200}>
+        <Button
+            id={'ar-button3'}
+            isArrow={true}
+            arrowColor='#000'
+            arrowType='default'
+            arrowPosition='center'
+            arrowDirection='right'
+            colorMod="white"
+            sizeMod="small"
+            width={44}
+            height={44}
+            borderRadius={27}
+            borderColor={'#000'}
+            backgroundColor={'#fff'}
+            text='<p class="ql-align-center"></p>'
+            />
+    </Control>,
+    <Control id={524} schema={ButtonSchema} width={800} height={200}>
+        <Button
+            id={'ar-button3'}
+            isArrow={true}
+            arrowColor='#000'
+            arrowType='default'
+            arrowPosition='right'
+            arrowDirection='right'
+            colorMod="white"
+            sizeMod="small"
+            width={106}
+            height={53}
+            borderRadius={34}
+            borderColor={'#000'}
+            backgroundColor={'#fff'}
+            text='<p class="ql-align-center">Next</p>'
+        />
+    </Control>,
 ]
 
 export default COMPONENTS

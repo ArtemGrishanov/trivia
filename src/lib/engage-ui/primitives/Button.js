@@ -20,6 +20,7 @@ class Button extends React.Component {
             arrowType,
             arrowDirection,
             arrowPosition,
+            arrowColor,
             doubleClicked,
             dropShadow,
             sizeMod,
@@ -65,7 +66,7 @@ class Button extends React.Component {
         return (
             <button className={`rmx-component rmx-button  __${sizeMod}`} style={st}>
                 <div className='clipped'>
-                    {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color='#fff' />}
+                    {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color={arrowColor} />}
                     <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                 </div>
             </button>
@@ -137,6 +138,10 @@ export const Schema = new DataSchema({
         enum: ['left', 'right', 'center'],
         default: 'center'
     },
+    'arrowColor': {
+        type: 'string',
+        default: '#fff'
+    }
     //TODO color format for strings, +tests
 });
 
