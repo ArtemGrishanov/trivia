@@ -1,12 +1,15 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
-import TextEditor from '../bricks/TextEditor'
+import TextEditor from '../bricks/TextEditor';
+import Arrow from '../bricks/Arrow';
 
 class Button extends React.Component {
+
     constructor(props) {
-        super(props)
-        this.state = {}
+        super(props);
+        this.state = {
+        }
     }
 
     getMarkup(props) {
@@ -28,30 +31,42 @@ class Button extends React.Component {
             boxSizing: 'border-box',
             borderStyle: 'solid',
             ...Object.fromEntries(
-                ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor'].map(prop => {
-                    const value = this.props[prop]
+                ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor']
+                    .map(prop => {
+                        const value = this.props[prop]
 
-                    switch (typeof value) {
-                        case 'number':
-                            return [prop, `${value}px`]
-                        default:
-                            return [prop, value]
-                    }
-                }),
-            ),
+                        switch (typeof value) {
+                            case 'number':
+                                return [prop, `${value}px`];
+                            default:
+                                return [prop, value];
+                        }
+                    })
+            )
+        };
+
+        const arrowPositionOptions = {
+            right: '80%',
+            left: '20%',
+            center: '50%'
         }
-        if (this.props.dropShadow) {
-            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)'
+
+        const arrowSt = {
+            position: 'absolute',
+            top: '50%',
+            left: arrowPosition ? arrowPositionOptions[arrowPosition] : '50%',
+            transform: 'translate(-50%, -50%)',
+        };
+
+        if (dropShadow) {
+            st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)';
         }
 
         return (
-            <button className={`rmx-component rmx-button  __${this.props.sizeMod}`} style={st}>
-                <div className="clipped">
-                    <TextEditor
-                        parentId={this.props.id}
-                        readOnly={!this.props.doubleClicked}
-                        text={this.props.text}
-                    ></TextEditor>
+            <button className={`rmx-component rmx-button  __${sizeMod}`} style={st}>
+                <div className='clipped'>
+                    {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color='#fff' />}
+                    <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                 </div>
             </button>
         )
@@ -68,40 +83,40 @@ class Button extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
-    text: {
+    'text': {
         type: 'string',
         minLength: 1,
         maxLength: 4096,
-        default: 'Button text',
+        default: 'Button text'
     },
-    sizeMod: {
+    'sizeMod': {
         type: 'string',
         enum: ['small', 'normal'],
-        default: 'normal',
+        default: 'normal'
     },
-    borderRadius: {
+    'borderRadius': {
         type: 'number',
         min: 0,
         max: 100,
-        default: 0,
+        default: 0
     },
-    borderWidth: {
+    'borderWidth': {
         type: 'number',
         min: 0,
         max: 400,
-        default: 0,
+        default: 0
     },
-    borderColor: {
+    'borderColor': {
         type: 'string',
-        default: '',
+        default: ''
     },
-    dropShadow: {
+    'dropShadow': {
         type: 'boolean',
-        default: false,
+        default: false
     },
-    backgroundColor: {
+    'backgroundColor': {
         type: 'string',
-        default: 'blue',
+        default: 'blue'
     },
     'isArrow': {
         type: 'boolean',
@@ -123,6 +138,6 @@ export const Schema = new DataSchema({
         default: 'center'
     },
     //TODO color format for strings, +tests
-})
+});
 
 export default RemixWrapper(Button, Schema, 'Button')
