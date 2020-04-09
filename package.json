@@ -38,12 +38,10 @@
     },
     "lint-staged": {
         "src/**/*.(js|jsx)": [
-            "npm run prettier:base --",
-            "git add"
+            "npm run prettier:base --"
         ],
-        "**/*.{css,scss,md}": [
-            "npm run prettier:base --",
-            "git add"
+        "src/**/*.{css,scss,md}": [
+            "npm run prettier:base --"
         ]
     },
     "eslintConfig": {
