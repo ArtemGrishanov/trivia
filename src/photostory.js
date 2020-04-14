@@ -27,7 +27,8 @@ initRemixRouting({
     // some params specially for Remix-Routing plugin
     screenRoute: [
         { tag: 'start' }, // show all scrrens with tag in linear order
-        { tag: 'photostory', shuffle: true }, // show all scrrens with tag and shuffle them
+        { tag: 'photostoryitem', shuffle: true }, // show all scrrens with tag and shuffle them
+        { tag: 'final' }
     ],
     restartTag: 'restart',
     nextTag: 'next',
@@ -36,13 +37,9 @@ initRemixRouting({
 
 initScreenProgress({
     remix: Remix,
-    screenTag: 'photostory',
+    screenTag: 'photostoryitem',
 })
 
-initQuizPoints({
-    remix: Remix,
-    tag: 'option',
-})
 
 initShare({
     remix: Remix,
