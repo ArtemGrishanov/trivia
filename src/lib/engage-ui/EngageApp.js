@@ -3,17 +3,13 @@ import { connect } from 'react-redux'
 import DataSchema from '../schema'
 import Remix from '../remix'
 import Router from './router'
-import { getComponentClass } from './RemixWrapper'
-import { setComponentsRects } from '../remix'
+import Prerender from './Prerender'
 
 class EngageApp extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {
-            message: null
-        };
-        this.preRenderRects = {};
+        this.state = {};
     }
 
     componentDidMount() {
@@ -21,25 +17,6 @@ class EngageApp extends React.Component {
     }
 
     componentDidUpdate() {
-        // if (this.props.preRenderComponents) {
-            // const rects = {}
-            // this.props.preRenderComponents.forEach( c => {
-            //     if (this.preRenderRefs[c.hashlistId] && this.preRenderRefs[c.hashlistId].current)
-            //         rects[c.hashlistId] = this.preRenderRefs[c.hashlistId].current.getBoundingClientRect();
-            //     else
-            //         console.error(`Prerender components: cannot find a ref for a ${c.hashlistId} component`)
-            // })
-        //     setComponentsRects(rects);
-        // }
-    }
-
-    getContentRect(id, rect) {
-        console.log('getContentRect', id, rect);
-        this.preRenderRects[id] = rect;
-        //TODO max time waiting
-        if (Object.keys(this.preRenderRects).length === this.props.preRenderComponents.length) {
-            setComponentsRects(this.preRenderRects);
-        }
     }
 
     render() {
@@ -51,14 +28,7 @@ class EngageApp extends React.Component {
         return (
             <div className="rmx-app" style={appSt}>
                 <Router></Router>
-                <div>
-                    {this.props.preRenderComponents &&
-                        this.props.preRenderComponents.map( cmpn => {
-                            const RemixComponent = getComponentClass(cmpn.displayName);
-                            return <RemixComponent {...cmpn} id={cmpn.hashlistId} key={cmpn.hashlistId} getContentRect={this.getContentRect.bind(this, cmpn.hashlistId)}></RemixComponent>;
-                        })
-                    }
-                </div>
+                <Prerender></Prerender>
             </div>
         );
     }
@@ -66,10 +36,7 @@ class EngageApp extends React.Component {
 
 const mapStateToProps = (state) => {
     return {
-        width: state.app.size.width,
-        height: state.app.size.height,
-        editable: state.session.mode === 'edit',
-        preRenderComponents: state.session.prerender.components
+        editable: state.session.mode === 'edit'
     }
 }
 

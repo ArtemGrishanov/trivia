@@ -9,12 +9,10 @@ export default class Row {
      *
      * @param  {...any} components
      */
-    constructor(originalComponentsProps, originalContainerWidth, containerWidth, horizMargin, refs) {
-        this.originalComponentProps = originalComponentsProps;
+    constructor(originalContainerWidth, containerWidth, horizMargin) {
         this.originalContainerWidth = originalContainerWidth;
         this.containerWidth = containerWidth;
         this.horizMargin = horizMargin || 1;
-        this.refs = refs;
         this.components = [];
         this._allComponentsWidth = 0;
         this._height = 0;
@@ -137,25 +135,24 @@ export default class Row {
             this.center();
         }
 
-        // ШАГ 6 определяем воозможные vertical overflows и изменяем высоту
+        this._resized = droppedComponents.length > 0;
+        return droppedComponents.reverse();
+    }
+
+    /**
+     * Нормализовать высоту ряда, передав размеры элементов
+     *
+     * @param {Object} rects
+     */
+    updateHeight(rects) {
         this.components.forEach( (c) => {
-            const ref = this.refs[c.id];
-            if (ref) {
-                //TODO однажды увеличив высоту scrollHeight уже не уменьшится - проверить что обратно возвращается
-                const ov = this.getElementOverflowHeight(ref, c.height);
-                if (ov > 0) {
-                    c.height += ov;
-                    this._height = Math.max(this._height, c.height);
-                    console.log(`overflow ${c.id} overflow = ${ov}`)
-                }
+            if (c.id) {
+                this._height = Math.max(this._height, rects[c.id]);
             }
             else {
                 console.error(`No ref was found for ${c.id}. Can not detect vertical overflow`);
             }
         });
-
-        this._resized = droppedComponents.length > 0;
-        return droppedComponents.reverse();
     }
 
     /**
