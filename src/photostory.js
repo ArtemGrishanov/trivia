@@ -9,7 +9,6 @@ import store from './store'
 import Remix from './lib/remix'
 import initRemixRouting from './lib/plugins/remix-routing'
 import initScreenProgress from './lib/plugins/screen-progress'
-import initQuizPoints from './lib/plugins/quiz-points'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
@@ -39,7 +38,6 @@ initScreenProgress({
     remix: Remix,
     screenTag: 'photostoryitem',
 })
-
 
 initShare({
     remix: Remix,
