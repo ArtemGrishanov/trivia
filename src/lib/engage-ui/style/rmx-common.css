@@ -135,3 +135,15 @@ p {
     word-break: break-word;
     white-space: normal;
 }
+
+.rmx-collage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.rmx-collage-subitems-wrap {
+    height: 100%;
+    display: inline-block;
+}

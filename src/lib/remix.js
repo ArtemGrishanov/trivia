@@ -983,6 +983,25 @@ function getScreens(filter = {}) {
 }
 
 /**
+ * Helper method
+ * Get some components by its display name and tag
+ *
+ * @param {string} filter.displayName
+ * @param {string} filter.tags
+ */
+function getComponents(filter = {}) {
+    const components = []
+    store
+        .getState()
+        .router.screens.toArray()
+        .filter(scr => (filter.tags ? scr.tags.indexOf(filter.tags) > 0 : true))
+        .forEach(scr => {
+            scr.components.toArray().forEach(c => (c.displayName === filter.displayName ? components.push(c) : null))
+        })
+    return components
+}
+
+/**
  * Returns all dynamic properties with additional information from this remix app
  * Additional information: screenId, componentId if relevant
  * Example: property 'router.screens.8wruuz.components.zbnkhy.fontShadow' has relevant 'screenId' and 'componentId'
@@ -1158,6 +1177,7 @@ const remix = {
     setData,
     setSize,
     getScreens,
+    getComponents,
     addHashlistElement,
     changePositionInHashlist,
     deleteHashlistElement,
