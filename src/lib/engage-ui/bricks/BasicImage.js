@@ -1,25 +1,24 @@
 import React from 'react'
 import '../style/rmx-progressive_image.css'
 
-const STATE_INITIAL = 'STATE_INITIAL';
-const STATE_LOADING = 'STATE_LOADING';
-const STATE_REVEALING = 'STATE_REVEALING';
-const STATE_SHOW = 'STATE_SHOW';
-const REVEAL_ANIM_TIME = 1000; // slightly larger then 1s transition in tstx_progressive_image.css
+const STATE_INITIAL = 'STATE_INITIAL'
+const STATE_LOADING = 'STATE_LOADING'
+const STATE_REVEALING = 'STATE_REVEALING'
+const STATE_SHOW = 'STATE_SHOW'
+const REVEAL_ANIM_TIME = 1000 // slightly larger then 1s transition in tstx_progressive_image.css
 
 //TODO mouse move, touch makes a parallax effect
 //TODO try gifs? Or dedicated component?
 
 class BasicImage extends React.Component {
-
     static getDerivedStateFromProps(props, state) {
-        const pb = !!props.blur;
-        let imgst = {};
+        const pb = !!props.blur
+        let imgst = {}
         if (props.src !== state.src) {
             imgst = {
                 src: props.src,
-                step: props.srcThumb ? STATE_LOADING: STATE_INITIAL,
-                image: null
+                step: props.srcThumb ? STATE_LOADING : STATE_INITIAL,
+                image: null,
             }
         }
         return {
@@ -27,77 +26,83 @@ class BasicImage extends React.Component {
             ...imgst,
             src: props.src,
             propsBlur: pb,
-            blur: (state.propsBlur !== pb) ? pb: state.blur
-        };
+            blur: state.propsBlur !== pb ? pb : state.blur,
+        }
     }
 
     constructor(props) {
-        super(props);
+        super(props)
         this.state = {
-            step: props.srcThumb ? STATE_LOADING: STATE_INITIAL,
+            step: props.srcThumb ? STATE_LOADING : STATE_INITIAL,
             src: null,
-            imageMods: "",
-            thumbImageMods: "",
+            imageMods: '',
+            thumbImageMods: '',
             propsBlur: false,
             blur: false,
-            image: null
-        };
-        this.thumbRatio = undefined;
-        this.thumbImage = null;
-        this.onClick = this.onClick.bind(this);
-        this.reveal1Timer = null;
-        this.reveal2Timer = null;
+            image: null,
+        }
+        this.thumbRatio = undefined
+        this.thumbImage = null
+        this.onClick = this.onClick.bind(this)
+        this.reveal1Timer = null
+        this.reveal2Timer = null
     }
 
     componentDidUpdate() {
-        this.startLoading();
+        this.startLoading()
     }
 
     componentDidMount() {
-        this.startLoading();
+        this.startLoading()
     }
 
     componentWillUnmount() {
         if (this.reveal1Timer) {
-            clearTimeout(this.reveal1Timer);
+            clearTimeout(this.reveal1Timer)
         }
         if (this.reveal2Timer) {
-            clearTimeout(this.reveal2Timer);
+            clearTimeout(this.reveal2Timer)
         }
     }
 
     startLoading() {
         if (!this.isLoaded()) {
             this.loadThumbImage()
-                .then( () => this.loadFullImage() )
-                .then( ()=> {
-                    this.reveal1Timer = setTimeout( ()=> this.setState({
-                        imageMods: 'reveal',
-                        thumbImageMods: 'hide'
-                    }), 0);
-                    this.reveal2Timer = setTimeout( ()=> this.setState({
-                        step: STATE_SHOW
-                    }), REVEAL_ANIM_TIME);
-                });
+                .then(() => this.loadFullImage())
+                .then(() => {
+                    this.reveal1Timer = setTimeout(
+                        () =>
+                            this.setState({
+                                imageMods: 'reveal',
+                                thumbImageMods: 'hide',
+                            }),
+                        0,
+                    )
+                    this.reveal2Timer = setTimeout(
+                        () =>
+                            this.setState({
+                                step: STATE_SHOW,
+                            }),
+                        REVEAL_ANIM_TIME,
+                    )
+                })
         }
     }
 
     loadThumbImage() {
-        return new Promise( (resolve)=> {
+        return new Promise(resolve => {
             if (this.props.srcThumb) {
-                this.thumbImage = new Image();
-                this.thumbImage.src = this.props.srcThumb;
+                this.thumbImage = new Image()
+                this.thumbImage.src = this.props.srcThumb
                 if (this.thumbImage.complete) {
-                    resolve();
-                }
-                else {
-                    this.thumbImage.onload = ()=> {
-                        resolve();
+                    resolve()
+                } else {
+                    this.thumbImage.onload = () => {
+                        resolve()
                     }
                 }
-            }
-            else {
-                resolve();
+            } else {
+                resolve()
             }
         })
     }
@@ -108,129 +113,143 @@ class BasicImage extends React.Component {
      * By https://www.sitepoint.com/how-to-build-your-own-progressive-image-loader/
      */
     loadFullImage() {
-        return new Promise( (resolve)=> {
+        return new Promise(resolve => {
             if (this.props.src) {
-                const image = new Image();
-                image.src = this.props.src;
+                const image = new Image()
+                image.src = this.props.src
                 if (image.complete) {
                     this.setState({
                         image,
                         imageRatio: image.naturalWidth / image.naturalHeight,
-                        step: STATE_REVEALING
-                    });
-                    resolve();
-                }
-                else {
-                    image.onload = ()=> {
+                        step: STATE_REVEALING,
+                    })
+                    resolve()
+                } else {
+                    image.onload = () => {
                         this.setState({
                             image,
                             imageRatio: image.naturalWidth / image.naturalHeight,
-                            step: STATE_REVEALING
-                        });
-                        resolve();
+                            step: STATE_REVEALING,
+                        })
+                        resolve()
                     }
                 }
-            }
-            else {
-                resolve();
+            } else {
+                resolve()
             }
         })
     }
 
     isProgressive() {
-        return this.props.srcThumb || this.props.src;
+        return this.props.srcThumb || this.props.src
     }
 
     isLoaded() {
-        return !!(this.state.image && this.state.image.naturalWidth > 0);
+        return !!(this.state.image && this.state.image.naturalWidth > 0)
     }
 
     isThumbLoaded() {
-        return !!(this.thumbImage && this.thumbImage.naturalWidth > 0);
+        return !!(this.thumbImage && this.thumbImage.naturalWidth > 0)
     }
 
     onClick() {
         if (this.props.blur) {
             this.setState({
-                blur: !this.state.blur
-            });
+                blur: !this.state.blur,
+            })
         }
     }
 
     render() {
-        const showThumb = this.isThumbLoaded() && (this.state.step === STATE_LOADING || this.state.step === STATE_REVEALING);
-        const showOriginal = this.isLoaded() && (this.state.step === STATE_REVEALING || this.state.step === STATE_SHOW);
-        const originImgStyle = {};
+        const showThumb =
+            this.isThumbLoaded() && (this.state.step === STATE_LOADING || this.state.step === STATE_REVEALING)
+        const showOriginal = this.isLoaded() && (this.state.step === STATE_REVEALING || this.state.step === STATE_SHOW)
+        const originImgStyle = {}
         if (this.props.backgroundSize === 'cover') {
             // originImgStyle['marginLeft'] = '-100%';
             // originImgStyle['marginRight'] = '-100%';
             // console.log(`Progr Img render w=${this.props.width} h=${this.props.height}`)
             if (this.state.imageRatio > this.props.width / this.props.height) {
-                originImgStyle['maxWidth'] = 'none';
-                originImgStyle['height'] = '100%';
+                originImgStyle['maxWidth'] = 'none'
+                originImgStyle['height'] = '100%'
+            } else {
+                originImgStyle['maxHeight'] = 'none'
+                originImgStyle['width'] = '100%'
             }
-            else {
-                originImgStyle['maxHeight'] = 'none';
-                originImgStyle['width'] = '100%';
-            }
-        }
-        else if (this.props.backgroundSize === 'contain') {
-
+        } else if (this.props.backgroundSize === 'contain') {
         }
         const alignCntSt = {
-            lineHeight: (this.state.height-3)+"px" //TODO -3 determine this later
-        };
-        let cntCl = "";
+            lineHeight: this.state.height - 3 + 'px', //TODO -3 determine this later
+        }
+        let cntCl = ''
         const cntSt = {
             boxSizing: 'border-box',
             borderStyle: 'solid',
             ...Object.fromEntries(
-                ['borderRadius', 'borderWidth', 'borderColor']
-                    .map(prop => {
-                        const value = this.props[prop]
+                ['borderRadius', 'borderWidth', 'borderColor'].map(prop => {
+                    const value = this.props[prop]
 
-                        switch (typeof value) {
-                            case 'number':
-                                return [prop, `${value}px`];
-                            default:
-                                return [prop, value];
-                        }
-                    })
-            )
-        };
+                    switch (typeof value) {
+                        case 'number':
+                            return [prop, `${value}px`]
+                        default:
+                            return [prop, value]
+                    }
+                }),
+            ),
+        }
         if (this.props.dropShadow) {
-            cntCl += ' __dropShadow';
+            cntCl += ' __dropShadow'
         }
-        let mainImgCl = this.state.imageMods;
+        let mainImgCl = this.state.imageMods
         if (this.props.animation) {
-            mainImgCl += " __"+this.props.animation;
+            mainImgCl += ' __' + this.props.animation
         }
-        let filter = '';
+        let filter = ''
         if (this.state.blur) {
-            filter += ' blur(10px)';
+            filter += ' blur(10px)'
         }
         if (this.props.grayscale) {
-            filter += ' grayscale(1)';
+            filter += ' grayscale(1)'
         }
-        let thumbImgCl = this.state.thumbImageMods;
+        let thumbImgCl = this.state.thumbImageMods
         return (
             <div className={`image_cnt ${cntCl}`} style={cntSt} onClick={this.onClick}>
-                {showThumb &&
+                {showThumb && (
                     <div className="image_align_cnt" style={alignCntSt}>
-                        <img alt="" className={"preview " + thumbImgCl} src={this.props.srcThumb}/>
+                        <img alt="" className={'preview ' + thumbImgCl} src={this.props.srcThumb} />
                     </div>
-                }
-                {showOriginal && this.state.height === undefined &&
+                )}
+                {showOriginal && this.state.height === undefined && (
                     // automatic height
-                    <img alt="" style={{visibility:"hidden", filter}} className={"original " + mainImgCl} src={this.props.src}/>
-                }
-                {showOriginal &&
+                    <img
+                        alt=""
+                        style={{ visibility: 'hidden', filter }}
+                        className={'original ' + mainImgCl}
+                        src={this.props.src}
+                    />
+                )}
+                {showOriginal && (
                     <div className="image_align_cnt" style={alignCntSt}>
-                        <img alt="" className={"original " + mainImgCl} src={this.props.src} style={{filter, ...originImgStyle}}/>
-                        {this.state.blur &&
+                        <img
+                            alt=""
+                            className={'original ' + mainImgCl}
+                            src={this.props.src}
+                            style={{ filter, ...originImgStyle }}
+                        />
+                        {this.state.blur && (
                             <div className="cursor_wr">
-                                <svg id="pb-cp-icon-hand-press-lg" viewBox="0 0 94.2691 104.3058" width="100%" height="100%">
-                                    <path fillRule="evenodd" clipRule="evenodd" fill="#FFFFFF" d="M27.7876,72.8258C15.1172,67.6919,6.1761,55.276,6.1761,40.7637
+                                <svg
+                                    id="pb-cp-icon-hand-press-lg"
+                                    viewBox="0 0 94.2691 104.3058"
+                                    width="100%"
+                                    height="100%"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        clipRule="evenodd"
+                                        fill="#FFFFFF"
+                                        d="M27.7876,72.8258C15.1172,67.6919,6.1761,55.276,6.1761,40.7637
                                     c0-19.1026,15.4857-34.5882,34.5882-34.5882s34.5882,15.4856,34.5882,34.5882c0,1.0043-0.0519,1.9975-0.1359,2.9795
                                     c-0.5868,0.0828-1.1674,0.2075-1.7282,0.4138l-0.3434,0.1272c-0.5176,0.1915-1.0092,0.4299-1.47,0.7103
                                     c-0.0939-0.0939-0.1952-0.1766-0.2915-0.2656c0.168-1.2995,0.2631-2.6213,0.2631-3.9653c0-17.0285-13.8538-30.8824-30.8824-30.8824
@@ -246,12 +265,13 @@ class BasicImage extends React.Component {
                                     c-0.882-2.3495,0.3323-4.9671,2.7102-5.8442l0.3409-0.126c2.3779-0.8783,5.0215,0.3138,5.9022,2.6633l6.1752,16.4652
                                     c-0.8808-2.3483,0.3323-4.9659,2.7115-5.8442l0.3397-0.126c2.3779-0.8783,5.0215,0.315,5.9022,2.6645
                                     c-0.8808-2.3495,0.3323-4.9671,2.7102-5.8454l0.3409-0.126c2.3779-0.8783,5.0215,0.315,5.9022,2.6645l1.659,4.4224
-                                    c-0.882-2.3495,0.3323-4.9671,2.7102-5.8454l0.3409-0.1248c2.3779-0.8795,5.0202,0.3138,5.9022,2.6633L86.5814,66.0551z"></path>
+                                    c-0.882-2.3495,0.3323-4.9671,2.7102-5.8454l0.3409-0.1248c2.3779-0.8795,5.0202,0.3138,5.9022,2.6633L86.5814,66.0551z"
+                                    ></path>
                                 </svg>
                             </div>
-                        }
+                        )}
                     </div>
-                }
+                )}
             </div>
         )
     }

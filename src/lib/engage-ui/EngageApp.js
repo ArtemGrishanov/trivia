@@ -6,62 +6,59 @@ import Router from './router'
 import Prerender from './Prerender'
 
 class EngageApp extends React.Component {
-
     constructor(props) {
-        super(props);
-        this.state = {};
+        super(props)
+        this.state = {}
     }
 
     componentDidMount() {
-        Remix.fireEvent('app_start');
+        Remix.fireEvent('app_start')
     }
 
-    componentDidUpdate() {
-    }
+    componentDidUpdate() {}
 
     render() {
         const appSt = {
             width: '100%',
             height: '100%',
-            overflow: this.props.editable ? 'initial': 'hidden'
+            overflow: this.props.editable ? 'initial' : 'hidden',
         }
         return (
             <div className="rmx-app" style={appSt}>
                 <Router></Router>
                 <Prerender></Prerender>
             </div>
-        );
+        )
     }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = state => {
     return {
-        editable: state.session.mode === 'edit'
+        editable: state.session.mode === 'edit',
     }
 }
 
-const mapDispatchToProps = {
-}
+const mapDispatchToProps = {}
 
 /**
  * Props schema
  * Which props could be edited and how (types, range and other rules)
  */
 export const EngageAppSchema = new DataSchema({
-    "width": {
+    width: {
         type: 'number',
         min: 80,
         max: 4000,
         default: 444,
-        appWidthProperty: true
+        appWidthProperty: true,
     },
-    "height": {
+    height: {
         type: 'number',
         min: 18,
         max: 12000,
         default: 444,
-        appHeightProperty: true
-    }
-});
+        appHeightProperty: true,
+    },
+})
 
-export default connect(mapStateToProps, mapDispatchToProps)(EngageApp);
+export default connect(mapStateToProps, mapDispatchToProps)(EngageApp)

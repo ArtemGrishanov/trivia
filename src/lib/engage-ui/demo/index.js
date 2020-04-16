@@ -1,12 +1,12 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
+import React from 'react'
+import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 
 import store from '../../../store'
-import Demo from './demo';
+import Demo from './demo'
 
-Remix.setStore(store);
-Remix.setMode('none');
+Remix.setStore(store)
+Remix.setMode('none')
 
 ReactDOM.render(
     <Provider store={store}>
@@ -14,4 +14,5 @@ ReactDOM.render(
             <Demo></Demo>
         </div>
     </Provider>,
-document.getElementById('root'));
+    document.getElementById('root'),
+)

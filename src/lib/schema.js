@@ -1,35 +1,34 @@
 import Format from './format.js'
-import { getTokens, matchPropertyPath } from './object-path.js';
+import { getTokens, matchPropertyPath } from './object-path.js'
 
 const types = {
-    'string': {
-        attributes: ["default","serialize","enum","minLength","maxLength",],
-        mandatory: ["default"]
+    string: {
+        attributes: ['default', 'serialize', 'enum', 'minLength', 'maxLength'],
+        mandatory: ['default'],
     },
-    'number': {
-        attributes: ["default","serialize","min","max","enum","appWidthProperty","appHeightProperty"],
-        mandatory: ["default","min","max"]
+    number: {
+        attributes: ['default', 'serialize', 'min', 'max', 'enum', 'appWidthProperty', 'appHeightProperty'],
+        mandatory: ['default', 'min', 'max'],
     },
-    'boolean': {
-        attributes: ["default","serialize","enum"], // do not need to specify enum ['true', 'false']
-        mandatory: ["default"]
+    boolean: {
+        attributes: ['default', 'serialize', 'enum'], // do not need to specify enum ['true', 'false']
+        mandatory: ['default'],
     },
-    'hashlist': {
-        attributes: ["default","serialize","minLength","maxLength","elementSchema","prototypes"],
-        mandatory: ["default"]
+    hashlist: {
+        attributes: ['default', 'serialize', 'minLength', 'maxLength', 'elementSchema', 'prototypes'],
+        mandatory: ['default'],
     },
-    'url': {
-        attributes: ["default","serialize"],
-        mandatory: ["default"]
+    url: {
+        attributes: ['default', 'serialize'],
+        mandatory: ['default'],
     },
-    'color': {
-        attributes: ["default","serialize"],
-        mandatory: ["default"]
-    }
+    color: {
+        attributes: ['default', 'serialize'],
+        mandatory: ['default'],
+    },
 }
 
 export default class DataSchema {
-
     constructor(schm) {
         this.extend(schm)
     }
@@ -42,15 +41,15 @@ export default class DataSchema {
     extend(newSchm) {
         if (newSchm && newSchm.hasOwnProperty('_schm')) {
             // DataSchema instance was passed
-            newSchm = newSchm._schm;
+            newSchm = newSchm._schm
         }
-        const schm = {...this._schm, ...newSchm};
-        this._validateSchema(schm);
-        this._prepareSchema(schm);
-        this._schm = schm;
-        this._selectorsInProcessOrder = this._getSelectorsInProcessOrder();
-        this._selectorForPathCache = {};
-        return this;
+        const schm = { ...this._schm, ...newSchm }
+        this._validateSchema(schm)
+        this._prepareSchema(schm)
+        this._schm = schm
+        this._selectorsInProcessOrder = this._getSelectorsInProcessOrder()
+        this._selectorForPathCache = {}
+        return this
     }
 
     /**
@@ -60,8 +59,8 @@ export default class DataSchema {
     getDescription(path) {
         // _schm содержит массив селекторов (хотя большинство совпадает с name)
         // нужно провести поиск по ним
-        const selector = this.findSelectorForPath(path);
-        return selector ? this._schm[selector]: null;
+        const selector = this.findSelectorForPath(path)
+        return selector ? this._schm[selector] : null
     }
 
     /**
@@ -72,16 +71,16 @@ export default class DataSchema {
      */
     findSelectorForPath(path) {
         if (this._selectorForPathCache[path]) {
-            return this._selectorForPathCache[path];
+            return this._selectorForPathCache[path]
         }
         const seltrs = Object.keys(this._schm)
         for (let i = 0; i < seltrs.length; i++) {
             if (matchPropertyPath(path, seltrs[i]) === true) {
-                this._selectorForPathCache[path] = seltrs[i];
-                return seltrs[i];
+                this._selectorForPathCache[path] = seltrs[i]
+                return seltrs[i]
             }
         }
-        return null;
+        return null
     }
 
     /**
@@ -89,7 +88,7 @@ export default class DataSchema {
      * @returns {Array}
      */
     get selectorsInProcessOrder() {
-        return this._selectorsInProcessOrder;
+        return this._selectorsInProcessOrder
     }
 
     /**
@@ -106,7 +105,7 @@ export default class DataSchema {
      * @returns {Array}
      */
     _getSelectorsInProcessOrder() {
-        return Object.keys(this._schm).sort( (a, b) => getTokens(a).length - getTokens(b).length);
+        return Object.keys(this._schm).sort((a, b) => getTokens(a).length - getTokens(b).length)
     }
 
     /**
@@ -114,43 +113,47 @@ export default class DataSchema {
      * @param {object} schm
      */
     _prepareSchema(schm) {
-        Object.keys(schm).forEach( (prop) => {
+        Object.keys(schm).forEach(prop => {
             if (schm[prop].type === 'boolean') {
-                schm[prop].enum = ['false','true'];
+                schm[prop].enum = ['false', 'true']
             }
-        });
+        })
     }
 
     _validateSchema(schm) {
-        const whitelistTypes = Object.keys(types);
-        Object.keys(schm).forEach( (prop) => {
-            const type = schm[prop].type;
+        const whitelistTypes = Object.keys(types)
+        Object.keys(schm).forEach(prop => {
+            const type = schm[prop].type
             if (!type) {
-                throw new Error(`DataSchema: type must be specified`);
+                throw new Error(`DataSchema: type must be specified`)
             }
             if (whitelistTypes.includes(type.toLowerCase()) === false) {
-                throw new Error(`DataSchema: unsupported type "${type}". Supported typed: ${whitelistTypes.join(',')}`);
+                throw new Error(`DataSchema: unsupported type "${type}". Supported typed: ${whitelistTypes.join(',')}`)
             }
-            const whitelistAttr = types[type].attributes;
-            let mAttrs = types[type].mandatory.slice(0);
-            Object.keys(schm[prop]).forEach( (attr) => {
+            const whitelistAttr = types[type].attributes
+            let mAttrs = types[type].mandatory.slice(0)
+            Object.keys(schm[prop]).forEach(attr => {
                 if (whitelistAttr.includes(attr) === false && attr !== 'type') {
-                    throw new Error(`DataSchema: invalid attribute "${attr}". Valid attributes: ${whitelistAttr.join(',')} for type "${type}"`);
+                    throw new Error(
+                        `DataSchema: invalid attribute "${attr}". Valid attributes: ${whitelistAttr.join(
+                            ',',
+                        )} for type "${type}"`,
+                    )
                 }
-                mAttrs = mAttrs.filter( (e) => e !== attr);
+                mAttrs = mAttrs.filter(e => e !== attr)
             })
             if (mAttrs.length > 0) {
-                throw new Error(`DataSchema: attribute "${mAttrs[0]}" is missed in "${prop}"`);
+                throw new Error(`DataSchema: attribute "${mAttrs[0]}" is missed in "${prop}"`)
             }
-        });
+        })
     }
 
     toString() {
-        return JSON.stringify(this._schm);
+        return JSON.stringify(this._schm)
     }
     /**
-    * Prints example with all possible options
-    */
+     * Prints example with all possible options
+     */
     // printHelp() {
     //     const json = JSON.stringify(example);
     //     console.log(json)
@@ -164,15 +167,15 @@ export default class DataSchema {
      * @returns {Array}
      */
     getDescriptionsWithAttribute(attrName) {
-        const result = [];
-        Object.keys(this._schm).forEach( (prop) => {
+        const result = []
+        Object.keys(this._schm).forEach(prop => {
             if (this._schm[prop].hasOwnProperty(attrName)) {
                 result.push({
                     selector: prop,
-                    value: this._schm[prop]
-                });
+                    value: this._schm[prop],
+                })
             }
-        });
-        return result.length > 0 ? result: null;
+        })
+        return result.length > 0 ? result : null
     }
 }

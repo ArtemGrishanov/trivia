@@ -1,28 +1,28 @@
 import PropsNormalizer from './PropsNormalizer'
 import { connect } from 'react-redux'
-import LayoutItem from './layout/LayoutItem';
+import LayoutItem from './layout/LayoutItem'
 import { setData } from '../remix'
 
-const componentClassMap = {};
+const componentClassMap = {}
 
 export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
-    'id': {
+    id: {
         type: 'string',
         minLength: 1,
         maxLength: 1024,
         //TODO default generate id
-        default: 'none'
+        default: 'none',
     },
-    'tags': {
+    tags: {
         type: 'string',
         minLength: 0,
         maxLength: 1024,
-        default: 'remixcomponent'
+        default: 'remixcomponent',
     },
-    'displayName': {
+    displayName: {
         type: 'string',
         minLength: 1,
-        default: 'RemixComponent'
+        default: 'RemixComponent',
     },
     // это не строка это объект в котором плагины размещают различные данные для своих нужд
     // 'data': {
@@ -31,80 +31,81 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
     //     maxLength: 4096,
     //     default: ''
     // },
-    'width': {
+    width: {
         type: 'number',
         min: 1,
         max: 9999,
-        default: 50
+        default: 50,
     },
-    'widthStrategy': {
+    widthStrategy: {
         type: 'string',
         enum: ['fixed', 'dynamic'],
-        default: 'fixed'
+        default: 'fixed',
     },
-    'height': {
+    height: {
         type: 'number',
         min: 1,
         max: 9999,
-        default: 50
+        default: 50,
     },
-    'left': {
+    left: {
         type: 'number',
         min: -1000,
         max: 9999,
-        default: 100
+        default: 100,
     },
-    'leftStrategy': {
+    leftStrategy: {
         type: 'string',
         enum: ['dynamic', 'fixed'],
-        default: 'dynamic'
+        default: 'dynamic',
     },
-    'top': {
+    top: {
         type: 'number',
         min: -1000,
         max: 9999,
-        default: 100
+        default: 100,
     },
-    'displayType': {
+    displayType: {
         type: 'string',
-        enum: ['flow','decor'],
-        default: 'flow'
-    }
-};
+        enum: ['flow', 'decor'],
+        default: 'flow',
+    },
+}
 
 export default (Component, Schema, DisplayName) => {
     if (!DisplayName) {
-        throw new Error('RemixWrapper: you must specify DisplayName for each component. Usually it matches the class name');
+        throw new Error(
+            'RemixWrapper: you must specify DisplayName for each component. Usually it matches the class name',
+        )
     }
 
-    let composed = null;
+    let composed = null
 
     switch (DisplayName) {
         case 'Router': {
-            composed = compose( routerConnect(), withPropNormalizer(Schema, DisplayName) )(Component);
-            break;
+            composed = compose(routerConnect(), withPropNormalizer(Schema, DisplayName))(Component)
+            break
         }
         case 'Screen': {
-            composed = compose( screenConnect(), withPropNormalizer(Schema, DisplayName) )(Component);
-            break;
+            composed = compose(screenConnect(), withPropNormalizer(Schema, DisplayName))(Component)
+            break
         }
         default: {
             composed = compose(
                 LayoutItem(),
                 //TODO It works without componentConnect Is screenConnect sufficient?
                 //componentConnect(),
-                withPropNormalizer(Schema, DisplayName)
-
-            )(Component);
+                withPropNormalizer(Schema, DisplayName),
+            )(Component)
         }
     }
 
-    componentClassMap[DisplayName] = composed;
-    return composed;
+    componentClassMap[DisplayName] = composed
+    return composed
 }
 
-export const getComponentClass = (DisplayName) => {
-    return componentClassMap[DisplayName];
+export const getComponentClass = DisplayName => {
+    return componentClassMap[DisplayName]
 }
 
 /**
@@ -124,47 +125,45 @@ function compose(...enhancers) {
 
 function routerConnect() {
     return connect(
-        (state) => {
+        state => {
             return {
                 ...state.router,
                 screens: state.router.screens.filter(s => !s.disabled),
-                mode: state.session.mode
+                mode: state.session.mode,
             }
         },
-        (dispatch) => {
+        dispatch => {
             return {
-                setData
+                setData,
             }
-        }
-    );
+        },
+    )
 }
 
 function screenConnect() {
-    return connect(
-        (state, ownProps) => {
-            if (ownProps.id && state.router.screens[ownProps.id]) {
-                return {
-                    ...state.router.screens[ownProps.id],
-                    ...state.session
-                }
+    return connect((state, ownProps) => {
+        if (ownProps.id && state.router.screens[ownProps.id]) {
+            return {
+                ...state.router.screens[ownProps.id],
+                ...state.session,
             }
-            return {}
         }
-    )
+        return {}
+    })
 }
 
 function componentConnect() {
-    return connect(
-        (state, ownProps) => {
-            //TODO find and return component state in global state
-            return {}
-        }
-    )
+    return connect((state, ownProps) => {
+        //TODO find and return component state in global state
+        return {}
+    })
 }
 
 function withPropNormalizer(Schema, DisplayName) {
-    return PropsNormalizer(Schema.extend({
-        ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
-        ...{'displayName': {...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{'default': DisplayName}}} // use specific displayName for each Component type
-    }));
+    return PropsNormalizer(
+        Schema.extend({
+            ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
+            ...{ displayName: { ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{ default: DisplayName } } }, // use specific displayName for each Component type
+        }),
+    )
 }

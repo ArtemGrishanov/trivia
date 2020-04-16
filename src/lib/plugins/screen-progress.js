@@ -4,11 +4,10 @@
  *
  * @param {array} options.screenTag
  */
-export default function initScreenProgress(options = {remix: null, screenTag: null}) {
-
+export default function initScreenProgress(options = { remix: null, screenTag: null }) {
     const COMPONENT_ID = 'screen-progress:progressComponentId',
         screenTag = options.screenTag,
-        remix = options.remix;
+        remix = options.remix
 
     /**
      * Add new properties to app schema for additional plugin functionality
@@ -21,16 +20,16 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
         //
         'app.screenProgress.showQuestionProgress': {
             type: 'boolean',
-            default: true
-        }
-    });
+            default: true,
+        },
+    })
 
-    Remix.registerTriggerAction('screen-progress:update_progress_components', (event) => {
+    Remix.registerTriggerAction('screen-progress:update_progress_components', event => {
         const state = event.remix.getState(),
-              showProgress = state.app.screenProgress.showQuestionProgress,
-              scrs = event.remix.getScreens({tag: screenTag});
+            showProgress = state.app.screenProgress.showQuestionProgress,
+            scrs = event.remix.getScreens({ tag: screenTag })
         scrs.forEach((scr, i) => {
-            let pc = getProgressComponent(scr);
+            let pc = getProgressComponent(scr)
             if (showProgress) {
                 if (!pc) {
                     // create progress component first time
@@ -42,44 +41,49 @@ export default function initScreenProgress(options = {remix: null, screenTag: nu
                         fontSize: 20,
                         step: i + 1,
                         max: scrs.length,
-                        color: '#aaa'
-                    });
+                        color: '#aaa',
+                    })
                     // нужно узнать id нового компонента
                     // добавился новый компонент на экран, надо заново запросить стейт
-                    pc = getProgressComponent(event.remix.getState().router.screens[scr.hashlistId]);
+                    pc = getProgressComponent(event.remix.getState().router.screens[scr.hashlistId])
                 }
                 //let path = `router.screens.${scr.hashlistId}.components.${pc.hashlistId}.`;
                 // set props text or step-max
                 event.remix.setComponentProps(pc.hashlistId, {
-                    'max': scrs.length,
-                    'step': i+1
-                });
-            }
-            else {
+                    max: scrs.length,
+                    step: i + 1,
+                })
+            } else {
                 if (pc) {
                     // если прогресс добавлен на экран, то удалить его
-                    event.remix.deleteScreenComponent(scr.hashlistId, pc.hashlistId);
+                    event.remix.deleteScreenComponent(scr.hashlistId, pc.hashlistId)
                 }
             }
-        });
-    });
+        })
+    })
 
     remix.addTrigger({
-        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'router.screens'} },
-        then: { actionType: 'screen-progress:update_progress_components'}
-    });
+        when: { eventType: 'property_updated', condition: { prop: 'path', clause: 'EQUALS', value: 'router.screens' } },
+        then: { actionType: 'screen-progress:update_progress_components' },
+    })
 
     remix.addTrigger({
-        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'EQUALS', value: 'app.screenProgress.showQuestionProgress'} },
-        then: { actionType: 'screen-progress:update_progress_components'}
-    });
+        when: {
+            eventType: 'property_updated',
+            condition: { prop: 'path', clause: 'EQUALS', value: 'app.screenProgress.showQuestionProgress' },
+        },
+        then: { actionType: 'screen-progress:update_progress_components' },
+    })
 
     remix.addTrigger({
-        when: { eventType: 'property_updated', condition: {prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.disabled'} },
-        then: { actionType: 'screen-progress:update_progress_components'}
-    });
+        when: {
+            eventType: 'property_updated',
+            condition: { prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.disabled' },
+        },
+        then: { actionType: 'screen-progress:update_progress_components' },
+    })
 
     function getProgressComponent(screen) {
-        return screen.components.toArray().find( c => c.id === COMPONENT_ID)
+        return screen.components.toArray().find(c => c.id === COMPONENT_ID)
     }
 }
