@@ -8,6 +8,7 @@ import {
     getScreenIdFromPath,
     getComponentIdFromPath,
     debounce,
+    callOncePerTime,
 } from './remix/util/util.js'
 import { getAdaptedChildrenProps } from './engage-ui/layout/LayoutAdapter.js'
 
@@ -33,6 +34,7 @@ export const REMIX_SET_SESSION_SIZE = '__Remix_set_session_size__'
 const EXPECTED_CONTAINER_ORIGIN = null
 const MODE_SET = new Set(['none', 'edit', 'preview', 'published'])
 const LOG_BY_DEFAULT = false
+const USER_ACTIVITY_EVENTS = ['mousemove', 'keydown']
 
 let logging = LOG_BY_DEFAULT,
     root = null,
@@ -54,6 +56,13 @@ let logging = LOG_BY_DEFAULT,
 // establish communication with RemixContainer
 window.addEventListener('message', receiveMessage, false)
 window.addEventListener('keydown', onKeyDown, false)
+
+USER_ACTIVITY_EVENTS.forEach(eventType => {
+    const activity = () =>
+        containerWindow && containerOrigin && containerWindow.postMessage({ method: 'user-activity' }, containerOrigin)
+
+    window.addEventListener(eventType, callOncePerTime(activity, 5000))
+})
 
 function onKeyDown(e) {
     if (getMode() === 'edit') {
@@ -95,6 +104,11 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
             rect: document.getElementById('remix-app-root').getBoundingClientRect(),
         })
         _sendOuterEvents()
+    }
+    if (data.method === 'setsize') {
+        // сообщение от контейнера по установке размера не имеет смысла
+        // так как remix-приложение всегда width:100%;height:100% а реальный размер ставится в параметрах контейнера
+        //setSize(data.width, data.height);
     }
     if (data.method === 'addhashlistelement') {
         addHashlistElement(data.propertyPath, data.index, { newElement: data.newElement })
