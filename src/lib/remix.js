@@ -597,10 +597,7 @@ function init({externalActions = [], container = null, mode = 'none', defaultPro
     // это произойдет потом единым событием
     setMode(mode);
     updateWindowSize();
-    // window.addEventListener('load', updateWindowSize, false);
-    // if (mode !== 'edit') {
-        window.addEventListener('resize', debounce(onWindowResize, 500), false);
-    // }
+    window.addEventListener('resize', debounce(onWindowResize, 500), false);
     stateHistory = [];
     putStateHistory();
     Remix.fireEvent('remix_inited');

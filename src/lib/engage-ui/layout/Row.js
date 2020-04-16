@@ -59,10 +59,6 @@ export default class Row {
 
         // ШАГ 2 - сдвинуть left в завосомости от стратегии компонентов
         this.components.forEach( (c) => {
-            //const
-                //originProps = this.originalComponentProps[c.id],
-                //ow = parseInt(originProps.width),
-                //r1 = (this.containerWidth - this.originalContainerWidth) / this.originalContainerWidth;
             if (c.leftStrategy === 'fixed') {
                 // do nothing
             }
@@ -73,10 +69,6 @@ export default class Row {
                     r = this.containerWidth / this.originalContainerWidth;
                 if (c.widthStrategy === 'fixed') {
                     // ширина остается постоянной, и значит мы сильнее сдвигаем left для выравнивания
-                    //c.left = Math.round(l * r + (c.width * r1) / 2); // 1 element
-                    //c.left = Math.round(l * r + c.width * r1 / (2/this.components.length) );
-
-                    //const ww = c.widthStrategy === 'fixed' ? c.width*r : c.width;
                     c.left = Math.round((l + c.width/2) * r - c.width/2);
                 }
                 else {
@@ -87,7 +79,7 @@ export default class Row {
                     c.left = 0;
                 }
                 // чтобы сохранить минимальный отступ между элементами и не лепить вплотную
-                //TODO uncomment?
+                // uncomment?
                 // c.left = minLeft > 0 && minLeft > c.left? minLeft: c.left;
                 // minLeft = c.left + c.width + this.horizMargin;
             }
@@ -129,6 +121,7 @@ export default class Row {
                 if (c.left + c.width > this.containerWidth) {
                     c.width = this.containerWidth;
                 }
+
             }
         }
         else if (droppedComponents.length > 0) {
