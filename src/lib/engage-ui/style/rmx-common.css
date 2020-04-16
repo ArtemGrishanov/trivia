@@ -76,6 +76,14 @@ p {
     background-color: #fafafa;
 }
 
+.rmx-button.__with-arrow {
+    background-color: #e1e1e4;
+}
+
+.rmx-button.__with-arrow:hover {
+    background-color: #c7c8ca;
+}
+
 .rmx-control {
     margin: 5px;
     color: #333;
