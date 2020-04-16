@@ -164,13 +164,13 @@ const COMPONENTS = [
     // </Control>
     // ,
     <Control id={519} schema={TextOptionSchema} width={800} height={600}>
-        <Screen id={'screen1'} width={800} height={600} top={0}
+        <Screen id={'screen1'} size={{width:800, height:600}} top={0}
             backgroundColor={'#a7a7d2'}
             />
     </Control>
     ,
     <Control id={520} schema={TextOptionSchema} width={800} height={600}>
-        <Screen id={'screen2'} width={800} height={600} top={0}
+        <Screen id={'screen2'} size={{width:800, height:600}} top={0}
             backgroundImage={'https://cdn.thinglink.me/gfx/pages16/images/frontpage/march2019/landing-image-03-04@2x.jpg'}
             />
     </Control>

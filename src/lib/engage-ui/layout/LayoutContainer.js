@@ -130,7 +130,7 @@ class LayoutContainer extends React.Component {
         }
 
         return (
-            <div style={st} className="rmx-layout_container" onMouseDown={this.onMouseDown}>
+            <div className="rmx-layout_container" onMouseDown={this.onMouseDown}>
                 {childrenWithProps}
                 {this.props.editable && this.state.visibleMagnets && this.state.visibleMagnets.map( (mv) => {
                     if (mv.hide !== true) {
