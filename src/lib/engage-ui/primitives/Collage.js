@@ -4,6 +4,11 @@ import RemixWrapper from '../RemixWrapper'
 
 const { Remix } = window
 
+const MAIN_IMG_WIDTH_OPTIONS = {
+    oneRow: 70,
+    twoRows: 60,
+}
+
 function CollageItem({ src, width, height, isInlineBlock }) {
     const st = {
         width: width || '100%',
@@ -25,8 +30,14 @@ function Collage(props) {
     let collage = {}
 
     if (images.length === 1) {
+        /**
+         * If only one image exists
+         */
         collage = <CollageItem src={first.src} />
     } else if (images.length === 2) {
+        /**
+         * If two images
+         */
         collage = (
             <>
                 <CollageItem src={first.src} width={'50%'} isInlineBlock />
@@ -34,10 +45,13 @@ function Collage(props) {
             </>
         )
     } else if (images.length > 2 && images.length <= 4) {
+        /**
+         * If many images but less than 4
+         */
         collage = (
             <>
-                <CollageItem src={first.src} width={'70%'} isInlineBlock />
-                <div className="rmx-collage-subitems-wrap" style={{ width: '30%' }}>
+                <CollageItem src={first.src} width={`${MAIN_IMG_WIDTH_OPTIONS.oneRow}%`} isInlineBlock />
+                <div className="rmx-collage-subitems-wrap" style={{ width: `${100 - MAIN_IMG_WIDTH_OPTIONS.oneRow}%` }}>
                     {images.slice(1).map((item, i) => (
                         <CollageItem key={item.hashlistId} src={item.src} height={'33.333%'} />
                     ))}
@@ -45,15 +59,24 @@ function Collage(props) {
             </>
         )
     } else {
+        /**
+         * If many images exist and their count is bigger than 4
+         */
         collage = (
             <>
-                <CollageItem src={first.src} width={'60%'} isInlineBlock />
-                <div className="rmx-collage-subitems-wrap" style={{ width: '20%' }}>
+                <CollageItem src={first.src} width={`${MAIN_IMG_WIDTH_OPTIONS.twoRows}%`} isInlineBlock />
+                <div
+                    className="rmx-collage-subitems-wrap"
+                    style={{ width: `${(100 - MAIN_IMG_WIDTH_OPTIONS.twoRows) / 2}%` }}
+                >
                     {images.slice(1, 4).map((item, i) => (
                         <CollageItem key={item.hashlistId} src={item.src} height={'33.333%'} />
                     ))}
                 </div>
-                <div className="rmx-collage-subitems-wrap" style={{ width: '20%' }}>
+                <div
+                    className="rmx-collage-subitems-wrap"
+                    style={{ width: `${(100 - MAIN_IMG_WIDTH_OPTIONS.twoRows) / 2}%` }}
+                >
                     {images.slice(4, 7).map((item, i) => (
                         <CollageItem key={item.hashlistId} src={item.src} height={'33.333%'} />
                     ))}
