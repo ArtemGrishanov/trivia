@@ -86,6 +86,8 @@ class Router extends React.Component {
             })
         }
 
+        const isPhotostory = !!Remix.getComponents({ displayName: 'ProgressiveImage', tags: 'photostoryitem' }).length
+
         return (
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 && <p>no screens</p>}
@@ -108,7 +110,7 @@ class Router extends React.Component {
                     <div
                         ref={refs[this.props.currentScreenId]}
                         className={'rmx-scr_container_item ' + (this.state.transition ? '__transition' : '')}
-                        style={{ transform: 'translateX(' + this.state.scrLeft + 'px)' }}
+                        style={isPhotostory ? {} : { transform: 'translateX(' + this.state.scrLeft + 'px)' }}
                     >
                         <Screen {...scr} id={this.props.currentScreenId} editable={editable}></Screen>
                     </div>
