@@ -25,34 +25,24 @@ function CollageItem({ src, width, height, isInlineBlock }) {
 
 function Collage(props) {
     const images = Remix.getComponents({ displayName: 'ProgressiveImage', tags: 'photostoryitem' })
-    const [first, second] = images
+    const [first] = images
 
     let collage = {}
 
-    if (images.length === 1) {
+    if (images.length === 1 || images.length < 4) {
         /**
-         * If only one image exists
+         * If less than 4
          */
         collage = <CollageItem src={first.src} />
-    } else if (images.length === 2) {
+    } else if (images.length === 4 || images.length < 7) {
         /**
-         * If two images
-         */
-        collage = (
-            <>
-                <CollageItem src={first.src} width={'50%'} isInlineBlock />
-                <CollageItem src={second.src} width={'50%'} isInlineBlock />
-            </>
-        )
-    } else if (images.length > 2 && images.length <= 4) {
-        /**
-         * If many images but less than 4
+         * If many images but less than 7
          */
         collage = (
             <>
                 <CollageItem src={first.src} width={`${MAIN_IMG_WIDTH_OPTIONS.oneRow}%`} isInlineBlock />
                 <div className="rmx-collage-subitems-wrap" style={{ width: `${100 - MAIN_IMG_WIDTH_OPTIONS.oneRow}%` }}>
-                    {images.slice(1).map((item, i) => (
+                    {images.slice(1, 4).map((item, i) => (
                         <CollageItem key={item.hashlistId} src={item.src} height={'33.333%'} />
                     ))}
                 </div>
@@ -60,7 +50,7 @@ function Collage(props) {
         )
     } else {
         /**
-         * If many images exist and their count is bigger than 4
+         * If many images exist and their count is bigger than 6
          */
         collage = (
             <>
