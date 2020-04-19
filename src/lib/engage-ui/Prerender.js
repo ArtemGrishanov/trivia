@@ -11,7 +11,7 @@ class Prerender extends React.Component {
         this.preRenderRects = {}
     }
 
-    getContentRect(id, rect) {
+    checkAndSetPreRenderRects(id, rect) {
         console.log('getContentRect', id, rect)
         this.preRenderRects[id] = rect
         if (Object.keys(this.preRenderRects).length === this.props.preRenderComponents.length) {
@@ -36,7 +36,7 @@ class Prerender extends React.Component {
                                     {...cmpn}
                                     id={cmpn.hashlistId}
                                     key={cmpn.hashlistId}
-                                    getContentRect={this.getContentRect.bind(this, cmpn.hashlistId)}
+                                    getContentRect={this.checkAndSetPreRenderRects.bind(this, cmpn.hashlistId)}
                                 ></RemixComponent>
                             )
                         })}
