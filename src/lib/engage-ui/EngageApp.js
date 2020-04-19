@@ -1,44 +1,14 @@
 import React from 'react'
-import ReactDOMServer from 'react-dom/server'
 import { connect } from 'react-redux'
 import DataSchema from '../schema'
 import Remix from '../remix'
 import Router from './router'
+import Prerender from './Prerender'
 
-import stylll from './style/rmx-common.css'
-
-/**
- * TODO
- * Engage application container
- * - set width and height
- * - size modes: stretch on width? min height? height by content?
- * - behaviour on mobile?
- * - can show modals
- * -- messages
- * -- animations, like loaders, counters...
- * -- forms
- * --- data collection forms
- * --- auth forms (like facebook login)
- * --- sharing window (like twitter post? I guess that all windows opens in browser popups)
- * --- other standart intergation modals...
- * --- ...
- * - can show bottom banner, show block banner
- * - network interaction
- * - if no content - show stub "no content"
- * - progress loader
- * - show default sharing pane
- * - show logo
- * - switch children with effect? slide left-right, shade effect ? But possible it is in Screen
- * - ...
- * -
- */
 class EngageApp extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {
-            message: null,
-        }
-        this.screens = []
+        this.state = {}
     }
 
     componentDidMount() {
@@ -46,62 +16,6 @@ class EngageApp extends React.Component {
     }
 
     componentDidUpdate() {}
-
-    // syncScreens() {
-    //     const prevScrs = this.screens;
-    //     this.screens = [];
-    //     const result = {
-    //         added: [],
-    //         changed: [],
-    //         deleted: []
-    //     };
-    //     let childrenArr = this.props.children;
-    //     if (!childrenArr) {
-    //         childrenArr = [];
-    //     }
-    //     childrenArr.flat().forEach( (child) => {
-    //         const screenId = child.props.screenId;
-    //         if (!screenId) {
-    //             throw new Error('You must define unique prop "screenId" for each Screen component');
-    //         }
-    //         if (this.getScreenById(this.screens, screenId)) {
-    //             throw new Error(`screenId "${screenId}" is not unique`);
-    //         }
-    //         const markup = ReactDOMServer.renderToStaticMarkup(child);
-    //         const scr = this.getScreenById(prevScrs, screenId);
-    //         if (!scr) {
-    //             // a new screen came
-    //             const newScreen = {
-    //                 screenId: screenId,
-    //                 markup: markup
-    //             };
-    //             this.screens.push(newScreen);
-    //             result.added.push(newScreen);
-    //         }
-    //         else {
-    //             // screen already exist
-    //             // sync screen markup
-    //             if (scr.markup !== markup) {
-    //                 result.changed.push(scr);
-    //                 scr.markup = markup;
-    //             }
-    //             this.screens.push(scr); // because we created a new array
-    //         }
-    //     });
-    //     // check deleted screens
-    //     prevScrs.forEach( (scr) => {
-    //         if (!this.getScreenById(this.screens, scr.screenId)) {
-    //             result.deleted.push(scr);
-    //         }
-    //     });
-    //     if (result.added.length > 0 || result.changed.length > 0 || result.deleted.length > 0) {
-    //         Remix._setScreenEvents(result);
-    //     }
-    // }
-
-    getScreenById(screenArr = [], id) {
-        return screenArr.find(scr => scr.screenId === id)
-    }
 
     render() {
         const appSt = {
@@ -112,6 +26,7 @@ class EngageApp extends React.Component {
         return (
             <div className="rmx-app" style={appSt}>
                 <Router></Router>
+                <Prerender></Prerender>
             </div>
         )
     }
@@ -119,8 +34,6 @@ class EngageApp extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        width: state.app.size.width,
-        height: state.app.size.height,
         editable: state.session.mode === 'edit',
     }
 }

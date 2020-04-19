@@ -1,9 +1,6 @@
 import '../style/rmx-layout.css'
-import sizeMe from 'react-sizeme'
 import React from 'react'
 import DataSchema from '../../schema'
-import { getAdaptedChildrenProps } from './LayoutAdapter'
-import { selectComponents } from '../../../lib/remix'
 
 class LayoutContainer extends React.Component {
     static getDerivedStateFromProps(props, state) {
@@ -17,8 +14,6 @@ class LayoutContainer extends React.Component {
         return {
             ...state,
             magnets: { ...state.magnets },
-            width: props.size.width >= 0 ? props.size.width : state.width,
-            height: props.size.height >= 0 ? props.size.height : state.height,
         }
     }
 
@@ -28,7 +23,6 @@ class LayoutContainer extends React.Component {
             width: undefined,
             height: undefined,
             visibleMagnets: null,
-            adaptedChildrenProps: {},
             // магниты созданные компонентами, края и середина компонента создают магниты - всего 3 вертикальных магнита
             magnets: {},
             // компоненты вокруг которых показать рамку для их подсветки
@@ -37,20 +31,15 @@ class LayoutContainer extends React.Component {
         if (props.globalTestId) {
             window[props.globalTestId] = this
         }
-        this.childRefs = {}
-        this.userDefinedNormalizedProps = {}
         this.onMouseDown = this.onMouseDown.bind(this)
         this.onDragAndMagnetsAttached = this.onDragAndMagnetsAttached.bind(this)
         this.onLayoutItemUpdate = this.onLayoutItemUpdate.bind(this)
         // магниты видимые в данный момент, те которых коснулся перетаскиваемый компонент
         this.visibleMagnetsComponents = {}
+        this.unmounted = false
     }
 
-    onMouseDown(e) {
-        // if (this.props.editable) {
-        //     selectComponents([]);
-        // }
-    }
+    onMouseDown(e) {}
 
     /**
      * Вызывается когда компонент перетаскивается и прилепился к одному из магнитов
@@ -115,88 +104,36 @@ class LayoutContainer extends React.Component {
         })
     }
 
-    /**
-     * Адаптировать разметку под измененный размер контейнера
-     * Иметь одно событие (onSize в LayoutContainer) для запуска этой функции очень удобно, вместо установки колбеков на все LayoutItem
-     */
-    adaptateToNewViewportSize() {
-        // console.log(`AdaptateToNewViewportSize. Size w=${this.props.size.width} h=${this.props.size.height}`);
-        // // только для НЕредакирования. В 'edit' пользователь только настраивает положение элементов
-        // if (!this.props.editable && this.props.size.width !== 800) {
-        //     this.setState({
-        //         adaptedChildrenProps: getAdaptedChildrenProps(this.props.children, {
-        //             //TODO 800
-        //             origCntWidth: 800,
-        //             userDefinedNormalizedProps: this.userDefinedNormalizedProps,
-        //             containerWidth: this.props.size.width
-        //         })
-        //     })
-        //     //TODO увеличение высоты самого контейнера (и приложения?) при необходимости
-        // }
-    }
-
-    /**
-     * Сохраняем ссылки на все отрендеренные элементы children
-     * @param {string} id
-     * @param {DomElement} element
-     */
-    setRef(componentId, element) {
-        if (componentId) {
-            this.childRefs[componentId] = element
-            //TODO zombie components? Подумать нужна ли здесь эта проверка
-            // if (this.props.children.length < Object.keys(this.childRefs).length) {
-            //     throw new Error('Zombie components, check pls');
-            // }
-        }
-    }
-
-    /**
-     * Сохраняем ссылки на все отрендеренные элементы children
-     * @param {string} componentId
-     * @param {object} props
-     */
-    setNormalizedProps(componentId, props) {
-        //TODO когда именно и сколько раз надо устанавливать оригинальные нормализованные свойства?
-        if (componentId && this.userDefinedNormalizedProps[componentId] === undefined) {
-            // установить изначальные нормализованные свойства
-            this.userDefinedNormalizedProps[componentId] = { ...props }
-        }
-    }
-
     render() {
-        const st = {
-            border: this.props.border ? '1px solid black' : 'none',
-        }
         let childrenWithProps = null
         // state.width comes from 'sizeMe' wrapper
-        if (this.state.width > 0 && this.state.height > 0) {
+        if (this.props.width > 0 && this.props.height > 0) {
             // container inited and measured
             // we can render children now
-            this.childRefs = {}
-            const magnetsVertical = Object.values(this.state.magnets).flat()
-            childrenWithProps = React.Children.map(this.props.children, child => {
-                const aProps =
-                    !this.props.editable && child.props.id && this.state.adaptedChildrenProps[child.props.id]
-                        ? this.state.adaptedChildrenProps[child.props.id]
+
+            const magnetsVertical = Object.values(this.state.magnets).flat(),
+                aPropsMap =
+                    this.props.adaptedui && this.props.adaptedui[this.props.width]
+                        ? this.props.adaptedui[this.props.width]
                         : {}
+
+            childrenWithProps = React.Children.map(this.props.children, child => {
                 return React.cloneElement(child, {
-                    setRef: this.setRef.bind(this, child.props.id),
-                    normalizerRef: this.setNormalizedProps.bind(this, child.props.id),
-                    containerWidth: this.state.width,
-                    containerHeight: this.state.height,
+                    containerWidth: this.props.width,
+                    containerHeight: this.props.height,
                     magnetsVertical,
                     // 'editable' означает что LayoutItem поддерживает режим редактирования (показ рамки, ресайз и тд). Таким образом, для вложенных друг в друга LayoutItem становится не активным (например иконка внутри TextOption)
                     editable: this.props.editable,
                     onDragAndMagnetsAttached: this.onDragAndMagnetsAttached,
                     onLayoutItemUpdate: this.onLayoutItemUpdate,
                     bordered: this.state.borderedComponents.includes(child.props.id),
-                    ...aProps,
+                    ...aPropsMap[child.props.id],
                 })
             })
         }
 
         return (
-            <div style={st} className="rmx-layout_container" onMouseDown={this.onMouseDown}>
+            <div className="rmx-layout_container" onMouseDown={this.onMouseDown}>
                 {childrenWithProps}
                 {this.props.editable &&
                     this.state.visibleMagnets &&
@@ -214,23 +151,24 @@ class LayoutContainer extends React.Component {
     componentDidMount() {}
 
     componentDidUpdate(prevProps) {
-        if (this.props.size.width >= 0 && !this.state.magnets['default']) {
+        if (this.props.width >= 0 && !this.state.magnets['default']) {
             this.setState((state, props) => {
                 return {
                     magnets: {
                         ...state.magnets,
                         default: [
                             { left: 0, type: 'edge', componentId: null },
-                            { left: this.props.size.width / 2, type: 'center', componentId: null },
-                            { left: this.props.size.width - 1, type: 'edge', componentId: null },
+                            { left: this.props.width / 2, type: 'center', componentId: null },
+                            { left: this.props.width - 1, type: 'edge', componentId: null },
                         ],
                     },
                 }
             })
         }
-        if (this.props.size.width > 0 && this.props.size.width !== prevProps.size.width) {
-            this.adaptateToNewViewportSize()
-        }
+    }
+
+    componentWillUnmount() {
+        this.unmounted = true
     }
 }
 
@@ -241,9 +179,4 @@ export const Schema = new DataSchema({
     },
 })
 
-export default sizeMe({
-    refreshMode: 'debounce',
-    refreshRate: 400,
-    monitorHeight: true,
-    noPlaceholder: true,
-})(LayoutContainer)
+export default LayoutContainer

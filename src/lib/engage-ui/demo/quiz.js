@@ -3,12 +3,106 @@ import Control from './Control'
 import TextOption from '../primitives/TextOption'
 import ProgressiveImage from '../primitives/ProgressiveImage'
 import Text from '../primitives/Text'
+import Progress from '../primitives/Progress'
 
 const QUIZ_SAMPLES = [
+    <Control id={106} width={800} height={600} label={'What is this city?'}>
+        {/* <Progress left={382} top={32} width={35} height={30}></Progress> */}
+        <Text
+            id={'text'}
+            text={`<p class="ql-align-center"><strong class="ql-size-huge" style="color: rgb(136, 136, 136);">WHAT IS THIS CITY?</strong></p>`}
+            left={198}
+            top={62}
+            width={404}
+            height={55}
+        />
+        <ProgressiveImage
+            id={'img'}
+            left={171}
+            top={133}
+            width={457}
+            height={216}
+            src="https://backend-dev-bucket.s3.eu-central-1.amazonaws.com/697676/media/62394/1974"
+        />
+        <TextOption
+            id={'opt1'}
+            left={198}
+            top={368}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">ATHENS</strong></p>`}
+        />
+        <TextOption
+            id={'opt2'}
+            left={409}
+            top={368}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">MILAN</strong></p>`}
+        />
+        <TextOption
+            id={'opt3'}
+            left={198}
+            top={466}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">ROME</strong></p>`}
+        />
+        <TextOption
+            id={'opt4'}
+            left={409}
+            top={466}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">DUBAI</strong></p>`}
+        />
+    </Control>,
+    <Control id={107} width={800} height={600} label={'What is this city?'}>
+        <Text
+            id={'text'}
+            text={`<p class="ql-align-center"><strong class="ql-size-huge" style="color: rgb(136, 136, 136);">WHAT IS THIS CITY?</strong></p>`}
+            left={198}
+            top={62}
+            width={404}
+            height={55}
+        />
+        <ProgressiveImage
+            id={'img'}
+            left={171}
+            top={133}
+            width={457}
+            height={216}
+            src="https://backend-dev-bucket.s3.eu-central-1.amazonaws.com/697676/media/62394/1974"
+        />
+        <TextOption
+            id={'opt1'}
+            left={96}
+            top={368}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">ATHENS</strong></p>`}
+        />
+        <TextOption
+            id={'opt2'}
+            left={300}
+            top={368}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">MILAN</strong></p>`}
+        />
+        <TextOption
+            id={'opt3'}
+            left={504}
+            top={368}
+            width={193}
+            height={81}
+            text={`<p class="ql-align-center"><strong class="ql-size-large" style="color: rgb(240, 102, 102);">ROME</strong></p>`}
+        />
+    </Control>,
     <Control id={101} width={800} height={400} label={'Photo question'}>
         <ProgressiveImage
             id={'img'}
-            left={40}
+            left={140}
             top={40}
             width={520}
             height={180}
@@ -16,7 +110,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt1'}
-            left={35}
+            left={135}
             top={240}
             width={235}
             height={60}
@@ -27,7 +121,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt2'}
-            left={335}
+            left={435}
             top={310}
             width={235}
             height={60}
@@ -38,7 +132,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt3'}
-            left={35}
+            left={135}
             top={310}
             width={235}
             height={60}
@@ -49,7 +143,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt4'}
-            left={335}
+            left={435}
             top={240}
             width={235}
             height={60}
@@ -63,7 +157,7 @@ const QUIZ_SAMPLES = [
         <Text
             id={'text'}
             text={'Question text here...'}
-            left={225}
+            left={325}
             fontSize={18}
             top={40}
             width={150}
@@ -72,7 +166,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt1'}
-            left={100}
+            left={200}
             top={110}
             width={400}
             height={60}
@@ -83,7 +177,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt2'}
-            left={100}
+            left={200}
             top={200}
             width={400}
             height={60}
@@ -94,7 +188,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt3'}
-            left={100}
+            left={200}
             top={290}
             width={400}
             height={60}
@@ -108,7 +202,7 @@ const QUIZ_SAMPLES = [
         <Text
             id={'text'}
             text={'Question text about this photo'}
-            left={175}
+            left={275}
             fontSize={18}
             top={20}
             width={250}
@@ -116,7 +210,7 @@ const QUIZ_SAMPLES = [
         />
         <ProgressiveImage
             id={'img'}
-            left={70}
+            left={170}
             top={60}
             width={460}
             height={200}
@@ -124,7 +218,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt1'}
-            left={100}
+            left={200}
             top={280}
             width={400}
             height={60}
@@ -135,7 +229,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt2'}
-            left={100}
+            left={200}
             top={360}
             width={400}
             height={60}
@@ -146,7 +240,7 @@ const QUIZ_SAMPLES = [
         />
         <TextOption
             id={'opt3'}
-            left={100}
+            left={200}
             top={440}
             width={400}
             height={60}
@@ -160,7 +254,7 @@ const QUIZ_SAMPLES = [
         <Text
             id={'text'}
             text={'Пьер Огюст Ренуар. Где оригинал?'}
-            left={175}
+            left={275}
             fontSize={18}
             top={20}
             width={250}
@@ -168,7 +262,7 @@ const QUIZ_SAMPLES = [
         />
         <ProgressiveImage
             id={'img11'}
-            left={20}
+            left={120}
             top={120}
             width={260}
             height={260}
@@ -176,7 +270,7 @@ const QUIZ_SAMPLES = [
         />
         <ProgressiveImage
             id={'img22'}
-            left={320}
+            left={420}
             top={120}
             width={260}
             height={260}
@@ -187,7 +281,7 @@ const QUIZ_SAMPLES = [
         <Text
             id={'text'}
             text={"You've just known about pay boost!"}
-            left={175}
+            left={275}
             fontSize={18}
             top={20}
             width={250}
@@ -195,7 +289,7 @@ const QUIZ_SAMPLES = [
         />
         <ProgressiveImage
             id={'img11'}
-            left={10}
+            left={110}
             top={120}
             width={180}
             height={200}
@@ -203,7 +297,7 @@ const QUIZ_SAMPLES = [
         />
         <ProgressiveImage
             id={'img22'}
-            left={210}
+            left={310}
             top={120}
             width={180}
             height={200}
@@ -211,7 +305,7 @@ const QUIZ_SAMPLES = [
         />
         <ProgressiveImage
             id={'img33'}
-            left={410}
+            left={510}
             top={120}
             width={180}
             height={200}

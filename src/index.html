@@ -85,14 +85,15 @@
                 }
                 inited = true;
                 var root = document.getElementById('remix-app-root');
-                if (data.width) {
-                    root.style.width = data.width;
+                if (data.fixedRootWidth) {
+                    // special params for 'edit' mode only (artboard functionality)
+                    root.style.width = data.fixedRootWidth + 'px';
                 }
-                if (data.height) {
-                    root.style.height = data.height;
+                if (data.fixedRootHeight) {
+                    root.style.height = data.fixedRootHeight + 'px';
                 }
                 if (data.marginTop) {
-                    root.style.marginTop = data.marginTop;
+                    root.style.marginTop = data.marginTop + 'px';
                 }
                 Remix.init({
                     appStore: store,

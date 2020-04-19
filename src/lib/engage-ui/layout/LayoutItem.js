@@ -36,6 +36,7 @@ function calcState({
     top,
     width,
     height,
+    editable,
 }) {
     const isPercent =
         typeof propWidth === 'string' && propWidth.length > 2 ? propWidth[propWidth.length - 1] === '%' : false
@@ -82,17 +83,19 @@ function calcState({
         left = propLeft
     }
 
-    // component cannot leave container and became invisible
-    // normalize left and top
-    if (left > propContainerWidth - (width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100) {
-        left = propContainerWidth - (width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100
-    } else if (left < (-width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100) {
-        left = (-width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100
-    }
-    if (top > propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
-        top = propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
-    } else if (top < (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
-        top = (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
+    if (editable) {
+        // component cannot leave container and become invisible in edit mode
+        // normalize left and top
+        if (left > propContainerWidth - (width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100) {
+            left = propContainerWidth - (width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100
+        } else if (left < (-width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100) {
+            left = (-width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100
+        }
+        if (top > propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
+            top = propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
+        } else if (top < (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
+            top = (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
+        }
     }
 
     return {
@@ -167,6 +170,7 @@ export default function LayoutItem() {
                             top: state.top,
                             left: state.left,
                             id: props.id,
+                            editable: props.editable,
                         }),
                     }
                 }
@@ -480,7 +484,6 @@ export default function LayoutItem() {
                                 ></div>
                             )}
                             <div
-                                ref={this.props.setRef}
                                 className={`rmx-l_child_cnt` + (this.state.doubleClicked ? ' __dblClick' : '')}
                                 style={cst}
                             >

@@ -45,6 +45,7 @@ class Text extends React.Component {
                         parentId={this.props.id}
                         readOnly={!this.props.doubleClicked}
                         text={this.props.text}
+                        getContentRect={this.props.getContentRect}
                     ></TextEditor>
                 </div>
             </div>

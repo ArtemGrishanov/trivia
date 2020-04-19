@@ -27,7 +27,7 @@ initRemixRouting({
     screenRoute: [
         { tag: 'start' }, // show all scrrens with tag in linear order
         { tag: 'photostoryitem', shuffle: true }, // show all scrrens with tag and shuffle them
-        { tag: 'final' }
+        { tag: 'final' },
     ],
     restartTag: 'restart',
     nextTag: 'next',
