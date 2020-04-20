@@ -60,7 +60,9 @@ export default class Control extends React.Component {
                     style={{ width: this.props.width + 'px', height: this.props.height + 'px' }}
                 >
                     <div className="rmx-control_elem">
-                        <LayoutContainer editable={isEditMode}>{childrenWithProps}</LayoutContainer>
+                        <LayoutContainer editable={isEditMode} width={this.props.width} height={this.props.height}>
+                            {childrenWithProps}
+                        </LayoutContainer>
                     </div>
                 </div>
                 {isEditMode && (
