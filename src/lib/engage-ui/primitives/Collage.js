@@ -34,12 +34,12 @@ function Collage(props) {
 
     let collage = {}
 
-    if (images.length >= 1 || images.length < 4) {
+    if (images.length >= 1 && images.length < 4) {
         /**
          * If less than 4
          */
         collage = <CollageItem src={first.src} />
-    } else if (images.length >= 4 || images.length < 7) {
+    } else if (images.length >= 4 && images.length < 7) {
         /**
          * If many images but less than 7
          */
