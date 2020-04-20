@@ -1,8 +1,7 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
-
-const { Remix } = window
+import { getComponents } from '../../remix'
 
 const MAIN_IMG_WIDTH_OPTIONS = {
     oneRow: 70,
@@ -24,17 +23,23 @@ function CollageItem({ src, width, height, isInlineBlock }) {
 }
 
 function Collage(props) {
-    const images = Remix.getComponents({ displayName: 'ProgressiveImage', tags: 'photostoryitem' })
+    const images = getComponents({ displayName: 'ProgressiveImage', tags: 'photostoryitem' })
     const [first] = images
+
+    if (!first) {
+        //TODO[DM]: Proper handler media for user notification
+        const userNotificationMessage = 'No images were found'
+        return <div> {userNotificationMessage} </div>
+    }
 
     let collage = {}
 
-    if (images.length === 1 || images.length < 4) {
+    if (images.length >= 1 || images.length < 4) {
         /**
          * If less than 4
          */
         collage = <CollageItem src={first.src} />
-    } else if (images.length === 4 || images.length < 7) {
+    } else if (images.length >= 4 || images.length < 7) {
         /**
          * If many images but less than 7
          */

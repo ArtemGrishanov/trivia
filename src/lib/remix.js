@@ -989,7 +989,7 @@ function getScreens(filter = {}) {
  * @param {string} filter.displayName
  * @param {string} filter.tags
  */
-function getComponents(filter = {}) {
+export function getComponents(filter = {}) {
     const components = []
     store
         .getState()
