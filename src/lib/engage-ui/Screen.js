@@ -90,7 +90,7 @@ export const Schema = new DataSchema({
     staticMarkup: {
         type: 'string',
         minLength: 0,
-        maxLength: 32000,
+        maxLength: 512000,
         default: '',
         serialize: false,
     },

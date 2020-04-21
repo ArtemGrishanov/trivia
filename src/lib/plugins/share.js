@@ -14,7 +14,10 @@ export default function initShare(options = {}) {
     let fbApiEmbedded = false
 
     const DEBOUNCE_UPDATE_DELAY = 1500,
+        DEBOUNCE_PREVIEW_DELAY = 1600,
         displayTypes = options.displayTypes,
+        getMainPreviewHTML = options.getMainPreviewHTML,
+        getShareEntityPreviewHTML = options.getShareEntityPreviewHTML,
         remix = options.remix,
         updateShare = debounce(() => {
             const state = remix.getState(),
@@ -68,7 +71,25 @@ export default function initShare(options = {}) {
                 embedFbCode()
                 fbApiEmbedded = true
             }
-        }, DEBOUNCE_UPDATE_DELAY)
+        }, DEBOUNCE_UPDATE_DELAY),
+        updatePreviews = debounce(() => {
+            const state = remix.getState()
+
+            if (getMainPreviewHTML) {
+                remix.setData({ 'app.share.previewHtml': getMainPreviewHTML(remix) })
+            }
+
+            if (getShareEntityPreviewHTML && state.app.share && state.app.share.entities) {
+                const previews = {}
+                state.app.share.entities.toArray().forEach(share => {
+                    previews[`app.share.entities.${share.hashlistId}.previewHtml`] = getShareEntityPreviewHTML(
+                        remix,
+                        share,
+                    )
+                })
+                remix.setData(previews)
+            }
+        }, DEBOUNCE_PREVIEW_DELAY)
 
     function embedFbCode() {
         window.fbAsyncInit = function () {
@@ -121,6 +142,10 @@ export default function initShare(options = {}) {
             type: 'string',
             default: '',
         },
+        'app.share.[entities HashList]./^[0-9a-z]+$/.previewHtml': {
+            type: 'string',
+            default: '',
+        },
         'app.share.[entities HashList]./^[0-9a-z]+$/.screen.id': {
             type: 'string',
             default: '',
@@ -138,6 +163,10 @@ export default function initShare(options = {}) {
             default: '',
         },
         'app.share.defaultDescription': {
+            type: 'string',
+            default: '',
+        },
+        'app.share.previewHtml': {
             type: 'string',
             default: '',
         },
@@ -164,6 +193,11 @@ export default function initShare(options = {}) {
     Remix.registerTriggerAction('share:update_share_entities', event => {
         // синхронизировать 'app.share.entities' с существующими шаринг кнопками в приложении
         updateShare()
+        updatePreviews()
+    })
+
+    Remix.registerTriggerAction('share:update_share_previews', event => {
+        updatePreviews()
     })
 
     remix.addTrigger({
