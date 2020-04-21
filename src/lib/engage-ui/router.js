@@ -123,8 +123,8 @@ class Router extends React.Component {
         const switchEffectStyle = {
             none: {},
             moveleft: { transform: 'translateX(' + this.state.scrLeft + 'px)' },
-            //TODO[DM]: Slide both screens
-            slide: { transform: 'translateX(' + this.state.scrLeft + 'px)' },
+            //TODO[DM]: Slide both screens logic
+            slide: {},
             fadein: {
                 visibility: this.state.visibilityScr,
                 opacity: this.state.opacityScr,
@@ -164,7 +164,7 @@ class Router extends React.Component {
                                     : '__transition'
                                 : '')
                         }
-                        style={isFadeAnimation ? switchEffectStylePrevScreen.fadein : switchEffectStylePrevScreen.none}
+                        style={switchEffectStylePrevScreen[this.props.switchEffect]}
                     >
                         <Screen {...prevScr} id={this.state.prevScreenId}></Screen>
                     </div>
