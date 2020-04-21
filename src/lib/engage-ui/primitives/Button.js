@@ -59,8 +59,13 @@ class Button extends React.Component {
             st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)'
         }
 
+        // Delete inline background-color style,
+        if (isArrow) {
+            delete st.backgroundColor
+        }
+
         return (
-            <button className={`rmx-component rmx-button  __${sizeMod}`} style={st}>
+            <button className={`rmx-component rmx-button ${isArrow ? '__with-arrow' : ''}  __${sizeMod}`} style={st}>
                 <div className="clipped">
                     {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color={arrowColor} />}
                     <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />

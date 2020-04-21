@@ -32,6 +32,12 @@ p {
 .rmx-scr_container_item.__transition {
     transition: transform 0.5s;
 }
+.rmx-scr_container_item.__transition-opacity-in {
+    transition: opacity 0.45s linear;
+}
+.rmx-scr_container_item.__transition-opacity-out {
+    transition: visibility 0s 0.45s, opacity 0.45s linear;
+}
 
 .rmx-screen {
     position: absolute;
@@ -74,6 +80,14 @@ p {
 }
 .rmx-button.__white:hover {
     background-color: #fafafa;
+}
+
+.rmx-button.__with-arrow {
+    background-color: #e1e1e4;
+}
+
+.rmx-button.__with-arrow:hover {
+    background-color: #c7c8ca;
 }
 
 .rmx-control {
@@ -126,4 +140,16 @@ p {
     padding: 0;
     word-break: break-word;
     white-space: normal;
+}
+
+.rmx-collage {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.rmx-collage-subitems-wrap {
+    height: 100%;
+    display: inline-block;
 }

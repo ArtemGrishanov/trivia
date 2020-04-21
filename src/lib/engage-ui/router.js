@@ -17,6 +17,10 @@ class Router extends React.Component {
             showPrevScreen: false,
             transition: false,
             scrLeft: 0,
+            opacityScr: 1,
+            opacityScrPrev: 0,
+            visibilityScr: 'visible',
+            visibilityScrPrev: 'hidden',
         }
         this.timeoutId = null
     }
@@ -30,23 +34,51 @@ class Router extends React.Component {
             this.renderStaticMarkup()
         } else {
             if (prevProps.currentScreenId && this.props.currentScreenId !== prevProps.currentScreenId) {
-                this.setState({
-                    prevScreenId: prevProps.currentScreenId,
-                    scrLeft: 999,
-                    transition: false,
-                    showPrevScreen: true,
-                })
-                setTimeout(() => {
+                if (this.props.switchEffect === 'moveleft') {
                     this.setState({
-                        scrLeft: 0,
-                        transition: true,
+                        prevScreenId: prevProps.currentScreenId,
+                        scrLeft: 999,
+                        transition: false,
+                        showPrevScreen: true,
                     })
-                }, 0)
-                setTimeout(() => {
+                    setTimeout(() => {
+                        this.setState({
+                            scrLeft: 0,
+                            transition: true,
+                        })
+                    }, 0)
+                    setTimeout(() => {
+                        this.setState({
+                            showPrevScreen: false,
+                        })
+                    }, 501) // .rmx-scr_container_item.__transition delay
+                }
+                if (this.props.switchEffect === 'fadein') {
+                    console.log('toggle fade in!')
                     this.setState({
-                        showPrevScreen: false,
+                        prevScreenId: prevProps.currentScreenId,
+                        showPrevScreen: true,
+                        transition: false,
+                        opacityScr: 0,
+                        visibilityScr: 'hidden',
+                        opacityScrPrev: 1,
+                        visibilityScrPrev: 'visible',
                     })
-                }, 501) // .rmx-scr_container_item.__transition delay
+                    setTimeout(() => {
+                        this.setState({
+                            transition: true,
+                            opacityScr: 1,
+                            visibilityScr: 'visible',
+                            opacityScrPrev: 0,
+                            visibilityScrPrev: 'hidden',
+                        })
+                    }, 0)
+                    setTimeout(() => {
+                        this.setState({
+                            showPrevScreen: false,
+                        })
+                    }, 651)
+                }
             }
         }
     }
@@ -73,6 +105,8 @@ class Router extends React.Component {
     }
 
     render() {
+        const isFadeAnimation = this.props.switchEffect === 'fadein'
+
         const st = {
             backgroundColor: this.props.backgroundColor,
         }
@@ -86,9 +120,28 @@ class Router extends React.Component {
             })
         }
 
+        const switchEffectStyle = {
+            none: {},
+            moveleft: { transform: 'translateX(' + this.state.scrLeft + 'px)' },
+            //TODO[DM]: Slide both screens logic
+            slide: {},
+            fadein: {
+                visibility: this.state.visibilityScr,
+                opacity: this.state.opacityScr,
+            },
+        }
+        const switchEffectStylePrevScreen = {
+            none: {},
+            fadein: {
+                visibility: this.state.visibilityScrPrev,
+                opacity: this.state.opacityScrPrev,
+            },
+        }
+
         return (
             <div className="rmx-scr_container" style={st}>
                 {this.props.screens.length === 0 && <p>no screens</p>}
+
                 {/* Render all screens first time in 'edit' */}
                 {editable &&
                     this.props.screens.toArray().map(s => {
@@ -99,16 +152,37 @@ class Router extends React.Component {
                             </div>
                         )
                     })}
+
+                {/* Render previous screen */}
                 {!editable && this.state.showPrevScreen && prevScr && (
-                    <div className="rmx-scr_container_item">
+                    <div
+                        className={
+                            'rmx-scr_container_item ' +
+                            (this.state.transition
+                                ? isFadeAnimation
+                                    ? '__transition-opacity-out'
+                                    : '__transition'
+                                : '')
+                        }
+                        style={switchEffectStylePrevScreen[this.props.switchEffect]}
+                    >
                         <Screen {...prevScr} id={this.state.prevScreenId}></Screen>
                     </div>
                 )}
+
+                {/* Render current screen */}
                 {scr && (
                     <div
                         ref={refs[this.props.currentScreenId]}
-                        className={'rmx-scr_container_item ' + (this.state.transition ? '__transition' : '')}
-                        style={{ transform: 'translateX(' + this.state.scrLeft + 'px)' }}
+                        className={
+                            'rmx-scr_container_item ' +
+                            (this.state.transition
+                                ? isFadeAnimation
+                                    ? '__transition-opacity-in'
+                                    : '__transition'
+                                : '')
+                        }
+                        style={switchEffectStyle[this.props.switchEffect]}
                     >
                         <Screen {...scr} id={this.props.currentScreenId} editable={editable}></Screen>
                     </div>
@@ -134,8 +208,8 @@ export const Schema = new DataSchema({
     },
     switchEffect: {
         type: 'string',
-        enum: ['none'],
-        default: 'none',
+        enum: ['none', 'moveleft', 'fadein', 'slide'],
+        default: 'fadein',
     },
     screens: {
         type: 'hashlist',
