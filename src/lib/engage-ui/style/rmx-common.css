@@ -32,6 +32,12 @@ p {
 .rmx-scr_container_item.__transition {
     transition: transform 0.5s;
 }
+.rmx-scr_container_item.__transition-opacity-in {
+    transition: opacity 0.45s linear;
+}
+.rmx-scr_container_item.__transition-opacity-out {
+    transition: visibility 0s 0.45s, opacity 0.45s linear;
+}
 
 .rmx-screen {
     position: absolute;
