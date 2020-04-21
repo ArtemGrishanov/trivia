@@ -1,5 +1,6 @@
 import { getPropertiesBySelector, assignByPropertyString, getPathes } from './object-path.js'
 import HashList from './hashlist.js'
+import { htmlDecode } from './remix/util/util'
 
 export default class Normalizer {
     /**
@@ -79,37 +80,6 @@ export default class Normalizer {
         })
         return state
     }
-    // process(state) {
-    //     this.dataSchema.selectorsInProcessOrder.forEach( (selector) => {
-
-    //         // for each property in dataSchema fetch property value by path, exmaple "property.deep.path.value"
-    //         // in common case there could be many properties for one selector
-    //         const requestResult = getPropertiesBySelector(state, selector);
-    //         if (requestResult.length > 0) {
-    //             requestResult.forEach( (res) => {
-    //                 // normalize that value according dataSchema rules
-    //                 const normValue = this.processValue(res.path, res.value);
-    //                 assignByPropertyString(state, res.path, normValue);
-    //             });
-    //         }
-    //         else {
-    //             // no properties were found, we must create new pathes and values
-
-    //             // нужно создать по регэкспу сабпроперти ? по идее да это второй вариант ниже который описан
-    //             // иначе это присвоение одного и тоже значения (а не копий) в разные ветви стейта
-    //             // создать свойства а потом присвоить?
-    //             //assignByPropertyString(state, selector, this.processValue(selector, undefined));
-
-    //             // 2.
-    //             const pathes = getPathes(state, selector)
-    //             pathes.forEach((path) => {
-    //                 const normValue = this.processValue(path, undefined); // важно: делаем это каждый раз, так как нам нужен новый инстанс значения в каждый path стейта
-    //                 assignByPropertyString(state, path, normValue)
-    //             });
-    //         }
-    //     });
-    //     return state;
-    // }
 
     /**
      *
@@ -164,7 +134,7 @@ export default class Normalizer {
 
     processString(info, value) {
         if (typeof value === 'string') {
-            // do nothing
+            value = htmlDecode(value)
         } else if (typeof value === 'number' || typeof value === 'boolean') {
             value = value.toString()
         } else {
