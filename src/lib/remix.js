@@ -9,6 +9,8 @@ import {
     getComponentIdFromPath,
     debounce,
     callOncePerTime,
+    htmlEncode,
+    htmlDecode,
 } from './remix/util/util.js'
 import { getAdaptedChildrenProps } from './engage-ui/layout/LayoutAdapter.js'
 
@@ -1136,24 +1138,6 @@ export function serialize2(state, options = {}) {
         }
     })
     return JSON.stringify(res)
-}
-
-const encodeChars = [`\n`, `\r`, `\``, `'`, `"`, `<`, `>`]
-
-function htmlEncode(html) {
-    encodeChars.forEach(char => {
-        const reg = new RegExp(char, 'g')
-        html = html.replace(reg, `U+${char.charCodeAt(0)};`)
-    })
-    return html
-}
-
-function htmlDecode(str) {
-    encodeChars.forEach(char => {
-        const reg = new RegExp(`U\\+${char.charCodeAt(0)};`, 'g')
-        str = str.replace(reg, char)
-    })
-    return str
 }
 
 /**
