@@ -17,6 +17,8 @@ import { Schema as TextSchema } from '../primitives/Text'
 import FbButton from '../primitives/social/FbButton'
 import { Schema as FbButtonSchema } from '../primitives/social/FbButton'
 import Screen from '../Screen'
+import Progress from './../primitives/Progress'
+import { Schema as ProgressSchema } from './../primitives/Progress'
 
 const COMPONENTS = [
     <Control id={500} schema={TextSchema} width={800} height={300}>
@@ -283,6 +285,33 @@ const COMPONENTS = [
             borderColor={'#000'}
             backgroundColor={'#fff'}
             text='<p class="ql-align-center">Next</p>'
+        />
+    </Control>,
+    <Control id={525} schema={ProgressSchema} width={800} height={200}>
+        <Progress
+            id={'progress1'}
+            variant="variant0"
+            width={32}
+            height={25}
+            step={2}
+            max={10}
+            fontSize={14}
+            color="green"
+        />
+    </Control>,
+    <Control id={526} schema={ProgressSchema} width={800} height={200}>
+        <Progress
+            id={'progress2'}
+            variant="variant1"
+            width={300}
+            height={25}
+            step={2}
+            max={10}
+            fontSize={14}
+            color="red"
+            backgroundLine="green"
+            backgroundFilledLine="blue"
+            borderRadius={16}
         />
     </Control>,
 ]
