@@ -13,6 +13,7 @@ import initQuizPoints from './lib/plugins/quiz-points'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import { getScreenHTMLPreview } from './lib/remix/util/util'
 
 Remix.setStore(store)
 
@@ -47,6 +48,25 @@ initQuizPoints({
 initShare({
     remix: Remix,
     displayTypes: ['FbButton'],
+    /**
+     * Функция для генерации главного превью приложения в виде HTML
+     * Отсылается вовне, в редактор, где на основе этого html кода будет создано графическое превью
+     * Css стили - это те же самые стили, что и для типа проекта загруженный через админку файл
+     */
+    getMainPreviewHTML: remix => {
+        const state = remix.getState(),
+            screen = state.router.screens.getByIndex(0) // это может быть кавер скрин или первый вопрос
+        return getScreenHTMLPreview({ screen, defaultTitle: 'Take the quiz!' })
+    },
+    /**
+     * Функция для генерации превью для каждого отдельного результата шаринга
+     */
+    getShareEntityPreviewHTML: (remix, shareEntity) => {
+        const screenId = shareEntity.screen.id,
+            state = remix.getState(),
+            resultScreen = state.router.screens[screenId]
+        return getScreenHTMLPreview({ screen: resultScreen, defaultTitle: 'Result title' })
+    },
 })
 
 initGoogleAnalytics({ remix: Remix })
