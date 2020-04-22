@@ -137,3 +137,39 @@ export function callOncePerTime(func, wait) {
         }
     }
 }
+
+/**
+ * Получить простое превью экрана в виде html строки
+ * Берется фон экрана и один текст на нем.
+ *
+ * @param {Screen} screen
+ * @param {string} defaultTitle
+ */
+export function getScreenHTMLPreview({ screen, defaultTitle }) {
+    const FB_SHARE_WIDTH = 1200, // поддерживаем пока один фикс размер шаринг картинки
+        FB_SHARE_HEIGHT = 630,
+        mainTextCmp = screen.components.toArray().find(c => c.displayName === 'Text'),
+        backStyle = `width:${FB_SHARE_WIDTH}px;
+            height:${FB_SHARE_HEIGHT}px;
+            padding:100px;
+            box-sizing:border-box;
+            text-align:center;
+            background-image:url(${screen.backgroundImage});
+            background-size:cover;
+            background-color:${screen.backgroundColor};
+            color:#fff;
+            font-size:48px;
+            display:flex;
+            justify-content:center;
+            align-items:center;`
+
+    let mainText = mainTextCmp ? mainTextCmp.text.replace(/<[^>]+>/g, '') : null
+
+    if (!mainText) {
+        mainText = defaultTitle
+    }
+
+    return `<div style="${backStyle}">
+                ${mainText}
+            </div>`
+}
