@@ -27,7 +27,7 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
             [finalScreen] = event.remix.getScreens({ tag: 'final' })
 
         const collage = getCollageComponent(finalScreen)
-        console.log(enable, collage, 'COLLAGE DATA')
+
         if (enable) {
             if (finalScreen && !collage) {
                 const [finalScreen] = event.remix.getScreens().filter(x => x.tags === 'screen final')
