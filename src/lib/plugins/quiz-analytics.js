@@ -179,6 +179,7 @@ const initQuizAnalytics = ({
     remix.addTrigger({
         when: {
             eventType: 'property_updated',
+            condition: { prop: 'path', clause: 'EQUALS', value: 'router.currentScreenId' },
         },
         then: { actionType: ENGAGEMENT_START_SCREEN },
     })
