@@ -178,6 +178,14 @@ const initQuizAnalytics = ({
 
     remix.addTrigger({
         when: {
+            eventType: 'onclick',
+            condition: { prop: 'tags', clause: 'CONTAINS', value: logoImgTag },
+        },
+        then: { actionType: LOGO_CLICK },
+    })
+
+    remix.addTrigger({
+        when: {
             eventType: 'property_updated',
             condition: { prop: 'path', clause: 'EQUALS', value: 'router.currentScreenId' },
         },
