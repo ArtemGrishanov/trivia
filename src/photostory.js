@@ -10,10 +10,15 @@ import Remix from './lib/remix'
 import initRemixRouting from './lib/plugins/remix-routing'
 import initScreenProgress from './lib/plugins/screen-progress'
 import initCoverScreen from './lib/plugins/cover-screen'
+import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 
 Remix.setStore(store)
+
+initScreenCollage({
+    remix: Remix,
+})
 
 initCoverScreen({
     remix: Remix,
