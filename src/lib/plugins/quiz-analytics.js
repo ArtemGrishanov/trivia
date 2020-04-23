@@ -6,13 +6,14 @@ const TEST_QUESTION_STARTED = 'TEST_QUESTION_STARTED'
 const TEST_QUESTION_ANSWERED = 'TEST_QUESTION_ANSWERED'
 const TEST_RESULT_SHARED = 'TEST_RESULT_SHARED'
 const SOCIAL_SHARE = 'SOCIAL_SHARE'
-const TEST_RESULT_DOWNLOAD = 'TEST_RESULT_DOWNLOAD'
+const TEST_RESULT_DOWNLOADED = 'TEST_RESULT_DOWNLOAD'
 const PASS_TEST_AGAIN_CLICKED = 'PASS_TEST_AGAIN_CLICKED'
 const LOGO_CLICK = 'LOGO_CLICK'
 const SHARED_BY = 'SHARED_BY'
 
 const initQuizAnalytics = ({
     remix,
+    logoImgTag = 'logo',
     startScreenTag = 'start',
     startBtnTag = 'coverStartBtn',
     resultScreenTag = 'result',
@@ -21,7 +22,7 @@ const initQuizAnalytics = ({
     restartBtnTag = 'restart',
     shareBtnTag = 'share',
     socialShareBtnTag = 'socialShare',
-    logoImgTag = 'logo',
+    downloadBtnTag = 'download',
 }) => {
     if (!remix) {
         console.error(`remix is: ${remix}`)
@@ -176,6 +177,17 @@ const initQuizAnalytics = ({
         })
     })
 
+    remix.registerTriggerAction(TEST_RESULT_DOWNLOADED, event => {
+        event.remix.postMessage('analytics', {
+            type: 'standard',
+            actionType: 'test_result_downloaded',
+        })
+        event.remix.postMessage('analytics', {
+            type: 'conversion',
+            actionType: 'test_result_downloaded',
+        })
+    })
+
     remix.addTrigger({
         when: {
             eventType: 'onclick',
@@ -254,6 +266,14 @@ const initQuizAnalytics = ({
             condition: { prop: 'socialName', clause: 'EXISTS' },
         },
         then: { actionType: SHARED_BY },
+    })
+
+    remix.addTrigger({
+        when: {
+            eventType: 'onclick',
+            condition: { prop: 'tags', clause: 'CONTAINS', value: downloadBtnTag },
+        },
+        then: { actionType: TEST_RESULT_DOWNLOADED },
     })
 }
 
