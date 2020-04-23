@@ -1,6 +1,4 @@
-import sizeMe from 'react-sizeme'
 import PropsNormalizer from './PropsNormalizer'
-import { getPropertiesBySelector } from '../object-path'
 import { connect } from 'react-redux'
 import LayoutItem from './layout/LayoutItem'
 import { setData } from '../remix'
@@ -95,7 +93,6 @@ export default (Component, Schema, DisplayName) => {
         default: {
             composed = compose(
                 LayoutItem(),
-                // sizeMe({monitorHeight: true, noPlaceholder: true}),
                 //TODO It works without componentConnect Is screenConnect sufficient?
                 //componentConnect(),
                 withPropNormalizer(Schema, DisplayName),
@@ -146,7 +143,10 @@ function routerConnect() {
 function screenConnect() {
     return connect((state, ownProps) => {
         if (ownProps.id && state.router.screens[ownProps.id]) {
-            return state.router.screens[ownProps.id]
+            return {
+                ...state.router.screens[ownProps.id],
+                ...state.session,
+            }
         }
         return {}
     })

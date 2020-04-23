@@ -26,10 +26,10 @@ class FbButton extends React.Component {
                 entity = state.app.share.entities.toArray().find(e => e.componentId === this.props.id)
 
             if (entity && entity.href) {
-                FB.ui(
+                window.FB.ui(
                     {
                         method: 'share',
-                        href: this.props.entity.href,
+                        href: entity.href,
                     },
                     response => {},
                 )

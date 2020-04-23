@@ -72,6 +72,7 @@ class TextEditor extends React.Component {
             prevPropText: props.text,
         }
         this.handleChange = this.handleChange.bind(this)
+        this.contentRef = React.createRef()
     }
 
     handleChange(value) {
@@ -99,7 +100,7 @@ class TextEditor extends React.Component {
     // 2. always - check which fonts is used and add styles dynamically
     render() {
         return (
-            <div className={`rmx-text-editor ${this.props.readOnly ? '__readonly' : ''}`}>
+            <div className={`rmx-text-editor ${this.props.readOnly ? '__readonly' : ''}`} ref={this.contentRef}>
                 <ReactQuill
                     readOnly={this.props.readOnly}
                     modules={this.modules}
@@ -110,7 +111,13 @@ class TextEditor extends React.Component {
         )
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        if (this.props.getContentRect) {
+            if (this.contentRef && this.contentRef.current) {
+                this.props.getContentRect(this.contentRef.current.getBoundingClientRect())
+            }
+        }
+    }
 
     componentDidUpdate(prevProps) {
         if (!this.props.readOnly) {

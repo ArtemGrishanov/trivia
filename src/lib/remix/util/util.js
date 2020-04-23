@@ -106,15 +106,23 @@ export function flattenProperties(obj = {}, path = '', result = {}) {
 }
 
 export function debounce(func, wait, immediate) {
-    let timeout
+    let timeout = null
+
     return function () {
-        let context = this,
-            args = arguments
-        let later = function () {
+        const [context, args] = [this, arguments]
+        const later = function () {
             timeout = null
             if (!immediate) {
                 func.apply(context, args)
             }
+        }
+        const callNow = immediate && !timeout
+
+        clearTimeout(timeout)
+        timeout = setTimeout(later, wait)
+
+        if (callNow) {
+            func.apply(context, args)
         }
     }
 }
@@ -128,4 +136,58 @@ export function callOncePerTime(func, wait) {
             timeout = setTimeout(() => (timeout = null), wait)
         }
     }
+}
+
+const encodeChars = [`\n`, `\r`, `\``, `'`, `"`, `<`, `>`]
+
+export function htmlEncode(html) {
+    encodeChars.forEach(char => {
+        const reg = new RegExp(char, 'g')
+        html = html.replace(reg, `U+${char.charCodeAt(0)};`)
+    })
+    return html
+}
+
+export function htmlDecode(str) {
+    encodeChars.forEach(char => {
+        const reg = new RegExp(`U\\+${char.charCodeAt(0)};`, 'g')
+        str = str.replace(reg, char)
+    })
+    return str
+}
+
+/**
+ * Получить простое превью экрана в виде html строки
+ * Берется фон экрана и один текст на нем.
+ *
+ * @param {Screen} screen
+ * @param {string} defaultTitle
+ */
+export function getScreenHTMLPreview({ screen, defaultTitle }) {
+    const FB_SHARE_WIDTH = 1200, // поддерживаем пока один фикс размер шаринг картинки
+        FB_SHARE_HEIGHT = 630,
+        mainTextCmp = screen.components.toArray().find(c => c.displayName === 'Text'),
+        backStyle = `width:${FB_SHARE_WIDTH}px;
+            height:${FB_SHARE_HEIGHT}px;
+            padding:100px;
+            box-sizing:border-box;
+            text-align:center;
+            background-image:url(${screen.backgroundImage});
+            background-size:cover;
+            background-color:${screen.backgroundColor};
+            color:#fff;
+            font-size:48px;
+            display:flex;
+            justify-content:center;
+            align-items:center;`
+
+    let mainText = mainTextCmp ? mainTextCmp.text.replace(/<[^>]+>/g, '') : null
+
+    if (!mainText) {
+        mainText = defaultTitle
+    }
+
+    return `<div style="${backStyle}">
+                ${mainText}
+            </div>`
 }

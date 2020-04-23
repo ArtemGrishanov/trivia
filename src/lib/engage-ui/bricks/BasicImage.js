@@ -44,6 +44,8 @@ class BasicImage extends React.Component {
         this.thumbRatio = undefined
         this.thumbImage = null
         this.onClick = this.onClick.bind(this)
+        this.reveal1Timer = null
+        this.reveal2Timer = null
     }
 
     componentDidUpdate() {
@@ -54,12 +56,21 @@ class BasicImage extends React.Component {
         this.startLoading()
     }
 
+    componentWillUnmount() {
+        if (this.reveal1Timer) {
+            clearTimeout(this.reveal1Timer)
+        }
+        if (this.reveal2Timer) {
+            clearTimeout(this.reveal2Timer)
+        }
+    }
+
     startLoading() {
         if (!this.isLoaded()) {
             this.loadThumbImage()
                 .then(() => this.loadFullImage())
                 .then(() => {
-                    setTimeout(
+                    this.reveal1Timer = setTimeout(
                         () =>
                             this.setState({
                                 imageMods: 'reveal',
@@ -67,7 +78,7 @@ class BasicImage extends React.Component {
                             }),
                         0,
                     )
-                    setTimeout(
+                    this.reveal2Timer = setTimeout(
                         () =>
                             this.setState({
                                 step: STATE_SHOW,

@@ -44,7 +44,13 @@ class Screen extends React.Component {
                         ></BasicImage>
                     </div>
                 )}
-                <LayoutContainer editable={this.props.editable} id={'__lc_of_screen_' + this.props.id}>
+                <LayoutContainer
+                    editable={this.props.editable}
+                    id={'__lc_of_screen_' + this.props.id}
+                    width={this.props.size.width}
+                    height={this.props.size.height}
+                    adaptedui={this.props.adaptedui}
+                >
                     {components}
                 </LayoutContainer>
             </div>
@@ -84,7 +90,7 @@ export const Schema = new DataSchema({
     staticMarkup: {
         type: 'string',
         minLength: 0,
-        maxLength: 32000,
+        maxLength: 512000,
         default: '',
         serialize: false,
     },

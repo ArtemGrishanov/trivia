@@ -7,8 +7,12 @@ import {
     combineReducers,
     getScreenIdFromPath,
     getComponentIdFromPath,
+    debounce,
     callOncePerTime,
+    htmlEncode,
+    htmlDecode,
 } from './remix/util/util.js'
+import { getAdaptedChildrenProps } from './engage-ui/layout/LayoutAdapter.js'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -23,6 +27,9 @@ export const REMIX_MARK_AS_EXECUTED = '__REMIX_MARK_AS_EXECUTED__'
 export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
+export const REMIX_PRE_RENDER = '__Remix_pre_render__'
+export const REMIX_SET_ADAPTED_PROPS = '__Remix_set_adapted_props__'
+export const REMIX_SET_SESSION_SIZE = '__Remix_set_session_size__'
 
 //TODO specify origin during publishing?
 //const containerOrigin = "http://localhost:8080";
@@ -32,6 +39,7 @@ const LOG_BY_DEFAULT = false
 const USER_ACTIVITY_EVENTS = ['mousemove', 'keydown']
 
 let logging = LOG_BY_DEFAULT,
+    root = null,
     containerOrigin = null,
     containerWindow = null,
     store = null,
@@ -156,6 +164,20 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
             _sendOuterEvents()
         }
     }
+    if (data.method === 'set_remix_container_size') {
+        console.log(`set_remix_container_size ${data.size.width} ${data.size.height}`)
+        if (data.size.width > 0) {
+            root.style.width = data.size.width + 'px'
+        }
+        if (data.size.height > 0) {
+            root.style.height = data.size.height + 'px'
+        }
+        updateWindowSize()
+    }
+}
+
+function onWindowResize() {
+    updateWindowSize()
 }
 
 /**
@@ -182,7 +204,9 @@ function setCurrentScreen(screenId) {
 }
 
 /**
- * Sets application width and height
+ * Sets default application width and height
+ * Application will start with this size if width/height not specified in init()
+ *
  * Value will be set, if not "undefined"
  *
  * It changes value in state only. In fact width-height are governed by rcontainer (and by loader.js params)
@@ -190,7 +214,7 @@ function setCurrentScreen(screenId) {
  * @param {number} width
  * @param {number} height
  */
-function setSize(width, height) {
+export function setSize(width, height) {
     // find propertes in schema responsible for width and height
     const data = {}
     if (width !== undefined) {
@@ -215,6 +239,180 @@ function setSize(width, height) {
     }
     if (Object.keys(data).length > 0) {
         setData(data)
+    }
+}
+
+/**
+ * Обновить размер приложения в рамках сессии
+ * Запустится процедура адаптации UI для новой ширины
+ *
+ * @param {number} width
+ * @param {number} height
+ */
+function updateWindowSize() {
+    const state = getState()
+    let width, height
+    if (getMode() === 'edit') {
+        const rect = root.getBoundingClientRect()
+        width = rect.width
+        height = rect.height
+    } else {
+        width = window.innerWidth
+        height = window.innerHeight
+    }
+    console.log(`updateWindowSize ${width} ${height}`)
+    // width === 0 | height === 0, window may be not loaded yet
+    if (width > 0 && height > 0 && (width !== state.session.size.width || height !== state.session.size.height)) {
+        const defaultWidth = state.app.size.width
+        if (width !== defaultWidth) {
+            //TODO если произвели, но потом отредактировали экран, то заново или слияние?
+            // если адаптация для этой ширины еще не прооизведена, то сделать ее
+            if (!state.session.adaptedui[width]) {
+                console.log(`Adaptation running for width=${width} ...`)
+                // пройти по всем экранам и компонентам приложения и получить адаптированные свойства для новой ширины приложения width
+                let adaptedComponentsProps = {}
+                state.router.screens.toArray().forEach(scr => {
+                    const components = []
+                    scr.components.toArray().forEach(c => components.push({ ...c, id: c.hashlistId }))
+                    adaptedComponentsProps = {
+                        ...adaptedComponentsProps,
+                        ...getAdaptedChildrenProps(components, {
+                            origCntWidth: defaultWidth,
+                            containerWidth: width,
+                        }),
+                    }
+                })
+                store.dispatch({
+                    type: REMIX_SET_SESSION_SIZE,
+                    width,
+                    height,
+                })
+                store.dispatch({
+                    type: REMIX_SET_ADAPTED_PROPS,
+                    width,
+                    props: adaptedComponentsProps,
+                })
+                requestComponentsBoundingRect()
+            } else {
+                console.log(`Adaptation already exist for width=${width}`)
+                if (height !== state.session.adaptedui[width].height) {
+                    // Хотя session size изменится в результате запроса 'requestSetSize', мы вынуждены сделать изменение размера сессии немедленно
+                    // так как после апдейта REMIX_SET_ADAPTED_PROPS будет перестроен интерфейс и в этот момент требуется уже актуальной размер session.size
+                    store.dispatch({
+                        type: REMIX_SET_SESSION_SIZE,
+                        width,
+                        height: state.session.adaptedui[width].height,
+                    })
+                    console.log(`requestSetSize ${width} ${state.session.adaptedui[width].height}`)
+                    postMessage('requestSetSize', {
+                        size: {
+                            width,
+                            height: state.session.adaptedui[width].height,
+                        },
+                    })
+                }
+            }
+        } else {
+            store.dispatch({
+                type: REMIX_SET_SESSION_SIZE,
+                width,
+                height,
+            })
+        }
+    }
+}
+
+function requestComponentsBoundingRect() {
+    console.log(`requestComponentsBoundingRect`)
+    const components = []
+
+    getState()
+        .router.screens.toArray()
+        .forEach(scr => {
+            scr.components.toArray().forEach(c => (c.displayName === 'Text' ? components.push(c) : null))
+        })
+
+    // найти все объекты которые могут изменить свой размер из-за нового размера приложения
+    store.dispatch({
+        type: REMIX_PRE_RENDER,
+        components,
+    })
+}
+
+export function setComponentsRects(rects) {
+    console.log(`setComponentsRects`)
+    // продолжение адаптации по вертикали, запущенной в updateWindowSize
+    const { width, height } = getState().session.size,
+        defaultWidth = getState().app.size.width
+
+    let adaptedComponentsProps = {},
+        maxContentHeight = 0
+
+    console.log(`Vertical adaptation running for width=${width} ...`)
+
+    // пройти по всем экранам и компонентам приложения и получить адаптированные свойства для новой ширины приложения width
+    getState()
+        .router.screens.toArray()
+        .forEach(scr => {
+            const components = [],
+                attrs = {}
+            scr.components.toArray().forEach(c => {
+                const overr = { id: c.hashlistId }
+                if (rects[c.hashlistId]) {
+                    // добавляем измеренные размеры компонента в его свойства для более уточненной адаптации
+                    overr.width = rects[c.hashlistId].width
+                    overr.height = rects[c.hashlistId].height
+                }
+                components.push({
+                    ...c,
+                    ...overr,
+                })
+            })
+
+            adaptedComponentsProps = {
+                ...adaptedComponentsProps,
+                ...getAdaptedChildrenProps(
+                    components,
+                    {
+                        origCntWidth: defaultWidth,
+                        containerWidth: width,
+                    },
+                    attrs,
+                ),
+            }
+
+            maxContentHeight = Math.max(maxContentHeight, attrs.contentHeight)
+        })
+
+    // после смены размера экрана высота превысила исходную, контент не умещается по высоте
+    if (maxContentHeight > height) {
+        // Хотя session size изменится в результате запроса 'requestSetSize', мы вынуждены сделать изменение размера сессии немедленно
+        // так как после апдейта REMIX_SET_ADAPTED_PROPS будет перестроен интерфейс и в этот момент требуется уже актуальной размер session.size
+        store.dispatch({
+            type: REMIX_SET_SESSION_SIZE,
+            width,
+            height: maxContentHeight,
+        })
+        store.dispatch({
+            type: REMIX_SET_ADAPTED_PROPS,
+            width,
+            height: maxContentHeight,
+            props: adaptedComponentsProps,
+        })
+        console.log(`requestSetSize ${width} ${maxContentHeight}`)
+        postMessage('requestSetSize', {
+            size: {
+                width,
+                height: maxContentHeight,
+            },
+        })
+    } else {
+        store.dispatch({
+            type: REMIX_SET_ADAPTED_PROPS,
+            width,
+            height,
+            props: adaptedComponentsProps,
+        })
     }
 }
 
@@ -398,13 +596,11 @@ export function setStore(astore) {
  * Method for external init in index.html
  */
 function init({ externalActions = [], container = null, mode = 'none', defaultProperties = '', origin, source, log }) {
+    root = container
     containerOrigin = origin
     containerWindow = source
     logging = typeof log === 'boolean' ? log : LOG_BY_DEFAULT
     extActions = externalActions || []
-    // store.dispatch({
-    //     type: REMIX_INIT_ACTION
-    // });
     if (defaultProperties) {
         deserialize2(defaultProperties)
     } else if (window.__REMIX_DEFAULT_PROPERTIES__) {
@@ -418,6 +614,8 @@ function init({ externalActions = [], container = null, mode = 'none', defaultPr
     // mode устанавливаем после десериализации. Чтобы во время десериализации не рассылать события об изменении свойств
     // это произойдет потом единым событием
     setMode(mode)
+    updateWindowSize()
+    window.addEventListener('resize', debounce(onWindowResize, 500), false)
     stateHistory = []
     putStateHistory()
     Remix.fireEvent('remix_inited')
@@ -587,7 +785,18 @@ function router(state = {}, action) {
  * @param {*} state
  * @param {*} action
  */
-function session(state = { triggers: [], events: [], selectedComponentIds: [], mode: 'none' }, action) {
+function session(
+    state = {
+        triggers: [],
+        events: [],
+        selectedComponentIds: [],
+        mode: 'none',
+        prerender: {},
+        adaptedui: {},
+        size: { width: undefined, height: undefined },
+    },
+    action,
+) {
     switch (action.type) {
         case REMIX_ADD_TRIGGER: {
             //const newTriggers = (state.triggers) ? state.triggers.shallowClone().addElement(action.trigger): new HashList([action.trigger]);
@@ -634,6 +843,35 @@ function session(state = { triggers: [], events: [], selectedComponentIds: [], m
                 return { ...state, mode: action.mode }
             }
             return state
+        }
+        case REMIX_PRE_RENDER: {
+            return {
+                ...state,
+                prerender: {
+                    components: action.components,
+                },
+            }
+        }
+        case REMIX_SET_ADAPTED_PROPS: {
+            return {
+                ...state,
+                adaptedui: {
+                    ...state.adaptedui,
+                    [action.width]: {
+                        ...action.props,
+                        height: action.height,
+                    },
+                },
+            }
+        }
+        case REMIX_SET_SESSION_SIZE: {
+            return {
+                ...state,
+                size: {
+                    width: action.width,
+                    height: action.height,
+                },
+            }
         }
         default:
             return state
@@ -902,24 +1140,6 @@ export function serialize2(state, options = {}) {
     return JSON.stringify(res)
 }
 
-const encodeChars = [`\n`, `\r`, `\``, `'`, `"`, `<`, `>`]
-
-function htmlEncode(html) {
-    encodeChars.forEach(char => {
-        const reg = new RegExp(char, 'g')
-        html = html.replace(reg, `U+${char.charCodeAt(0)};`)
-    })
-    return html
-}
-
-function htmlDecode(str) {
-    encodeChars.forEach(char => {
-        const reg = new RegExp(`U\\+${char.charCodeAt(0)};`, 'g')
-        str = str.replace(reg, char)
-    })
-    return str
-}
-
 /**
  * Deserialize dynamic store properties
  * You can put string got from serialize method
@@ -980,6 +1200,25 @@ function getScreens(filter = {}) {
             }
             return filter.tag ? s.tags && s.tags.indexOf(filter.tag) >= 0 : true
         })
+}
+
+/**
+ * Helper method
+ * Get some components by its display name and tag
+ *
+ * @param {string} filter.displayName
+ * @param {string} filter.tags
+ */
+export function getComponents(filter = {}) {
+    const components = []
+    store
+        .getState()
+        .router.screens.toArray()
+        .filter(scr => (filter.tags ? scr.tags.indexOf(filter.tags) > 0 : true))
+        .forEach(scr => {
+            scr.components.toArray().forEach(c => (c.displayName === filter.displayName ? components.push(c) : null))
+        })
+    return components
 }
 
 /**
@@ -1158,6 +1397,7 @@ const remix = {
     setData,
     setSize,
     getScreens,
+    getComponents,
     addHashlistElement,
     changePositionInHashlist,
     deleteHashlistElement,

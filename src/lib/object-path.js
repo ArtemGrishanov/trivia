@@ -348,43 +348,8 @@ export function getPathes(obj, selector, resolvedPathesOnly = false) {
  * @return {boolean}
  */
 export function matchPropertyPath(propertyPath, selector) {
+    //export function matchPropertyPath(propertyPath, selector, filtrationData) {
     const s = new Selector(selector)
+    //return s.match(propertyPath, filtrationData);
     return s.match(propertyPath)
-    // if (propertyPath === selector) return true;
-    // if (!propertyPath || !selector) {
-    //     return false;
-    // }
-    // try {
-    //     const pathElems = propertyPath.split('.');
-    //     const selectorElems = selector.split('.');
-
-    //     const ppart0 = pathElems[0];
-    //     const spart0 = selectorElems[0];
-    //     if (spart0 === ppart0) {
-    //         return matchPropertyPath(pathElems.slice(1).join('.'), selectorElems.slice(1).join('.'));
-    //     }
-    //     // regex check. Expression expected in slashes /.../
-    //     if (spart0[0] === "/" && spart0[spart0.length-1] === "/") {
-    //         const reg = new RegExp(spart0.substring(1,spart0.length-1));
-    //         if (reg.exec(ppart0)) {
-    //             return matchPropertyPath(pathElems.slice(1).join('.'), selectorElems.slice(1).join('.'));
-    //         }
-    //         return false;
-    //     }
-    //     if (spart0[0] === "[" && spart0[spart0.length-1] === "]") {
-    //         // description with type found: "[myProperty Type]"
-    //         const pair = spart0.substring(1,spart0.length-1).split(' ');
-    //         const objName = pair[0]; // ex: "questions"
-    //         const objType = pair[1]; // ex: "Hashlist"
-    //         const ppart1 = pathElems[1]; // ex: "ugltc7"
-    //         if (objName === ppart0 && objType === "HashList") {
-    //             //TODO тип Hashlist проверить не можем
-    //             //TODO как видим пока жестко зашита поддержка одного типа HashList для эксперимента. Подумать, расширить.
-    //             return matchPropertyPath(pathElems.slice(1).join('.'), selectorElems.slice(1).join('.'));
-    //         }
-    //     }
-    // }
-    // catch(e) {
-    // }
-    // return false;
 }

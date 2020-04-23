@@ -29,6 +29,7 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
     const remix = options.remix
     const restartTag = options.restartTag
     const nextTag = options.nextTag
+    const prevTag = options.prevTag
 
     let screenIds = null
 
@@ -146,6 +147,16 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
         }
     })
 
+    Remix.registerTriggerAction('go_prev_screen', event => {
+        const stateRouter = store.getState().router
+        const routerScreens = stateRouter.screens
+        const curentScreenIndex = routerScreens.getIndex(stateRouter.currentScreenId)
+        if (curentScreenIndex > 0) {
+            const prevScreenIndex = routerScreens.getId(curentScreenIndex - 1)
+            event.remix.setCurrentScreen(prevScreenIndex)
+        }
+    })
+
     Remix.registerTriggerAction('restart', event => {
         if (remix.getMode() !== 'edit') {
             remix.setCurrentScreen(screenIds[0])
@@ -186,6 +197,13 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
         remix.addTrigger({
             when: { eventType: 'onclick', condition: { prop: 'tags', clause: 'CONTAINS', value: nextTag } },
             then: { actionType: 'go_next_screen' },
+        })
+    }
+
+    if (prevTag) {
+        remix.addTrigger({
+            when: { eventType: 'onclick', condition: { prop: 'tags', clause: 'CONTAINS', value: prevTag } },
+            then: { actionType: 'go_prev_screen' },
         })
     }
 }
