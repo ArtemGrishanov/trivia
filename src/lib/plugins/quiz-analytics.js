@@ -10,6 +10,7 @@ const TEST_RESULT_DOWNLOADED = 'TEST_RESULT_DOWNLOAD'
 const PASS_TEST_AGAIN_CLICKED = 'PASS_TEST_AGAIN_CLICKED'
 const LOGO_CLICK = 'LOGO_CLICK'
 const SHARED_BY = 'SHARED_BY'
+const EXTERNAL_LINK = 'EXTERNAL_LINK'
 
 const initQuizAnalytics = ({
     remix,
@@ -23,6 +24,7 @@ const initQuizAnalytics = ({
     shareBtnTag = 'share',
     socialShareBtnTag = 'socialShare',
     downloadBtnTag = 'download',
+    externalLinkTag = 'externalLink',
 }) => {
     if (!remix) {
         console.error(`remix is: ${remix}`)
@@ -188,6 +190,17 @@ const initQuizAnalytics = ({
         })
     })
 
+    remix.registerTriggerAction(EXTERNAL_LINK, event => {
+        event.remix.postMessage('analytics', {
+            type: 'standard',
+            actionType: 'external_link',
+        })
+        event.remix.postMessage('analytics', {
+            type: 'conversion',
+            actionType: 'external_link',
+        })
+    })
+
     remix.addTrigger({
         when: {
             eventType: 'onclick',
@@ -274,6 +287,14 @@ const initQuizAnalytics = ({
             condition: { prop: 'tags', clause: 'CONTAINS', value: downloadBtnTag },
         },
         then: { actionType: TEST_RESULT_DOWNLOADED },
+    })
+
+    remix.addTrigger({
+        when: {
+            eventType: 'onclick',
+            condition: { prop: 'tags', clause: 'CONTAINS', value: externalLinkTag },
+        },
+        then: { actionType: EXTERNAL_LINK },
     })
 }
 
