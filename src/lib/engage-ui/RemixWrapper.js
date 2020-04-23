@@ -4,7 +4,6 @@ import { getPropertiesBySelector } from '../object-path'
 import { connect } from 'react-redux'
 import LayoutItem from './layout/LayoutItem'
 import { setData } from '../remix'
-import DataSchema from '../schema'
 
 const componentClassMap = {}
 
@@ -162,9 +161,9 @@ function componentConnect() {
 
 function withPropNormalizer(Schema, DisplayName) {
     return PropsNormalizer(
-        new DataSchema({
+        Schema.extend({
             ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA, // use common Remix Components properties
             ...{ displayName: { ...REMIX_COMPONENTS_COMMON_PROPS_SCHEMA.displayName, ...{ default: DisplayName } } }, // use specific displayName for each Component type
-        }).extend(Schema),
+        }),
     )
 }
