@@ -18,6 +18,7 @@ Remix.setStore(store)
 
 initScreenCollage({
     remix: Remix,
+    screenTag: 'final',
 })
 
 initCoverScreen({
@@ -30,8 +31,8 @@ initRemixRouting({
     remix: Remix,
     // some params specially for Remix-Routing plugin
     screenRoute: [
-        { tag: 'start' }, // show all scrrens with tag in linear order
-        { tag: 'photostoryitem', shuffle: true }, // show all scrrens with tag and shuffle them
+        { tag: 'start' }, // show all screens with tag in linear order
+        { tag: 'photostoryitem', shuffle: true }, // show all screens with tag and shuffle them
         { tag: 'final' },
     ],
     restartTag: 'restart',

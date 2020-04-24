@@ -1,15 +1,13 @@
 /**
- * Плагин добавляет экран Cover в приложение. Который будет стартовым экраном
+ * Плагин добавляет Collage на экран
  *
  * @param {array} options.screenTag
  */
-export default function initScreenCollage(options = { remix: null, screenTag: null, startBtnTag: null }) {
-    console.log('init collage plugin')
-
+export default function initScreenCollage(options = { remix: null, screenTag: null }) {
     const collageId = '__plugin__screenCollage',
-        screenTag = options.screenTag || '',
+        screenTag = options.screenTag || 'final',
         remix = options.remix
-
+    console.log(options)
     /**
      * Add new properties to app schema for additional plugin functionality
      * These properties will be added to the app state and normalized
@@ -24,17 +22,17 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
     Remix.registerTriggerAction('screenCollage:update_collage_screen', event => {
         const state = event.remix.getState(),
             enable = state.app.collage.enable,
-            [finalScreen] = event.remix.getScreens({ tag: 'final' })
+            [screen] = event.remix.getScreens({ tag: screenTag })
 
-        const collage = getCollageComponent(finalScreen)
+        const collage = getCollageComponent(screen)
 
         if (enable) {
-            if (finalScreen && !collage) {
+            if (screen && !collage) {
                 const [finalScreen] = event.remix.getScreens().filter(x => x.tags === 'screen final')
                 if (!finalScreen) {
                     return
                 }
-                event.remix.addHashlistElement(`router.screens.${finalScreen.hashlistId}.components`, undefined, {
+                event.remix.addHashlistElement(`router.screens.${screen.hashlistId}.components`, undefined, {
                     newElement: {
                         id: collageId,
                         displayName: `Collage`,
@@ -48,7 +46,7 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
             }
         } else {
             if (collage) {
-                event.remix.deleteScreenComponent(finalScreen.hashlistId, collage.hashlistId)
+                event.remix.deleteScreenComponent(screen.hashlistId, collage.hashlistId)
             }
         }
     })
@@ -57,14 +55,6 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
         when: {
             eventType: 'property_updated',
             condition: { prop: 'path', clause: 'EQUALS', value: 'app.collage.enable' },
-        },
-        then: { actionType: 'screenCollage:update_collage_screen' },
-    })
-
-    remix.addTrigger({
-        when: {
-            eventType: 'property_updated',
-            condition: { prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.disabled' },
         },
         then: { actionType: 'screenCollage:update_collage_screen' },
     })
