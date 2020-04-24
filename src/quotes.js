@@ -18,6 +18,9 @@ import { getScreenHTMLPreview } from './lib/remix/util/util'
 
 Remix.setStore(store)
 
+const PROJECT_TAG = 'quotes'
+const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
+
 initScreenCollage({
     remix: Remix,
     screenTag: 'final',
@@ -34,7 +37,7 @@ initRemixRouting({
     // some params specially for Remix-Routing plugin
     screenRoute: [
         { tag: 'start' }, // show all screens with tag in linear order
-        { tag: 'photostoryitem', shuffle: true }, // show all screens with tag and shuffle them
+        { tag: PROJECT_ITEM_TAG, shuffle: true }, // show all screens with tag and shuffle them
         { tag: 'final' },
     ],
     restartTag: 'restart',
@@ -44,7 +47,7 @@ initRemixRouting({
 
 initScreenProgress({
     remix: Remix,
-    screenTag: 'photostoryitem',
+    screenTag: PROJECT_ITEM_TAG,
 })
 
 initShare({
