@@ -17,7 +17,8 @@
 .rmx-text-editor.__readonly .quill {
     margin-top: 0 !important;
 }
-.rmx-button .rmx-text-editor.__readonly .ql-editor > * {
+.rmx-button .rmx-text-editor.__readonly .ql-editor > *,
+.rmx-option .rmx-text-editor.__readonly .ql-editor > * {
     cursor: pointer !important;
 }
 .ql-editor {
