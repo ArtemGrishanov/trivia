@@ -7,7 +7,6 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
     const collageId = '__plugin__screenCollage',
         screenTag = options.screenTag || 'final',
         remix = options.remix
-    console.log(options)
     /**
      * Add new properties to app schema for additional plugin functionality
      * These properties will be added to the app state and normalized
