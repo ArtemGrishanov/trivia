@@ -27,10 +27,6 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
 
         if (enable) {
             if (screen && !collage) {
-                const [finalScreen] = event.remix.getScreens().filter(x => x.tags === 'screen final')
-                if (!finalScreen) {
-                    return
-                }
                 event.remix.addHashlistElement(`router.screens.${screen.hashlistId}.components`, undefined, {
                     newElement: {
                         id: collageId,
