@@ -92,7 +92,7 @@ function getTriggersToExecute(triggers, event) {
     return toExec
 }
 
-const validClauses = ['contains', 'equals', 'match']
+const validClauses = ['contains', 'equals', 'match', 'exists']
 
 function conditionWorks(event, trigger) {
     const c = trigger.when.condition
@@ -131,6 +131,8 @@ function _condition(event, triggerCondition) {
         return event.eventData[triggerCondition.prop].toString().indexOf(triggerCondition.value) >= 0
     } else if (triggerCondition.clause.toLowerCase() === 'equals') {
         return event.eventData[triggerCondition.prop] === triggerCondition.value
+    } else if (triggerCondition.clause.toLowerCase() === 'exists') {
+        return triggerCondition.prop in event.eventData
     }
     return false
 }

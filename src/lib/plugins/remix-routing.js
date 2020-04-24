@@ -132,6 +132,8 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
         }
         if (nsId) {
             event.remix.setCurrentScreen(nsId)
+
+            remix.fireEvent('remix-routing:next_screen', event.remix.getState().router.screens[nsId])
         } else {
             if (isCustomFunc) {
                 console.warn(
@@ -158,6 +160,8 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
     Remix.registerTriggerAction('restart', event => {
         if (remix.getMode() !== 'edit') {
             remix.setCurrentScreen(screenIds[0])
+
+            remix.fireEvent('remix-routing:restart', event.eventData || event.remix.getState().router)
         }
     })
 

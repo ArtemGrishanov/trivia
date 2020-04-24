@@ -13,6 +13,7 @@ import initQuizPoints from './lib/plugins/quiz-points'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initQuizAnalytics from './lib/plugins/quiz-analytics'
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 
 Remix.setStore(store)
@@ -70,6 +71,8 @@ initShare({
 })
 
 initGoogleAnalytics({ remix: Remix })
+
+initQuizAnalytics({ remix: Remix })
 
 /**
  * Trivia quiz custom result calculation

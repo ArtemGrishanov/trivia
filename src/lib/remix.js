@@ -1419,6 +1419,7 @@ const remix = {
     setComponentProps,
     undo,
     redo,
+    postMessage,
 
     // for debug
     _setScreenEvents,

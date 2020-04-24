@@ -64,6 +64,11 @@ export const Schema = new DataSchema({
         enum: ['circle', 'normal'],
         default: 'normal',
     },
+    socialName: {
+        type: 'string',
+        enum: ['facebook'],
+        default: 'facebook',
+    },
 })
 
 export default RemixWrapper(FbButton, Schema, 'FbButton')
