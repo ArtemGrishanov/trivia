@@ -19,12 +19,16 @@
         "redux-saga": "^1.1.1"
     },
     "scripts": {
-        "build": "webpack --config webpack.prod.js",
+        "build-trivia": "webpack     --env.PROJECT_TYPE='index' --config webpack.prod.js",
+        "build-quotes": "webpack     --env.PROJECT_TYPE='quotes' --config webpack.prod.js",
+        "build-photostory": "webpack --env.PROJECT_TYPE='photostory' --config webpack.prod.js",
+        "start-trivia": "webpack-dev-server     --env.PROJECT_TYPE='index' --open --config webpack.dev.js",
+        "start-quotes": "webpack-dev-server     --env.PROJECT_TYPE='quotes' --open --config webpack.dev.js",
+        "start-photostory": "webpack-dev-server --env.PROJECT_TYPE='photostory' --open --config webpack.dev.js",
         "css": "webpack --config webpack.css.js",
         "ui-demo": "webpack-dev-server --open --config webpack.ui-demo.js",
         "ui-demo-build": "webpack --config webpack.ui-demo.js",
         "babel": "babel --presets es2015 js/main.js -o build/main.bundle.js",
-        "start": "webpack-dev-server --open --config webpack.dev.js",
         "eject": "react-scripts eject",
         "prettier:base": "./node_modules/.bin/prettier --write",
         "prettier": "npm run prettier:base -- \"{*.{js,json},src/**/*.{js,jsx,css,scss,less,json,yaml,yml,md}}\"",
