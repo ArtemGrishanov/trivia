@@ -1,9 +1,8 @@
 const HtmlWebPackPlugin = require('html-webpack-plugin')
 
-module.exports = {
+module.exports = (projectType) => ({
     entry: {
-        main: './src/index.js',
-        //,demo: './src/lib/engage-ui/demo/index.js'
+        main: `./src/${projectType}.js`,
     },
     module: {
         rules: [
@@ -33,4 +32,4 @@ module.exports = {
             inject: false,
         }),
     ],
-}
+})
