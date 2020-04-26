@@ -1,8 +1,14 @@
 const HtmlWebPackPlugin = require('html-webpack-plugin')
+const TerserJSPlugin = require('terser-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 
-module.exports = (projectType) => ({
+module.exports = projectType => ({
     entry: {
         main: `./src/${projectType}.js`,
+    },
+    optimization: {
+        minimizer: [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})],
     },
     module: {
         rules: [
@@ -14,8 +20,13 @@ module.exports = (projectType) => ({
                 },
             },
             {
-                test: /\.css$/i,
-                use: ['style-loader', 'css-loader'],
+                test: /\.(css)$/,
+                use: [
+                    MiniCssExtractPlugin.loader,
+                    {
+                        loader: 'css-loader',
+                    },
+                ],
             },
             {
                 test: /\.(html)$/,
@@ -26,6 +37,7 @@ module.exports = (projectType) => ({
         ],
     },
     plugins: [
+        new MiniCssExtractPlugin({}),
         new HtmlWebPackPlugin({
             template: './src/index.html',
             filename: './index.html',
