@@ -3,6 +3,7 @@ import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 import TextEditor from '../bricks/TextEditor'
 import Arrow from '../bricks/Arrow'
+import * as icons from '../icons'
 
 class Button extends React.Component {
     constructor(props) {
@@ -22,6 +23,11 @@ class Button extends React.Component {
             dropShadow,
             sizeMod,
             text,
+            iconName,
+            iconColor,
+            iconPosition,
+            iconGap,
+            openUrl,
         } = props
 
         const st = {
@@ -55,6 +61,12 @@ class Button extends React.Component {
             transform: 'translate(-50%, -50%)',
         }
 
+        const Icon = icons[iconName]
+        const iconSt = {
+            [iconPosition === 'left' ? 'marginRight' : 'marginLeft']: `${iconGap}px`,
+            order: iconPosition === 'left' ? 0 : 1,
+        }
+
         if (dropShadow) {
             st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)'
         }
@@ -65,8 +77,13 @@ class Button extends React.Component {
         }
 
         return (
-            <button className={`rmx-component rmx-button ${isArrow ? '__with-arrow' : ''}  __${sizeMod}`} style={st}>
-                <div className="clipped">
+            <button
+                className={`rmx-component rmx-button ${isArrow ? '__with-arrow' : ''}  __${sizeMod}`}
+                style={st}
+                onClick={() => openUrl && window.open(openUrl)}
+            >
+                <div className={`clipped ${doubleClicked ? '' : 'align-center'}`}>
+                    {doubleClicked || Icon === void 0 ? null : <Icon color={iconColor} style={iconSt} />}
                     {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color={arrowColor} />}
                     <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                 </div>
@@ -141,6 +158,30 @@ export const Schema = new DataSchema({
     arrowColor: {
         type: 'string',
         default: '#fff',
+    },
+    iconName: {
+        type: 'string',
+        default: '',
+    },
+    iconColor: {
+        type: 'string',
+        default: '',
+    },
+    iconPosition: {
+        type: 'string',
+        enum: ['left', 'right'],
+        default: 'left',
+    },
+    iconGap: {
+        type: 'number',
+        min: 0,
+        max: 20,
+        default: 10,
+    },
+    openUrl: {
+        type: 'string',
+        maxLength: 1024,
+        default: '',
     },
     //TODO color format for strings, +tests
 })
