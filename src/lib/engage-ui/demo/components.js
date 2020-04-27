@@ -116,6 +116,41 @@ const COMPONENTS = [
             text='<p class="ql-align-center">Button text</p>'
         />
     </Control>,
+    <Control id={525} schema={ButtonSchema} width={800} height={300}>
+        <Button
+            id={'button2'}
+            text={
+                '<p class="ql-align-center"><span class="ql-size-normal ql-font-Roboto" style="color: #FFFFFF">Open site</span></p>'
+            }
+            width={136}
+            height={44}
+            backgroundColor={'#2990FB'}
+            borderRadius={'40px'}
+            borderWidth={'0'}
+            iconName={'link'}
+            iconColor={'#FFFFFF'}
+            iconPosition={'left'}
+            iconGap={12}
+            openUrl={'https://www.google.com/'}
+        />
+    </Control>,
+    <Control id={525} schema={ButtonSchema} width={800} height={300}>
+        <Button
+            id={'button2'}
+            text={
+                '<p class="ql-align-center"><span class="ql-size-normal ql-font-Roboto" style="color: #787878">Download</span></p>'
+            }
+            width={136}
+            height={44}
+            backgroundColor={'white'}
+            borderRadius={40}
+            borderWidth={0}
+            iconName={'link'}
+            iconColor={'#787878'}
+            iconPosition={'left'}
+            iconGap={13}
+        />
+    </Control>,
     <Control id={507} schema={FbButtonSchema} width={800} height={300}>
         <FbButton id={'fbbutton1'} width={150} />
     </Control>,
