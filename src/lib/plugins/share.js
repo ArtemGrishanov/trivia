@@ -55,6 +55,7 @@ export default function initShare(options = {}) {
                         imageId: '',
                         imageUrl: '',
                         href: '',
+                        customImage: false,
                         ...Object.values(oldEntities).find(e => e.componentId === componentId),
                     }
                 if (!ne.title) {
@@ -137,6 +138,10 @@ export default function initShare(options = {}) {
         'app.share.[entities HashList]./^[0-9a-z]+$/.imageUrl': {
             type: 'string',
             default: '',
+        },
+        'app.share.[entities HashList]./^[0-9a-z]+$/.customImage': {
+            type: 'boolean',
+            default: false,
         },
         'app.share.[entities HashList]./^[0-9a-z]+$/.href': {
             type: 'string',
