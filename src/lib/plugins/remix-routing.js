@@ -150,10 +150,14 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
     Remix.registerTriggerAction('go_prev_screen', event => {
         const stateRouter = store.getState().router
         const routerScreens = stateRouter.screens
-        const curentScreenIndex = routerScreens.getIndex(stateRouter.currentScreenId)
-        if (curentScreenIndex > 0) {
-            const prevScreenIndex = routerScreens.getId(curentScreenIndex - 1)
-            event.remix.setCurrentScreen(prevScreenIndex)
+        const currentScreenIndex = routerScreens.getIndex(stateRouter.currentScreenId)
+        if (currentScreenIndex > 0) {
+            const prevScreenIndex = routerScreens.getId(currentScreenIndex - 1)
+            if (prevScreenIndex) {
+                event.remix.setCurrentScreen(prevScreenIndex)
+            } else {
+                console.warn('[Remix-Routing]: No previous screen was found!')
+            }
         }
     })
 
