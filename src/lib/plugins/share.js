@@ -13,13 +13,11 @@ import { getScreenIdFromPath, debounce, flattenProperties } from '../remix/util/
 export default function initShare(options = {}) {
     let fbApiEmbedded = false
 
-    const DEBOUNCE_UPDATE_DELAY = 1500,
-        DEBOUNCE_PREVIEW_DELAY = 1600,
-        displayTypes = options.displayTypes,
+    const displayTypes = options.displayTypes,
         getMainPreviewHTML = options.getMainPreviewHTML,
         getShareEntityPreviewHTML = options.getShareEntityPreviewHTML,
         remix = options.remix,
-        updateShare = debounce(() => {
+        updateShare = function () {
             const state = remix.getState(),
                 // try to request existing share entities
                 entProps = getPropertiesBySelector(state, 'app.share.entities')
@@ -72,8 +70,8 @@ export default function initShare(options = {}) {
                 embedFbCode()
                 fbApiEmbedded = true
             }
-        }, DEBOUNCE_UPDATE_DELAY),
-        updatePreviews = debounce(() => {
+        },
+        updatePreviews = function () {
             const state = remix.getState()
 
             if (getMainPreviewHTML) {
@@ -90,7 +88,7 @@ export default function initShare(options = {}) {
                 })
                 remix.setData(previews)
             }
-        }, DEBOUNCE_PREVIEW_DELAY)
+        }
 
     function embedFbCode() {
         window.fbAsyncInit = function () {
@@ -185,6 +183,8 @@ export default function initShare(options = {}) {
     })
 
     Remix.addMessageListener('getshareentities', data => {
+        updateShare()
+        updatePreviews()
         const share = JSON.parse(JSON.stringify(Remix.getState().app.share))
         if (share.entities) {
             delete share.entities._orderedIds
@@ -193,29 +193,5 @@ export default function initShare(options = {}) {
             message: 'share_entities',
             data: { share },
         }
-    })
-
-    Remix.registerTriggerAction('share:update_share_entities', event => {
-        // синхронизировать 'app.share.entities' с существующими шаринг кнопками в приложении
-        updateShare()
-        updatePreviews()
-    })
-
-    Remix.registerTriggerAction('share:update_share_previews', event => {
-        updatePreviews()
-    })
-
-    remix.addTrigger({
-        when: { eventType: 'remix_inited' },
-        then: { actionType: 'share:update_share_entities' },
-    })
-
-    // мы должны знать обо всех добавлениях и удалениях sharing кнопок в приложении
-    remix.addTrigger({
-        when: {
-            eventType: 'property_updated',
-            condition: { prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.components' },
-        },
-        then: { actionType: 'share:update_share_entities' },
     })
 }
