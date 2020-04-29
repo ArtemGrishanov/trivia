@@ -35,7 +35,7 @@ export default function initScreenCollage(options = { remix: null, screenTag: nu
                         left: 200,
                         width: 400,
                         height: 350,
-                        tags: `collage photostoryitem`,
+                        tags: `collage ${screenTag}item`,
                     },
                 })
             }

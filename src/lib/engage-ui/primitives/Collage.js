@@ -8,6 +8,9 @@ const MAIN_IMG_WIDTH_OPTIONS = {
     twoRows: 60,
 }
 
+const PHOTO_STORY_TAG = 'photostoryitem'
+const QUOTES_TAG = 'quotesitem'
+
 function CollageItem({ src, width, height, isInlineBlock }) {
     const st = {
         width: width || '100%',
@@ -22,8 +25,19 @@ function CollageItem({ src, width, height, isInlineBlock }) {
     return <div className="rmx-collage-item" style={st}></div>
 }
 
-function Collage(props) {
-    const images = getComponents({ displayName: 'ProgressiveImage', tags: 'photostoryitem' })
+function Collage() {
+    let images = []
+
+    const getCollageItems = tags => getComponents({ displayName: 'ProgressiveImage', tags: tags })
+    const photoStoryItems = getCollageItems(PHOTO_STORY_TAG)
+
+    //TODO[DM]: Provide collage-item-search tag from outside
+    if (photoStoryItems && photoStoryItems.length > 0) {
+        images = photoStoryItems
+    } else {
+        images = getCollageItems(QUOTES_TAG)
+    }
+
     const [first] = images
 
     if (!first) {
