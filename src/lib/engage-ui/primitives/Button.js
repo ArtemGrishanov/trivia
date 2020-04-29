@@ -80,9 +80,7 @@ class Button extends React.Component {
             <button
                 className={`rmx-component rmx-button ${isArrow ? '__with-arrow' : ''}  __${sizeMod}`}
                 style={st}
-                onClick={() =>
-                    openUrl && openUrl.includes('://') ? window.open(openUrl) : window.open('//' + openUrl)
-                }
+                onClick={() => openUrl && window.open(openUrl.includes('://') ? openUrl : '//' + openUrl)}
             >
                 <div className={`clipped ${doubleClicked ? '' : 'align-center'}`}>
                     {doubleClicked || Icon === void 0 ? null : <Icon color={iconColor} style={iconSt} />}
