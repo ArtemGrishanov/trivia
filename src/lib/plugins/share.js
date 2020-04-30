@@ -194,4 +194,27 @@ export default function initShare(options = {}) {
             data: { share },
         }
     })
+    Remix.registerTriggerAction('share:update_share_entities', event => {
+        // синхронизировать 'app.share.entities' с существующими шаринг кнопками в приложении
+        updateShare()
+        updatePreviews()
+    })
+
+    Remix.registerTriggerAction('share:update_share_previews', event => {
+        updatePreviews()
+    })
+
+    remix.addTrigger({
+        when: { eventType: 'remix_inited' },
+        then: { actionType: 'share:update_share_entities' },
+    })
+
+    // мы должны знать обо всех добавлениях и удалениях sharing кнопок в приложении
+    remix.addTrigger({
+        when: {
+            eventType: 'property_updated',
+            condition: { prop: 'path', clause: 'MATCH', value: 'router.[screens HashList]./^[0-9a-z]+$/.components' },
+        },
+        then: { actionType: 'share:update_share_entities' },
+    })
 }
