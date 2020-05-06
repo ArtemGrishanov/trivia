@@ -14,7 +14,7 @@ import RemixWrapper from '../RemixWrapper'
  * @param {boolean} props.isLast
  * @param {boolean} props.isCompleted
  */
-function ProgressStepItem({
+function ProgressArrowItem({
     height = 16,
     width = 125,
     fill = '#D8D8D8',
@@ -145,7 +145,7 @@ class Progress extends React.Component {
                             const isLast = index === max - 1
                             const isCompleted = index < step
                             return (
-                                <ProgressStepItem
+                                <ProgressArrowItem
                                     key={index}
                                     fill={background}
                                     completedFill={completedBackground}

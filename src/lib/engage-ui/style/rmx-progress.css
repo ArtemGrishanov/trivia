@@ -1,9 +1,9 @@
-.progress-step__item-wrapper {
+.progress-arrow__item-wrapper {
     position: relative;
     display: inline-block;
 }
 
-.progress-step__item {
+.progress-arrow__item {
     position: absolute;
     top: 50%;
     left: 50%;
