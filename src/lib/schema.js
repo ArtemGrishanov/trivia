@@ -3,27 +3,44 @@ import { getTokens, matchPropertyPath } from './object-path.js'
 
 const types = {
     string: {
-        attributes: ['default', 'serialize', 'enum', 'minLength', 'maxLength'],
+        attributes: ['default', 'serialize', 'adaptedForCustomWidth', 'enum', 'minLength', 'maxLength'],
         mandatory: ['default'],
     },
     number: {
-        attributes: ['default', 'serialize', 'min', 'max', 'enum', 'appWidthProperty', 'appHeightProperty'],
+        attributes: [
+            'default',
+            'serialize',
+            'adaptedForCustomWidth',
+            'min',
+            'max',
+            'enum',
+            'appWidthProperty',
+            'appHeightProperty',
+        ],
         mandatory: ['default', 'min', 'max'],
     },
     boolean: {
-        attributes: ['default', 'serialize', 'enum'], // do not need to specify enum ['true', 'false']
+        attributes: ['default', 'serialize', 'adaptedForCustomWidth', 'enum'], // do not need to specify enum ['true', 'false']
         mandatory: ['default'],
     },
     hashlist: {
-        attributes: ['default', 'serialize', 'minLength', 'maxLength', 'elementSchema', 'prototypes'],
+        attributes: [
+            'default',
+            'serialize',
+            'adaptedForCustomWidth',
+            'minLength',
+            'maxLength',
+            'elementSchema',
+            'prototypes',
+        ],
         mandatory: ['default'],
     },
     url: {
-        attributes: ['default', 'serialize'],
+        attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
         mandatory: ['default'],
     },
     color: {
-        attributes: ['default', 'serialize'],
+        attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
         mandatory: ['default'],
     },
 }
