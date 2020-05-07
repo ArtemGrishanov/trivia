@@ -265,15 +265,24 @@ function updateWindowSize() {
     if (width > 0 && height > 0 && (width !== state.session.size.width || height !== state.session.size.height)) {
         const defaultWidth = state.app.size.width
         if (width !== defaultWidth) {
-            //TODO если произвели, но потом отредактировали экран, то заново или слияние?
-            // если адаптация для этой ширины еще не прооизведена, то сделать ее
+            if (state.app.adaptedui && state.app.adaptedui[width]) {
+                // имеется адаптация созданная пользователем в редакторе. Например, пользователь отредактировал UI под моб устройство
+                store.dispatch({
+                    type: REMIX_SET_ADAPTED_PROPS,
+                    width,
+                    props: state.app.adaptedui[width],
+                })
+            }
             if (!state.session.adaptedui[width]) {
-                console.log(`Adaptation running for width=${width} ...`)
+                const nearestAdaptation = getAdaptation(width) || {}
+                console.log(`Adaptation running for width=${width}...`)
                 // пройти по всем экранам и компонентам приложения и получить адаптированные свойства для новой ширины приложения width
                 let adaptedComponentsProps = {}
                 state.router.screens.toArray().forEach(scr => {
                     const components = []
-                    scr.components.toArray().forEach(c => components.push({ ...c, id: c.hashlistId }))
+                    scr.components
+                        .toArray()
+                        .forEach(c => components.push({ ...c, ...nearestAdaptation[c.hashlistId], id: c.hashlistId }))
                     adaptedComponentsProps = {
                         ...adaptedComponentsProps,
                         ...getAdaptedChildrenProps(components, {
@@ -414,6 +423,33 @@ export function setComponentsRects(rects) {
             props: adaptedComponentsProps,
         })
     }
+}
+
+/**
+ * Возвращает хеш адаптированных свойств компоненетов (алаптацию) в зависимости от ширины приложения
+ *
+ * Например если у нас есть базовая ширина 800px и есть адаптация на 320px, то адаптацию 320 надо применять для ширин [0 ... 750px]
+ * то есть в почти до базового размера. Так было решено на обсуждении, что лучше расширять адаптацию, чем сжимать.
+ *
+ * @param {number} width ширина приложения
+ */
+function getAdaptation(width) {
+    //при наличии нескольких адаптаций здесь придется переделать. Но пока предполагается только одна моб адаптация и смена дефолтного размера
+    //также предполагается что апаптация меньше по ширине чем defaultWidth
+    const app = getState().app,
+        defaultWidth = app.size.width,
+        aKeys = app.adaptedui ? Object.keys(app.adaptedui) : null
+
+    if (!aKeys || aKeys.length === 0) {
+        return undefined
+    }
+
+    if (defaultWidth - 50 < width) {
+        // нет адаптации, использоваться будут дефолтные свойства компонентов (которые выставлены пользователем от размера defaultWidth)
+        return undefined
+    }
+
+    return app.adaptedui(aKeys[0])
 }
 
 function registerTriggerAction(name, fn) {
@@ -895,13 +931,14 @@ function _doUpdate(state, data) {
         if (!propDescription) {
             throw new Error(`Remix: can not find description for path "${path}" in schema`)
         }
-        const propResult = getPropertiesBySelector(state, path)
-        if (propResult.length === 0) {
-            throw new Error(`Remix: there is no such property ${path} in state`)
-        } else {
-            const value = normalizer.processValue(path, pathesValues[path])
-            assignByPropertyString(state, path, value)
-        }
+        //Artem: 07.05.2020 зачем была сделана эта проверка? для нового типа object это не подходит
+        // const propResult = getPropertiesBySelector(state, path)
+        // if (propResult.length === 0) {
+        //     throw new Error(`Remix: there is no such property ${path} in state`)
+        // } else {
+        const value = normalizer.processValue(path, pathesValues[path])
+        assignByPropertyString(state, path, value)
+        // }
     })
 }
 
@@ -1348,21 +1385,62 @@ function deleteScreenComponent(screenId, componentId) {
  * @param {boolean} options.putStateHistory
  */
 export function setComponentProps(componentId, props, options) {
+    const state = store.getState(),
+        editingCustomWidth =
+            state.session.mode === 'edit' &&
+            state.session.size.width > 0 &&
+            state.app.size.width > 0 &&
+            state.app.size.width !== state.session.size.width
+
     if (!_componentIdToScreenId[componentId]) {
-        calcComponentIdScreenIdHash(store.getState().router.screens)
+        calcComponentIdScreenIdHash(state.router.screens)
     }
     const screenId = _componentIdToScreenId[componentId]
     if (screenId) {
         let path = `router.screens.${screenId}.components.${componentId}.`
-        const data = {}
+        const data = {},
+            adaptedData = {}
         Object.keys(props).forEach(prop => {
-            data[path + prop] = props[prop]
+            const propDescription = schema.getDescription(path + prop)
+            if (editingCustomWidth && propDescription && propDescription.adaptedForCustomWidth) {
+                // если ширина кастомная и свойство помечено как адаптивное то сохраняем его отдельно в адаптацию
+                adaptedData[prop] = props[prop]
+            } else {
+                data[path + prop] = props[prop]
+            }
         })
         setData(data)
+        if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
+            // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
+            saveAdaptedProps(componentId, adaptedData)
+        }
     }
     if (options && options.putStateHistory === true) {
         putStateHistory()
     }
+}
+
+/**
+ *
+ * @param {*} componentId
+ * @param {*} props
+ */
+function saveAdaptedProps(componentId, props) {
+    const state = store.getState(),
+        sessionWidth = state.session.size.width
+    if (!(state.app.adaptedui && state.app.adaptedui[sessionWidth]) && state.session.adaptedui[sessionWidth]) {
+        // если такая адаптация еще не существует, создать на основе сессии
+        // state.session.adaptedui уже к этому моменту была вычислена автоматически
+        setData({ [`app.adaptedui.${sessionWidth}`]: state.session.adaptedui[sessionWidth] })
+    }
+    // сохраняем некоторые свойства, если они были изменены при другой ширине приложения
+    // например: геометрические свойства (top, left, width, height) сохраняем для мобильной версии приложения
+    //assignByPropertyString(state, `app.adaptedui.${state.session.size.width}.${componentId}.${adaptedProp}`, value)
+    setData({ [`app.adaptedui.${state.session.size.width}.${componentId}.${adaptedProp}`]: value })
+    // для сессии также надо сохранить новые значения
+    // экраны берут адаптированные значения именно из session.adaptedui, в то время как в app.adaptedui они хранятся для сериализации
+    //assignByPropertyString(state, `session.adaptedui.${state.session.size.width}.${componentId}.${adaptedProp}`, value)
+    //setData(state, `session.adaptedui.${state.session.size.width}.${componentId}.${adaptedProp}`, value)
 }
 
 function calcComponentIdScreenIdHash(screens) {
