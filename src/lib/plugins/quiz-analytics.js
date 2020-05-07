@@ -132,7 +132,7 @@ const initQuizAnalytics = ({
         event.remix.postMessage('analytics', {
             type: 'test_ended',
             actionType: 'test_ended',
-            // resultId, todo
+            resultId,
             timePassing,
             rightQuestionCount,
         })
