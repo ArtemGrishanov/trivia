@@ -1,15 +1,15 @@
 import React from 'react'
-import '../style/rmx-progress.css'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
-
+import { CompletionIcon } from '../icons'
+import '../style/rmx-progress.css'
 /**
  *
  * @param {object} props
  * @param {number} props.height
  * @param {number} props.width
- * @param {string} props.fill
- * @param {string} props.completedFill
+ * @param {string} props.color
+ * @param {string} props.completionColor
  * @param {boolean} props.isFirst
  * @param {boolean} props.isLast
  * @param {boolean} props.isCompleted
@@ -17,13 +17,13 @@ import RemixWrapper from '../RemixWrapper'
 function ProgressArrowItem({
     height = 16,
     width = 125,
-    fill = '#D8D8D8',
-    completedFill = '#69B1FC',
+    color = '#D8D8D8',
+    completionColor = '#69B1FC',
     isFirst = false,
     isLast = false,
     isCompleted = false,
 }) {
-    const computedFill = isCompleted ? completedFill : fill
+    const fillColor = isCompleted ? completionColor : color
     const completedIcon = (
         <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -37,19 +37,19 @@ function ProgressArrowItem({
     )
     const firstItem = (
         <svg width={width} height={height} viewBox="0 0 125 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 8C0 3.58172 3.58172 0 8 0H120L125 8L120 16H8C3.58172 16 0 12.4183 0 8Z" fill={computedFill} />
+            <path d="M0 8C0 3.58172 3.58172 0 8 0H120L125 8L120 16H8C3.58172 16 0 12.4183 0 8Z" fill={fillColor} />
         </svg>
     )
     const middleItem = (
         <svg width={width} height={height} viewBox="0 0 125 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0H120L125 8L120 16H0L5 8L0 0Z" fill={computedFill} />
+            <path d="M0 0H120L125 8L120 16H0L5 8L0 0Z" fill={fillColor} />
         </svg>
     )
     const lastItem = (
         <svg width={width} height={height} viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
                 d="M112 0H0L5 8L0 16H112C116.418 16 120 12.4183 120 8C120 3.58172 116.418 0 112 0Z"
-                fill={computedFill}
+                fill={fillColor}
             />
         </svg>
     )
@@ -65,9 +65,13 @@ function ProgressArrowItem({
     }
 
     return (
-        <div className="progress-step__item-wrapper" style={{ width, height }}>
+        <div className="progress-arrow__item-wrapper" style={{ width, height }}>
             {progressItem}
-            {isCompleted && <div className="progress-step__item">{completedIcon}</div>}
+            {isCompleted && (
+                <div className="progress-arrow__item">
+                    <CompletionIcon />
+                </div>
+            )}
         </div>
     )
 }
@@ -76,12 +80,12 @@ function ProgressArrowItem({
  *
  * @param {object} props
  * @param {number} props.radius
- * @param {string} props.fill
- * @param {string} props.completedFill
+ * @param {string} props.color
+ * @param {string} props.completionColor
  * @param {boolean} props.isCompleted
  */
-function ProgressDotItem({ radius = 6, fill = '#C4C4C4', completedFill = '#2990FB', isCompleted }) {
-    const backgroundColor = isCompleted ? completedFill : fill
+function ProgressDotItem({ radius = 6, color = '#C4C4C4', completionColor = '#2990FB', isCompleted = false }) {
+    const backgroundColor = isCompleted ? completionColor : color
     return <div className="progress-dot__item" style={{ width: radius, height: radius, backgroundColor }} />
 }
 
