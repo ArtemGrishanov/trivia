@@ -3,6 +3,7 @@ import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
 import { CompletionIcon } from '../icons'
 import '../style/rmx-progress.css'
+
 /**
  *
  * @param {object} props
@@ -24,17 +25,6 @@ function ProgressArrowItem({
     isCompleted = false,
 }) {
     const fillColor = isCompleted ? completionColor : color
-    const completedIcon = (
-        <svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-                d="M1 3.21238L4.53363 6.99995L10.1572 1"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
-        </svg>
-    )
     const firstItem = (
         <svg width={width} height={height} viewBox="0 0 125 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M0 8C0 3.58172 3.58172 0 8 0H120L125 8L120 16H8C3.58172 16 0 12.4183 0 8Z" fill={fillColor} />
@@ -100,7 +90,7 @@ class Progress extends React.Component {
             variant,
             step,
             max,
-            completedBackground,
+            completionBackground,
             background,
             fontSize,
             color,
@@ -132,7 +122,7 @@ class Progress extends React.Component {
                             <div
                                 style={{
                                     width: `${percent}%`,
-                                    backgroundColor: completedBackground,
+                                    backgroundColor: completionBackground,
                                     height: 8,
                                     borderRadius,
                                 }}
@@ -151,8 +141,8 @@ class Progress extends React.Component {
                             return (
                                 <ProgressArrowItem
                                     key={index}
-                                    fill={background}
-                                    completedFill={completedBackground}
+                                    color={background}
+                                    completionColor={completionBackground}
                                     isFirst={isFirst}
                                     isLast={isLast}
                                     isCompleted={isCompleted}
@@ -170,9 +160,9 @@ class Progress extends React.Component {
                             return (
                                 <ProgressDotItem
                                     key={index}
-                                    fill={background}
+                                    color={background}
                                     radius={dotSize}
-                                    completedFill={completedBackground}
+                                    completionColor={completionBackground}
                                     isCompleted={isCompleted}
                                 />
                             )
@@ -256,7 +246,7 @@ export const Schema = new DataSchema({
         type: 'string',
         default: '#D8D8D8',
     },
-    completedBackground: {
+    completionBackground: {
         type: 'string',
         default: '#2990FB',
     },
