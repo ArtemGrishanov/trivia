@@ -30,7 +30,7 @@ initRemixRouting({
     // some params specially for Remix-Routing plugin
     screenRoute: [
         { tag: 'start' }, // show all screens with tag in linear order
-        { tag: PROJECT_ITEM_TAG, shuffle: true }, // show all screens with tag and shuffle them
+        { tag: PROJECT_ITEM_TAG }, // show all screens with tag and shuffle them
         { tag: 'final' },
     ],
     restartTag: 'restart',
