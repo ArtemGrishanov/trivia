@@ -35,6 +35,10 @@ const types = {
         ],
         mandatory: ['default'],
     },
+    object: {
+        attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
+        mandatory: ['default'],
+    },
     url: {
         attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
         mandatory: ['default'],

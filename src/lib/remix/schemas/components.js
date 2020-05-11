@@ -26,18 +26,52 @@ const componentSchemas = {
 const schemaData = {
     'app.size.width': EngageAppSchema.getDescription('width'),
     'app.size.height': EngageAppSchema.getDescription('height'),
-    'app.adaptedui./^[0-9a-z]+$/': {
-        type: 'number',
-        default: 234,
-        min: 80,
-        max: 4000,
+    'app.adaptedui': {
+        type: 'object',
+        default: {},
     },
-    // 'app.adaptedui': {
-    //     type: 'number',
-    //     min: 80,
-    //     max: 4000,
-    //     default: 444,
-    // },
+    'app.adaptedui./^[0-9]+$/': {
+        type: 'object',
+        default: {},
+    },
+    // кастомные расположения компонентов для различных ширин
+    'app.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/': {
+        type: 'object',
+        default: {},
+    },
+    // Свойства компонентов
+    // Example: app.adaptedui.320.1ts4ia.top
+    'app.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
+        type: 'number',
+        min: -9999,
+        max: 9999,
+        default: 0,
+    },
+    'app.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.left': {
+        type: 'number',
+        min: -9999,
+        max: 9999,
+        default: 0,
+    },
+    'app.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.width': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 100,
+    },
+    'app.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.height': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 100,
+    },
+    // кастомные высоты приложения выставленные пользователем для различных ширин
+    'app.adaptedui./^[0-9]+$/.height': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 600,
+    },
     'router.[screens HashList]': RouterScreensSchema.getDescription('screens'),
     'router.currentScreenId': RouterScreensSchema.getDescription('currentScreenId'),
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),

@@ -56,7 +56,7 @@ export default class Row {
             sumWidth += c.width
         })
 
-        // ШАГ 2 - сдвинуть left в завосомости от стратегии компонентов
+        // ШАГ 2 - сдвинуть left в зависимости от стратегии компонентов
         this.components.forEach(c => {
             if (c.leftStrategy === 'fixed') {
                 // do nothing
