@@ -1,0 +1,21 @@
+.progress-arrow__item-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.progress-arrow__item {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.progress-dot__item {
+    display: inline-block;
+    margin-right: 8px;
+    border-radius: 50%;
+}
+
+.progress-dot__item:last-child {
+    margin-right: 0;
+}
