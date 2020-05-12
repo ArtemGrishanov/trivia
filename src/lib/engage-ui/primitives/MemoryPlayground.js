@@ -12,12 +12,16 @@ const MEMORY_TAG = 'memoryitem'
 const mainStyleClass = 'rmx-memory'
 const DEBOUNCE_THRESHOLD = 650
 const CARD_BACK_IMG_URL = 'https://www.publicdomainpictures.net/pictures/40000/velka/question-mark.jpg'
+let cardId = 0
 
 class CardData {
-    constructor(id, link, src) {
-        this.id = id
-        this.link = link
-        this.src = src
+    constructor(gameLink, src) {
+        this.id = this.getId()
+        this.gameLink = gameLink
+        this.src = src || CARD_BACK_IMG_URL
+    }
+    getId() {
+        return cardId++
     }
 }
 
@@ -25,27 +29,38 @@ class MemoryPlayground extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            cardIndent: 5,
             prevSelectedCardId: null,
+            cardRowOption: this.props.cardRowOption,
             cardsData: [],
         }
         this.onCardClick = this.onCardClick.bind(this)
     }
 
     componentDidMount() {
+        this.updateCardsData()
+    }
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        if (prevProps.cardRowOption !== this.props.cardRowOption) {
+            console.log(prevProps, prevState, snapshot)
+            this.updateCardsData()
+        }
+    }
+
+    updateCardsData() {
         let cardsData = []
-        const { rows, cardsPerRow } = this.props
-        if (rows % 2 !== 0) {
-            return <div> Wrong number of cards was provided! </div>
+        const { cardRowOption } = this.props
+        const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
+        const isValidProp = x => typeof x === 'number' && x > 0
+
+        if (!isValidProp(cardRowsCount) && !isValidProp(cardsInRowCount)) {
+            return console.warn('[Memory]: Bad props from cardRowsCount!')
         }
-        let link = 0
-        for (let i = 0; i < rows; i++) {
-            const cards = []
-            for (let j = 0; j < cardsPerRow; j++) {
-                cards.push(new CardData(i, link, CARD_BACK_IMG_URL))
-            }
-            cardsData.push(cards)
+
+        for (let i = 0; i < cardRowsCount; i++) {
+            cardsData.push([...new Array(cardsInRowCount)].map((x, i) => new CardData(i, null)))
         }
+
         this.setState({
             cardsData,
         })
@@ -53,36 +68,30 @@ class MemoryPlayground extends React.Component {
 
     onCardClick(card) {
         console.log(card)
-        // const updatedCardsData = [...this.state.cardsData]
-        // const index = updatedCardsData.findIndex(_card => _card.id === card.id)
-        // updatedCardsData[index] = new CardData(card.id, 'http://p.testix.me/temp/cat1500x1000.jpg')
-        // this.setState({
-        //     prevSelectedCardId: card.id,
-        //     cardsData: updatedCardsData,
-        // })
     }
 
     render() {
-        const { cardsData, cardIndent } = this.state
-        const { rows, cardsPerRow } = this.props
-        const height = `${100 / rows}%`
-        const cardWidth = `${100 / cardsPerRow}%`
-        const indent = '5px'
+        const { cardsData } = this.state
+        const { cardRowOption, indent } = this.props
+        const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
+        const height = `${100 / cardRowsCount}%`
+        const cardWidth = `${100 / cardsInRowCount}%`
         const rowStyle = {
             height: height,
         }
-        console.log(cardsData, rowStyle)
         return (
             <div className={`${mainStyleClass}-playground`}>
                 {cardsData.map((row, i) => (
                     <div style={rowStyle} className={`${mainStyleClass}-row`} key={i}>
                         {row.map(card => (
                             <MemoryCard
+                                key={`${card.id}key`}
                                 padding={indent}
                                 height={height}
                                 width={cardWidth}
-                                key={Math.random()}
+                                backCoverSrc={CARD_BACK_IMG_URL}
                                 src={card.src}
+                                gameLink={card.gameLink}
                                 clickHandler={this.onCardClick}
                             />
                         ))}
@@ -98,17 +107,16 @@ class MemoryPlayground extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
-    rows: {
+    indent: {
         type: 'number',
-        min: 4,
-        max: 6,
-        default: 4,
+        min: 0,
+        max: 25,
+        default: 5,
     },
-    cardsPerRow: {
-        type: 'number',
-        min: 2,
-        max: 6,
-        default: 4,
+    cardRowOption: {
+        type: 'string',
+        enum: ['4x2', '4x3', '4x4', '5x2', '5x4', '6x3', '6x4', '6x6'],
+        default: '4x4',
     },
 })
 

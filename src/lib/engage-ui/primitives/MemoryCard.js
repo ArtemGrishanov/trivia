@@ -20,16 +20,22 @@ function MemoryImage({ src, width, height, isInlineBlock }) {
 export default class MemoryCard extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {}
+        this.state = {
+            isActive: false,
+        }
         this.handleClick = this.handleClick.bind(this)
     }
 
     handleClick() {
-        this.props.clickHandler(this.props)
+        this.setState({
+            isActive: true,
+        })
+        this.props.clickHandler({ ...this.props, ...this.state })
     }
 
     render() {
-        const { src, width, padding, relationKey } = this.props
+        const { isActive } = this.state
+        const { src, backCoverSrc, width, padding, relationKey } = this.props
         const cardStyles = {
             width: width,
             padding: padding,
@@ -37,7 +43,11 @@ export default class MemoryCard extends React.Component {
         }
         return (
             <div onClick={this.handleClick} style={cardStyles} className={`${mainStyleClass}-card`}>
-                <MemoryImage left={1} top={0} src={src} />
+                {isActive ? (
+                    <MemoryImage left={1} top={0} src={src} />
+                ) : (
+                    <MemoryImage left={1} top={0} src={backCoverSrc} />
+                )}
             </div>
         )
     }
