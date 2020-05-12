@@ -1,4 +1,4 @@
-import Row from './Row'
+import Row from './row'
 
 /**
  * Получить новые props для компонентов в соответствии с параметрами пережаннами в init

@@ -1,4 +1,4 @@
-import { cloneLayoutItemProps } from './LayoutAdapter'
+import { cloneLayoutItemProps } from './adapter'
 
 /**
  * Ряд - класс представляющий горизонтальную последовательность flow элементов

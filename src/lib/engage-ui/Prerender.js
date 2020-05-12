@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import { getComponentClass } from './RemixWrapper'
-import { setComponentsRects } from '../remix'
+import { setComponentsRects } from '../remix/layout/helpers'
 import LayoutContainer from './layout/LayoutContainer'
 
 class Prerender extends React.Component {
@@ -12,7 +12,7 @@ class Prerender extends React.Component {
     }
 
     checkAndSetPreRenderRects(id, rect) {
-        console.log('getContentRect', id, rect)
+        // console.log('getContentRect', id, rect)
         this.preRenderRects[id] = rect
         if (Object.keys(this.preRenderRects).length === this.props.preRenderComponents.length) {
             setComponentsRects(this.preRenderRects)

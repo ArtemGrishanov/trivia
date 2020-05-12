@@ -11,7 +11,7 @@ const diffMiddleware = store => next => action => {
     const prevState = store.getState()
     const result = next(action)
     const nextState = store.getState()
-    const lastUpdDiff = diff(Remix._getSchema(), prevState, nextState)
+    const lastUpdDiff = diff(Remix.getSchema(), prevState, nextState)
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0
     // Важное замечание
     // Даже при самом первом запуске этой функции diff начальный стейт уже содержит нормализованные по схеме свойства, поскольку @@redux/INIT action запускается без middleware

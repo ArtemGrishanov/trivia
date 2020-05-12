@@ -34,7 +34,7 @@
         var appId;
         try {
             window.localStorage.getItem("REMIX_APP_ID") || window.localStorage.setItem("REMIX_APP_ID", generateUUID());
-            
+
             appId = window.localStorage.getItem("REMIX_APP_ID");
         } catch (err) {
             appId = generateUUID();
@@ -108,7 +108,7 @@
                     cntSource.postMessage({
                         method: 'inited',
                         initialProperties: Remix.getProperties(),
-                        schema: Remix._getSchema(),
+                        schema: Remix.getSchema(),
                         state: Remix.serialize2(),
                         screens: Remix.getScreens(),
                         appId: appId,
