@@ -209,7 +209,7 @@ export const Schema = new DataSchema({
         type: 'string',
         minLength: 1,
         maxLength: 4096,
-        default: 'Button text',
+        default: 'Progress:',
     },
     variant: {
         type: 'string',
