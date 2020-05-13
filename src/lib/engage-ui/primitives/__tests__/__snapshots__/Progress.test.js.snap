@@ -1,0 +1,195 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<Progress /> should match <Progress /> snapshot as variant0 1`] = `
+<p
+  className="rmx-text"
+  style={
+    Object {
+      "color": "green",
+      "fontSize": 14,
+    }
+  }
+>
+  2/5
+</p>
+`;
+
+exports[`<Progress /> should match <Progress /> snapshot as variant1 1`] = `
+<div>
+  <div
+    style={
+      Object {
+        "color": "green",
+        "fontSize": 14,
+        "marginBottom": 8,
+        "textAlign": "left",
+      }
+    }
+  >
+    <TextEditor
+      readOnly={true}
+      text="Progress: 40%"
+    />
+  </div>
+  <div
+    style={
+      Object {
+        "background": "#f3f3f3",
+        "borderColor": "#000",
+        "borderRadius": 5,
+        "borderStyle": "solid",
+        "borderWidth": 1,
+        "boxSizing": "border-box",
+        "width": "100%",
+      }
+    }
+  >
+    <div
+      style={
+        Object {
+          "backgroundColor": "#c5e5e5",
+          "borderRadius": 5,
+          "height": 8,
+          "width": "40%",
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`<Progress /> should match <Progress /> snapshot as variant2 1`] = `
+<div
+  className="progress-variant-2"
+>
+  <ProgressArrowItem
+    isCompleted={true}
+    isFirst={true}
+    isLast={false}
+    key="0"
+  />
+  <ProgressArrowItem
+    isCompleted={true}
+    isFirst={false}
+    isLast={false}
+    key="1"
+  />
+  <ProgressArrowItem
+    isCompleted={false}
+    isFirst={false}
+    isLast={false}
+    key="2"
+  />
+  <ProgressArrowItem
+    isCompleted={false}
+    isFirst={false}
+    isLast={false}
+    key="3"
+  />
+  <ProgressArrowItem
+    isCompleted={false}
+    isFirst={false}
+    isLast={true}
+    key="4"
+  />
+</div>
+`;
+
+exports[`<Progress /> should match <Progress /> snapshot as variant3 1`] = `
+<div>
+  <ProgressDotItem
+    isCompleted={true}
+    key="0"
+  />
+  <ProgressDotItem
+    isCompleted={true}
+    key="1"
+  />
+  <ProgressDotItem
+    isCompleted={false}
+    key="2"
+  />
+  <ProgressDotItem
+    isCompleted={false}
+    key="3"
+  />
+  <ProgressDotItem
+    isCompleted={false}
+    key="4"
+  />
+</div>
+`;
+
+exports[`<ProgressArrowItem /> should match <ProgressArrowItem /> snapshot when it is completed 1`] = `
+<div
+  className="progress-variant-2__arrow"
+  style={
+    Object {
+      "backgroundColor": "blue",
+    }
+  }
+>
+  <CompletionIcon
+    className="progress-variant-2__completed-icon"
+  />
+</div>
+`;
+
+exports[`<ProgressArrowItem /> should match <ProgressArrowItem /> snapshot when it is first 1`] = `
+<div
+  className="progress-variant-2__arrow progress-variant-2__arrow_first"
+  style={
+    Object {
+      "backgroundColor": "grey",
+    }
+  }
+/>
+`;
+
+exports[`<ProgressArrowItem /> should match <ProgressArrowItem /> snapshot when it is last 1`] = `
+<div
+  className="progress-variant-2__arrow progress-variant-2__arrow_last"
+  style={
+    Object {
+      "backgroundColor": "grey",
+    }
+  }
+/>
+`;
+
+exports[`<ProgressArrowItem /> should match snapshot 1`] = `
+<div
+  className="progress-variant-2__arrow"
+  style={
+    Object {
+      "backgroundColor": "grey",
+    }
+  }
+/>
+`;
+
+exports[`<ProgressDotItem /> should match <ProgressDotItem /> snapshot when it is completed 1`] = `
+<div
+  className="progress-variant-3__dot"
+  style={
+    Object {
+      "backgroundColor": "blue",
+      "height": 10,
+      "width": 10,
+    }
+  }
+/>
+`;
+
+exports[`<ProgressDotItem /> should match snapshot 1`] = `
+<div
+  className="progress-variant-3__dot"
+  style={
+    Object {
+      "backgroundColor": "grey",
+      "height": 10,
+      "width": 10,
+    }
+  }
+/>
+`;

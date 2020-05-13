@@ -19,10 +19,10 @@
         "redux-saga": "^1.1.1"
     },
     "scripts": {
-        "build-trivia": "webpack --config webpack.css.js && webpack     --env.PROJECT_TYPE=index --config webpack.prod.js",
-        "build-quotes": "webpack --config webpack.css.js && webpack     --env.PROJECT_TYPE=quotes --config webpack.prod.js",
-        "build-photostory": "webpack --config webpack.css.js && webpack --env.PROJECT_TYPE=photostory --config webpack.prod.js",
-        "build-memory": "webpack --config webpack.css.js && webpack --env.PROJECT_TYPE=memory --config webpack.prod.js",
+        "build-trivia": "jest --ci && webpack --config webpack.css.js && webpack     --env.PROJECT_TYPE=index --config webpack.prod.js",
+        "build-quotes": "jest --ci && webpack --config webpack.css.js && webpack     --env.PROJECT_TYPE=quotes --config webpack.prod.js",
+        "build-photostory": "jest --ci && webpack --config webpack.css.js && webpack --env.PROJECT_TYPE=photostory --config webpack.prod.js",
+        "build-memory": "jest --ci && webpack --config webpack.css.js && webpack --env.PROJECT_TYPE=memory --config webpack.prod.js",
         "start-trivia": "webpack-dev-server     --env.PROJECT_TYPE=index --open --config webpack.dev.js",
         "start-quotes": "webpack-dev-server     --env.PROJECT_TYPE=quotes --open --config webpack.dev.js",
         "start-photostory": "webpack-dev-server --env.PROJECT_TYPE=photostory --open --config webpack.dev.js",
@@ -34,7 +34,9 @@
         "eject": "react-scripts eject",
         "prettier:base": "./node_modules/.bin/prettier --write",
         "prettier": "npm run prettier:base -- \"{*.{js,json},src/**/*.{js,jsx,css,scss,less,json,yaml,yml,md}}\"",
-        "precommit": "lint-staged"
+        "precommit": "lint-staged",
+        "test": "jest --watchAll",
+        "e2e": "cypress open"
     },
     "husky": {
         "hooks": {
@@ -49,6 +51,28 @@
         "src/**/*.{css,scss,md}": [
             "npm run prettier:base --"
         ]
+    },
+    "jest": {
+        "roots": [
+            "<rootDir>/src"
+        ],
+        "setupFilesAfterEnv": [
+            "<rootDir>src/setupTests.js"
+        ],
+        "snapshotSerializers": [
+            "enzyme-to-json/serializer"
+        ],
+        "collectCoverageFrom": [
+            "src/**/*.{js,jsx}",
+            "!src/**/*.d.ts"
+        ],
+        "testMatch": [
+            "<rootDir>/src/**/__tests__/**/*.{js,jsx}",
+            "<rootDir>/src/**/*.{spec,test}.{js,jsx}"
+        ],
+        "moduleNameMapper": {
+            "\\.(css|less|scss|sass)$": "identity-obj-proxy"
+        }
     },
     "eslintConfig": {
         "extends": "react-app"
@@ -66,9 +90,16 @@
         "@babel/preset-react": "^7.0.0",
         "babel-loader": "^8.0.6",
         "css-loader": "^3.0.0",
+        "cypress": "^4.5.0",
+        "dotenv-cli": "3.1.0",
+        "enzyme": "3.11.0",
+        "enzyme-adapter-react-16": "1.15.2",
+        "enzyme-to-json": "3.4.4",
         "html-loader": "^0.5.5",
         "html-webpack-plugin": "^3.2.0",
         "husky": "4.2.3",
+        "identity-obj-proxy": "3.0.0",
+        "jest": "24.9.0",
         "lint-staged": "10.1.2",
         "mini-css-extract-plugin": "^0.8.0",
         "prettier": "2.0.4",
