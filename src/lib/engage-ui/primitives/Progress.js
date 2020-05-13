@@ -1,6 +1,7 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
+import TextEditor from '../bricks/TextEditor'
 import { CompletionIcon } from '../icons'
 import '../style/rmx-progress.css'
 
@@ -99,14 +100,21 @@ class Progress extends React.Component {
             borderColor,
             progressText,
             dotSize,
+            text,
+            doubleClicked,
+            id,
         } = this.props
         switch (variant) {
             case 'variant1': {
                 const percent = +(step / max).toFixed(2) * 100
+                const resultText = text
+                    .replace(/<([^>]+)>/gi, '')
+                    .replace(/\d+%/gi, '')
+                    .trim()
                 return (
                     <div>
                         <div style={{ marginBottom: 8, textAlign: 'left', fontSize, color }}>
-                            {progressText} {percent}%
+                            <TextEditor parentId={id} readOnly={!doubleClicked} text={resultText + ` ${percent}%`} />
                         </div>
                         <div
                             style={{
@@ -197,6 +205,12 @@ class Progress extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
+    text: {
+        type: 'string',
+        minLength: 1,
+        maxLength: 4096,
+        default: 'Button text',
+    },
     variant: {
         type: 'string',
         enum: ['variant0', 'variant1', 'variant2', 'variant3'],
