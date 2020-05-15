@@ -98,7 +98,6 @@ class Progress extends React.Component {
             borderRadius,
             borderWidth,
             borderColor,
-            progressText,
             dotSize,
             text,
             doubleClicked,
@@ -215,12 +214,6 @@ export const Schema = new DataSchema({
         type: 'string',
         enum: ['variant0', 'variant1', 'variant2', 'variant3'],
         default: 'variant0',
-    },
-    progressText: {
-        type: 'string',
-        minLength: 1,
-        maxLength: 4096,
-        default: 'Progress:',
     },
     width: {
         type: 'number',
