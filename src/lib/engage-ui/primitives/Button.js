@@ -117,7 +117,7 @@ class Button extends React.Component {
                         />
                     )}
                     {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color={arrowColor} />}
-                    {text.length ? <TextEditor parentId={id} readOnly={!doubleClicked} text={text} /> : null}
+                    <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                 </div>
             </button>
         )
