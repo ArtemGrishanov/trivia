@@ -185,18 +185,9 @@ class BasicImage extends React.Component {
         const cntSt = {
             boxSizing: 'border-box',
             borderStyle: 'solid',
-            ...Object.fromEntries(
-                ['borderRadius', 'borderWidth', 'borderColor'].map(prop => {
-                    const value = this.props[prop]
-
-                    switch (typeof value) {
-                        case 'number':
-                            return [prop, `${value}px`]
-                        default:
-                            return [prop, value]
-                    }
-                }),
-            ),
+            borderRadius: `${this.props.borderRadius || 0}px`,
+            borderWidth: `${this.props.borderWidth || 0}px`,
+            borderColor: this.props.borderColor || '#fff',
         }
         if (this.props.dropShadow) {
             cntCl += ' __dropShadow'
