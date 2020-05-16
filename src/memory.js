@@ -13,11 +13,39 @@ import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
+import HashList from './lib/hashlist'
 
 Remix.setStore(store)
 
 const PROJECT_TAG = 'memory'
 const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
+
+function extendMemorySchema() {
+    Remix.extendSchema({
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].dataSet': {
+            type: 'hashlist',
+            minLength: 0,
+            maxLength: 128,
+            default: new HashList([]),
+        },
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].[dataSet HashList]./^[0-9a-z]+$/.id': {
+            type: 'number',
+            min: 0,
+            max: 128,
+            default: 0,
+        },
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].[dataSet HashList]./^[0-9a-z]+$/.gameKey': {
+            type: 'number',
+            min: 0,
+            max: 1e10,
+            default: 0,
+        },
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].[dataSet HashList]./^[0-9a-z]+$/.src': {
+            type: 'string',
+            default: '',
+        },
+    })
+}
 
 initCoverScreen({
     remix: Remix,
@@ -61,6 +89,8 @@ initShare({
         return getScreenHTMLPreview({ screen: resultScreen, defaultTitle: 'Result title' })
     },
 })
+
+extendMemorySchema()
 
 initGoogleAnalytics({ remix: Remix })
 

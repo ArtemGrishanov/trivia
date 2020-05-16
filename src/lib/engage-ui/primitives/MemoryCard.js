@@ -1,41 +1,19 @@
-import ProgressiveImage from './ProgressiveImage'
 import React from 'react'
 
 const mainStyleClass = 'rmx-memory'
 
-function MemoryImage({ src, width, height, isInlineBlock }) {
-    const st = {
-        width: width || '100%',
-        height: height || '100%',
-        backgroundImage: `url(${src})`,
-        backgroundSize: 'cover',
-        backgroundPosition: '50%',
-    }
-    if (isInlineBlock) {
-        st.display = 'inline-block'
-    }
-    return <div className={`${mainStyleClass}-image`} style={st}></div>
-}
-
 export default class MemoryCard extends React.Component {
     constructor(props) {
         super(props)
-        this.state = {
-            isActive: false,
-        }
         this.handleClick = this.handleClick.bind(this)
     }
 
     handleClick() {
-        this.setState({
-            isActive: true,
-        })
-        this.props.clickHandler({ ...this.props, ...this.state })
+        this.props.clickHandler(this.props)
     }
 
     render() {
-        const { isActive } = this.state
-        const { src, backCoverSrc, width, padding, relationKey } = this.props
+        const { src, backCoverSrc, width, padding, isActive } = this.props
         const cardStyles = {
             width: width,
             padding: padding,
@@ -51,4 +29,18 @@ export default class MemoryCard extends React.Component {
             </div>
         )
     }
+}
+
+function MemoryImage({ src, width, height, isInlineBlock }) {
+    const st = {
+        width: width || '100%',
+        height: height || '100%',
+        backgroundImage: `url(${src})`,
+        backgroundSize: 'cover',
+        backgroundPosition: '50%',
+    }
+    if (isInlineBlock) {
+        st.display = 'inline-block'
+    }
+    return <div className={`${mainStyleClass}-image`} style={st}></div>
 }

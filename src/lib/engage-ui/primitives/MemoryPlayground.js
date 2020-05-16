@@ -16,9 +16,9 @@ const CARD_BACK_IMG_URL = 'https://www.publicdomainpictures.net/pictures/40000/v
 let cardId = 0
 
 class CardData {
-    constructor(gameLink, src) {
+    constructor(gameKey, src) {
         this.id = this.getId()
-        this.gameLink = gameLink
+        this.gameKey = gameKey
         this.src = src || CARD_BACK_IMG_URL
     }
     getId() {
@@ -30,27 +30,26 @@ class MemoryPlayground extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            prevSelectedCardId: null,
-            dataSet: this.props.dataSet,
-            cardRowOption: this.props.cardRowOption,
-            cardsData: [],
+            isUserSelectionBlocked: false,
+            prevSelectedCard: null,
+            cardsDataSet: [],
         }
         this.onCardClick = this.onCardClick.bind(this)
     }
 
     componentDidMount() {
-        this.updateCardsData()
+        this.updateCardsDataSet()
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.cardRowOption !== this.props.cardRowOption) {
-            this.updateCardsData()
+            this.updateCardsDataSet()
         }
     }
 
-    updateCardsData() {
-        let cardsData = []
-        const { cardRowOption } = this.props
+    updateCardsDataSet() {
+        let cardsDataSet = []
+        const { cardRowOption, dataSet } = this.props
         const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
         const isValidProp = x => typeof x === 'number' && x > 0
 
@@ -58,21 +57,102 @@ class MemoryPlayground extends React.Component {
             return console.warn('[Memory]: Bad props from cardRowsCount!')
         }
 
-        for (let i = 0; i < cardRowsCount; i++) {
-            cardsData.push([...new Array(cardsInRowCount)].map((x, i) => new CardData(i, null)))
+        let arr = []
+
+        if (dataSet && dataSet.toArray().length) {
+            arr = [...dataSet.toArray(), ...dataSet.toArray()].map((item, i) => ({ ...item, id: i }))
+            for (let i = 0; i < cardRowsCount; i++) {
+                const row = arr.splice(0, cardsInRowCount)
+                cardsDataSet.push(row)
+            }
+        } else {
+            arr = [...new Array(cardsInRowCount)]
+            for (let i = 0; i < cardRowsCount; i++) {
+                cardsDataSet.push(arr.map((x, i) => new CardData(i, null)))
+            }
         }
 
         this.setState({
-            cardsData,
+            cardsDataSet,
+        })
+    }
+
+    updateActive(card, isActive) {
+        const dataSet = [...this.state.cardsDataSet]
+        const [row] = dataSet.filter(x => x.some(y => y.id === card.id))
+        const [_card] = row.filter(x => x.id === card.id)
+        _card.isActive = isActive
+        this.setState({
+            cardsDataSet: dataSet,
         })
     }
 
     onCardClick(card) {
-        console.log(card)
+        const show = x => this.updateActive(x, true)
+        const hide = x => this.updateActive(x, false)
+        const { isUserSelectionBlocked, prevSelectedCard } = this.state
+
+        if (isUserSelectionBlocked) {
+            return
+        }
+
+        // (1)First step: Store first selected card in 'prevSelectedCard' and show it.
+        if (!prevSelectedCard) {
+            if (card.isActive) {
+                return
+            }
+            show(card)
+            this.setState({
+                prevSelectedCard: card,
+            })
+            return
+        }
+
+        // (2)Second step: Do nothing if selected previously selected card.
+        if (prevSelectedCard && prevSelectedCard.id === card.id) {
+            return
+        }
+
+        const isPair = prevSelectedCard.gameKey === card.gameKey
+
+        // React only on non active cards
+        if (!card.isActive) {
+            // (3)Third step: show card if pair or hide both selected and previous selected cards.
+            if (isPair) {
+                show(card)
+            } else {
+                show(card)
+                show(prevSelectedCard)
+                this.setState({
+                    isUserSelectionBlocked: true,
+                })
+                setTimeout(() => {
+                    hide(card)
+                    hide(prevSelectedCard)
+                    this.setState({
+                        isUserSelectionBlocked: false,
+                    })
+                }, 1000)
+            }
+
+            // (4)Fourth step: clean previous selection
+            this.setState({
+                prevSelectedCard: null,
+            })
+        }
+
+        // (5)Last step: Game over
+        if (this.state.cardsDataSet.every(row => row.every(card => card.isActive))) {
+            this.finalScreen()
+        }
+    }
+
+    finalScreen() {
+        Remix.setCurrentScreen(Remix.getScreens({ tag: 'final' })[0].hashlistId)
     }
 
     render() {
-        const { cardsData } = this.state
+        const { cardsDataSet } = this.state
         const { cardRowOption, indent } = this.props
         const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
         const height = `${100 / cardRowsCount}%`
@@ -82,17 +162,19 @@ class MemoryPlayground extends React.Component {
         }
         return (
             <div className={`${mainStyleClass}-playground`}>
-                {cardsData.map((row, i) => (
+                {cardsDataSet.map((row, i) => (
                     <div style={rowStyle} className={`${mainStyleClass}-row`} key={i}>
                         {row.map(card => (
                             <MemoryCard
+                                id={card.id}
                                 key={`${card.id}key`}
                                 padding={indent}
                                 height={height}
                                 width={cardWidth}
                                 backCoverSrc={CARD_BACK_IMG_URL}
                                 src={card.src}
-                                gameLink={card.gameLink}
+                                gameKey={card.gameKey}
+                                isActive={card.isActive}
                                 clickHandler={this.onCardClick}
                             />
                         ))}
@@ -118,15 +200,6 @@ export const Schema = new DataSchema({
         type: 'string',
         enum: ['4x2', '4x3', '4x4', '5x2', '5x4', '6x3', '6x4', '6x6'],
         default: '4x4',
-    },
-    dataSet: {
-        type: 'hashlist',
-        minLength: 0,
-        maxLength: 36,
-        default: new HashList([
-            // {id: '1', src: 'http://...'}
-        ]),
-        prototypes: [],
     },
 })
 
