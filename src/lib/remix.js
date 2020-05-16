@@ -1025,7 +1025,7 @@ export function deserialize2(json) {
  * @param {string} filter.tag
  * @param {boolean} filter.includeDisabled
  */
-function getScreens(filter = {}) {
+export function getScreens(filter = {}) {
     return store
         .getState()
         .router.screens.toArray()

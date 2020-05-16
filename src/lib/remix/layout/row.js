@@ -1,5 +1,10 @@
 import { cloneLayoutItemProps } from './adapter'
 
+const PADDING_LEFT = 10,
+    PADDING_RIGHT = 10,
+    PADDING_TOP = 20,
+    PADDING_BOTTOM = 20
+
 /**
  * Ряд - класс представляющий горизонтальную последовательность flow элементов
  */

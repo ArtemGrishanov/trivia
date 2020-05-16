@@ -5,6 +5,7 @@ import {
     postMessage,
     getMode,
     getSchema,
+    getScreens,
     REMIX_SET_ADAPTED_PROPS,
     REMIX_SET_SESSION_SIZE,
     REMIX_PRE_RENDER,
@@ -47,6 +48,7 @@ export function saveAdaptedProps(componentId, props) {
         width: sessionWidth,
         props: { [componentId]: props },
     })
+    recalculateAppHeight()
 }
 
 /**
@@ -299,5 +301,44 @@ function getAdaptation(width) {
         width: parseInt(aKeys[0]),
         contentHeight: app.adaptedui[aKeys[0]].height,
         props: app.adaptedui[aKeys[0]].props,
+    }
+}
+
+/**
+ * Пройти по всем экранам и компонентам и определить максимальную высоту и применить ее
+ * Это происходит только при редактировании адаптации пока что
+ * Подумаем - может делать то же самое и для дефолтного размера
+ *
+ */
+function recalculateAppHeight() {
+    const state = getState(),
+        adapted = state.session.adaptedui[state.session.size.width].props || {}
+
+    let maxH = 0
+
+    getScreens().forEach(scr => {
+        scr.components.toArray().forEach(c => {
+            const aprops = adapted[c.hashlistId]
+            let top = c.top,
+                height = c.height
+            if (aprops) {
+                top = typeof aprops.top === 'number' ? aprops.top : top
+                height = typeof aprops.height === 'number' ? aprops.height : height
+            }
+            maxH = Math.max(maxH, top + height)
+        })
+    })
+
+    maxH = Math.round(maxH + 20) //TODO 20 - to padding bottom
+
+    // set session height and request container size change
+    if (state.session.size.height !== maxH) {
+        setData({ [`app.adaptedui.${state.session.size.width}.height`]: maxH })
+        postMessage('requestSetSize', {
+            size: {
+                width: state.session.size.width,
+                height: maxH,
+            },
+        })
     }
 }

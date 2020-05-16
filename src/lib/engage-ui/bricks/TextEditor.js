@@ -114,7 +114,17 @@ class TextEditor extends React.Component {
     componentDidMount() {
         if (this.props.getContentRect) {
             if (this.contentRef && this.contentRef.current) {
-                this.props.getContentRect(this.contentRef.current.getBoundingClientRect())
+                if (this.props.parentId === 'emeh5f') {
+                    const stop = '2'
+                    console.log('emeh5f', this.contentRef.current.getBoundingClientRect())
+                    setTimeout(() => {
+                        console.log('emeh5f', this.contentRef.current.getBoundingClientRect())
+                    }, 500)
+                }
+                //this.props.getContentRect(this.contentRef.current.getBoundingClientRect())
+                setTimeout(() => {
+                    this.props.getContentRect(this.contentRef.current.getBoundingClientRect())
+                }, 100)
             }
         }
     }
