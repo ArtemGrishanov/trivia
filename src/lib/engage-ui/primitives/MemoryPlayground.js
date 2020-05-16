@@ -7,6 +7,7 @@ import ProgressiveImage from './ProgressiveImage'
 import '../style/rmx-memory.css'
 import { debounce } from '../../remix/util/util'
 import MemoryCard from './MemoryCard'
+import HashList from '../../hashlist'
 
 const MEMORY_TAG = 'memoryitem'
 const mainStyleClass = 'rmx-memory'
@@ -30,6 +31,7 @@ class MemoryPlayground extends React.Component {
         super(props)
         this.state = {
             prevSelectedCardId: null,
+            dataSet: this.props.dataSet,
             cardRowOption: this.props.cardRowOption,
             cardsData: [],
         }
@@ -42,7 +44,6 @@ class MemoryPlayground extends React.Component {
 
     componentDidUpdate(prevProps, prevState, snapshot) {
         if (prevProps.cardRowOption !== this.props.cardRowOption) {
-            console.log(prevProps, prevState, snapshot)
             this.updateCardsData()
         }
     }
@@ -117,6 +118,15 @@ export const Schema = new DataSchema({
         type: 'string',
         enum: ['4x2', '4x3', '4x4', '5x2', '5x4', '6x3', '6x4', '6x6'],
         default: '4x4',
+    },
+    dataSet: {
+        type: 'hashlist',
+        minLength: 0,
+        maxLength: 36,
+        default: new HashList([
+            // {id: '1', src: 'http://...'}
+        ]),
+        prototypes: [],
     },
 })
 
