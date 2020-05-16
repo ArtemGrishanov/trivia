@@ -26,18 +26,6 @@ const componentSchemas = {
 const schemaData = {
     'app.size.width': EngageAppSchema.getDescription('width'),
     'app.size.height': EngageAppSchema.getDescription('height'),
-    'app.adaptedui./^[0-9a-z]+$/': {
-        type: 'number',
-        default: 234,
-        min: 80,
-        max: 4000,
-    },
-    // 'app.adaptedui': {
-    //     type: 'number',
-    //     min: 80,
-    //     max: 4000,
-    //     default: 444,
-    // },
     'router.[screens HashList]': RouterScreensSchema.getDescription('screens'),
     'router.currentScreenId': RouterScreensSchema.getDescription('currentScreenId'),
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),
