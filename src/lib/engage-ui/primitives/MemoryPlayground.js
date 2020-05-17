@@ -16,8 +16,8 @@ const CARD_BACK_IMG_URL = 'https://www.publicdomainpictures.net/pictures/40000/v
 let cardId = 0
 
 class CardData {
-    constructor(gameKey, src) {
-        this.id = this.getId()
+    constructor(id, gameKey, src) {
+        this.id = id || this.getId()
         this.gameKey = gameKey
         this.src = src || CARD_BACK_IMG_URL
     }
@@ -32,7 +32,7 @@ class MemoryPlayground extends React.Component {
         this.state = {
             isUserSelectionBlocked: false,
             prevSelectedCard: null,
-            cardsDataSet: [],
+            renderSet: [],
         }
         this.onCardClick = this.onCardClick.bind(this)
     }
@@ -48,7 +48,7 @@ class MemoryPlayground extends React.Component {
     }
 
     updateCardsDataSet() {
-        let cardsDataSet = []
+        let renderSet = []
         const { cardRowOption, dataSet } = this.props
         const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
         const isValidProp = x => typeof x === 'number' && x > 0
@@ -59,31 +59,49 @@ class MemoryPlayground extends React.Component {
 
         let arr = []
 
-        if (dataSet && dataSet.toArray().length) {
-            arr = [...dataSet.toArray(), ...dataSet.toArray()].map((item, i) => ({ ...item, id: i }))
+        let dataSetArray = dataSet.toArray()
+
+        const shouldBeCardsCount = (cardRowsCount * cardsInRowCount) / 2
+
+        if (dataSet && dataSetArray.length) {
+            // Add or remove cards
+            if (dataSetArray.length < shouldBeCardsCount) {
+                let maxId = dataSetArray.sort(x => x.id)[dataSetArray.length - 1].id
+                while (dataSet.length < shouldBeCardsCount) {
+                    dataSet.addElement(new CardData(++maxId, null, null))
+                }
+                dataSetArray = dataSet.toArray()
+            } else if (dataSetArray.length > shouldBeCardsCount) {
+                dataSetArray = dataSet.toArray().splice(0, shouldBeCardsCount)
+            }
+        }
+
+        // Format to render specific view
+        if (dataSet && dataSetArray.length) {
+            arr = [...dataSetArray, ...dataSetArray].map((item, i) => ({ ...item, id: i }))
             for (let i = 0; i < cardRowsCount; i++) {
                 const row = arr.splice(0, cardsInRowCount)
-                cardsDataSet.push(row)
+                renderSet.push(row)
             }
         } else {
             arr = [...new Array(cardsInRowCount)]
             for (let i = 0; i < cardRowsCount; i++) {
-                cardsDataSet.push(arr.map((x, i) => new CardData(i, null)))
+                renderSet.push(arr.map((x, i) => new CardData(null, i, null)))
             }
         }
 
         this.setState({
-            cardsDataSet,
+            renderSet,
         })
     }
 
     updateActive(card, isActive) {
-        const dataSet = [...this.state.cardsDataSet]
+        const dataSet = [...this.state.renderSet]
         const [row] = dataSet.filter(x => x.some(y => y.id === card.id))
         const [_card] = row.filter(x => x.id === card.id)
         _card.isActive = isActive
         this.setState({
-            cardsDataSet: dataSet,
+            renderSet: dataSet,
         })
     }
 
@@ -142,7 +160,7 @@ class MemoryPlayground extends React.Component {
         }
 
         // (5)Last step: Game over
-        if (this.state.cardsDataSet.every(row => row.every(card => card.isActive))) {
+        if (this.state.renderSet.every(row => row.every(card => card.isActive))) {
             this.finalScreen()
         }
     }
@@ -152,7 +170,7 @@ class MemoryPlayground extends React.Component {
     }
 
     render() {
-        const { cardsDataSet } = this.state
+        const { renderSet } = this.state
         const { cardRowOption, indent } = this.props
         const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
         const height = `${100 / cardRowsCount}%`
@@ -162,7 +180,7 @@ class MemoryPlayground extends React.Component {
         }
         return (
             <div className={`${mainStyleClass}-playground`}>
-                {cardsDataSet.map((row, i) => (
+                {renderSet.map((row, i) => (
                     <div style={rowStyle} className={`${mainStyleClass}-row`} key={i}>
                         {row.map(card => (
                             <MemoryCard
