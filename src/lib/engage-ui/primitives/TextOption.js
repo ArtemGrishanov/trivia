@@ -50,9 +50,8 @@ class TextOption extends React.Component {
                 <div className="clipped" style={st}>
                     <div
                         className={
-                            'rmx-option align-center' +
-                            (withIndic ? ' withIndic' : '') +
-                            (withPercent ? ' withPercent' : '')
+                            // 'rmx-option align-center' +
+                            'rmx-option' + (withIndic ? ' withIndic' : '') + (withPercent ? ' withPercent' : '')
                         }
                     >
                         {this.props.imageSrc && (
