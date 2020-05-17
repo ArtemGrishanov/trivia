@@ -1,18 +1,13 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
-import { getComponents } from '../../remix'
-import ProgressiveImage from './ProgressiveImage'
 
 import '../style/rmx-memory.css'
-import { debounce } from '../../remix/util/util'
-import MemoryCard from './MemoryCard'
-import HashList from '../../hashlist'
 
-const MEMORY_TAG = 'memoryitem'
+import MemoryCard from './MemoryCard'
+
 const mainStyleClass = 'rmx-memory'
-const DEBOUNCE_THRESHOLD = 650
-const CARD_BACK_IMG_URL = 'https://www.publicdomainpictures.net/pictures/40000/velka/question-mark.jpg'
+const CARD_BACK_IMG_URL = ''
 let cardId = 0
 
 class CardData {
@@ -78,9 +73,11 @@ class MemoryPlayground extends React.Component {
 
         // Format to render specific view
         if (dataSet && dataSetArray.length) {
-            arr = [...dataSetArray, ...dataSetArray].map((item, i) => ({ ...item, id: i }))
+            arr = [...dataSetArray, ...dataSetArray]
+                .map((item, i) => ({ ...item, id: i }))
+                .sort(() => Math.random() - 0.5)
             for (let i = 0; i < cardRowsCount; i++) {
-                const row = arr.splice(0, cardsInRowCount)
+                const row = arr.splice(0, cardsInRowCount).sort(() => Math.random() - 0.5)
                 renderSet.push(row)
             }
         } else {
