@@ -1,25 +1,12 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
+import MemoryCard from './MemoryCard'
 
 import '../style/rmx-memory.css'
 
-import MemoryCard from './MemoryCard'
-
 const mainStyleClass = 'rmx-memory'
 const CARD_BACK_IMG_URL = ''
-let cardId = 0
-
-class CardData {
-    constructor(id, gameKey, src) {
-        this.id = id || this.getId()
-        this.gameKey = gameKey
-        this.src = src || CARD_BACK_IMG_URL
-    }
-    getId() {
-        return cardId++
-    }
-}
 
 class MemoryPlayground extends React.Component {
     constructor(props) {
@@ -63,7 +50,7 @@ class MemoryPlayground extends React.Component {
             if (dataSetArray.length < shouldBeCardsCount) {
                 let maxId = dataSetArray.sort(x => x.id)[dataSetArray.length - 1].id
                 while (dataSet.length < shouldBeCardsCount) {
-                    dataSet.addElement(new CardData(++maxId, null, null))
+                    dataSet.addElement({ id: ++maxId, gameKey: null, src: null })
                 }
                 dataSetArray = dataSet.toArray()
             } else if (dataSetArray.length > shouldBeCardsCount) {
@@ -83,7 +70,7 @@ class MemoryPlayground extends React.Component {
         } else {
             arr = [...new Array(cardsInRowCount)]
             for (let i = 0; i < cardRowsCount; i++) {
-                renderSet.push(arr.map((x, i) => new CardData(null, i, null)))
+                renderSet.push(arr.map((x, i) => ({ id: i, gameKey: null, src: null })))
             }
         }
 
