@@ -17,6 +17,7 @@ class TextOption extends React.Component {
     }
 
     render() {
+        const { doubleClicked } = this.props
         const st = {
             boxSizing: 'border-box',
             borderStyle: 'solid',
@@ -36,7 +37,7 @@ class TextOption extends React.Component {
         if (this.props.dropShadow) {
             st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)'
         }
-        if (this.props.doubleClicked) {
+        if (doubleClicked) {
             // in edit mode we must see a TextEditor toolbars
             st.overflow = 'visible'
         }
@@ -50,8 +51,10 @@ class TextOption extends React.Component {
                 <div className="clipped" style={st}>
                     <div
                         className={
-                            // 'rmx-option align-center' +
-                            'rmx-option' + (withIndic ? ' withIndic' : '') + (withPercent ? ' withPercent' : '')
+                            'rmx-option' +
+                            (!doubleClicked ? ' align-center' : '') +
+                            (withIndic ? ' withIndic' : '') +
+                            (withPercent ? ' withPercent' : '')
                         }
                     >
                         {this.props.imageSrc && (
@@ -90,7 +93,7 @@ class TextOption extends React.Component {
                         )}
                         <TextEditor
                             parentId={this.props.id}
-                            readOnly={!this.props.doubleClicked}
+                            readOnly={!doubleClicked}
                             text={this.props.text}
                         ></TextEditor>
                     </div>
