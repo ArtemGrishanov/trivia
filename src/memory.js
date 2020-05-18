@@ -20,6 +20,8 @@ Remix.setStore(store)
 const PROJECT_TAG = 'memory'
 const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
 
+initButtonBehavior({ remix: Remix })
+
 function extendMemorySchema() {
     Remix.extendSchema({
         'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].dataSet': {
