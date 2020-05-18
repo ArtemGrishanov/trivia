@@ -108,6 +108,9 @@ const Icon = ({ name, align }) => {
         cursor: 'pointer',
         [align === 'right' ? 'marginLeft' : 'marginRight']: `12px`,
         order: align === 'right' ? 1 : 0,
+        minWidth: '24px',
+        minHeight: '24px',
+        position: 'relative',
     }
 
     return Normal ? (
