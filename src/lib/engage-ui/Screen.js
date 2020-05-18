@@ -44,15 +44,17 @@ class Screen extends React.Component {
                         ></BasicImage>
                     </div>
                 )}
-                <LayoutContainer
-                    editable={this.props.editable}
-                    id={'__lc_of_screen_' + this.props.id}
-                    width={this.props.size.width}
-                    height={this.props.size.height}
-                    adaptedui={this.props.adaptedui}
-                >
-                    {components}
-                </LayoutContainer>
+                {this.props.size && (
+                    <LayoutContainer
+                        editable={this.props.editable}
+                        id={'__lc_of_screen_' + this.props.id}
+                        width={this.props.size.width}
+                        height={this.props.size.height}
+                        adaptedui={this.props.adaptedui}
+                    >
+                        {components}
+                    </LayoutContainer>
+                )}
             </div>
         )
     }
@@ -98,6 +100,10 @@ export const Schema = new DataSchema({
     disabled: {
         type: 'boolean',
         default: false,
+    },
+    adaptedui: {
+        type: 'object',
+        default: {},
     },
 })
 

@@ -28,7 +28,6 @@ export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
 export const REMIX_PRE_RENDER = '__Remix_pre_render__'
-export const REMIX_SET_ADAPTED_PROPS = '__Remix_set_adapted_props__'
 export const REMIX_SET_SESSION_SIZE = '__Remix_set_session_size__'
 
 //TODO specify origin during publishing?
@@ -618,7 +617,6 @@ function session(
         selectedComponentIds: [],
         mode: 'none',
         prerender: {},
-        adaptedui: {},
         size: { width: undefined, height: undefined },
     },
     action,
@@ -675,22 +673,6 @@ function session(
                 ...state,
                 prerender: {
                     components: action.components,
-                },
-            }
-        }
-        case REMIX_SET_ADAPTED_PROPS: {
-            // собираем существующие пропс и высоту (если уже заданы) для мерджа
-            const eAdapted = state.adaptedui && state.adaptedui[action.width] ? state.adaptedui[action.width] : null,
-                eProps = eAdapted && eAdapted.props ? eAdapted.props : {},
-                eHeight = eAdapted && eAdapted.height ? eAdapted.height : undefined
-            return {
-                ...state,
-                adaptedui: {
-                    ...state.adaptedui,
-                    [action.width]: {
-                        props: { ...eProps, ...action.props },
-                        height: action.height || eHeight,
-                    },
                 },
             }
         }
@@ -1210,7 +1192,7 @@ export function setComponentProps(componentId, props, options) {
         setData(data)
         if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
             // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
-            saveAdaptedProps(componentId, adaptedData)
+            saveAdaptedProps(screenId, componentId, adaptedData)
         }
     }
     if (options && options.putStateHistory === true) {
