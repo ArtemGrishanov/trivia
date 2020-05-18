@@ -7,12 +7,14 @@ import App from './App'
 
 import store from './store'
 import Remix from './lib/remix'
+
 import initRemixRouting from './lib/plugins/remix-routing'
 import initScreenProgress from './lib/plugins/screen-progress'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initButtonBehavior from './lib/plugins/button-behavior'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 

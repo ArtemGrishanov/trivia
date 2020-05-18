@@ -11,6 +11,7 @@ import initRemixRouting from './lib/plugins/remix-routing'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initButtonBehavior from './lib/plugins/button-behavior'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import HashList from './lib/hashlist'
