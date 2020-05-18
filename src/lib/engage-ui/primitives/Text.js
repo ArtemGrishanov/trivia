@@ -89,7 +89,7 @@ class Text extends React.Component {
 export const Schema = new DataSchema({
     text: {
         type: 'string',
-        minLength: 1,
+        minLength: 0,
         maxLength: 4096,
         default: 'Some text',
     },
