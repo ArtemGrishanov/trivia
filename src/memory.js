@@ -14,6 +14,7 @@ import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import HashList from './lib/hashlist'
+import initButtonBehavior from './lib/plugins/button-behavior'
 
 Remix.setStore(store)
 
