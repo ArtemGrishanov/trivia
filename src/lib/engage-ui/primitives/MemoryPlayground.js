@@ -6,7 +6,6 @@ import MemoryCard, { backCoverImgBase64 } from './MemoryCard'
 import '../style/rmx-memory.css'
 
 const mainStyleClass = 'rmx-memory'
-const CARD_BACK_IMG_URL = ''
 
 class MemoryPlayground extends React.Component {
     constructor(props) {

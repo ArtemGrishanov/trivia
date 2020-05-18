@@ -24,19 +24,19 @@ export default class MemoryCard extends React.Component {
         }
         return (
             <div onClick={this.handleClick} style={cardStyles} className={`${mainStyleClass}-card`}>
-                {isActive ? <MemoryImage src={src} /> : <MemoryImage src={backCoverSrc} />}
+                <FlipCard isActive={isActive} src={src} backCoverSrc={backCoverSrc} />
             </div>
         )
     }
 }
 
-function MemoryImage({ src, width, height }) {
-    const st = {
-        width: width || '100%',
-        height: height || '100%',
-        backgroundImage: `url(${src})`,
-        backgroundSize: 'cover',
-        backgroundPosition: '50%',
-    }
-    return <div className={`${mainStyleClass}-image`} style={st}></div>
+function FlipCard({ isActive, src, backCoverSrc }) {
+    return (
+        <div className={`${mainStyleClass}-image flip-card ${isActive ? 'active' : ''}`}>
+            <div className="flip-card-inner">
+                <div className="flip-card-front" style={{ backgroundImage: `url(${backCoverSrc})` }}></div>
+                <div className="flip-card-back" style={{ backgroundImage: `url(${src})` }}></div>
+            </div>
+        </div>
+    )
 }
