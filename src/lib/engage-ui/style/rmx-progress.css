@@ -1,21 +1,62 @@
-.progress-arrow__item-wrapper {
-    position: relative;
-    display: inline-block;
+.progress-variant-2 {
+    display: flex;
 }
 
-.progress-arrow__item {
+.progress-variant-2__completed-icon {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 }
 
-.progress-dot__item {
+.progress-variant-2__arrow {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    height: 16px;
+    clip-path: polygon(calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 0 100%, 5px 50%, 0 0);
+}
+
+.progress-variant-2__arrow_first {
+    clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 0 100%);
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.progress-variant-2__arrow_last {
+    clip-path: polygon(0 0, 5px 50%, 0 100%, 100% 100%, 100% 0);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.progress-variant-3__dot {
     display: inline-block;
     margin-right: 8px;
     border-radius: 50%;
 }
 
-.progress-dot__item:last-child {
+.progress-variant-3__dot:last-child {
     margin-right: 0;
 }
+
+/* .test-first-item {
+    clip-path: polygon(0 0, calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 0 100%);
+    height: 16px;
+    background: #69b1fc;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.test-middle-item {
+    clip-path: polygon(calc(100% - 5px) 0, 100% 50%, calc(100% - 5px) 100%, 0 100%, 5px 50%, 0 0);
+    height: 16px;
+    background: #69b1fc;
+}
+
+.test-last-item {
+    clip-path: polygon(0 0, 5px 50%, 0 100%, 100% 100%, 100% 0);
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    background: #69b1fc;
+    height: 16px;
+} */
