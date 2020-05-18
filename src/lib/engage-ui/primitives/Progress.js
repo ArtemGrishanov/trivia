@@ -8,8 +8,6 @@ import '../style/rmx-progress.css'
 /**
  *
  * @param {object} props
- * @param {number} props.height
- * @param {number} props.width
  * @param {string} props.color
  * @param {string} props.completionColor
  * @param {boolean} props.isFirst
@@ -17,52 +15,24 @@ import '../style/rmx-progress.css'
  * @param {boolean} props.isCompleted
  */
 function ProgressArrowItem({
-    height = 16,
-    width = 125,
     color = '#D8D8D8',
     completionColor = '#69B1FC',
     isFirst = false,
     isLast = false,
     isCompleted = false,
 }) {
-    const fillColor = isCompleted ? completionColor : color
-    const firstItem = (
-        <svg width={width} height={height} viewBox="0 0 125 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 8C0 3.58172 3.58172 0 8 0H120L125 8L120 16H8C3.58172 16 0 12.4183 0 8Z" fill={fillColor} />
-        </svg>
-    )
-    const middleItem = (
-        <svg width={width} height={height} viewBox="0 0 125 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M0 0H120L125 8L120 16H0L5 8L0 0Z" fill={fillColor} />
-        </svg>
-    )
-    const lastItem = (
-        <svg width={width} height={height} viewBox="0 0 120 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path
-                d="M112 0H0L5 8L0 16H112C116.418 16 120 12.4183 120 8C120 3.58172 116.418 0 112 0Z"
-                fill={fillColor}
-            />
-        </svg>
-    )
-
-    let progressItem = middleItem
+    const backgroundColor = isCompleted ? completionColor : color
+    let className = 'progress-variant-2__arrow'
 
     if (isFirst) {
-        progressItem = firstItem
-    }
-
-    if (isLast) {
-        progressItem = lastItem
+        className += ' progress-variant-2__arrow_first'
+    } else if (isLast) {
+        className += ' progress-variant-2__arrow_last'
     }
 
     return (
-        <div className="progress-arrow__item-wrapper" style={{ width, height }}>
-            {progressItem}
-            {isCompleted && (
-                <div className="progress-arrow__item">
-                    <CompletionIcon />
-                </div>
-            )}
+        <div className={className} style={{ backgroundColor }}>
+            {isCompleted && <CompletionIcon className="progress-variant-2__completed-icon" />}
         </div>
     )
 }
@@ -77,7 +47,7 @@ function ProgressArrowItem({
  */
 function ProgressDotItem({ radius = 6, color = '#C4C4C4', completionColor = '#2990FB', isCompleted = false }) {
     const backgroundColor = isCompleted ? completionColor : color
-    return <div className="progress-dot__item" style={{ width: radius, height: radius, backgroundColor }} />
+    return <div className="progress-variant-3__dot" style={{ width: radius, height: radius, backgroundColor }} />
 }
 
 class Progress extends React.Component {
@@ -140,7 +110,7 @@ class Progress extends React.Component {
             }
             case 'variant2': {
                 return (
-                    <div>
+                    <div className="progress-variant-2">
                         {new Array(max).fill('').map((_, index) => {
                             const isFirst = index === 0
                             const isLast = index === max - 1
