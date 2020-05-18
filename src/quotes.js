@@ -21,6 +21,8 @@ Remix.setStore(store)
 const PROJECT_TAG = 'quotes'
 const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
 
+initButtonBehavior({ remix: Remix })
+
 initScreenCollage({
     remix: Remix,
     screenTag: 'final',

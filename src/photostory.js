@@ -18,6 +18,7 @@ import { getScreenHTMLPreview } from './lib/remix/util/util'
 
 Remix.setStore(store)
 
+initButtonBehavior({ remix: Remix })
 initScreenCollage({
     remix: Remix,
     screenTag: 'final',
