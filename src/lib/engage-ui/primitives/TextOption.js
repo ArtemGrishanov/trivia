@@ -58,7 +58,7 @@ class TextOption extends React.Component {
         // const withPercent = this.props.percent > 0
 
         return (
-            <div className={`rmx-component`}>
+            <div className="rmx-component rmx-pointer">
                 <div className={`clipped`} style={st}>
                     {/* <div className="rmx-option" style={st}> */}
                     {this.props.imageSrc && (
