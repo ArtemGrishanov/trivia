@@ -59,24 +59,24 @@ class TextOption extends React.Component {
 
         return (
             <div className={`rmx-component`}>
-                <div className={`clipped`}>
-                    <div className="rmx-option" style={st}>
-                        {this.props.imageSrc && (
-                            <div className="rmx-option_backimg_wr">
-                                <BasicImage
-                                    width={this.props.width}
-                                    height={this.props.height}
-                                    src={this.props.imageSrc}
-                                    backgroundSize={'cover'}
-                                    blur={blur}
-                                    grayscale={grayscale}
-                                    borderRadius={this.props.borderRadius}
-                                    borderColor={this.props.borderColor}
-                                    borderWidth={this.props.borderWidth}
-                                ></BasicImage>
-                            </div>
-                        )}
-                        {/* {this.props.percent > 0 && (
+                <div className={`clipped`} style={st}>
+                    {/* <div className="rmx-option" style={st}> */}
+                    {this.props.imageSrc && (
+                        <div className="rmx-option_backimg_wr">
+                            <BasicImage
+                                width={this.props.width}
+                                height={this.props.height}
+                                src={this.props.imageSrc}
+                                backgroundSize={'cover'}
+                                blur={blur}
+                                grayscale={grayscale}
+                                borderRadius={this.props.borderRadius}
+                                borderColor={this.props.borderColor}
+                                borderWidth={this.props.borderWidth}
+                            ></BasicImage>
+                        </div>
+                    )}
+                    {/* {this.props.percent > 0 && (
                         <div className="rmx-percent_info">
                             <div className="rmx-pb_wr">
                                 <div
@@ -89,10 +89,10 @@ class TextOption extends React.Component {
                             </p>
                         </div>
                     )} */}
-                        {doubleClicked ? null : <Icon name={correctIndicator} align={align} />}
-                        <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
-                    </div>
+                    {doubleClicked ? null : <Icon name={correctIndicator} align={align} />}
+                    <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                 </div>
+                {/* </div> */}
             </div>
         )
     }
