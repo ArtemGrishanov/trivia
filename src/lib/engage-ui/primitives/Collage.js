@@ -28,7 +28,7 @@ function CollageItem({ src, width, height, isInlineBlock }) {
 function Collage() {
     let images = []
 
-    const getCollageItems = tags => getComponents({ displayName: 'ProgressiveImage', tags: tags })
+    const getCollageItems = tags => getComponents({ displayName: 'ProgressiveImage', screenTag: tags })
     const photoStoryItems = getCollageItems(PHOTO_STORY_TAG)
 
     //TODO[DM]: Provide collage-item-search tag from outside
