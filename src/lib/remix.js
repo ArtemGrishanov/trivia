@@ -1207,16 +1207,24 @@ function getScreens(filter = {}) {
  * Get some components by its display name and tag
  *
  * @param {string} filter.displayName
- * @param {string} filter.tags
+ * @param {string} filter.screenTag
+ * @param {string} filter.tag
  */
 export function getComponents(filter = {}) {
     const components = []
     store
         .getState()
         .router.screens.toArray()
-        .filter(scr => (filter.tags ? scr.tags.indexOf(filter.tags) > 0 : true))
+        .filter(scr => (filter.screenTag ? scr.tags.indexOf(filter.screenTag) > 0 : true))
         .forEach(scr => {
-            scr.components.toArray().forEach(c => (c.displayName === filter.displayName ? components.push(c) : null))
+            scr.components
+                .toArray()
+                .forEach(c =>
+                    (!filter.displayName || c.displayName === filter.displayName) &&
+                    (!filter.tag || c.tags.indexOf(filter.tag) > 0)
+                        ? components.push({ ...c, screen: scr })
+                        : null,
+                )
         })
     return components
 }
