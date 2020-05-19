@@ -1,3 +1,7 @@
+.progress-variant-1 .ql-editor {
+    padding: 0 !important;
+}
+
 .progress-variant-2 {
     display: flex;
 }
@@ -27,6 +31,13 @@
     clip-path: polygon(0 0, 5px 50%, 0 100%, 100% 100%, 100% 0);
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
+}
+
+.progress-variant-3 {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .progress-variant-3__dot {

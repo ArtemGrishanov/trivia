@@ -81,7 +81,7 @@ class Progress extends React.Component {
                     .replace(/\d+%/gi, '')
                     .trim()
                 return (
-                    <div>
+                    <div className="progress-variant-1">
                         <div style={{ marginBottom: 8, textAlign: 'left', fontSize, color }}>
                             <TextEditor parentId={id} readOnly={!doubleClicked} text={resultText + ` ${percent}%`} />
                         </div>
@@ -131,7 +131,7 @@ class Progress extends React.Component {
             }
             case 'variant3': {
                 return (
-                    <div>
+                    <div className="progress-variant-3">
                         {new Array(max).fill('').map((_, index) => {
                             const isCompleted = index < step
                             return (
