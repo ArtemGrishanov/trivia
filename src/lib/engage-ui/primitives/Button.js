@@ -110,7 +110,7 @@ class Button extends React.Component {
                 <div className={`clipped ${doubleClicked ? '' : 'align-center'}`}>
                     {doubleClicked ? null : (
                         <Icon
-                            color={this.state.isHover ? iconColorHover : iconColor}
+                            color={this.state.isHover && iconColorHover ? iconColorHover : iconColor}
                             name={iconName}
                             position={iconPosition}
                             gap={iconGap}
