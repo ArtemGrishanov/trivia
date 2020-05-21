@@ -2,8 +2,6 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 
-import '../../../editor_assets/l'
-
 import store from '../../../store'
 import Demo from './demo'
 

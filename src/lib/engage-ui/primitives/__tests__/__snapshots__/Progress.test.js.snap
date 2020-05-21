@@ -15,7 +15,9 @@ exports[`<Progress /> should match <Progress /> snapshot as variant0 1`] = `
 `;
 
 exports[`<Progress /> should match <Progress /> snapshot as variant1 1`] = `
-<div>
+<div
+  className="progress-variant-1"
+>
   <div
     style={
       Object {
@@ -96,7 +98,9 @@ exports[`<Progress /> should match <Progress /> snapshot as variant2 1`] = `
 `;
 
 exports[`<Progress /> should match <Progress /> snapshot as variant3 1`] = `
-<div>
+<div
+  className="progress-variant-3"
+>
   <ProgressDotItem
     isCompleted={true}
     key="0"

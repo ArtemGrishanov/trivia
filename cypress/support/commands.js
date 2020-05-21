@@ -23,3 +23,12 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+export function getIframeBody() {
+    cy.log('getIframeBody')
+    return cy
+        .get('iframe', { log: false })
+        .its('0.contentDocument.body', { log: false })
+        .should('not.be.empty')
+        .then($body => cy.wrap($body, { log: false }))
+}
