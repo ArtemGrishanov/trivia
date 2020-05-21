@@ -35,8 +35,9 @@
         "prettier:base": "./node_modules/.bin/prettier --write",
         "prettier": "npm run prettier:base -- \"{*.{js,json},src/**/*.{js,jsx,css,scss,less,json,yaml,yml,md}}\"",
         "precommit": "lint-staged",
-        "test": "jest --watchAll",
-        "e2e": "cypress open"
+        "jest": "jest --watchAll",
+        "cypress": "cypress open",
+        "all-tests": "jest --ci && cypress run"
     },
     "husky": {
         "hooks": {
@@ -90,7 +91,7 @@
         "@babel/preset-react": "^7.0.0",
         "babel-loader": "^8.0.6",
         "css-loader": "^3.0.0",
-        "cypress": "^4.5.0",
+        "cypress": "4.5.0",
         "dotenv-cli": "3.1.0",
         "enzyme": "3.11.0",
         "enzyme-adapter-react-16": "1.15.2",

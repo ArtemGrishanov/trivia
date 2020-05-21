@@ -121,25 +121,4 @@ class Demo extends React.Component {
     }
 }
 
-new window.RemixContainer({
-    mode: 'preview',
-    element: document.getElementById('id-app_preview_remix_cnt'),
-    url: 'index.html',
-    scriptUrl: 'main.js',
-    cssUrl: 'main.css',
-    width: 800,
-    height: 600,
-    containerLog: true,
-    defaults: null,
-    forceRestart: true,
-    onAppChange: event => {
-        switch (event) {
-            case 'inited': {
-                console.log('demo.js: THE APP WAS INITED!')
-                //TODO add screens LAYOUTS_SAMPLES into each app
-            }
-        }
-    },
-})
-
 export default Demo
