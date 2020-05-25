@@ -32,3 +32,19 @@ export function getIframeBody() {
         .should('not.be.empty')
         .then($body => cy.wrap($body, { log: false }))
 }
+
+export function getIframeWindow() {
+    return cy
+        .get('iframe', { log: false })
+        .its('0.contentWindow', { log: false })
+        .should('not.be.empty')
+        .then($window => cy.wrap($window), { log: false })
+}
+
+export function getRemix() {
+    return cy
+        .get('iframe', { log: false })
+        .its('0.contentWindow.Remix', { log: false })
+        .should('not.be.undefined')
+        .then(remix => cy.wrap(remix), { log: false })
+}
