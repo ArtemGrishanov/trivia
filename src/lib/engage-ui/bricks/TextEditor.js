@@ -73,6 +73,8 @@ class TextEditor extends React.Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.contentRef = React.createRef()
+        this.measureInterval = null
+        this.measuredRect = {}
     }
 
     handleChange(value) {
@@ -114,18 +116,24 @@ class TextEditor extends React.Component {
     componentDidMount() {
         if (this.props.getContentRect) {
             if (this.contentRef && this.contentRef.current) {
-                if (this.props.parentId === 'emeh5f') {
-                    const stop = '2'
-                    console.log('emeh5f', this.contentRef.current.getBoundingClientRect())
-                    setTimeout(() => {
-                        console.log('emeh5f', this.contentRef.current.getBoundingClientRect())
-                    }, 500)
-                }
-                //this.props.getContentRect(this.contentRef.current.getBoundingClientRect())
-                setTimeout(() => {
-                    this.props.getContentRect(this.contentRef.current.getBoundingClientRect())
-                }, 100)
+                //TODO попробовать react-size-me в будущем как, возможно, более производительное решение. Хотя этот код измерения текста запускается очень редко и не стоит добавлять лишние библиотеки
+                this.measureInterval = setInterval(() => {
+                    const { width, height } = this.contentRef.current.getBoundingClientRect()
+                    if (this.props.parentId === 'emeh5f') {
+                        const stop = 0
+                    }
+                    if (this.measuredRect.width !== width || this.measuredRect.height !== height) {
+                        this.measuredRect = { width, height }
+                        this.props.getContentRect({ width, height })
+                    }
+                }, 400)
             }
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.measureInterval) {
+            clearInterval(this.measureInterval)
         }
     }
 

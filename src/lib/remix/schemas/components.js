@@ -72,13 +72,6 @@ const schemaData = {
         max: 9999,
         default: 100,
     },
-    // кастомные высоты приложения выставленные пользователем для различных ширин
-    // 'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.height': {
-    //     type: 'number',
-    //     min: 0,
-    //     max: 9999,
-    //     default: 600,
-    // },
 }
 
 // add common component properties from RemixWrapper

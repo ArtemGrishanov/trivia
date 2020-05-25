@@ -12,7 +12,7 @@ import {
     htmlEncode,
     htmlDecode,
 } from './remix/util/util.js'
-import { updateWindowSize, saveAdaptedProps } from './remix/layout/helpers'
+import { updateWindowSize, saveAdaptedProps, updateAppHeight } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -364,7 +364,7 @@ function cloneHashlistElement(hashlistPropPath, elementId) {
     }
     const index = hl.getIndex(elementId)
     addHashlistElement(hashlistPropPath, index + 1, {
-        newElement: hl.getElementCopy(index, { cloneChildHashlists: true }),
+        newElement: hl.getElementCopy(index, { cloneChildHashlists: true, replaceObjectIds: true }),
     })
 }
 
@@ -815,6 +815,7 @@ export function setComponentPosition({ id, top, left, width, height }, options) 
     if (width !== undefined) props.width = width
     if (height !== undefined) props.height = height
     setComponentProps(id, props, options)
+    updateAppHeight()
 }
 
 /**
@@ -1189,7 +1190,9 @@ export function setComponentProps(componentId, props, options) {
                 data[path + prop] = props[prop]
             }
         })
-        setData(data)
+        if (Object.keys(data).length > 0) {
+            setData(data)
+        }
         if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
             // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
             saveAdaptedProps(screenId, componentId, adaptedData)

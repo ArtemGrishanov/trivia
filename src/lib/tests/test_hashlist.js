@@ -184,6 +184,76 @@ describe('HashList', function () {
             chai.assert.equal(copy.components.getId(0) == origin.components.getId(0), false)
             chai.assert.equal(copy.components.getId(1) == origin.components.getId(1), false)
         })
+
+        /**
+         * Клонирование элемента с замещением свойств-ид
+         *
+         * Пример
+         * {
+         *   hashlist_1: {
+         *      'qwe123': {}
+         *      'asd456': {},
+         *      _orderedIds: ['qwe123', 'asd456']
+         *   },
+         *   some_props: {
+         *      'asd456': {
+         *
+         *      },
+         *      'qwe123': {
+         *
+         *      }
+         *   }
+         * }
+         *
+         * При клонировании hashlist_1 его элементы получат новые идишники
+         * есть специальная опция, которая позволит найти идишники (qwe123, asd456) в соседних свойствах и заменить их соответственно на новые
+         *
+         */
+        it('deep clone child hashlist elements with ids replacement', function () {
+            const components = new HashList([
+                { name: 'Component1', data: '12345' },
+                { name: 'Component2', data: '09876' },
+            ])
+            const origId1 = components.getId(0)
+            const origId2 = components.getId(1)
+
+            const screens = new HashList([
+                {
+                    backgroundColor: '#000',
+                    components,
+                    // соседний объект который имеет свойства с идентификаторами равными ключам из хешлиста
+                    // когда элемент screens[0] будет клонироваться, то эти идентификаторы будут заменены на новые
+                    someProps: {
+                        [components.getId(0)]: 'asd',
+                        [components.getId(1)]: 'qwe',
+                    },
+                },
+            ])
+            const copy = screens.getElementCopy(0, { cloneChildHashlists: true, replaceObjectIds: true })
+
+            const origin = screens.getByIndex(0)
+            chai.assert.equal(copy == origin, false)
+            chai.assert.equal(copy.backgroundColor === origin.backgroundColor, true)
+            chai.assert.equal(origin.components.length === 2, true)
+            chai.assert.equal(copy.components.length === 2, true)
+            chai.assert.equal(copy.components.getByIndex(0).name === 'Component1', true)
+            chai.assert.equal(origin.components.getByIndex(0).name === 'Component1', true)
+            chai.assert.equal(copy.components.getByIndex(1).name === 'Component2', true)
+            chai.assert.equal(origin.components.getByIndex(1).name === 'Component2', true)
+            chai.assert.equal(copy.components.getByIndex(0) == origin.components.getByIndex(0), false)
+            chai.assert.equal(copy.components.getByIndex(1) == origin.components.getByIndex(1), false)
+            chai.assert.equal(copy.components.getId(0).length > 1, true)
+            chai.assert.equal(copy.components.getId(1).length > 1, true)
+            chai.assert.equal(copy.components.getId(0) == origin.components.getId(0), false)
+            chai.assert.equal(copy.components.getId(1) == origin.components.getId(1), false)
+
+            const newId1 = copy.components.getId(0)
+            const newId2 = copy.components.getId(1)
+            chai.assert.equal(copy.someProps[newId1] === 'asd', true) // идишники были заменены
+            chai.assert.equal(copy.someProps[newId2] === 'qwe', true)
+            chai.assert.equal(!!copy.someProps[origId1], false)
+            chai.assert.equal(!!copy.someProps[origId2], false)
+        })
     })
 
     describe('#list empty', function () {

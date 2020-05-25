@@ -8,9 +8,11 @@ import {
     getScreens,
     REMIX_SET_SESSION_SIZE,
     REMIX_PRE_RENDER,
+    getComponents,
 } from '../../remix'
 
 import { getAdaptedChildrenProps } from './adapter.js'
+import { debounce } from '../util/util'
 
 export const APP_BOTTOM_PADDING = 20
 
@@ -23,17 +25,6 @@ export const APP_BOTTOM_PADDING = 20
  */
 export function saveAdaptedProps(screenId, componentId, props) {
     const state = getState()
-    // sessionWidth = state.session.size.width
-    // if (
-    //     (!state.app.adaptedui ||
-    //         !state.app.adaptedui[sessionWidth] ||
-    //         Object.keys(state.app.adaptedui[sessionWidth]).length === 0) &&
-    //     state.session.adaptedui[sessionWidth]
-    // ) {
-    //     // если такая адаптация еще не существует, создать на основе сессии
-    //     // state.session.adaptedui уже к этому моменту была вычислена автоматически
-    //     setData({ [`app.adaptedui.${sessionWidth}`]: state.session.adaptedui[sessionWidth] })
-    // }
     // сохраняем некоторые свойства, если они были изменены при другой ширине приложения
     // например: геометрические свойства (top, left, width, height) сохраняем для мобильной версии приложения
     const data = {}
@@ -78,21 +69,19 @@ export function updateWindowSize(root) {
         if (defaultWidth !== width) {
             // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
             let adaptationNeeded = false
-            const needRequestRects = []
             getScreens().forEach(scr => {
                 if (!getAdaptationProps(scr, width)) {
                     adaptationNeeded = true
-                    getAdaptedProps({
+                    calcAdaptedProps({
                         screen: scr,
                         screenId: scr.hashlistId,
                         defaultWidth,
                         width,
                     }).props
-                    //needRequestRects.push(??);
                 }
             })
             if (adaptationNeeded) {
-                //requestComponentsBoundingRect(store, needRequestRects)
+                runVerticalNormalization(store)
             }
         }
 
@@ -100,7 +89,7 @@ export function updateWindowSize(root) {
     }
 }
 
-function updateAppHeight() {
+export function updateAppHeight() {
     // set session height and request container size change
     const appHeight = getMaxContentHeight(),
         state = getState()
@@ -120,23 +109,6 @@ function getAdaptationProps(scr, width) {
         : null
 }
 
-function requestComponentsBoundingRect(store) {
-    const components = []
-
-    store
-        .getState()
-        .router.screens.toArray()
-        .forEach(scr => {
-            scr.components.toArray().forEach(c => (c.displayName === 'Text' ? components.push(c) : null))
-        })
-
-    // найти все объекты которые могут изменить свой размер из-за нового размера приложения
-    store.dispatch({
-        type: REMIX_PRE_RENDER,
-        components,
-    })
-}
-
 /**
  * Получить адаптированные свойства компонентов для ширины и с вычисленными размерами компонентов boundingRects
  *
@@ -145,7 +117,7 @@ function requestComponentsBoundingRect(store) {
  * @param {number} width ширина для которой рассчитать новые свойства
  * @param {object} boundingRects (опционально) рассчитанные размеры компонентов width,height
  */
-function getAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects }) {
+function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects }) {
     let props = {},
         maxContentHeight = 0
 
@@ -215,42 +187,57 @@ function getAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects 
     }
 }
 
-export function setComponentsRects(boundingRects) {
+const MEASURE_TIME = 3000,
+    VETICAL_ADAPTATION_DEBOUNCE = 1000
+let measureTimer = null
+
+/**
+ *
+ * @param {*} store
+ */
+function runVerticalNormalization(store) {
+    if (measureTimer) {
+        clearTimeout(measureTimer)
+    }
+
+    store.dispatch({
+        type: REMIX_PRE_RENDER,
+        components: getComponents({ displayName: 'Text' }),
+    })
+
+    measureTimer = setTimeout(() => {
+        store.dispatch({
+            type: REMIX_PRE_RENDER,
+            components: null,
+        })
+    }, MEASURE_TIME)
+}
+window.runVerticalNormalization = () => runVerticalNormalization(getStore())
+
+export const setComponentsRects = debounce(boundingRects => {
     const state = getState()
 
     if (state.app.size.width !== state.session.size.width) {
-        // продолжение адаптации по вертикали, запущенной в updateWindowSize
+        console.log(
+            `setComponentsRects: vertical adaptation running for width=${state.session.size.width} ...`,
+            boundingRects,
+        )
+
         const { width, height } = state.session.size
 
-        getAdaptedProps({
-            screen: scr,
-            screenId: scr.hashlistId,
-            defaultWidth: state.app.size.width,
-            width,
-            boundingRects,
+        getScreens().forEach(scr => {
+            calcAdaptedProps({
+                screen: scr,
+                screenId: scr.hashlistId,
+                defaultWidth: state.app.size.width,
+                width,
+                boundingRects,
+            })
         })
-        console.log(`Vertical adaptation running for width=${width} ...`)
 
         updateAppHeight()
     }
-
-    // // после смены размера экрана высота превысила исходную, контент не умещается по высоте
-    // if (adapted.maxContentHeight > height) {
-    //     // Хотя session size изменится в результате запроса 'requestSetSize', мы вынуждены сделать изменение размера сессии немедленно
-    //     // так как после апдейта REMIX_SET_ADAPTED_PROPS будет перестроен интерфейс и в этот момент требуется уже актуальной размер session.size
-    //     store.dispatch({
-    //         type: REMIX_SET_SESSION_SIZE,
-    //         width,
-    //         height: adapted.maxContentHeight,
-    //     })
-    //     postMessage('requestSetSize', {
-    //         size: {
-    //             width,
-    //             height: adapted.maxContentHeight,
-    //         },
-    //     })
-    // }
-}
+}, VETICAL_ADAPTATION_DEBOUNCE)
 
 /**
  * Возвращает хеш адаптированных свойств компоненетов (алаптацию) в зависимости от ширины приложения
