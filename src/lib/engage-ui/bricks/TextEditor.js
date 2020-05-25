@@ -119,12 +119,10 @@ class TextEditor extends React.Component {
                 //TODO попробовать react-size-me в будущем как, возможно, более производительное решение. Хотя этот код измерения текста запускается очень редко и не стоит добавлять лишние библиотеки
                 this.measureInterval = setInterval(() => {
                     const { width, height } = this.contentRef.current.getBoundingClientRect()
-                    if (this.props.parentId === 'emeh5f') {
-                        const stop = 0
-                    }
-                    if (this.measuredRect.width !== width || this.measuredRect.height !== height) {
-                        this.measuredRect = { width, height }
-                        this.props.getContentRect({ width, height })
+                    //TODO эксперимент - нужна только высота. Пробую убрать ширину.
+                    if (/*this.measuredRect.width !== width ||*/ this.measuredRect.height !== height) {
+                        this.measuredRect = { /*width,*/ height }
+                        this.props.getContentRect({ /*width,*/ height })
                     }
                 }, 400)
             }

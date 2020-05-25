@@ -136,8 +136,8 @@ function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects
         }
         if (boundingRects && boundingRects[c.hashlistId]) {
             // добавляем измеренные размеры компонента в его свойства для более уточненной адаптации
-            overr.width = boundingRects[c.hashlistId].width
-            overr.height = boundingRects[c.hashlistId].height
+            if (boundingRects[c.hashlistId].hasOwnProperty('width')) overr.width = boundingRects[c.hashlistId].width
+            if (boundingRects[c.hashlistId].hasOwnProperty('height')) overr.height = boundingRects[c.hashlistId].height
         }
         components.push({
             ...c,
