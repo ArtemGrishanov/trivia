@@ -1,6 +1,9 @@
 import '../style/rmx-layout.css'
 import React from 'react'
+import { connect } from 'react-redux'
 import DataSchema from '../../schema'
+import { intersectRect, throttle } from '../../remix/util/util'
+import { setComponentProps } from '../../remix'
 
 class LayoutContainer extends React.Component {
     static getDerivedStateFromProps(props, state) {
@@ -27,19 +30,154 @@ class LayoutContainer extends React.Component {
             magnets: {},
             // компоненты вокруг которых показать рамку для их подсветки
             borderedComponents: [],
+            selectRect: null,
+            groupRect: null,
+            groupComponents: null,
+            componentPropsDeltas: null,
         }
         if (props.globalTestId) {
             window[props.globalTestId] = this
         }
+        this.childrenWithProps = null
         this.onMouseDown = this.onMouseDown.bind(this)
+        this.onWindowMouseMove = this.onWindowMouseMove.bind(this)
+        this.onMouseUp = this.onMouseUp.bind(this)
         this.onDragAndMagnetsAttached = this.onDragAndMagnetsAttached.bind(this)
         this.onLayoutItemUpdate = this.onLayoutItemUpdate.bind(this)
         // магниты видимые в данный момент, те которых коснулся перетаскиваемый компонент
         this.visibleMagnetsComponents = {}
         this.unmounted = false
+        this.selectStartPoint = null
+        this.groupMouseDown = false
+        this.groupDragging = false
+        this.childrenComputedProps = {}
     }
 
-    onMouseDown(e) {}
+    onMouseDown(e) {
+        if (this.props.editable) {
+            console.log('Container mouseDown')
+            this.selectStartPoint = {
+                left: e.nativeEvent.offsetX,
+                top: e.nativeEvent.offsetY,
+                clientX: e.clientX,
+                clientY: e.clientY,
+            }
+            if (this.state.groupComponents) {
+                this.groupMouseDown = true
+            } else {
+                this.setState({ groupComponents: null, groupRect: null, componentPropsDeltas: null })
+            }
+        }
+    }
+
+    onWindowMouseMove(e) {
+        if (this.props.editable && this.selectStartPoint) {
+            const cx = e.clientX - this.selectStartPoint.clientX,
+                cy = e.clientY - this.selectStartPoint.clientY
+            if (this.groupMouseDown) {
+                this.groupDragging = true
+            }
+            if (this.groupDragging) {
+                this.setState({
+                    componentPropsDeltas: {
+                        left: cx,
+                        top: cy,
+                    },
+                })
+            } else {
+                const selectRect = {
+                    top: Math.min(this.selectStartPoint.top, this.selectStartPoint.top + cy),
+                    left: Math.min(this.selectStartPoint.left, this.selectStartPoint.left + cx),
+                    width: Math.abs(cx),
+                    height: Math.abs(cy),
+                }
+                this.setState({ selectRect })
+                this.filterSelected(this.childrenWithProps, selectRect)
+            }
+            e.stopPropagation()
+            e.preventDefault()
+        }
+    }
+
+    onMouseUp(e) {
+        if (this.props.editable) {
+            console.log('Container mouseUp')
+            if (this.groupMouseDown) {
+                if (this.groupDragging) {
+                    //TODO remix setselected components
+                    this.saveGroupComponentsPosition()
+                    // так как обновили позицию компонентов, то дальше надо обновить и локальный стейт: прямоугольник выделения.
+                    // и сбросить дельты тоже - теперь изменения координат записы в сами компоненты
+                    this.setState(prevState => {
+                        return {
+                            groupRect: {
+                                ...prevState.groupRect,
+                                top: prevState.groupRect.top + prevState.componentPropsDeltas.top,
+                                left: prevState.groupRect.left + prevState.componentPropsDeltas.left,
+                            },
+                            componentPropsDeltas: null,
+                        }
+                    })
+                    this.groupDragging = false
+                } else {
+                    this.setState({
+                        groupComponents: null,
+                        groupRect: null,
+                        componentPropsDeltas: null,
+                    })
+                }
+            } else if (this.selectStartPoint) {
+                this.setState({
+                    selectRect: null,
+                })
+            }
+            this.groupMouseDown = false
+            this.selectStartPoint = null
+        }
+    }
+
+    saveGroupComponentsPosition() {
+        if (this.state.groupComponents) {
+            const pos = Object.keys(this.state.groupComponents).map(id =>
+                this.childrenComputedProps[id]
+                    ? {
+                          top: this.childrenComputedProps[id].top,
+                          left: this.childrenComputedProps[id].left,
+                          width: this.childrenComputedProps[id].width,
+                          height: this.childrenComputedProps[id].height,
+                          id,
+                      }
+                    : void 0,
+            )
+            setComponentProps(pos, { putStateHistory: true })
+        }
+    }
+
+    filterSelected = throttle((children, rect) => {
+        const groupComponents = {},
+            groupRect = {
+                top: Number.MAX_SAFE_INTEGER,
+                left: Number.MAX_SAFE_INTEGER,
+                right: Number.MIN_SAFE_INTEGER,
+                bottom: Number.MIN_SAFE_INTEGER,
+            }
+        children.forEach(c => {
+            if (intersectRect(c.props, rect)) {
+                groupComponents[c.props.id] = true
+                groupRect.top = Math.min(groupRect.top, c.props.top)
+                groupRect.left = Math.min(groupRect.left, c.props.left)
+                groupRect.right = Math.max(groupRect.right, c.props.left + c.props.width)
+                groupRect.bottom = Math.max(groupRect.bottom, c.props.top + c.props.height)
+            }
+        })
+        if (Object.keys(groupComponents).length === 0) {
+            this.setState({ groupComponents: null, groupRect: null })
+        } else {
+            groupRect.width = groupRect.right - groupRect.left
+            groupRect.height = groupRect.bottom - groupRect.top
+            this.setState({ groupComponents, groupRect })
+        }
+    }, 100)
 
     /**
      * Вызывается когда компонент перетаскивается и прилепился к одному из магнитов
@@ -104,20 +242,43 @@ class LayoutContainer extends React.Component {
         })
     }
 
-    render() {
-        let childrenWithProps = null
-        // state.width comes from 'sizeMe' wrapper
-        if (this.props.width > 0 && this.props.height > 0) {
-            // container inited and measured
-            // we can render children now
+    computeComponentProps(c) {
+        //aPropsMap
+        //deltas
+    }
 
+    render() {
+        if (this.props.width > 0 && this.props.height > 0) {
             const magnetsVertical = Object.values(this.state.magnets).flat(),
                 aPropsMap =
                     this.props.adaptedui && this.props.adaptedui[this.props.width]
                         ? this.props.adaptedui[this.props.width]
                         : {}
 
-            childrenWithProps = React.Children.map(this.props.children, child => {
+            const deltas = {}
+            if (this.state.componentPropsDeltas && this.state.groupComponents) {
+                this.props.children.forEach(c => {
+                    if (this.state.groupComponents[c.props.id]) {
+                        deltas[c.props.id] = {
+                            left: c.props.left + this.state.componentPropsDeltas.left,
+                            top: c.props.top + this.state.componentPropsDeltas.top,
+                        }
+                        if (aPropsMap.top) {
+                            deltas[c.props.id].top = aPropsMap.top + this.state.componentPropsDeltas.top
+                        }
+                        if (aPropsMap.left) {
+                            deltas[c.props.id].left = aPropsMap.left + this.state.componentPropsDeltas.left
+                        }
+                    }
+                })
+            }
+
+            this.childrenWithProps = React.Children.map(this.props.children, child => {
+                this.childrenComputedProps[child.props.id] = {
+                    ...child.props,
+                    ...aPropsMap[child.props.id],
+                    ...deltas[child.props.id],
+                }
                 return React.cloneElement(child, {
                     containerWidth: this.props.width,
                     containerHeight: this.props.height,
@@ -126,15 +287,18 @@ class LayoutContainer extends React.Component {
                     editable: this.props.editable,
                     onDragAndMagnetsAttached: this.onDragAndMagnetsAttached,
                     onLayoutItemUpdate: this.onLayoutItemUpdate,
-                    bordered: this.state.borderedComponents.includes(child.props.id),
-                    ...aPropsMap[child.props.id],
+                    bordered:
+                        this.state.borderedComponents.includes(child.props.id) ||
+                        (this.state.groupComponents ? this.state.groupComponents[child.props.id] : false),
+                    selected: this.props.remixSelectedComponents[child.props.id],
+                    ...this.childrenComputedProps[child.props.id],
                 })
             })
         }
 
         return (
-            <div className="rmx-layout_container" onMouseDown={this.onMouseDown}>
-                {childrenWithProps}
+            <div className="rmx-layout_container" onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}>
+                {this.childrenWithProps}
                 {this.props.editable &&
                     this.state.visibleMagnets &&
                     this.state.visibleMagnets.map(mv => {
@@ -144,11 +308,46 @@ class LayoutContainer extends React.Component {
                             )
                         }
                     })}
+                {this.state.selectRect && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: this.state.selectRect.top + 'px',
+                            left: this.state.selectRect.left + 'px',
+                            width: this.state.selectRect.width + 'px',
+                            height: this.state.selectRect.height + 'px',
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        <div className="rmx-layout_item_selection_cnt __selected"></div>
+                    </div>
+                )}
+                {this.state.groupRect && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top:
+                                this.state.groupRect.top +
+                                (this.state.componentPropsDeltas ? this.state.componentPropsDeltas.top : 0) +
+                                'px',
+                            left:
+                                this.state.groupRect.left +
+                                (this.state.componentPropsDeltas ? this.state.componentPropsDeltas.left : 0) +
+                                'px',
+                            width: this.state.groupRect.width + 'px',
+                            height: this.state.groupRect.height + 'px',
+                        }}
+                    >
+                        <div className="rmx-layout_item_selection_cnt __selected"></div>
+                    </div>
+                )}
             </div>
         )
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        window.addEventListener('mousemove', this.onWindowMouseMove)
+    }
 
     componentDidUpdate(prevProps) {
         if (this.props.width >= 0 && !this.state.magnets['default']) {
@@ -168,7 +367,16 @@ class LayoutContainer extends React.Component {
     }
 
     componentWillUnmount() {
+        window.removeEventListener('mousemove', this.onWindowMouseMove)
         this.unmounted = true
+    }
+}
+
+const mapStateToProps = (state, ownProps) => {
+    const remixSelectedComponents = {}
+    state.session.selectedComponentIds.forEach(id => (remixSelectedComponents[id] = true))
+    return {
+        remixSelectedComponents,
     }
 }
 
@@ -179,4 +387,4 @@ export const Schema = new DataSchema({
     },
 })
 
-export default LayoutContainer
+export default connect(mapStateToProps)(LayoutContainer)

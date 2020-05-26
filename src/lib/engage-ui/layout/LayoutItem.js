@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Remix from '../../../lib/remix'
-import { selectComponents, setComponentPosition, getActiveScreenId, getActiveScreen } from '../../../lib/remix'
+import Remix, { setComponentProps } from '../../../lib/remix'
+import { selectComponents, getActiveScreenId, getActiveScreen } from '../../../lib/remix'
 
 const MIN_WIDTH = 20, // px
     MIN_HEIGHT = 20, // px
@@ -142,15 +142,9 @@ function tryToMagnet(left, width, id, propMagnetsVertical) {
     return { left, magnets }
 }
 
-const mapStateToProps = (state, ownProps) => {
-    return {
-        selected: state.session.selectedComponentIds.indexOf(ownProps.id) >= 0,
-    }
-}
-
 export default function LayoutItem() {
     return function (Component) {
-        return connect(mapStateToProps)(
+        return connect()(
             class extends React.Component {
                 static getDerivedStateFromProps(props, state) {
                     return {
@@ -218,6 +212,7 @@ export default function LayoutItem() {
                 }
 
                 onMouseDown(e) {
+                    console.log('LayoutItem mousedown')
                     if (this.state.doubleClicked) {
                         // компонент находится в режиме двойного нажатия (для текстовых компонентов это редактирование текста)
                         // ничего не делать и не давать родительским компонентам сбрасывать селект LayoutContainer.onMouseDown()
@@ -268,6 +263,7 @@ export default function LayoutItem() {
                 }
 
                 onMouseUp(e) {
+                    console.log('LayoutItem mouseup')
                     if (this.props.editable && this.state.doubleClicked) {
                         e.stopPropagation()
                     }
@@ -310,21 +306,6 @@ export default function LayoutItem() {
                             }
                         }
                         if (l !== undefined || t !== undefined || w !== undefined || h != undefined) {
-                            // this.setState({
-                            //     ...calcState({
-                            //         state: this.state,
-                            //         propContainerWidth: this.props.containerWidth,
-                            //         propLeft: this.props.left,
-                            //         propTop: this.props.top,
-                            //         propWidth: this.props.width,
-                            //         propHeight: this.props.height,
-                            //         width: w === undefined ? this.state.width: w,
-                            //         height: h === undefined ? this.state.height: h,
-                            //         top: t === undefined ? this.state.top: t,
-                            //         left: l === undefined ? this.state.left: l,
-                            //         propMagnetsVertical: this.props.magnetsVertical
-                            //     })
-                            // });
                             l = l === undefined ? this.state.left : l
                             w = w === undefined ? this.state.width : w
 
@@ -359,7 +340,7 @@ export default function LayoutItem() {
                         if (this.isDragging) {
                             this.isDragging = false
                             // save size and position after dragging
-                            setComponentPosition(
+                            setComponentProps(
                                 {
                                     id: this.props.id,
                                     top: this.state.top,

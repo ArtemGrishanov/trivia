@@ -127,6 +127,28 @@ export function debounce(func, wait, immediate) {
     }
 }
 
+export function throttle(callback, wait, immediate = false) {
+    let timeout = null
+    let initialCall = true
+
+    return function () {
+        const callNow = immediate && initialCall
+        const next = () => {
+            callback.apply(this, arguments)
+            timeout = null
+        }
+
+        if (callNow) {
+            initialCall = false
+            next()
+        }
+
+        if (!timeout) {
+            timeout = setTimeout(next, wait)
+        }
+    }
+}
+
 export function callOncePerTime(func, wait) {
     let timeout = null
     return function (...args) {
@@ -191,4 +213,13 @@ export function getScreenHTMLPreview({ screen, defaultTitle }) {
     return `<div style="${backStyle}">
                 ${mainText}
             </div>`
+}
+
+export function intersectRect(r1, r2) {
+    return !(
+        r2.left > r1.left + r1.width ||
+        r2.left + r2.width < r1.left ||
+        r2.top > r1.top + r1.height ||
+        r2.top + r2.height < r1.top
+    )
 }

@@ -49,7 +49,8 @@ export default function initScreenProgress(options = { remix: null, screenTag: n
                 }
                 //let path = `router.screens.${scr.hashlistId}.components.${pc.hashlistId}.`;
                 // set props text or step-max
-                event.remix.setComponentProps(pc.hashlistId, {
+                event.remix.setComponentProps({
+                    id: pc.hashlistId,
                     max: scrs.length,
                     step: i + 1,
                 })
