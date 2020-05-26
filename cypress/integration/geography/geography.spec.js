@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 
-import { getIframeBody } from '../../support/commands'
+import { getIframeBody, getRemix } from '../../support/commands'
 
 function clickStartButton() {
     getIframeBody().find('button').contains('Start quiz').click()
@@ -55,5 +55,15 @@ context('Geography project', () => {
         clickStartButton()
         finishGameIncorrectly()
         clickTryAgainButton()
+    })
+
+    it('Get Remix and switch the mode for editing and vice verse', () => {
+        clickStartButton()
+        getRemix().then(remix => {
+            remix.setMode('edit')
+            expect(remix.getMode()).equal('edit')
+            remix.setMode('none')
+            expect(remix.getMode()).equal('none')
+        })
     })
 })

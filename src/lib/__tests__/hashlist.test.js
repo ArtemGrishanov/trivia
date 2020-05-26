@@ -17,9 +17,9 @@ describe('HashList', () => {
         it('should creates new instance and get elements', () => {
             expect(list).toHaveLength(3)
             expect(list.toArray()).toHaveLength(3)
-            expect(!!list._orderedIds).toEqual(true)
+            expect(!!list._orderedIds).toBeTruthy()
             list._orderedIds.forEach(id => {
-                expect(!!list[id]).toEqual(true)
+                expect(!!list[id]).toBeTruthy()
             })
         })
     })
@@ -74,134 +74,134 @@ describe('HashList', () => {
         })
     })
 
-    // describe('#toArray', function () {
-    //     it('Retuns new array each time', function () {
-    //         chai.assert.equal(list.toArray() !== list.toArray(), true)
-    //     })
+    describe('#toArray', () => {
+        it('sould return new array each time', () => {
+            expect(list.toArray()).not.toBe(list.toArray())
+        })
 
-    //     it('Retuns new array with right length', function () {
-    //         chai.assert.equal(list.toArray().length, 3)
-    //     })
-    // })
+        it('should return new array with right length', () => {
+            expect(list.toArray()).toHaveLength(3)
+        })
+    })
 
-    // describe('#deleteElement', function () {
-    //     const list = new HashList([11, 22, 33])
+    describe('#deleteElement', () => {
+        list = new HashList([11, 22, 33])
 
-    //     it('Deleting all elements one by one', function () {
-    //         const deleted1 = list.deleteElement(1)
-    //         chai.assert.equal(deleted1, 22)
-    //         chai.assert.equal(list.length, 2)
-    //         chai.assert.equal(list.toArray()[0], 11)
-    //         chai.assert.equal(list.toArray()[1], 33)
+        it('Deleting all elements one by one', () => {
+            const deleted1 = list.deleteElement(1)
+            expect(deleted1).toEqual(22)
+            expect(list).toHaveLength(2)
+            expect(list.toArray()[0]).toEqual(11)
+            expect(list.toArray()[1]).toEqual(33)
 
-    //         const deleted2 = list.deleteElement(0)
-    //         chai.assert.equal(deleted2, 11)
-    //         chai.assert.equal(list.length, 1)
-    //         chai.assert.equal(list.toArray()[0], 33)
+            const deleted2 = list.deleteElement(0)
+            expect(deleted2).toEqual(11)
+            expect(list).toHaveLength(1)
+            expect(list.toArray()[0]).toEqual(33)
 
-    //         const deleted3 = list.deleteElement(0)
-    //         chai.assert.equal(deleted3, 33)
-    //         chai.assert.equal(list.length, 0)
-    //     })
-    // })
+            const deleted3 = list.deleteElement(0)
+            expect(deleted3).toEqual(33)
+            expect(list).toHaveLength(0)
+        })
+    })
 
-    // describe('#deleteElementById', function () {
-    //     const list = new HashList([11, 22, 33])
+    describe('#deleteElementById', () => {
+        list = new HashList([11, 22, 33])
 
-    //     it('Deleting', function () {
-    //         const deleted1 = list.deleteElementById(list.getId(1))
-    //         chai.assert.equal(deleted1, 22)
-    //         chai.assert.equal(list.length, 2)
-    //         chai.assert.equal(list.toArray()[0], 11)
-    //         chai.assert.equal(list.toArray()[1], 33)
-    //     })
-    // })
+        it('Deleting', () => {
+            const deleted1 = list.deleteElementById(list.getId(1))
+            expect(deleted1).toEqual(22)
+            expect(list).toHaveLength(2)
+            expect(list.toArray()[0]).toEqual(11)
+            expect(list.toArray()[1]).toEqual(33)
+        })
+    })
 
-    // describe('#getElementCopy', function () {
-    //     it('Make copy of primitive', function () {
-    //         const list = new HashList([11, 22, 33])
-    //         const cloned = list.getElementCopy(1)
-    //         chai.assert.equal(cloned == 22, true)
-    //     })
+    describe('#getElementCopy', () => {
+        it('Make copy of primitive', () => {
+            list = new HashList([11, 22, 33])
+            const cloned = list.getElementCopy(1)
+            expect(cloned).toEqual(22)
+        })
 
-    //     it('Make copy of object', function () {
-    //         const elem = {
-    //             data1: 'value1',
-    //             data2: false,
-    //             data3: {},
-    //         }
-    //         const list = new HashList([11, elem])
-    //         const cloned = list.getElementCopy(1)
-    //         chai.assert.equal(cloned == elem, false)
-    //         chai.assert.equal(cloned == list[list.getId(1)], false)
-    //         chai.assert.equal(cloned.data1 === 'value1', true)
-    //         chai.assert.equal(cloned.data2 === false, true)
-    //         chai.assert.equal(elem.data3 !== cloned.data3, true)
-    //     })
+        it('Make copy of object', () => {
+            const elem = {
+                data1: 'value1',
+                data2: false,
+                data3: {},
+            }
+            list = new HashList([11, elem])
+            const cloned = list.getElementCopy(1)
+            expect(cloned).toEqual(elem)
+            expect(cloned).toEqual(list[list.getId(1)])
+            expect(cloned.data1).toEqual('value1')
+            expect(cloned.data2).toEqual(false)
+            expect(elem.data3).not.toBe(cloned.data3)
+        })
 
-    //     it('deep clone child hashlist elements', function () {
-    //         const components = new HashList([
-    //             { name: 'Component1', data: '12345' },
-    //             { name: 'Component2', data: '09876' },
-    //         ])
-    //         const screens = new HashList([
-    //             {
-    //                 backgroundColor: '#000',
-    //                 components,
-    //             },
-    //         ])
-    //         const copy = screens.getElementCopy(0, { cloneChildHashlists: true })
+        it('deep clone child hashlist elements', function () {
+            const components = new HashList([
+                { name: 'Component1', data: '12345' },
+                { name: 'Component2', data: '09876' },
+            ])
+            const screens = new HashList([
+                {
+                    backgroundColor: '#000',
+                    components,
+                },
+            ])
+            const copy = screens.getElementCopy(0, { cloneChildHashlists: true })
 
-    //         const origin = screens.getByIndex(0)
-    //         chai.assert.equal(copy == origin, false)
-    //         chai.assert.equal(copy.backgroundColor === origin.backgroundColor, true)
+            const origin = screens.getByIndex(0)
+            expect(copy).not.toEqual(origin)
+            expect(copy.backgroundColor).toEqual(origin.backgroundColor)
 
-    //         chai.assert.equal(origin.components.length === 2, true)
-    //         chai.assert.equal(copy.components.length === 2, true)
+            expect(origin.components).toHaveLength(2)
+            expect(copy.components).toHaveLength(2)
 
-    //         chai.assert.equal(copy.components.getByIndex(0).name === 'Component1', true)
-    //         chai.assert.equal(origin.components.getByIndex(0).name === 'Component1', true)
+            expect(copy.components.getByIndex(0).name).toEqual('Component1')
+            expect(origin.components.getByIndex(0).name).toEqual('Component1')
 
-    //         chai.assert.equal(copy.components.getByIndex(1).name === 'Component2', true)
-    //         chai.assert.equal(origin.components.getByIndex(1).name === 'Component2', true)
+            expect(copy.components.getByIndex(1).name).toEqual('Component2')
+            expect(origin.components.getByIndex(1).name).toEqual('Component2')
 
-    //         chai.assert.equal(copy.components.getByIndex(0) == origin.components.getByIndex(0), false)
-    //         chai.assert.equal(copy.components.getByIndex(1) == origin.components.getByIndex(1), false)
+            expect(copy.components.getByIndex(0)).not.toBe(origin.components.getByIndex(0))
+            expect(copy.components.getByIndex(1)).not.toBe(origin.components.getByIndex(1))
 
-    //         chai.assert.equal(copy.components.getId(0).length > 1, true)
-    //         chai.assert.equal(copy.components.getId(1).length > 1, true)
+            expect(copy.components.getId(0).length).toBeGreaterThan(1)
+            expect(copy.components.getId(1).length).toBeGreaterThan(1)
 
-    //         chai.assert.equal(copy.components.getId(0) == origin.components.getId(0), false)
-    //         chai.assert.equal(copy.components.getId(1) == origin.components.getId(1), false)
-    //     })
-    // })
+            expect(copy.components.getId(0)).not.toBe(origin.components.getId(0))
+            expect(copy.components.getId(1)).not.toBe(origin.components.getId(1))
+        })
+    })
 
-    // describe('#list empty', function () {
-    //     const listEmpty = new HashList([])
+    describe('#list empty', function () {
+        const listEmpty = new HashList([])
 
-    //     it('Can be created', function () {
-    //         chai.assert.equal(listEmpty.length == 0, true)
-    //         chai.assert.equal(listEmpty._orderedIds.length == 0, true)
-    //     })
-    // })
+        it('Can be created', function () {
+            expect(listEmpty).toHaveLength(0)
+            expect(listEmpty._orderedIds).toHaveLength(0)
+        })
+    })
 
-    // describe('#filter', function () {
-    //     const list = new HashList([-1, 2, -3])
-    //     const listObj = new HashList([{ disabled: false }, { disabled: false }, { disabled: true }])
+    describe('#filter', function () {
+        const list = new HashList([-1, 2, -3])
+        const listObj = new HashList([{ disabled: false }, { disabled: false }, { disabled: true }])
 
-    //     it('Filter', function () {
-    //         const f1 = list.filter(e => e > 0)
-    //         chai.assert.equal(!!f1._orderedIds, true)
-    //         chai.assert.equal(list !== f1, true)
-    //         chai.assert.equal(f1.length, 1)
-    //         chai.assert.equal(f1.getByIndex(0), 2)
+        it('Filter', function () {
+            const f1 = list.filter(e => e > 0)
+            expect(!!f1._orderedIds).toBeTruthy()
+            expect(list).not.toEqual(f1)
+            expect(f1).toHaveLength(1)
+            expect(f1.getByIndex(0)).toEqual(2)
 
-    //         // empty hashlist as a result
-    //         chai.assert.equal(list.filter(e => e > 100).length, 0)
+            // empty hashlist as a result
+            expect(list.filter(e => e > 100)).toHaveLength(0)
 
-    //         const f2 = listObj.filter(e => !e.disabled)
-    //         chai.assert.equal(listObj !== f2, true)
-    //         chai.assert.equal(f2.length, 2)
-    //     })
-    // })
+            const f2 = listObj.filter(e => !e.disabled)
+            expect(listObj).not.toEqual(f2)
+            expect(f2).toHaveLength(2)
+        })
+    })
 })
