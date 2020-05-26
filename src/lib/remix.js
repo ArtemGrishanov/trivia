@@ -11,6 +11,7 @@ import {
     callOncePerTime,
     htmlEncode,
     htmlDecode,
+    throttle,
 } from './remix/util/util.js'
 import { getAdaptedChildrenProps } from './engage-ui/layout/LayoutAdapter.js'
 
@@ -185,16 +186,31 @@ function onWindowResize() {
  *
  * @param {object} data, exmaple {'path.to.the.property': 'newvalue'}
  */
-export function setData(data, forceFeedback) {
+let __data = {}
+export function setData(data, forceFeedback = false, immediate = false) {
     if (typeof data !== 'object') {
         throw new Error(`You must pass data object as first argument, example {'path.to.the.property': 123}`)
     }
+    if (immediate) {
+        store.dispatch({
+            type: REMIX_UPDATE_ACTION,
+            data,
+            forceFeedback,
+        })
+    } else {
+        __data = { ...__data, ...data }
+        __callSetData(forceFeedback)
+    }
+}
+
+const __callSetData = throttle(forceFeedback => {
     store.dispatch({
         type: REMIX_UPDATE_ACTION,
-        data,
+        data: __data,
         forceFeedback,
     })
-}
+    __data = {}
+}, 100)
 
 function setCurrentScreen(screenId) {
     store.dispatch({
@@ -897,7 +913,9 @@ function _doUpdate(state, data) {
         }
         const propResult = getPropertiesBySelector(state, path)
         if (propResult.length === 0) {
-            throw new Error(`Remix: there is no such property ${path} in state`)
+            //TODO experiment
+            // при асинхронное работе setState такая ситуация теперь возможна, начиная с 26.05.2020
+            //throw new Error(`Remix: there is no such property ${path} in state`)
         } else {
             const value = normalizer.processValue(path, pathesValues[path])
             assignByPropertyString(state, path, value)
@@ -1177,7 +1195,7 @@ export function deserialize2(json) {
             })
         })
         log('deserialize2:', data)
-        remix.setData(data)
+        remix.setData(data, false, true)
     } else {
         throw new Error('Remix: json string expected')
     }

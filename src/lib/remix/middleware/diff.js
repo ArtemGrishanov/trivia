@@ -1,5 +1,7 @@
-import { isHashlistInstance, getScreenIdFromPath, getComponentIdFromPath } from '../util/util.js'
+import { isHashlistInstance, getScreenIdFromPath, getComponentIdFromPath, debounce } from '../util/util.js'
 import { getPropertiesBySelector, deserialize } from '../../object-path.js'
+
+let prevState = null
 
 /**
  * This middleware calcultes a diff between previous and new states
@@ -7,17 +9,21 @@ import { getPropertiesBySelector, deserialize } from '../../object-path.js'
  *
  */
 const diffMiddleware = store => next => action => {
-    // console.log('Diff middleware begin');
-    const prevState = store.getState()
+    if (!prevState) {
+        prevState = store.getState()
+    }
     const result = next(action)
+    scheduleDiff()
+    return result
+}
+
+const scheduleDiff = debounce(() => {
+    if (!prevState) {
+        return
+    }
     const nextState = store.getState()
     const lastUpdDiff = diff(Remix._getSchema(), prevState, nextState)
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0
-    // Важное замечание
-    // Даже при самом первом запуске этой функции diff начальный стейт уже содержит нормализованные по схеме свойства, поскольку @@redux/INIT action запускается без middleware
-    // Происходит нормализация в remix high order reducer. Получается стейт который содержит все свойства приложения по схеме, но мы еще не разу не оказались в diffMiddleware (здесь)
-    // поэтому начальный набор свойств невозможно да и не нужно отправлять как added (добавленные свойства)
-    // решил так - при старте приложения отправляются initialProperties в 'inited' сообщении
     if (changed) {
         // in 'edit' mode Remix send out event messages to RemixContainer
         if (Remix.getMode() === 'edit') {
@@ -40,9 +46,8 @@ const diffMiddleware = store => next => action => {
         // поэтому вызываем в конце (как при рекурсии)
         Remix.fireEvent('property_updated', { diff: lastUpdDiff })
     }
-    // console.log('/Diff middleware end');
-    return result
-}
+    prevState = nextState
+}, 200)
 
 /**
  * Returns arrays:
