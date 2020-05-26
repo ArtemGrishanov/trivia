@@ -1,3 +1,5 @@
+import { createStore, applyMiddleware } from 'redux'
+import createSagaMiddleware from 'redux-saga'
 import Remix, { remixReducer } from '../remix.js'
 import eventSaga from '../remix/sagas/triggerExecutor.js'
 import diffMiddleware from '../remix/middleware/diff.js'
@@ -33,41 +35,44 @@ var testSchema = new DataSchema({
 })
 testSchema.extend(schema)
 
-const sagaMiddleware = ReduxSaga.default()
+const sagaMiddleware = createSagaMiddleware()
 const reducer = remixReducer({
     reducers: {},
     dataSchema: testSchema,
 })
-const store = Redux.createStore(reducer, Redux.applyMiddleware(sagaMiddleware, diffMiddleware))
+const store = createStore(reducer, applyMiddleware(sagaMiddleware, diffMiddleware))
 sagaMiddleware.run(eventSaga)
 window.store = store // for debug: inspect storage state in browser console
 Remix.setStore(store)
 
-describe('Remix', function () {
-    describe('#fireEvents', function () {
-        it('fire 2 events', function () {
+describe('Remix', () => {
+    // beforeEach(() => {
+    //     jest.useFakeTimers()
+    // })
+    describe('#fireEvents', () => {
+        it('fire 2 events', () => {
             Remix.clearTriggersAndEvents()
 
             Remix.fireEvent('dumb_event', { datazz: '123' })
             Remix.fireEvent('other_dumb_event', { variable: 987 })
-            chai.assert.equal(store.getState().session.events.length, 2)
+            expect(store.getState().session.events).toHaveLength(2)
 
             Remix.clearTriggersAndEvents()
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
         })
     })
 
-    describe('#addTrigger', function () {
+    describe('#addTrigger', () => {
         Remix.clearTriggersAndEvents()
 
-        it('add simple trigger', function (done) {
+        it('add simple trigger', done => {
             let c = 0
             let v = 0
 
             Remix.addTrigger({
                 when: { eventType: 'dumb_event52' },
                 then: Remix.registerTriggerAction('custom_action_0', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'dumb_event52', true, 'trigger 52 activated')
+                    expect(evt.trigger.when.eventType).toEqual('dumb_event52')
                     v++
                 }),
             })
@@ -77,7 +82,7 @@ describe('Remix', function () {
             Remix.addTrigger({
                 when: { eventType: 'dumb_event32' },
                 then: Remix.registerTriggerAction('custom_action_1', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'dumb_event32', true, 'trigger 32 activated')
+                    expect(evt.trigger.when.eventType).toEqual('dumb_event32')
                     c++
                 }),
             })
@@ -94,13 +99,17 @@ describe('Remix', function () {
                     const dumbEventsCount = store
                         .getState()
                         .session.events.filter(evt => evt.eventType.indexOf('dumb_event') >= 0).length
-                    chai.assert.equal(dumbEventsCount, 5)
+                    expect(dumbEventsCount).toEqual(5)
                     done()
                 }
             }, 80)
+            // const dumbEventsCount = store
+            //     .getState()
+            //     .session.events.filter(evt => evt.eventType.indexOf('dumb_event') >= 0).length
+            // expect(dumbEventsCount).toEqual(4)
         })
 
-        it('trigger with condition CONTAINS', function (done) {
+        it('trigger with condition CONTAINS', done => {
             Remix.clearTriggersAndEvents()
 
             let c = 0
@@ -108,7 +117,7 @@ describe('Remix', function () {
             Remix.addTrigger({
                 when: { eventType: 'on_condition', condition: { prop: 'tags', clause: 'CONTAINS', value: 'option' } },
                 then: Remix.registerTriggerAction('custommm', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'on_condition', true, 'trigger activated')
+                    expect(evt.trigger.when.eventType).toEqual('on_condition')
                     c++
                 }),
             })
@@ -123,20 +132,20 @@ describe('Remix', function () {
                     const condEventsCount = store
                         .getState()
                         .session.events.filter(evt => evt.eventType.indexOf('on_cond') >= 0).length
-                    chai.assert.equal(condEventsCount, 4)
+                    expect(condEventsCount).toEqual(4)
                     done()
                 }
             }, 80)
         })
     })
 
-    describe('#changeProperty trigger', function () {
-        it('property_updated simple trigger', function () {
+    describe('#changeProperty trigger', () => {
+        it('property_updated simple trigger', () => {
             Remix.clearTriggersAndEvents()
 
             var c = 0
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.addTrigger({
                 when: {
@@ -144,27 +153,27 @@ describe('Remix', function () {
                     condition: { prop: 'path', clause: 'EQUALS', value: 'app.my.property' },
                 },
                 then: Remix.registerTriggerAction('custom', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated')
+                    expect(evt.trigger.when.eventType).toEqual('property_updated')
                     c++
                 }),
             })
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.setData({ 'app.my.property': 88 })
-            chai.assert.equal(c, 1)
+            expect(c).toEqual(1)
 
             Remix.setData({ 'app.my.property': 99 })
-            chai.assert.equal(c, 2)
+            expect(c).toEqual(2)
         })
 
-        it('2 triggers on the same property_updated', function () {
+        it('2 triggers on the same property_updated', () => {
             Remix.clearTriggersAndEvents()
 
             var c1 = 0
             var c2 = 0
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.addTrigger({
                 when: {
@@ -172,7 +181,7 @@ describe('Remix', function () {
                     condition: { prop: 'path', clause: 'EQUALS', value: 'app.my.property' },
                 },
                 then: Remix.registerTriggerAction('custom1', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated')
+                    expect(evt.trigger.when.eventType).toEqual('property_updated')
                     c1++
                 }),
             })
@@ -183,27 +192,27 @@ describe('Remix', function () {
                     condition: { prop: 'path', clause: 'EQUALS', value: 'app.my.property' },
                 },
                 then: Remix.registerTriggerAction('custom2', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated')
+                    expect(evt.trigger.when.eventType).toEqual('property_updated')
                     c2++
                 }),
             })
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.setData({ 'app.my.property': 88 }) // triggers custom1
             Remix.setData({ 'app.my.property': 99 }) // triggers custom2
 
-            chai.assert.equal(c1, 2)
-            chai.assert.equal(c2, 2)
+            expect(c1).toEqual(2)
+            expect(c2).toEqual(2)
         })
 
-        it('property_updated trigger inside other trigger execution', function () {
+        it('property_updated trigger inside other trigger execution', () => {
             Remix.clearTriggersAndEvents()
 
             var c1 = 0
             var c2 = 0
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.addTrigger({
                 when: {
@@ -211,7 +220,7 @@ describe('Remix', function () {
                     condition: { prop: 'path', clause: 'EQUALS', value: 'app.my.property' },
                 },
                 then: Remix.registerTriggerAction('custom1', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated')
+                    expect(evt.trigger.when.eventType).toEqual('property_updated')
                     c1++
                     Remix.setData({ 'app.my.other.property': 234 }) // triggers custom2
                 }),
@@ -223,26 +232,26 @@ describe('Remix', function () {
                     condition: { prop: 'path', clause: 'EQUALS', value: 'app.my.other.property' },
                 },
                 then: Remix.registerTriggerAction('custom2', evt => {
-                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated')
+                    expect(evt.trigger.when.eventType).toEqual('property_updated')
                     c2++
                 }),
             })
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.setData({ 'app.my.property': 88 }) // triggers custom1
 
-            chai.assert.equal(store.getState().session.events.length, 2) // 2 fireEvent
-            chai.assert.equal(c1, 1)
-            chai.assert.equal(c2, 1)
+            expect(store.getState().session.events).toHaveLength(2) // 2 fireEvent
+            expect(c1).toEqual(1)
+            expect(c2).toEqual(1)
         })
 
-        it('MATCH clause', function () {
+        it('MATCH clause', () => {
             Remix.clearTriggersAndEvents()
 
             let c1 = 0
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.addTrigger({
                 when: {
@@ -250,18 +259,14 @@ describe('Remix', function () {
                     condition: { prop: 'path', clause: 'MATCH', value: 'app.[screens HashList]./^[0-9a-z]+$/.name' },
                 },
                 then: Remix.registerTriggerAction('MATCH_TRIGGER', evt => {
-                    chai.assert.equal(evt.trigger.when.condition.clause === 'MATCH', true, 'trigger activated')
-                    chai.assert.equal(
-                        evt.trigger.when.condition.value === 'app.[screens HashList]./^[0-9a-z]+$/.name',
-                        true,
-                        'trigger activated',
-                    )
-                    chai.assert.equal(evt.trigger.when.eventType === 'property_updated', true, 'trigger activated')
+                    expect(evt.trigger.when.condition.clause).toEqual('MATCH')
+                    expect(evt.trigger.when.condition.value).toEqual('app.[screens HashList]./^[0-9a-z]+$/.name')
+                    expect(evt.trigger.when.eventType).toEqual('property_updated')
                     c1++
                 }),
             })
 
-            chai.assert.equal(store.getState().session.events.length, 0)
+            expect(store.getState().session.events).toHaveLength(0)
 
             Remix.setData({ 'app.screens': new HashList() })
             Remix.addHashlistElement('app.screens', undefined, { newElement: { name: 'screen1name' } }) // MATCH_TRIGGER new value
@@ -270,7 +275,7 @@ describe('Remix', function () {
             Remix.setData({ [`app.screens.${scrId}.tag`]: 'tagggggs' }) // no trigger
             Remix.setData({ [`app.screens.${scrId}.name`]: 'edited_name' }) // // MATCH_TRIGGER again
 
-            chai.assert.equal(c1, 2, 'Trigger executed two times')
+            expect(c1).toEqual(2)
         })
     })
 })

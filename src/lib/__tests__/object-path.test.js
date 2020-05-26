@@ -1,67 +1,61 @@
 import { Selector } from '../object-path.js'
 import HashList from '../hashlist.js'
 
-describe('Selector', function () {
-    describe('#fetch', function () {
-        it('empty result 1', function () {
+describe('Selector', () => {
+    describe('#fetch', () => {
+        it('empty result 1', () => {
             const s1 = new Selector('app.size.width')
-            chai.assert.equal(s1.fetch({}).length, 0)
-            chai.assert.equal(s1.fetch('3234').length, 0)
-            chai.assert.equal(s1.fetch(23334).length, 0)
-            chai.assert.equal(s1.fetch({ some: { props: { app: {} } } }).length, 0)
-            try {
-                chai.assert.equal(s1.fetch().length, 0)
-                chai.assert.equal(true, false)
-            } catch (err) {
-                // it is OK
-            }
-            try {
-                chai.assert.equal(s1.fetch(null).length, 0)
-                chai.assert.equal(true, false)
-            } catch (err) {
-                // it is OK
-            }
+            expect(s1.fetch({})).toHaveLength(0)
+            expect(s1.fetch('3234')).toHaveLength(0)
+            expect(s1.fetch(23334)).toHaveLength(0)
+            expect(s1.fetch({ some: { props: { app: {} } } })).toHaveLength(0)
+            expect(() => {
+                s1.fetch()
+            }).toThrowError('Object is not specified')
+            expect(() => {
+                s1.fetch(null)
+            }).toThrowError('Object is not specified')
         })
 
-        it('empty result 2', function () {
+        it('empty result 2', () => {
             const s1 = new Selector('app.size.width')
             const obj0 = {
                 app: {},
             }
-            chai.assert.equal(s1.fetch(obj0).length, 0)
+            expect(s1.fetch(obj0)).toHaveLength(0)
         })
 
-        it('empty result 3', function () {
+        it('empty result 3', () => {
             const s1 = new Selector('app.size.width')
             const obj = {
                 app: {
                     size: undefined,
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 0)
+            expect(s1.fetch(obj)).toHaveLength(0)
         })
 
-        it('empty result 4', function () {
+        it('empty result 4', () => {
             const s1 = new Selector('app.size.width')
             const obj = {
                 app: {
                     size: null,
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 0)
+            expect(s1.fetch(obj)).toHaveLength(0)
         })
 
-        it('empty result 5', function () {
+        it('empty result 5', () => {
             const s1 = new Selector('app.size.width')
             const obj1 = {
                 app: {
                     size: {},
                 },
             }
-            chai.assert.equal(s1.fetch(obj1).length, 0)
+            expect(s1.fetch(obj1)).toHaveLength(0)
         })
 
-        it('empty result 6', function () {
+        it('empty result 6', () => {
             const s1 = new Selector('app.size.width')
             const obj2 = {
                 app: {
@@ -70,10 +64,10 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj2).length, 0)
+            expect(s1.fetch(obj2)).toHaveLength(0)
         })
 
-        it('fetch number value', function () {
+        it('fetch number value', () => {
             const s1 = new Selector('app.size.width')
             const obj = {
                 app: {
@@ -82,12 +76,12 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 1)
-            chai.assert.equal(s1.fetch(obj)[0].value, 99)
-            chai.assert.equal(s1.fetch(obj)[0].path, 'app.size.width')
+            expect(s1.fetch(obj)).toHaveLength(1)
+            expect(s1.fetch(obj)[0].value).toEqual(99)
+            expect(s1.fetch(obj)[0].path).toEqual('app.size.width')
         })
 
-        it('fetch undefined', function () {
+        it('fetch undefined', () => {
             const s1 = new Selector('app.size.undefinedProp')
             const obj = {
                 app: {
@@ -96,12 +90,12 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 1)
-            chai.assert.equal(s1.fetch(obj)[0].value, undefined)
-            chai.assert.equal(s1.fetch(obj)[0].path, 'app.size.undefinedProp')
+            expect(s1.fetch(obj)).toHaveLength(1)
+            expect(s1.fetch(obj)[0].value).toBeUndefined()
+            expect(s1.fetch(obj)[0].path).toEqual('app.size.undefinedProp')
         })
 
-        it('fetch null', function () {
+        it('fetch null', () => {
             const s1 = new Selector('app.size.nullProp')
             const obj = {
                 app: {
@@ -110,12 +104,12 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 1)
-            chai.assert.equal(s1.fetch(obj)[0].value, null)
-            chai.assert.equal(s1.fetch(obj)[0].path, 'app.size.nullProp')
+            expect(s1.fetch(obj)).toHaveLength(1)
+            expect(s1.fetch(obj)[0].value).toBeNull()
+            expect(s1.fetch(obj)[0].path).toEqual('app.size.nullProp')
         })
 
-        it('fetch types', function () {
+        it('fetch types', () => {
             const s1 = new Selector('app.[size Object].[width Number]')
 
             const obj = {
@@ -125,9 +119,9 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 1)
-            chai.assert.equal(s1.fetch(obj)[0].value, 123)
-            chai.assert.equal(s1.fetch(obj)[0].path, 'app.size.width')
+            expect(s1.fetch(obj)).toHaveLength(1)
+            expect(s1.fetch(obj)[0].value).toEqual(123)
+            expect(s1.fetch(obj)[0].path).toEqual('app.size.width')
 
             const obj2 = {
                 app: {
@@ -136,10 +130,10 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj2).length, 0)
+            expect(s1.fetch(obj2)).toHaveLength(0)
         })
 
-        it('Regexp', function () {
+        it('Regexp', () => {
             const obj = {
                 app: {
                     size: {
@@ -159,21 +153,21 @@ describe('Selector', function () {
             }
 
             const s1 = new Selector('/^[a-z]+$/./^[a-z]+$/./^prop$/')
-            chai.assert.equal(s1.fetch(obj).length, 2)
-            chai.assert.equal(s1.fetch(obj)[0].value, 123)
-            chai.assert.equal(s1.fetch(obj)[0].path, 'app.size.prop')
-            chai.assert.equal(s1.fetch(obj)[1].value, 345)
-            chai.assert.equal(s1.fetch(obj)[1].path, 'foo.bar.prop')
+            expect(s1.fetch(obj)).toHaveLength(2)
+            expect(s1.fetch(obj)[0].value).toEqual(123)
+            expect(s1.fetch(obj)[0].path).toEqual('app.size.prop')
+            expect(s1.fetch(obj)[1].value).toEqual(345)
+            expect(s1.fetch(obj)[1].path).toEqual('foo.bar.prop')
 
             const s2 = new Selector('/^[a-z0-9]+$/./^bar$/./^prop$/')
-            chai.assert.equal(s2.fetch(obj).length, 2)
-            chai.assert.equal(s2.fetch(obj)[0].value, 345)
-            chai.assert.equal(s2.fetch(obj)[0].path, 'foo.bar.prop')
-            chai.assert.equal(s2.fetch(obj)[1].value, 999)
-            chai.assert.equal(s2.fetch(obj)[1].path, 'nope123.bar.prop')
+            expect(s2.fetch(obj)).toHaveLength(2)
+            expect(s2.fetch(obj)[0].value).toEqual(345)
+            expect(s2.fetch(obj)[0].path).toEqual('foo.bar.prop')
+            expect(s2.fetch(obj)[1].value).toEqual(999)
+            expect(s2.fetch(obj)[1].path).toEqual('nope123.bar.prop')
         })
 
-        it('fetch Hashlist', function () {
+        it('fetch Hashlist', () => {
             const s1 = new Selector('app.[screens HashList]./^[a-z0-9]+$/')
 
             const obj = {
@@ -182,12 +176,12 @@ describe('Selector', function () {
                     otherdata: 1,
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 2)
-            chai.assert.equal(s1.fetch(obj)[0].value, 'A')
-            chai.assert.equal(s1.fetch(obj)[1].value, 'B')
+            expect(s1.fetch(obj)).toHaveLength(2)
+            expect(s1.fetch(obj)[0].value).toEqual('A')
+            expect(s1.fetch(obj)[1].value).toEqual('B')
         })
 
-        it('fetch Hashlist with custom type checking', function () {
+        it('fetch Hashlist with custom type checking', () => {
             const s1 = new Selector('app.[screens HashList]./^[a-z0-9]+$/', {
                 typeCheckers: {
                     HashList: obj => obj.hasOwnProperty('_orderedIds'),
@@ -201,12 +195,12 @@ describe('Selector', function () {
                     otherdata: 1,
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 2)
-            chai.assert.equal(s1.fetch(obj)[0].value, 'A')
-            chai.assert.equal(s1.fetch(obj)[1].value, 'B')
+            expect(s1.fetch(obj)).toHaveLength(2)
+            expect(s1.fetch(obj)[0].value).toEqual('A')
+            expect(s1.fetch(obj)[1].value).toEqual('B')
         })
 
-        it('fetch with attribute filter', function () {
+        it('fetch with attribute filter', () => {
             const s1 = new Selector('app.[component displayName=Text].tags')
             const s2 = new Selector('app.[component displayName=Image].tags')
 
@@ -219,13 +213,13 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 1)
-            chai.assert.equal(s1.fetch(obj)[0].value, 'text component remix')
+            expect(s1.fetch(obj)).toHaveLength(1)
+            expect(s1.fetch(obj)[0].value).toEqual('text component remix')
 
-            chai.assert.equal(s2.fetch(obj).length, 0)
+            expect(s2.fetch(obj)).toHaveLength(0)
         })
 
-        it('fetch with attribute "indexOf" filter', function () {
+        it('fetch with attribute "indexOf" filter', () => {
             const s1 = new Selector('app.[component tags=~component].tags')
             const s2 = new Selector('app.[component tags=~no_component].tags') // no result
 
@@ -238,13 +232,13 @@ describe('Selector', function () {
                     },
                 },
             }
-            chai.assert.equal(s1.fetch(obj).length, 1)
-            chai.assert.equal(s1.fetch(obj)[0].value, 'text component remix')
+            expect(s1.fetch(obj)).toHaveLength(1)
+            expect(s1.fetch(obj)[0].value).toEqual('text component remix')
 
-            chai.assert.equal(s2.fetch(obj).length, 0)
+            expect(s2.fetch(obj)).toHaveLength(0)
         })
 
-        it('fetch with attribute filter and regexp', function () {
+        it('fetch with attribute filter and regexp', () => {
             const s1 = new Selector('app./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Text].tags')
             const s2 = new Selector('app./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=Image].tags')
 
@@ -272,21 +266,21 @@ describe('Selector', function () {
                 },
             }
 
-            chai.assert.equal(s1.fetch(obj).length, 2)
-            chai.assert.equal(s1.fetch(obj)[0].value, 'ttt')
-            chai.assert.equal(s1.fetch(obj)[1].value, 'ttt')
+            expect(s1.fetch(obj)).toHaveLength(2)
+            expect(s1.fetch(obj)[0].value).toEqual('ttt')
+            expect(s1.fetch(obj)[1].value).toEqual('ttt')
 
-            chai.assert.equal(s2.fetch(obj).length, 1)
-            chai.assert.equal(s2.fetch(obj)[0].value, 'iii')
+            expect(s2.fetch(obj)).toHaveLength(1)
+            expect(s2.fetch(obj)[0].value).toEqual('iii')
         })
     })
 
-    describe('#assign', function () {
-        it('to empty object', function () {
+    describe('#assign', () => {
+        it('to empty object', () => {
             const s1 = new Selector('app.size.width')
             const obj = {}
             s1.assign(obj, 77)
-            chai.assert.equal(obj.app.size.width, 77)
+            expect(obj.app.size.width).toEqual(77)
         })
 
         it('with typed hashlist', () => {
@@ -299,7 +293,7 @@ describe('Selector', function () {
                 },
             }
             s1.assign(obj, 777)
-            chai.assert.equal(h.toArray()[1].data, 777)
+            expect(h.toArray()[1].data).toEqual(777)
         })
 
         it('cannot assign with mismatched type', () => {
@@ -311,13 +305,11 @@ describe('Selector', function () {
                     hashlist: h,
                 },
             }
-            try {
+            expect(() => {
                 s1.assign(obj, 777)
-                chai.assert.equal(false, true)
-            } catch (err) {
-                // it is OK
-            }
-            chai.assert.equal(h.toArray()[1].data, 456) // no assign
+            }).toThrowError('hashlist has type "HashList", but "Object" expected')
+
+            expect(h.toArray()[1].data).toEqual(456) // no assign
         })
 
         it('assign using regexp', () => {
@@ -328,37 +320,31 @@ describe('Selector', function () {
                     hashlist: h,
                 },
             }
-            try {
+            expect(() => {
                 s1.assign(obj, { optionText: 'option text' })
-                chai.assert.equal(true, false)
-            } catch (err) {
-                // it is OK
-            }
-            // const result = s1.fetch(obj);
-            // chai.assert.equal(result.length, 3); // 3 properties were added
-            // chai.assert.equal(result[2].value.optionText, "option text");
+            }).toThrowError('Cannot use this selector for assignment')
         })
     })
 
-    describe('#match', function () {
+    describe('#match', () => {
         it('match', () => {
             const s = new Selector('app.path.to.prop')
-            chai.assert.equal(s.match('app.path.to.prop'), true)
+            expect(s.match('app.path.to.prop')).toBeTruthy()
         })
 
         it('match', () => {
             const s = new Selector('app.path.to.prop.false')
-            chai.assert.equal(s.match('app.path.to.prop'), false)
+            expect(s.match('app.path.to.prop')).toBeFalsy()
         })
 
         it('regexp', () => {
             const s = new Selector('app./^[a-z0-9]+$/.to.prop')
-            chai.assert.equal(s.match('app.path.to.prop'), true)
+            expect(s.match('app.path.to.prop')).toBeTruthy()
         })
 
         it('regexp selector, regexp path', () => {
             const s = new Selector('quiz.[questions HashList]./^[0-9a-z]+$/.text')
-            chai.assert.equal(s.match('quiz.[questions HashList]./^[0-9a-z]+$/.options'), false)
+            expect(s.match('quiz.[questions HashList]./^[0-9a-z]+$/.options')).toBeFalsy()
         })
     })
 
@@ -375,8 +361,8 @@ describe('Selector', function () {
                 },
             }
             const pathes = s.getPathes(obj)
-            chai.assert.equal(pathes.length, 1)
-            chai.assert.equal(pathes[0], 'app.path.to.prop')
+            expect(pathes).toHaveLength(1)
+            expect(pathes[0]).toEqual('app.path.to.prop')
         })
 
         it('unresolved path', () => {
@@ -387,8 +373,8 @@ describe('Selector', function () {
                 },
             }
             const pathes = s.getPathes(obj)
-            chai.assert.equal(pathes.length, 1)
-            chai.assert.equal(pathes[0], 'app.path.to.prop')
+            expect(pathes).toHaveLength(1)
+            expect(pathes[0]).toEqual('app.path.to.prop')
         })
 
         it('path with undefined value', () => {
@@ -403,8 +389,8 @@ describe('Selector', function () {
                 },
             }
             const pathes = s.getPathes(obj)
-            chai.assert.equal(pathes.length, 1)
-            chai.assert.equal(pathes[0], 'app.path.to.prop')
+            expect(pathes).toHaveLength(1)
+            expect(pathes[0]).toEqual('app.path.to.prop')
         })
 
         it('path with undefined value', () => {
@@ -416,10 +402,10 @@ describe('Selector', function () {
                 },
             }
             const pathes = s1.getPathes(obj)
-            chai.assert.equal(pathes.length, 3)
-            chai.assert.equal(pathes[0], 'app.hashlist.' + h.getId(0) + '.options')
-            chai.assert.equal(pathes[1], 'app.hashlist.' + h.getId(1) + '.options')
-            chai.assert.equal(pathes[2], 'app.hashlist.' + h.getId(2) + '.options')
+            expect(pathes).toHaveLength(3)
+            expect(pathes[0]).toEqual('app.hashlist.' + h.getId(0) + '.options')
+            expect(pathes[1]).toEqual('app.hashlist.' + h.getId(1) + '.options')
+            expect(pathes[2]).toEqual('app.hashlist.' + h.getId(2) + '.options')
         })
     })
 })

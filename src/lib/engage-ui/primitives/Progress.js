@@ -14,7 +14,7 @@ import '../style/rmx-progress.css'
  * @param {boolean} props.isLast
  * @param {boolean} props.isCompleted
  */
-function ProgressArrowItem({
+export function ProgressArrowItem({
     color = '#D8D8D8',
     completionColor = '#69B1FC',
     isFirst = false,
@@ -45,12 +45,12 @@ function ProgressArrowItem({
  * @param {string} props.completionColor
  * @param {boolean} props.isCompleted
  */
-function ProgressDotItem({ radius = 6, color = '#C4C4C4', completionColor = '#2990FB', isCompleted = false }) {
+export function ProgressDotItem({ radius = 6, color = '#C4C4C4', completionColor = '#2990FB', isCompleted = false }) {
     const backgroundColor = isCompleted ? completionColor : color
     return <div className="progress-variant-3__dot" style={{ width: radius, height: radius, backgroundColor }} />
 }
 
-class Progress extends React.Component {
+export class Progress extends React.Component {
     constructor(props) {
         super(props)
         this.state = {}
@@ -80,6 +80,7 @@ class Progress extends React.Component {
                     .replace(/<([^>]+)>/gi, '')
                     .replace(/\d+%/gi, '')
                     .trim()
+
                 return (
                     <div className="progress-variant-1">
                         <div style={{ marginBottom: 8, textAlign: 'left', fontSize, color }}>
