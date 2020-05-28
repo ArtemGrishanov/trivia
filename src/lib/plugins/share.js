@@ -1,20 +1,19 @@
 import { getPropertiesBySelector } from '../object-path'
 import HashList from '../hashlist'
 import { getScreenIdFromPath, debounce, flattenProperties } from '../remix/util/util'
+import { getComponents } from '../remix'
 
 /**
  * Плагин отслеживает все шаринг кнопки и создает сущности для шаринга в свойства app.share.entities
  *
  * Общий шаринг для проекта отдельно - для этого создаются 'app.share.defaultTitle', 'app.share.defaultDescription', 'app.share.defaultImage'
  *
- *
- * @param {array} options.displayTypes
  */
 export default function initShare(options = {}) {
+    const SHARE_BTN_TAG = 'share'
     let fbApiEmbedded = false
 
-    const displayTypes = options.displayTypes,
-        getMainPreviewHTML = options.getMainPreviewHTML,
+    const getMainPreviewHTML = options.getMainPreviewHTML,
         getShareEntityPreviewHTML = options.getShareEntityPreviewHTML,
         remix = options.remix,
         updateShare = function () {
@@ -31,21 +30,14 @@ export default function initShare(options = {}) {
             }
 
             // fetch all sharing buttons from the app
-            displayTypes.forEach(type => {
-                sharingButtons = sharingButtons.concat(
-                    getPropertiesBySelector(
-                        state,
-                        `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=${type}]`,
-                    ),
-                )
-            })
+            sharingButtons = getComponents({ tag: SHARE_BTN_TAG })
+
             sharingButtons.forEach(button => {
-                const screenId = getScreenIdFromPath(button.path),
-                    componentId = button.propName,
+                const componentId = button.hashlistId,
                     ne = {
                         screen: {
-                            id: screenId,
-                            tags: state.router.screens[screenId].tags,
+                            id: button.screen.hashlistId,
+                            tags: button.screen.tags,
                         },
                         componentId,
                         title: '',

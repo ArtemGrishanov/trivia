@@ -7,24 +7,48 @@ import App from './App'
 
 import store from './store'
 import Remix from './lib/remix'
-
 import initRemixRouting from './lib/plugins/remix-routing'
-import initScreenProgress from './lib/plugins/screen-progress'
 import initCoverScreen from './lib/plugins/cover-screen'
-import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 import initButtonBehavior from './lib/plugins/button-behavior'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
+import HashList from './lib/hashlist'
 
 Remix.setStore(store)
 
+const PROJECT_TAG = 'memory'
+const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
+
 initButtonBehavior({ remix: Remix })
-initScreenCollage({
-    remix: Remix,
-    screenTag: 'final',
-})
+
+function extendMemorySchema() {
+    Remix.extendSchema({
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].dataSet': {
+            type: 'hashlist',
+            minLength: 0,
+            maxLength: 128,
+            default: new HashList([]),
+        },
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].[dataSet HashList]./^[0-9a-z]+$/.id': {
+            type: 'number',
+            min: 0,
+            max: 128,
+            default: 0,
+        },
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].[dataSet HashList]./^[0-9a-z]+$/.gameKey': {
+            type: 'number',
+            min: 0,
+            max: 1e10,
+            default: 0,
+        },
+        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=MemoryPlayground].[dataSet HashList]./^[0-9a-z]+$/.src': {
+            type: 'string',
+            default: '',
+        },
+    })
+}
 
 initCoverScreen({
     remix: Remix,
@@ -37,17 +61,12 @@ initRemixRouting({
     // some params specially for Remix-Routing plugin
     screenRoute: [
         { tag: 'start' }, // show all screens with tag in linear order
-        { tag: 'photostoryitem', shuffle: true }, // show all screens with tag and shuffle them
+        { tag: PROJECT_ITEM_TAG }, // show all screens with tag and shuffle them
         { tag: 'final' },
     ],
     restartTag: 'restart',
     nextTag: 'next',
     prevTag: 'prev',
-})
-
-initScreenProgress({
-    remix: Remix,
-    screenTag: 'photostoryitem',
 })
 
 initShare({
@@ -60,7 +79,7 @@ initShare({
     getMainPreviewHTML: remix => {
         const state = remix.getState(),
             screen = state.router.screens.getByIndex(0) // это может быть кавер скрин или первый вопрос
-        return getScreenHTMLPreview({ screen, defaultTitle: 'Take the quiz!' })
+        return getScreenHTMLPreview({ screen, defaultTitle: 'Take the memory!' })
     },
     /**
      * Функция для генерации превью для каждого отдельного результата шаринга
@@ -72,6 +91,8 @@ initShare({
         return getScreenHTMLPreview({ screen: resultScreen, defaultTitle: 'Result title' })
     },
 })
+
+extendMemorySchema()
 
 initGoogleAnalytics({ remix: Remix })
 

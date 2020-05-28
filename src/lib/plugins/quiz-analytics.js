@@ -23,6 +23,7 @@ const initQuizAnalytics = ({
     restartBtnTag = 'restart',
     shareBtnTag = 'share',
     socialShareBtnTag = 'socialShare',
+    sharedByBtnTag = 'shared_by',
     downloadBtnTag = 'download',
     externalLinkTag = 'externalLink',
 }) => {
@@ -132,7 +133,7 @@ const initQuizAnalytics = ({
         event.remix.postMessage('analytics', {
             type: 'test_ended',
             actionType: 'test_ended',
-            // resultId, todo
+            resultId,
             timePassing,
             rightQuestionCount,
         })
@@ -173,10 +174,14 @@ const initQuizAnalytics = ({
     })
 
     remix.registerTriggerAction(SHARED_BY, event => {
-        event.remix.postMessage('analytics', {
-            type: 'standard',
-            actionType: `shared_by_${event.eventData.socialName}`,
-        })
+        const shareTags = event.eventData.tags.split(' ').filter(str => str.includes(sharedByBtnTag))
+
+        for (const tag of shareTags) {
+            event.remix.postMessage('analytics', {
+                type: 'standard',
+                actionType: tag,
+            })
+        }
     })
 
     remix.registerTriggerAction(TEST_RESULT_DOWNLOADED, event => {
@@ -276,7 +281,7 @@ const initQuizAnalytics = ({
     remix.addTrigger({
         when: {
             eventType: 'onclick',
-            condition: { prop: 'socialName', clause: 'EXISTS' },
+            condition: { prop: 'tags', clause: 'CONTAINS', value: sharedByBtnTag },
         },
         then: { actionType: SHARED_BY },
     })

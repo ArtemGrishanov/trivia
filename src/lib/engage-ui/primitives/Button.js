@@ -6,9 +6,36 @@ import Arrow from '../bricks/Arrow'
 import * as icons from '../icons'
 
 class Button extends React.Component {
+    static primaryDefaultStyle = {
+        color: '#FFFFFF',
+    }
+
+    static secondaryLightDefaultStyle = {
+        backgroundColor: '#FFFFFF',
+        borderWidth: '1px',
+        borderColor: '#D8D8D8',
+        color: '#787878',
+    }
+
+    static replaceDefaultStyle(styleVariant, style) {
+        const defaultStyle = this[styleVariant + 'DefaultStyle']
+        if (defaultStyle === void 0) {
+            return style
+        }
+
+        const replacedStyle = { ...style }
+
+        for (const key in defaultStyle) {
+            if (key in schm) replacedStyle[key] = style[key] === schm[key].default ? defaultStyle[key] : style[key]
+            else replacedStyle[key] = defaultStyle[key]
+        }
+
+        return replacedStyle
+    }
+
     constructor(props) {
         super(props)
-        this.state = {}
+        this.state = { isHover: false }
     }
 
     getMarkup(props) {
@@ -25,12 +52,14 @@ class Button extends React.Component {
             text,
             iconName,
             iconColor,
+            iconColorHover,
             iconPosition,
             iconGap,
             openUrl,
+            styleVariant,
         } = props
 
-        const st = {
+        const st = Button.replaceDefaultStyle(styleVariant, {
             textAlign: 'initial',
             boxSizing: 'border-box',
             borderStyle: 'solid',
@@ -46,7 +75,7 @@ class Button extends React.Component {
                     }
                 }),
             ),
-        }
+        })
 
         const arrowPositionOptions = {
             right: '80%',
@@ -61,12 +90,6 @@ class Button extends React.Component {
             transform: 'translate(-50%, -50%)',
         }
 
-        const Icon = icons[iconName]
-        const iconSt = {
-            [iconPosition === 'left' ? 'marginRight' : 'marginLeft']: `${iconGap}px`,
-            order: iconPosition === 'left' ? 0 : 1,
-        }
-
         if (dropShadow) {
             st.boxShadow = '0px 2px 4px rgba(0, 0, 0, 0.5)'
         }
@@ -78,12 +101,21 @@ class Button extends React.Component {
 
         return (
             <button
-                className={`rmx-component rmx-button ${isArrow ? '__with-arrow' : ''}  __${sizeMod}`}
+                className={`rmx-component rmx-button ${isArrow ? '__with-arrow' : ''}  __${sizeMod} ${styleVariant}`}
                 style={st}
                 onClick={() => openUrl && window.open(openUrl.includes('://') ? openUrl : '//' + openUrl)}
+                onMouseLeave={() => this.setState({ ...this.state, isHover: false })}
+                onMouseEnter={() => this.setState({ ...this.state, isHover: true })}
             >
                 <div className={`clipped ${doubleClicked ? '' : 'align-center'}`}>
-                    {doubleClicked || Icon === void 0 ? null : <Icon color={iconColor} style={iconSt} />}
+                    {doubleClicked ? null : (
+                        <Icon
+                            color={this.state.isHover && iconColorHover ? iconColorHover : iconColor}
+                            name={iconName}
+                            position={iconPosition}
+                            gap={iconGap}
+                        />
+                    )}
                     {isArrow && <Arrow type={arrowType} direction={arrowDirection} st={arrowSt} color={arrowColor} />}
                     <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                 </div>
@@ -96,16 +128,28 @@ class Button extends React.Component {
     }
 }
 
-/**
- * Props schema
- * Which props could be edited and how (types, range and other rules)
- */
-export const Schema = new DataSchema({
+const Icon = ({ name, position, gap, color }) => {
+    const Icn = icons[name]
+
+    const st = {
+        [position === 'left' ? 'marginRight' : 'marginLeft']: `${gap}px`,
+        order: position === 'left' ? 0 : 1,
+    }
+
+    return Icn ? <Icn style={st} color={color} /> : null
+}
+
+const schm = {
     text: {
         type: 'string',
         minLength: 1,
         maxLength: 4096,
-        default: 'Button text',
+        default: '',
+    },
+    styleVariant: {
+        type: 'string',
+        enum: ['none', 'primary', 'secondary', 'secondaryLight', 'icon'],
+        default: 'none',
     },
     sizeMod: {
         type: 'string',
@@ -134,7 +178,7 @@ export const Schema = new DataSchema({
     },
     backgroundColor: {
         type: 'string',
-        default: 'blue',
+        default: '',
     },
     isArrow: {
         type: 'boolean',
@@ -167,6 +211,10 @@ export const Schema = new DataSchema({
         type: 'string',
         default: '',
     },
+    iconColorHover: {
+        type: 'string',
+        default: '',
+    },
     iconPosition: {
         type: 'string',
         enum: ['left', 'right'],
@@ -184,6 +232,12 @@ export const Schema = new DataSchema({
         default: '',
     },
     //TODO color format for strings, +tests
-})
+}
+
+/**
+ * Props schema
+ * Which props could be edited and how (types, range and other rules)
+ */
+export const Schema = new DataSchema(schm)
 
 export default RemixWrapper(Button, Schema, 'Button')

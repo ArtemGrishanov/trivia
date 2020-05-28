@@ -15,8 +15,11 @@ import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 import initQuizAnalytics from './lib/plugins/quiz-analytics'
 import { getScreenHTMLPreview } from './lib/remix/util/util'
+import initButtonBehavior from './lib/plugins/button-behavior'
 
 Remix.setStore(store)
+
+initButtonBehavior({ remix: Remix })
 
 initCoverScreen({
     remix: Remix,
@@ -48,7 +51,6 @@ initQuizPoints({
 
 initShare({
     remix: Remix,
-    displayTypes: ['FbButton'],
     /**
      * Функция для генерации главного превью приложения в виде HTML
      * Отсылается вовне, в редактор, где на основе этого html кода будет создано графическое превью

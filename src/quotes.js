@@ -13,6 +13,7 @@ import initCoverScreen from './lib/plugins/cover-screen'
 import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initButtonBehavior from './lib/plugins/button-behavior'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 
@@ -20,6 +21,8 @@ Remix.setStore(store)
 
 const PROJECT_TAG = 'quotes'
 const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
+
+initButtonBehavior({ remix: Remix })
 
 initScreenCollage({
     remix: Remix,
@@ -52,7 +55,6 @@ initScreenProgress({
 
 initShare({
     remix: Remix,
-    displayTypes: ['FbButton'],
     /**
      * Функция для генерации главного превью приложения в виде HTML
      * Отсылается вовне, в редактор, где на основе этого html кода будет создано графическое превью

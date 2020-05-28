@@ -42,9 +42,9 @@ const COMPONENTS = [
     //     ></Text>
     // </Control>
     // ,
-    <Control id={502} schema={TextOptionSchema} width={800} height={200}>
-        <TextOption id={'textoption1'} percent={55} height={60} width={200} />
-    </Control>,
+    // <Control id={502} schema={TextOptionSchema} width={800} height={200}>
+    //     <TextOption id={'textoption1'} percent={55} height={60} width={200} />
+    // </Control>,
     <Control id={503} schema={TextOptionSchema} width={800} height={200}>
         <TextOption
             id={'textoption2'}

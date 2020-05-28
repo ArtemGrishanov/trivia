@@ -1,8 +1,56 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
+import TextEditor from '../bricks/TextEditor'
+import { CompletionIcon } from '../icons'
+import '../style/rmx-progress.css'
 
-class Progress extends React.Component {
+/**
+ *
+ * @param {object} props
+ * @param {string} props.color
+ * @param {string} props.completionColor
+ * @param {boolean} props.isFirst
+ * @param {boolean} props.isLast
+ * @param {boolean} props.isCompleted
+ */
+export function ProgressArrowItem({
+    color = '#D8D8D8',
+    completionColor = '#69B1FC',
+    isFirst = false,
+    isLast = false,
+    isCompleted = false,
+}) {
+    const backgroundColor = isCompleted ? completionColor : color
+    let className = 'progress-variant-2__arrow'
+
+    if (isFirst) {
+        className += ' progress-variant-2__arrow_first'
+    } else if (isLast) {
+        className += ' progress-variant-2__arrow_last'
+    }
+
+    return (
+        <div className={className} style={{ backgroundColor }}>
+            {isCompleted && <CompletionIcon className="progress-variant-2__completed-icon" />}
+        </div>
+    )
+}
+
+/**
+ *
+ * @param {object} props
+ * @param {number} props.radius
+ * @param {string} props.color
+ * @param {string} props.completionColor
+ * @param {boolean} props.isCompleted
+ */
+export function ProgressDotItem({ radius = 6, color = '#C4C4C4', completionColor = '#2990FB', isCompleted = false }) {
+    const backgroundColor = isCompleted ? completionColor : color
+    return <div className="progress-variant-3__dot" style={{ width: radius, height: radius, backgroundColor }} />
+}
+
+export class Progress extends React.Component {
     constructor(props) {
         super(props)
         this.state = {}
@@ -13,22 +61,30 @@ class Progress extends React.Component {
             variant,
             step,
             max,
-            backgroundFilledLine,
-            backgroundLine,
+            completionBackground,
+            background,
             fontSize,
             color,
             borderRadius,
             borderWidth,
             borderColor,
-            progressText,
+            dotSize,
+            text,
+            doubleClicked,
+            id,
         } = this.props
         switch (variant) {
             case 'variant1': {
                 const percent = +(step / max).toFixed(2) * 100
+                const resultText = text
+                    .replace(/<([^>]+)>/gi, '')
+                    .replace(/\d+%/gi, '')
+                    .trim()
+
                 return (
-                    <div style={{ width: '100%' }}>
+                    <div className="progress-variant-1">
                         <div style={{ marginBottom: 8, textAlign: 'left', fontSize, color }}>
-                            {progressText} {percent}%
+                            <TextEditor parentId={id} readOnly={!doubleClicked} text={resultText + ` ${percent}%`} />
                         </div>
                         <div
                             style={{
@@ -38,18 +94,57 @@ class Progress extends React.Component {
                                 borderRadius,
                                 borderWidth,
                                 borderColor,
-                                background: backgroundLine,
+                                background,
                             }}
                         >
                             <div
                                 style={{
                                     width: `${percent}%`,
-                                    backgroundColor: backgroundFilledLine,
+                                    backgroundColor: completionBackground,
                                     height: 8,
                                     borderRadius,
                                 }}
                             ></div>
                         </div>
+                    </div>
+                )
+            }
+            case 'variant2': {
+                return (
+                    <div className="progress-variant-2">
+                        {new Array(max).fill('').map((_, index) => {
+                            const isFirst = index === 0
+                            const isLast = index === max - 1
+                            const isCompleted = index < step
+                            return (
+                                <ProgressArrowItem
+                                    key={index}
+                                    color={background}
+                                    completionColor={completionBackground}
+                                    isFirst={isFirst}
+                                    isLast={isLast}
+                                    isCompleted={isCompleted}
+                                />
+                            )
+                        })}
+                    </div>
+                )
+            }
+            case 'variant3': {
+                return (
+                    <div className="progress-variant-3">
+                        {new Array(max).fill('').map((_, index) => {
+                            const isCompleted = index < step
+                            return (
+                                <ProgressDotItem
+                                    key={index}
+                                    color={background}
+                                    radius={dotSize}
+                                    completionColor={completionBackground}
+                                    isCompleted={isCompleted}
+                                />
+                            )
+                        })}
                     </div>
                 )
             }
@@ -80,16 +175,16 @@ class Progress extends React.Component {
  * Which props could be edited and how (types, range and other rules)
  */
 export const Schema = new DataSchema({
-    variant: {
-        type: 'string',
-        enum: ['variant0', 'variant1'],
-        default: 'variant0',
-    },
-    progressText: {
+    text: {
         type: 'string',
         minLength: 1,
         maxLength: 4096,
         default: 'Progress:',
+    },
+    variant: {
+        type: 'string',
+        enum: ['variant0', 'variant1', 'variant2', 'variant3'],
+        default: 'variant0',
     },
     width: {
         type: 'number',
@@ -125,11 +220,11 @@ export const Schema = new DataSchema({
         type: 'string',
         default: '#3C3C3C',
     },
-    backgroundLine: {
+    background: {
         type: 'string',
-        default: 'linear-gradient(180deg, #D8D8D8 0%, #EEEEEE 100%)',
+        default: '#D8D8D8',
     },
-    backgroundFilledLine: {
+    completionBackground: {
         type: 'string',
         default: '#2990FB',
     },
@@ -148,6 +243,12 @@ export const Schema = new DataSchema({
     borderColor: {
         type: 'string',
         default: '',
+    },
+    dotSize: {
+        type: 'number',
+        min: 1,
+        max: 100,
+        default: 6,
     },
 })
 
