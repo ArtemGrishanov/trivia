@@ -1,4 +1,5 @@
 import DataSchema from '../schema.js'
+import HashList from '../hashlist'
 
 describe('Schema', () => {
     describe('#getDescription', () => {
@@ -30,6 +31,51 @@ describe('Schema', () => {
                     })
                 }
             }).not.toThrow()
+        })
+
+        it('getDescription() props with the same name', () => {
+            const s = new DataSchema({
+                components: {
+                    type: 'hashlist',
+                    minLength: 0,
+                    maxLength: 128,
+                    default: new HashList([
+                        // {displayName: 'Text', id: '123456'}
+                    ]),
+                    prototypes: [],
+                },
+                'components.[/^[0-9a-z]+$/ displayName=Button].text': {
+                    type: 'string',
+                    default: 'ButtonText',
+                },
+                'components.[/^[0-9a-z]+$/ displayName=Progress].text': {
+                    type: 'string',
+                    default: 'ProgressText',
+                },
+            })
+
+            // если нет данных о конкретном объекте, то схему для ProgressText никогда не получить,
+            // первой всегда находится 'ButtonText'
+            // фильтр displayName=Progress не к чему применять, нет объекта
+            expect(s.getDescription('components.aqw123.text').default).toEqual('ButtonText')
+            expect(s.getDescription('components.zxs456.text').default).toEqual('ButtonText')
+
+            const obj = {
+                components: new HashList([
+                    {
+                        displayName: 'Button',
+                        text: 'ButtonText',
+                    },
+                    {
+                        displayName: 'Progress',
+                        text: 'ProgressText',
+                    },
+                ]),
+            }
+
+            // теперь есть объект для которого можно применить фильтр
+            expect(s.getDescription(`components.${obj.components.getId(0)}.text`, obj).default).toEqual('ButtonText')
+            expect(s.getDescription(`components.${obj.components.getId(1)}.text`, obj).default).toEqual('ProgressText')
         })
     })
 })
