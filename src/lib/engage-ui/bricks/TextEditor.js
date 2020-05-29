@@ -42,11 +42,11 @@ const Font = ReactQuill.Quill.import('formats/font')
 Font.whitelist = fonts.map(f => f.replace(/ /g, ''))
 ReactQuill.Quill.register(Font, true)
 
-function getStylesheetLink(family) {
+export function getStylesheetLink(family) {
     return `https://fonts.googleapis.com/css?family=${family}`
 }
 
-function addFont(family) {
+export function addFont(family) {
     if (!importedFonts[family]) {
         const link = document.createElement('link')
         link.href = getStylesheetLink(family)
@@ -56,7 +56,7 @@ function addFont(family) {
     }
 }
 
-class TextEditor extends React.Component {
+export class TextEditor extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
