@@ -132,7 +132,6 @@ class LayoutContainer extends React.Component {
         if (this.props.editable) {
             if (this.groupMouseDown) {
                 if (this.groupDragging) {
-                    //TODO remix setselected components
                     this.saveGroupComponentsPosition()
                     // так как обновили позицию компонентов, то дальше надо обновить и локальный стейт: прямоугольник выделения.
                     // и сбросить дельты тоже - теперь изменения координат записы в сами компоненты
