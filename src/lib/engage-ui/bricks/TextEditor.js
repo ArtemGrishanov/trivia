@@ -64,6 +64,8 @@ export class TextEditor extends React.Component {
         }
         this.handleChange = this.handleChange.bind(this)
         this.contentRef = React.createRef()
+        this.measureInterval = null
+        this.measuredRect = {}
     }
 
     handleChange(html) {
@@ -104,9 +106,24 @@ export class TextEditor extends React.Component {
     }
 
     componentDidMount() {
-        const { getContentRect } = this.props
-        if (getContentRect && this.contentRef && this.contentRef?.current) {
-            getContentRect(this.contentRef.current.getBoundingClientRect())
+        if (this.props.getContentRect) {
+            if (this.contentRef && this.contentRef.current) {
+                //TODO попробовать react-size-me в будущем как, возможно, более производительное решение. Хотя этот код измерения текста запускается очень редко и не стоит добавлять лишние библиотеки
+                this.measureInterval = setInterval(() => {
+                    const { width, height } = this.contentRef.current.getBoundingClientRect()
+                    //TODO эксперимент - нужна только высота. Пробую убрать ширину.
+                    if (/*this.measuredRect.width !== width ||*/ this.measuredRect.height !== height) {
+                        this.measuredRect = { /*width,*/ height }
+                        this.props.getContentRect({ /*width,*/ height })
+                    }
+                }, 400)
+            }
+        }
+    }
+
+    componentWillUnmount() {
+        if (this.measureInterval) {
+            clearInterval(this.measureInterval)
         }
     }
 
@@ -115,6 +132,10 @@ export class TextEditor extends React.Component {
         if (!readOnly) {
             // import all fonts in edit mode
             fonts.forEach(f => addFont(f))
+            const { getContentRect } = this.props
+            if (getContentRect && this.contentRef && this.contentRef?.current) {
+                getContentRect(this.contentRef.current.getBoundingClientRect())
+            }
         }
         if (!prevReadOnly && readOnly) {
             // выход из режима ввода текста - делаем сохранение в remix

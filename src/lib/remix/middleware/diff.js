@@ -22,7 +22,7 @@ const scheduleDiff = debounce(() => {
         return
     }
     const nextState = store.getState()
-    const lastUpdDiff = diff(Remix._getSchema(), prevState, nextState)
+    const lastUpdDiff = diff(Remix.getSchema(), prevState, nextState)
     const changed = lastUpdDiff.added.length > 0 || lastUpdDiff.changed.length > 0 || lastUpdDiff.deleted.length > 0
     if (changed) {
         // in 'edit' mode Remix send out event messages to RemixContainer

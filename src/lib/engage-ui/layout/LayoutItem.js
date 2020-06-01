@@ -91,9 +91,10 @@ function calcState({
         } else if (left < (-width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100) {
             left = (-width * CAN_LEAVE_CONTAINER_HOR_PRC) / 100
         }
-        if (top > propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
-            top = propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
-        } else if (top < (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
+        // if (top > propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
+        //     top = propContainerHeight - (height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
+        // } else
+        if (top < (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100) {
             top = (-height * CAN_LEAVE_CONTAINER_VERT_PRC) / 100
         }
     }

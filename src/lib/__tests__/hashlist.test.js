@@ -174,6 +174,82 @@ describe('HashList', () => {
             expect(copy.components.getId(0)).not.toBe(origin.components.getId(0))
             expect(copy.components.getId(1)).not.toBe(origin.components.getId(1))
         })
+
+        /**
+         * Клонирование элемента с замещением свойств-ид
+         *
+         * Пример
+         * {
+         *   hashlist_1: {
+         *      'qwe123': {}
+         *      'asd456': {},
+         *      _orderedIds: ['qwe123', 'asd456']
+         *   },
+         *   some_props: {
+         *      'asd456': {
+         *
+         *      },
+         *      'qwe123': {
+         *
+         *      }
+         *   }
+         * }
+         *
+         * При клонировании hashlist_1 его элементы получат новые идишники
+         * есть специальная опция, которая позволит найти идишники (qwe123, asd456) в соседних свойствах и заменить их соответственно на новые
+         *
+         */
+        it('deep clone child hashlist elements with ids replacement', function () {
+            const components = new HashList([
+                { name: 'Component1', data: '12345' },
+                { name: 'Component2', data: '09876' },
+            ])
+            const origId1 = components.getId(0)
+            const origId2 = components.getId(1)
+
+            const screens = new HashList([
+                {
+                    backgroundColor: '#000',
+                    components,
+                    // соседний объект который имеет свойства с идентификаторами равными ключам из хешлиста
+                    // когда элемент screens[0] будет клонироваться, то эти идентификаторы будут заменены на новые
+                    someProps: {
+                        [components.getId(0)]: 'asd',
+                        [components.getId(1)]: 'qwe',
+                    },
+                },
+            ])
+            const copy = screens.getElementCopy(0, { cloneChildHashlists: true, replaceObjectIds: true })
+
+            const origin = screens.getByIndex(0)
+            expect(copy).not.toEqual(origin)
+            expect(copy.backgroundColor).toEqual(origin.backgroundColor)
+
+            expect(origin.components).toHaveLength(2)
+            expect(copy.components).toHaveLength(2)
+
+            expect(copy.components.getByIndex(0).name).toEqual('Component1')
+            expect(origin.components.getByIndex(0).name).toEqual('Component1')
+
+            expect(copy.components.getByIndex(1).name).toEqual('Component2')
+            expect(origin.components.getByIndex(1).name).toEqual('Component2')
+
+            expect(copy.components.getByIndex(0)).not.toBe(origin.components.getByIndex(0))
+            expect(copy.components.getByIndex(1)).not.toBe(origin.components.getByIndex(1))
+
+            expect(copy.components.getId(0).length).toBeGreaterThan(1)
+            expect(copy.components.getId(1).length).toBeGreaterThan(1)
+
+            expect(copy.components.getId(0)).not.toBe(origin.components.getId(0))
+            expect(copy.components.getId(1)).not.toBe(origin.components.getId(1))
+
+            const newId1 = copy.components.getId(0)
+            const newId2 = copy.components.getId(1)
+            expect(copy.someProps[newId1]).toEqual('asd') // идишники были заменены
+            expect(copy.someProps[newId2]).toEqual('qwe')
+            expect(copy.someProps[origId1]).toEqual(undefined)
+            expect(copy.someProps[origId2]).toEqual(undefined)
+        })
     })
 
     describe('#list empty', function () {

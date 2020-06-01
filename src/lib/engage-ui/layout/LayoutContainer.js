@@ -113,8 +113,10 @@ class LayoutContainer extends React.Component {
 
             const magnetsVertical = Object.values(this.state.magnets).flat(),
                 aPropsMap =
-                    this.props.adaptedui && this.props.adaptedui[this.props.width]
-                        ? this.props.adaptedui[this.props.width]
+                    this.props.adaptedui &&
+                    this.props.adaptedui[this.props.width] &&
+                    this.props.adaptedui[this.props.width].props
+                        ? this.props.adaptedui[this.props.width].props
                         : {}
 
             childrenWithProps = React.Children.map(this.props.children, child => {

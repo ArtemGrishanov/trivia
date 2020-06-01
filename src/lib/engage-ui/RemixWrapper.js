@@ -36,6 +36,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        adaptedForCustomWidth: true,
     },
     widthStrategy: {
         type: 'string',
@@ -47,12 +48,14 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        adaptedForCustomWidth: true,
     },
     left: {
         type: 'number',
         min: -1000,
         max: 9999,
         default: 100,
+        adaptedForCustomWidth: true,
     },
     leftStrategy: {
         type: 'string',
@@ -64,6 +67,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
+        adaptedForCustomWidth: true,
     },
     displayType: {
         type: 'string',

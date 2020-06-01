@@ -1,4 +1,9 @@
-import { cloneLayoutItemProps } from './LayoutAdapter'
+import { cloneLayoutItemProps } from './adapter'
+
+const PADDING_LEFT = 10,
+    PADDING_RIGHT = 10,
+    PADDING_TOP = 20,
+    PADDING_BOTTOM = 20
 
 /**
  * Ряд - класс представляющий горизонтальную последовательность flow элементов
@@ -56,7 +61,7 @@ export default class Row {
             sumWidth += c.width
         })
 
-        // ШАГ 2 - сдвинуть left в завосомости от стратегии компонентов
+        // ШАГ 2 - сдвинуть left в зависимости от стратегии компонентов
         this.components.forEach(c => {
             if (c.leftStrategy === 'fixed') {
                 // do nothing

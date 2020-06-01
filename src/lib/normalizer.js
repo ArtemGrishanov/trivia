@@ -105,6 +105,9 @@ export default class Normalizer {
             case 'boolean': {
                 return this.processBoolean(propDescription, value)
             }
+            case 'object': {
+                return this.processObject(propDescription, value)
+            }
             default: {
                 if (value === undefined) {
                     return propDescription.default
@@ -181,6 +184,18 @@ export default class Normalizer {
             }
         }
         //TODO min, max size of value
+        return value
+    }
+
+    /**
+     *
+     * @param {*} info
+     * @param {*} value
+     */
+    processObject(info, value) {
+        if (!value || Object.prototype.toString.apply(value) !== '[object Object]') {
+            return info.default
+        }
         return value
     }
 }
