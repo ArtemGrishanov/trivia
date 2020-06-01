@@ -214,3 +214,69 @@ export function throttle(callback, wait, immediate = false) {
         }
     }
 }
+
+/**
+ *
+ * @param {HTMLElement} element
+ * @returns {string}
+ */
+export function elementToHtml(element) {
+    const tmp = document.createElement('div')
+    tmp.appendChild(element)
+    return tmp.innerHTML
+}
+
+/**
+ * Удаляет ненужные для превью элементы редактора (артефакты)
+ * @param {HTMLElement} element
+ * @returns {HTMLElement}
+ */
+export function cutTextEditor(element) {
+    const rmxTextEditorList = element.querySelectorAll('.rmx-text-editor')
+
+    for (let i = 0; i < rmxTextEditorList.length; i++) {
+        const qlEditor = rmxTextEditorList[i].querySelector('.ql-editor').cloneNode(true)
+        rmxTextEditorList[i].innerHTML = `
+            <div class="ql-container ql-snow ql-disabled">
+                ${elementToHtml(qlEditor)}
+            </div>
+        `
+    }
+    return element
+}
+
+/**
+ * Удаляет рамки которые появляются при наведении/нажатии на элемент
+ * @param {HTMLElement} element
+ * @returns {HTMLElement}
+ */
+export function cutRmxEditingBorders(element) {
+    const rmxLayoutItemSelectionCntList = element.querySelectorAll('.rmx-layout_item_selection_cnt')
+
+    for (let i = 0; i < rmxLayoutItemSelectionCntList.length; i++) {
+        const item = rmxLayoutItemSelectionCntList[i]
+        item.parentNode.removeChild(item)
+    }
+
+    return element
+}
+
+/**
+ * Удаляет TextEditor и ненужные для превью Remix элементы
+ * @param {HTMLElement} element
+ * @returns {HTMLElement}
+ */
+export function removeUnnecessaryItemsFromScreen(element) {
+    const SELECTORS = ['.rmx-text-editor', '.rmx-layout_item_selection_cnt']
+    const isNeedCopy = SELECTORS.some(s => !!element.querySelector(s))
+
+    if (!isNeedCopy) {
+        return element
+    }
+
+    let copyOfElement = element.cloneNode(true)
+    copyOfElement = cutTextEditor(copyOfElement)
+    copyOfElement = cutRmxEditingBorders(copyOfElement)
+
+    return copyOfElement
+}
