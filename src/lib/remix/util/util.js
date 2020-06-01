@@ -127,6 +127,28 @@ export function debounce(func, wait, immediate) {
     }
 }
 
+export function throttle(callback, wait, immediate = false) {
+    let timeout = null
+    let initialCall = true
+
+    return function () {
+        const callNow = immediate && initialCall
+        const next = () => {
+            callback.apply(this, arguments)
+            timeout = null
+        }
+
+        if (callNow) {
+            initialCall = false
+            next()
+        }
+
+        if (!timeout) {
+            timeout = setTimeout(next, wait)
+        }
+    }
+}
+
 export function callOncePerTime(func, wait) {
     let timeout = null
     return function (...args) {
@@ -193,26 +215,61 @@ export function getScreenHTMLPreview({ screen, defaultTitle }) {
             </div>`
 }
 
-export function throttle(callback, wait, immediate = false) {
-    let timeout = null
-    let initialCall = true
+export function intersectRect(r1, r2) {
+    return !(
+        r2.left > r1.left + r1.width ||
+        r2.left + r2.width < r1.left ||
+        r2.top > r1.top + r1.height ||
+        r2.top + r2.height < r1.top
+    )
+}
 
-    return function () {
-        const callNow = immediate && initialCall
-        const next = () => {
-            callback.apply(this, arguments)
-            timeout = null
-        }
-
-        if (callNow) {
-            initialCall = false
-            next()
-        }
-
-        if (!timeout) {
-            timeout = setTimeout(next, wait)
+export function tryToMagnet(left, width, id, propMagnetsVertical) {
+    // trying to find an appropriate magnet to align 'left'
+    // магнит тип edge - за эти линии компонент может зацепляться только левым или правым краем. Для середины существует тип center
+    const MAGNET_DISTANCE = 5 // px
+    let magnets = null
+    if (propMagnetsVertical) {
+        const magnet = propMagnetsVertical.find(mv => {
+            if (id !== mv.componentId) {
+                if (mv.type === 'center' && Math.abs(mv.left - (left + width / 2)) < MAGNET_DISTANCE) {
+                    left = mv.left - width / 2
+                    return mv
+                } else if (mv.type === 'edge') {
+                    if (Math.abs(mv.left - left) < MAGNET_DISTANCE) {
+                        // компонент левым краем зацепился за магнит типа edge
+                        left = mv.left
+                        return mv
+                    } else if (Math.abs(mv.left - (left + width)) < MAGNET_DISTANCE) {
+                        // компонент правым краем зацепился за магнит типа edge
+                        left = mv.left - width
+                        return mv
+                    }
+                }
+            }
+        })
+        if (magnet) {
+            // сделано с заделом на несколько магнитов, возможно будем отобразать несколько - добавятся горизонтальные
+            magnets = [magnet]
         }
     }
+    return { left, magnets }
+}
+
+/**
+ * Из первого объекта удалить свойства которые есть во втором и вернуть новый объект
+ *
+ * @param {*} obj1
+ * @param {*} obj2
+ */
+export function objectMinus(obj1 = {}, obj2 = {}) {
+    const result = { ...obj1 }
+    Object.keys(obj2).forEach(key => {
+        if (result.hasOwnProperty(key)) {
+            delete result[key]
+        }
+    })
+    return result
 }
 
 /**

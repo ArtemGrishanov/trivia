@@ -139,7 +139,13 @@ export class TextEditor extends React.Component {
         }
         if (!prevReadOnly && readOnly) {
             // выход из режима ввода текста - делаем сохранение в remix
-            setComponentProps(parentId, { text: this.state.html }, { putStateHistory: true })
+            setComponentProps(
+                {
+                    id: this.props.parentId,
+                    text: this.state.html,
+                },
+                { putStateHistory: true },
+            )
         }
     }
 }

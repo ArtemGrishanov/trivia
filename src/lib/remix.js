@@ -818,21 +818,6 @@ export function getSchema() {
 }
 
 /**
- * Sets component position and size
- *
- * @param {string} id component id
- */
-export function setComponentPosition({ id, top, left, width, height }, options) {
-    const props = {}
-    if (top !== undefined) props.top = top
-    if (left !== undefined) props.left = left
-    if (width !== undefined) props.width = width
-    if (height !== undefined) props.height = height
-    setComponentProps(id, props, options)
-    updateAppHeight()
-}
-
-/**
  * Returns active screen id stored in router
  */
 export function getActiveScreenId() {
@@ -1183,45 +1168,50 @@ function deleteScreenComponent(screenId, componentId) {
  * Helper method
  * Set existing component props
  *
- * @param {string} componentId
- * @param {object} props
+ * @param {object || Array} props
  * @param {boolean} options.putStateHistory
  */
-export function setComponentProps(componentId, props, options) {
-    const state = store.getState(),
+export function setComponentProps(newProps, options) {
+    newProps = !Array.isArray(newProps) ? [newProps] : newProps
+    const data = {},
+        state = store.getState(),
         editingCustomWidth =
             state.session.mode === 'edit' &&
             state.session.size.width > 0 &&
             state.app.size.width > 0 &&
             state.app.size.width !== state.session.size.width
 
-    if (!_componentIdToScreenId[componentId]) {
-        calcComponentIdScreenIdHash(state.router.screens)
-    }
-    const screenId = _componentIdToScreenId[componentId]
-    if (screenId) {
-        let path = `router.screens.${screenId}.components.${componentId}.`
-        const data = {},
-            adaptedData = {}
-        Object.keys(props).forEach(prop => {
-            const propDescription = schema.getDescription(path + prop)
-            if (editingCustomWidth && propDescription && propDescription.adaptedForCustomWidth) {
-                // если ширина кастомная и свойство помечено как адаптивное то сохраняем его отдельно в адаптацию
-                adaptedData[prop] = props[prop]
-            } else {
-                data[path + prop] = props[prop]
+    newProps.forEach(newp => {
+        if (!newp.id) {
+            throw new Error('You must set a component id in new props')
+        }
+        if (!_componentIdToScreenId[newp.id]) {
+            calcComponentIdScreenIdHash(state.router.screens)
+        }
+        const screenId = _componentIdToScreenId[newp.id]
+        if (screenId) {
+            let path = `router.screens.${screenId}.components.${newp.id}.`
+            const adaptedData = {}
+            Object.keys(newp).forEach(key => {
+                const propDescription = schema.getDescription(path + key)
+                if (editingCustomWidth && propDescription && propDescription.adaptedForCustomWidth) {
+                    // если ширина кастомная и свойство помечено как адаптивное то сохраняем его отдельно в адаптацию
+                    adaptedData[key] = newp[key]
+                } else {
+                    data[path + key] = newp[key]
+                }
+            })
+            if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
+                // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
+                saveAdaptedProps(screenId, newp.id, adaptedData)
             }
-        })
-        if (Object.keys(data).length > 0) {
-            setData(data)
-        }
-        if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
-            // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
-            saveAdaptedProps(screenId, componentId, adaptedData)
         }
     }
-    if (options && options.putStateHistory === true) {
-        putStateHistory()
+    if (Object.keys(data).length > 0) {
+        setData(data)
+        if (options && options.putStateHistory === true) {
+            putStateHistory()
+        }
     }
 }
 

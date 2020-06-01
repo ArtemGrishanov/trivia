@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Remix from '../../../lib/remix'
-import { selectComponents, setComponentPosition, getActiveScreenId, getActiveScreen } from '../../../lib/remix'
+import Remix, { setComponentProps } from '../../../lib/remix'
+import { getActiveScreenId, getActiveScreen } from '../../../lib/remix'
+import { tryToMagnet } from '../../remix/util/util'
 
 const MIN_WIDTH = 20, // px
     MIN_HEIGHT = 20, // px
-    MAGNET_DISTANCE = 7, // px
     CAN_LEAVE_CONTAINER_HOR_PRC = 50, // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
     CAN_LEAVE_CONTAINER_VERT_PRC = 50, // насколько компонент при перетаскивании может выйти за границы котейнера, в процентах
     DRAG_Z_INDEX = 9999 // z-index на время перетаскивания
@@ -112,46 +112,9 @@ function calcState({
     }
 }
 
-function tryToMagnet(left, width, id, propMagnetsVertical) {
-    // trying to find an appropriate magnet to align 'left'
-    // магнит тип edge - за эти линии компонент может зацепляться только левым или правым краем. Для середины существует тип center
-    let magnets = null
-    if (propMagnetsVertical) {
-        const magnet = propMagnetsVertical.find(mv => {
-            if (id !== mv.componentId) {
-                if (mv.type === 'center' && Math.abs(mv.left - (left + width / 2)) < MAGNET_DISTANCE) {
-                    left = mv.left - width / 2
-                    return mv
-                } else if (mv.type === 'edge') {
-                    if (Math.abs(mv.left - left) < MAGNET_DISTANCE) {
-                        // компонент левым краем зацепился за магнит типа edge
-                        left = mv.left
-                        return mv
-                    } else if (Math.abs(mv.left - (left + width)) < MAGNET_DISTANCE) {
-                        // компонент правым краем зацепился за магнит типа edge
-                        left = mv.left - width
-                        return mv
-                    }
-                }
-            }
-        })
-        if (magnet) {
-            // сделано с заделом на несколько магнитов, возможно будем отобразать несколько - добавятся горизонтальные
-            magnets = [magnet]
-        }
-    }
-    return { left, magnets }
-}
-
-const mapStateToProps = (state, ownProps) => {
-    return {
-        selected: state.session.selectedComponentIds.indexOf(ownProps.id) >= 0,
-    }
-}
-
 export default function LayoutItem() {
     return function (Component) {
-        return connect(mapStateToProps)(
+        return connect()(
             class extends React.Component {
                 static getDerivedStateFromProps(props, state) {
                     return {
@@ -226,7 +189,7 @@ export default function LayoutItem() {
                         return
                     }
                     if (this.props.editable) {
-                        selectComponents([])
+                        this.props.requestSelection([])
                         this.itemNode = this.thisRef.current
                         if (this.mouseDownRecently) {
                             // режим двойного нажатия - перетаскивания не будет
@@ -311,21 +274,6 @@ export default function LayoutItem() {
                             }
                         }
                         if (l !== undefined || t !== undefined || w !== undefined || h != undefined) {
-                            // this.setState({
-                            //     ...calcState({
-                            //         state: this.state,
-                            //         propContainerWidth: this.props.containerWidth,
-                            //         propLeft: this.props.left,
-                            //         propTop: this.props.top,
-                            //         propWidth: this.props.width,
-                            //         propHeight: this.props.height,
-                            //         width: w === undefined ? this.state.width: w,
-                            //         height: h === undefined ? this.state.height: h,
-                            //         top: t === undefined ? this.state.top: t,
-                            //         left: l === undefined ? this.state.left: l,
-                            //         propMagnetsVertical: this.props.magnetsVertical
-                            //     })
-                            // });
                             l = l === undefined ? this.state.left : l
                             w = w === undefined ? this.state.width : w
 
@@ -345,7 +293,7 @@ export default function LayoutItem() {
                 selectThisComponent(doubleClicked = false, dragging = false) {
                     // use selection mode for external services (like Editor)
                     // and keep element selected (show selection border)
-                    selectComponents([this.props.id], {
+                    this.props.requestSelection([this.props.id], {
                         componentProps: { [this.props.id]: { ...this.props } },
                         clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect() : {},
                         screenProps: { ...getActiveScreen() },
@@ -360,7 +308,7 @@ export default function LayoutItem() {
                         if (this.isDragging) {
                             this.isDragging = false
                             // save size and position after dragging
-                            setComponentPosition(
+                            setComponentProps(
                                 {
                                     id: this.props.id,
                                     top: this.state.top,
@@ -383,9 +331,9 @@ export default function LayoutItem() {
                                 doubleClicked: false,
                                 zIndex: 0,
                             })
-                            selectComponents([])
+                            this.props.requestSelection([])
                         } else if (this.props.selected) {
-                            selectComponents([])
+                            this.props.requestSelection([])
                         }
                         this.isItemMouseDown = false
                     }
