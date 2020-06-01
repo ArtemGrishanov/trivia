@@ -342,6 +342,57 @@ describe('Selector', () => {
             expect(s.match('app.path.to.prop')).toBeTruthy()
         })
 
+        it('regexp', () => {
+            const s = new Selector('app./^[a-z0-9]+$/.to.prop')
+            expect(s.match('app.path.to.prop', {})).toBeTruthy()
+        })
+
+        it('with simple filter object', () => {
+            const s = new Selector('app./^[a-z0-9]+$/.to.prop')
+            expect(
+                s.match('app.path.to.prop', {
+                    app: {
+                        path: {
+                            to: {
+                                prop: 123,
+                            },
+                        },
+                    },
+                }),
+            ).toBeTruthy()
+        })
+
+        it('with filter object', () => {
+            const s = new Selector('app.[/^[a-z0-9]+$/ filter=Filter2].to.prop')
+            expect(
+                s.match('app.path.to.prop', {
+                    app: {
+                        path: {
+                            to: {
+                                prop: 123,
+                            },
+                            // do not match this object
+                            filter: 'Filter1',
+                        },
+                    },
+                }),
+            ).toBeFalsy()
+
+            const s2 = new Selector('app.[/^[a-z0-9]+$/ filter=Filter2].to.prop')
+            expect(
+                s2.match('app.path.to.prop', {
+                    app: {
+                        path: {
+                            to: {
+                                prop: 456,
+                            },
+                            filter: 'Filter2',
+                        },
+                    },
+                }),
+            ).toBeTruthy()
+        })
+
         it('regexp selector, regexp path', () => {
             const s = new Selector('quiz.[questions HashList]./^[0-9a-z]+$/.text')
             expect(s.match('quiz.[questions HashList]./^[0-9a-z]+$/.options')).toBeFalsy()

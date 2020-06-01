@@ -75,12 +75,13 @@ export default class DataSchema {
 
     /**
      *
-     * @param {string} path
+     * @param {string} path, например 'router.screens.ho3etc.components.x851ma.text'
+     * @param {object} filterObject (опционально) объект, на который накладывается path. Помогает подобрать описание если применяюся фильтры
      */
-    getDescription(path) {
+    getDescription(path, filterObject = {}) {
         // _schm содержит массив селекторов (хотя большинство совпадает с name)
         // нужно провести поиск по ним
-        const selector = this.findSelectorForPath(path)
+        const selector = this.findSelectorForPath(path, filterObject)
         return selector ? this._schm[selector] : null
     }
 
@@ -88,15 +89,17 @@ export default class DataSchema {
      * example: path=quiz.questions.ugltc7.text, we should find quiz.[questions HashList].text
      *
      * @param {string} path
+     * @param {object} filterObject
+     *
      * @return {string} selector
      */
-    findSelectorForPath(path) {
+    findSelectorForPath(path, filterObject = {}) {
         if (this._selectorForPathCache[path]) {
             return this._selectorForPathCache[path]
         }
         const seltrs = Object.keys(this._schm)
         for (let i = 0; i < seltrs.length; i++) {
-            if (matchPropertyPath(path, seltrs[i]) === true) {
+            if (matchPropertyPath(path, seltrs[i], filterObject) === true) {
                 this._selectorForPathCache[path] = seltrs[i]
                 return seltrs[i]
             }
