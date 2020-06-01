@@ -3,13 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import DataSchema from '../../schema'
 import { intersectRect, tryToMagnet, throttle, objectMinus } from '../../remix/util/util'
-import {
-    setComponentProps,
-    selectComponents,
-    getActiveScreenId,
-    getActiveScreen,
-    REMIX_MARK_AS_EXECUTED,
-} from '../../remix'
+import { setComponentProps, selectComponents, getActiveScreenId, getActiveScreen } from '../../remix'
 
 class LayoutContainer extends React.Component {
     static getDerivedStateFromProps(props, state) {
@@ -150,12 +144,7 @@ class LayoutContainer extends React.Component {
                     this.magnetsForGroup = null
                     this.onDragAndMagnetsAttached([], { props: { id: '__group__' } })
                 } else {
-                    this.setState({
-                        groupComponents: null,
-                        groupRect: null,
-                        componentPropsDeltas: null,
-                        selectRect: null,
-                    })
+                    this.clearGroupState()
                 }
             } else if (this.selectStartPoint) {
                 this.selectGroupComponents()
@@ -181,7 +170,8 @@ class LayoutContainer extends React.Component {
                       }
                     : void 0,
             )
-            setComponentProps(pos, { putStateHistory: true })
+            // immediate=true необходимо синхронно сразу установить позиции компонентов в этом случае
+            setComponentProps(pos, { putStateHistory: true, immediate: true })
         }
     }
 
@@ -313,7 +303,9 @@ class LayoutContainer extends React.Component {
      */
     computeComponentProps() {
         const aPropsMap =
-                this.props.adaptedui && this.props.adaptedui[this.props.width] && this.props.adaptedui[this.props.width].props
+                this.props.adaptedui &&
+                this.props.adaptedui[this.props.width] &&
+                this.props.adaptedui[this.props.width].props
                     ? this.props.adaptedui[this.props.width].props
                     : {},
             deltas = {},
@@ -326,11 +318,10 @@ class LayoutContainer extends React.Component {
                         left: c.props.left + this.state.componentPropsDeltas.left,
                         top: c.props.top + this.state.componentPropsDeltas.top,
                     }
-                    if (aPropsMap.top) {
-                        deltas[c.props.id].top = aPropsMap.top + this.state.componentPropsDeltas.top
-                    }
-                    if (aPropsMap.left) {
-                        deltas[c.props.id].left = aPropsMap.left + this.state.componentPropsDeltas.left
+                    const cp = aPropsMap[c.props.id]
+                    if (cp) {
+                        deltas[c.props.id].top = cp.top + this.state.componentPropsDeltas.top
+                        deltas[c.props.id].left = cp.left + this.state.componentPropsDeltas.left
                     }
                 }
             })
@@ -443,11 +434,28 @@ class LayoutContainer extends React.Component {
                 }
             })
         }
+        if (prevProps.screenId !== this.props.screenId && (this.state.selectRect || this.state.groupRect)) {
+            this.clearGroupState()
+        }
     }
 
     componentWillUnmount() {
         window.removeEventListener('mousemove', this.onWindowMouseMove)
         this.unmounted = true
+    }
+
+    clearGroupState() {
+        this.setState({
+            groupComponents: null,
+            groupRect: null,
+            componentPropsDeltas: null,
+            selectRect: null,
+        })
+        this.selectStartPoint = null
+        this.groupMouseDown = false
+        this.groupDragging = false
+        this.childrenComputedProps = {}
+        this.magnetsForGroup = null
     }
 }
 

@@ -23,7 +23,7 @@ export const APP_BOTTOM_PADDING = 20
  * @param {string} componentId
  * @param {object} props
  */
-export function saveAdaptedProps(screenId, componentId, props) {
+export function saveAdaptedProps(screenId, componentId, props, immediate = false) {
     const state = getState()
     // сохраняем некоторые свойства, если они были изменены при другой ширине приложения
     // например: геометрические свойства (top, left, width, height) сохраняем для мобильной версии приложения
@@ -32,7 +32,7 @@ export function saveAdaptedProps(screenId, componentId, props) {
         data[`router.screens.${screenId}.adaptedui.${state.session.size.width}.props.${componentId}.${key}`] =
             props[key]
     })
-    setData(data)
+    setData(data, false, immediate)
     updateAppHeight()
 }
 

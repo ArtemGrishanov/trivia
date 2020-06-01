@@ -726,12 +726,12 @@ function _doUpdate(state, data) {
         //Artem: 07.05.2020 зачем была сделана эта проверка? для нового типа object это не подходит
         //const propResult = getPropertiesBySelector(state, path)
         //if (propResult.length === 0) {
-            //TODO experiment
-            // при асинхронное работе setState такая ситуация теперь возможна, начиная с 26.05.2020
-            //throw new Error(`Remix: there is no such property ${path} in state`)
+        //TODO experiment
+        // при асинхронное работе setState такая ситуация теперь возможна, начиная с 26.05.2020
+        //throw new Error(`Remix: there is no such property ${path} in state`)
         //} else {
-            const value = normalizer.processValue(path, pathesValues[path])
-            assignByPropertyString(state, path, value)
+        const value = normalizer.processValue(path, pathesValues[path])
+        assignByPropertyString(state, path, value)
         //}
     })
 }
@@ -1170,9 +1170,11 @@ function deleteScreenComponent(screenId, componentId) {
  *
  * @param {object || Array} props
  * @param {boolean} options.putStateHistory
+ * @param {boolean} options.immediate
  */
-export function setComponentProps(newProps, options) {
+export function setComponentProps(newProps, options = {}) {
     newProps = !Array.isArray(newProps) ? [newProps] : newProps
+
     const data = {},
         state = store.getState(),
         editingCustomWidth =
@@ -1180,6 +1182,8 @@ export function setComponentProps(newProps, options) {
             state.session.size.width > 0 &&
             state.app.size.width > 0 &&
             state.app.size.width !== state.session.size.width
+
+    let needUpdateHeight = false
 
     newProps.forEach(newp => {
         if (!newp.id) {
@@ -1200,17 +1204,24 @@ export function setComponentProps(newProps, options) {
                 } else {
                     data[path + key] = newp[key]
                 }
+                if (!needUpdateHeight) {
+                    // любое изменение гееометрический свойств компонента может привести в изменению высоты приложения
+                    needUpdateHeight = key === 'top' || key === 'left' || key === 'width' || key === 'height'
+                }
             })
             if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
                 // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
-                saveAdaptedProps(screenId, newp.id, adaptedData)
+                saveAdaptedProps(screenId, newp.id, adaptedData, options.immediate)
             }
         }
-    }
+    })
     if (Object.keys(data).length > 0) {
-        setData(data)
+        setData(data, false, options.immediate)
         if (options && options.putStateHistory === true) {
             putStateHistory()
+        }
+        if (needUpdateHeight) {
+            updateAppHeight()
         }
     }
 }

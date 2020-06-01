@@ -51,6 +51,7 @@ class Screen extends React.Component {
                         width={this.props.size.width}
                         height={this.props.size.height}
                         adaptedui={this.props.adaptedui}
+                        screenId={this.props.id}
                     >
                         {components}
                     </LayoutContainer>
