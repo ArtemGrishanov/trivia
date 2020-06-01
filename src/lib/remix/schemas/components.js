@@ -33,13 +33,47 @@ const schemaData = {
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),
     'router.backgroundColor': RouterScreensSchema.getDescription('backgroundColor'),
     'router.switchEffect': RouterScreensSchema.getDescription('switchEffect'),
-
     'router.[screens HashList]./^[0-9a-z]+$/.backgroundColor': ScreenComponentsSchema.getDescription('backgroundColor'),
     'router.[screens HashList]./^[0-9a-z]+$/.backgroundImage': ScreenComponentsSchema.getDescription('backgroundImage'),
     'router.[screens HashList]./^[0-9a-z]+$/.components': ScreenComponentsSchema.getDescription('components'),
     'router.[screens HashList]./^[0-9a-z]+$/.tags': ScreenComponentsSchema.getDescription('tags'),
     'router.[screens HashList]./^[0-9a-z]+$/.staticMarkup': ScreenComponentsSchema.getDescription('staticMarkup'),
     'router.[screens HashList]./^[0-9a-z]+$/.disabled': ScreenComponentsSchema.getDescription('disabled'),
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui': {
+        type: 'object',
+        default: {},
+    },
+    // кастомные расположения компонентов для различных ширин
+    // Example: router.screens.ho3etc.adaptedui.320.props.emeh5y
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/': {
+        type: 'object',
+        default: {},
+    },
+    // Свойства компонентов
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
+        type: 'number',
+        min: -9999,
+        max: 9999,
+        default: 0,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.left': {
+        type: 'number',
+        min: -9999,
+        max: 9999,
+        default: 0,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.width': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 100,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.height': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 100,
+    },
 }
 
 // add common component properties from RemixWrapper

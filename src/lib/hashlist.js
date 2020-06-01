@@ -213,13 +213,17 @@ class HashList {
      * @param {number} index
      * @param {boolean} options.cloneChildHashlists, default 'false'
      */
-    getElementCopy(index, options = { cloneChildHashlists: false }) {
+    getElementCopy(index, options = { cloneChildHashlists: false, replaceObjectIds: false }) {
         if (Number.isInteger(index) === false || index < 0 || index >= this._orderedIds.length) {
             throw new Error('getElementCopy: illegal index')
         }
         const newElem = JSON.parse(JSON.stringify(this[this._orderedIds[index]]))
         if (options.cloneChildHashlists && typeof newElem === 'object') {
-            this._cloneAllHashlistsInObject(newElem)
+            const replacementMap = options.replaceObjectIds ? {} : null
+            this._cloneAllHashlistsInObject(newElem, replacementMap)
+            if (replacementMap) {
+                this._replacePropertiesKeys(newElem, replacementMap)
+            }
         }
         return newElem
     }
@@ -227,14 +231,40 @@ class HashList {
     /**
      * Рекурсивно пройти по всем свойствам объекта и создать новый инстантсы hashlist с новыми id
      */
-    _cloneAllHashlistsInObject(obj) {
+    _cloneAllHashlistsInObject(obj, replacementMap) {
         Object.keys(obj).forEach(key => {
             if (obj[key] && typeof obj[key] === 'object') {
                 if (this._isHashlistInstance(obj[key])) {
                     // creating new HL with new element ids
+                    const origIds = obj[key]._orderedIds.slice(0)
                     obj[key] = new HashList(obj[key], { generateNewIds: true })
+                    if (replacementMap) {
+                        obj[key]._orderedIds.forEach((id, i) => (replacementMap[origIds[i]] = id))
+                    }
                 }
                 this._cloneAllHashlistsInObject(obj[key])
+            }
+        })
+        return obj
+    }
+
+    /**
+     * Рекурсивно найти в объекте 'obj' все ключи объявленные в replacementMap и заменить их
+     *
+     * @param {*} obj
+     * @param {*} replacementMap
+     */
+    _replacePropertiesKeys(obj, replacementMap) {
+        Object.keys(obj).forEach(key => {
+            if (obj[key] && typeof obj[key] === 'object') {
+                Object.keys(replacementMap).forEach(rk => {
+                    if (obj[key].hasOwnProperty(rk)) {
+                        const newK = replacementMap[rk]
+                        obj[key][newK] = obj[key][rk]
+                        delete obj[key][rk]
+                    }
+                })
+                this._replacePropertiesKeys(obj[key], replacementMap)
             }
         })
         return obj

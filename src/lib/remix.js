@@ -11,8 +11,9 @@ import {
     callOncePerTime,
     htmlEncode,
     htmlDecode,
+    throttle,
 } from './remix/util/util.js'
-import { getAdaptedChildrenProps } from './engage-ui/layout/LayoutAdapter.js'
+import { updateWindowSize, saveAdaptedProps, updateAppHeight } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -28,7 +29,6 @@ export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
 export const REMIX_PRE_RENDER = '__Remix_pre_render__'
-export const REMIX_SET_ADAPTED_PROPS = '__Remix_set_adapted_props__'
 export const REMIX_SET_SESSION_SIZE = '__Remix_set_session_size__'
 
 //TODO specify origin during publishing?
@@ -172,12 +172,12 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
         if (data.size.height > 0) {
             root.style.height = data.size.height + 'px'
         }
-        updateWindowSize()
+        updateWindowSize(root)
     }
 }
 
 function onWindowResize() {
-    updateWindowSize()
+    updateWindowSize(root)
 }
 
 /**
@@ -185,16 +185,31 @@ function onWindowResize() {
  *
  * @param {object} data, exmaple {'path.to.the.property': 'newvalue'}
  */
-export function setData(data, forceFeedback) {
+let __data = {}
+export function setData(data, forceFeedback = false, immediate = false) {
     if (typeof data !== 'object') {
         throw new Error(`You must pass data object as first argument, example {'path.to.the.property': 123}`)
     }
+    if (immediate) {
+        store.dispatch({
+            type: REMIX_UPDATE_ACTION,
+            data,
+            forceFeedback,
+        })
+    } else {
+        __data = { ...__data, ...data }
+        __callSetData(forceFeedback)
+    }
+}
+
+const __callSetData = throttle(forceFeedback => {
     store.dispatch({
         type: REMIX_UPDATE_ACTION,
-        data,
+        data: __data,
         forceFeedback,
     })
-}
+    __data = {}
+}, 100)
 
 function setCurrentScreen(screenId) {
     store.dispatch({
@@ -239,180 +254,6 @@ export function setSize(width, height) {
     }
     if (Object.keys(data).length > 0) {
         setData(data)
-    }
-}
-
-/**
- * Обновить размер приложения в рамках сессии
- * Запустится процедура адаптации UI для новой ширины
- *
- * @param {number} width
- * @param {number} height
- */
-function updateWindowSize() {
-    const state = getState()
-    let width, height
-    if (getMode() === 'edit') {
-        const rect = root.getBoundingClientRect()
-        width = rect.width
-        height = rect.height
-    } else {
-        width = window.innerWidth
-        height = window.innerHeight
-    }
-    console.log(`updateWindowSize ${width} ${height}`)
-    // width === 0 | height === 0, window may be not loaded yet
-    if (width > 0 && height > 0 && (width !== state.session.size.width || height !== state.session.size.height)) {
-        const defaultWidth = state.app.size.width
-        if (width !== defaultWidth) {
-            //TODO если произвели, но потом отредактировали экран, то заново или слияние?
-            // если адаптация для этой ширины еще не прооизведена, то сделать ее
-            if (!state.session.adaptedui[width]) {
-                console.log(`Adaptation running for width=${width} ...`)
-                // пройти по всем экранам и компонентам приложения и получить адаптированные свойства для новой ширины приложения width
-                let adaptedComponentsProps = {}
-                state.router.screens.toArray().forEach(scr => {
-                    const components = []
-                    scr.components.toArray().forEach(c => components.push({ ...c, id: c.hashlistId }))
-                    adaptedComponentsProps = {
-                        ...adaptedComponentsProps,
-                        ...getAdaptedChildrenProps(components, {
-                            origCntWidth: defaultWidth,
-                            containerWidth: width,
-                        }),
-                    }
-                })
-                store.dispatch({
-                    type: REMIX_SET_SESSION_SIZE,
-                    width,
-                    height,
-                })
-                store.dispatch({
-                    type: REMIX_SET_ADAPTED_PROPS,
-                    width,
-                    props: adaptedComponentsProps,
-                })
-                requestComponentsBoundingRect()
-            } else {
-                console.log(`Adaptation already exist for width=${width}`)
-                if (height !== state.session.adaptedui[width].height) {
-                    // Хотя session size изменится в результате запроса 'requestSetSize', мы вынуждены сделать изменение размера сессии немедленно
-                    // так как после апдейта REMIX_SET_ADAPTED_PROPS будет перестроен интерфейс и в этот момент требуется уже актуальной размер session.size
-                    store.dispatch({
-                        type: REMIX_SET_SESSION_SIZE,
-                        width,
-                        height: state.session.adaptedui[width].height,
-                    })
-                    console.log(`requestSetSize ${width} ${state.session.adaptedui[width].height}`)
-                    postMessage('requestSetSize', {
-                        size: {
-                            width,
-                            height: state.session.adaptedui[width].height,
-                        },
-                    })
-                }
-            }
-        } else {
-            store.dispatch({
-                type: REMIX_SET_SESSION_SIZE,
-                width,
-                height,
-            })
-        }
-    }
-}
-
-function requestComponentsBoundingRect() {
-    console.log(`requestComponentsBoundingRect`)
-    const components = []
-
-    getState()
-        .router.screens.toArray()
-        .forEach(scr => {
-            scr.components.toArray().forEach(c => (c.displayName === 'Text' ? components.push(c) : null))
-        })
-
-    // найти все объекты которые могут изменить свой размер из-за нового размера приложения
-    store.dispatch({
-        type: REMIX_PRE_RENDER,
-        components,
-    })
-}
-
-export function setComponentsRects(rects) {
-    console.log(`setComponentsRects`)
-    // продолжение адаптации по вертикали, запущенной в updateWindowSize
-    const { width, height } = getState().session.size,
-        defaultWidth = getState().app.size.width
-
-    let adaptedComponentsProps = {},
-        maxContentHeight = 0
-
-    console.log(`Vertical adaptation running for width=${width} ...`)
-
-    // пройти по всем экранам и компонентам приложения и получить адаптированные свойства для новой ширины приложения width
-    getState()
-        .router.screens.toArray()
-        .forEach(scr => {
-            const components = [],
-                attrs = {}
-            scr.components.toArray().forEach(c => {
-                const overr = { id: c.hashlistId }
-                if (rects[c.hashlistId]) {
-                    // добавляем измеренные размеры компонента в его свойства для более уточненной адаптации
-                    overr.width = rects[c.hashlistId].width
-                    overr.height = rects[c.hashlistId].height
-                }
-                components.push({
-                    ...c,
-                    ...overr,
-                })
-            })
-
-            adaptedComponentsProps = {
-                ...adaptedComponentsProps,
-                ...getAdaptedChildrenProps(
-                    components,
-                    {
-                        origCntWidth: defaultWidth,
-                        containerWidth: width,
-                    },
-                    attrs,
-                ),
-            }
-
-            maxContentHeight = Math.max(maxContentHeight, attrs.contentHeight)
-        })
-
-    // после смены размера экрана высота превысила исходную, контент не умещается по высоте
-    if (maxContentHeight > height) {
-        // Хотя session size изменится в результате запроса 'requestSetSize', мы вынуждены сделать изменение размера сессии немедленно
-        // так как после апдейта REMIX_SET_ADAPTED_PROPS будет перестроен интерфейс и в этот момент требуется уже актуальной размер session.size
-        store.dispatch({
-            type: REMIX_SET_SESSION_SIZE,
-            width,
-            height: maxContentHeight,
-        })
-        store.dispatch({
-            type: REMIX_SET_ADAPTED_PROPS,
-            width,
-            height: maxContentHeight,
-            props: adaptedComponentsProps,
-        })
-        console.log(`requestSetSize ${width} ${maxContentHeight}`)
-        postMessage('requestSetSize', {
-            size: {
-                width,
-                height: maxContentHeight,
-            },
-        })
-    } else {
-        store.dispatch({
-            type: REMIX_SET_ADAPTED_PROPS,
-            width,
-            height,
-            props: adaptedComponentsProps,
-        })
     }
 }
 
@@ -539,7 +380,7 @@ function cloneHashlistElement(hashlistPropPath, elementId) {
     }
     const index = hl.getIndex(elementId)
     addHashlistElement(hashlistPropPath, index + 1, {
-        newElement: hl.getElementCopy(index, { cloneChildHashlists: true }),
+        newElement: hl.getElementCopy(index, { cloneChildHashlists: true, replaceObjectIds: true }),
     })
 }
 
@@ -614,7 +455,7 @@ function init({ externalActions = [], container = null, mode = 'none', defaultPr
     // mode устанавливаем после десериализации. Чтобы во время десериализации не рассылать события об изменении свойств
     // это произойдет потом единым событием
     setMode(mode)
-    updateWindowSize()
+    updateWindowSize(root)
     window.addEventListener('resize', debounce(onWindowResize, 500), false)
     stateHistory = []
     putStateHistory()
@@ -792,7 +633,6 @@ function session(
         selectedComponentIds: [],
         mode: 'none',
         prerender: {},
-        adaptedui: {},
         size: { width: undefined, height: undefined },
     },
     action,
@@ -852,18 +692,6 @@ function session(
                 },
             }
         }
-        case REMIX_SET_ADAPTED_PROPS: {
-            return {
-                ...state,
-                adaptedui: {
-                    ...state.adaptedui,
-                    [action.width]: {
-                        ...action.props,
-                        height: action.height,
-                    },
-                },
-            }
-        }
         case REMIX_SET_SESSION_SIZE: {
             return {
                 ...state,
@@ -895,13 +723,16 @@ function _doUpdate(state, data) {
         if (!propDescription) {
             throw new Error(`Remix: can not find description for path "${path}" in schema`)
         }
-        const propResult = getPropertiesBySelector(state, path)
-        if (propResult.length === 0) {
-            throw new Error(`Remix: there is no such property ${path} in state`)
-        } else {
+        //Artem: 07.05.2020 зачем была сделана эта проверка? для нового типа object это не подходит
+        //const propResult = getPropertiesBySelector(state, path)
+        //if (propResult.length === 0) {
+            //TODO experiment
+            // при асинхронное работе setState такая ситуация теперь возможна, начиная с 26.05.2020
+            //throw new Error(`Remix: there is no such property ${path} in state`)
+        //} else {
             const value = normalizer.processValue(path, pathesValues[path])
             assignByPropertyString(state, path, value)
-        }
+        //}
     })
 }
 
@@ -927,10 +758,6 @@ function _sendOuterEvents() {
         containerWindow.postMessage({ ...e.data, method: e.method }, containerOrigin)
     }
 }
-
-// function _getLastUpdateDiff() {
-//     return getLastDiff();
-// }
 
 function _setScreenEvents(updateData) {
     _putOuterEventInQueue('screens_updated', updateData)
@@ -984,6 +811,10 @@ export function setMode(mode) {
 
 export function getMode() {
     return store ? store.getState().session.mode : 'none'
+}
+
+export function getSchema() {
+    return schema
 }
 
 /**
@@ -1163,7 +994,7 @@ export function deserialize2(json) {
             })
         })
         log('deserialize2:', data)
-        remix.setData(data)
+        remix.setData(data, false, true)
     } else {
         throw new Error('Remix: json string expected')
     }
@@ -1176,7 +1007,7 @@ export function deserialize2(json) {
  * @param {string} filter.tag
  * @param {boolean} filter.includeDisabled
  */
-function getScreens(filter = {}) {
+export function getScreens(filter = {}) {
     return store
         .getState()
         .router.screens.toArray()
@@ -1342,22 +1173,40 @@ function deleteScreenComponent(screenId, componentId) {
  */
 export function setComponentProps(newProps, options) {
     newProps = !Array.isArray(newProps) ? [newProps] : newProps
-    const data = {}
+    const data = {},
+        state = store.getState(),
+        editingCustomWidth =
+            state.session.mode === 'edit' &&
+            state.session.size.width > 0 &&
+            state.app.size.width > 0 &&
+            state.app.size.width !== state.session.size.width
+
     newProps.forEach(newp => {
         if (!newp.id) {
             throw new Error('You must set a component id in new props')
         }
         if (!_componentIdToScreenId[newp.id]) {
-            calcComponentIdScreenIdHash(store.getState().router.screens)
+            calcComponentIdScreenIdHash(state.router.screens)
         }
         const screenId = _componentIdToScreenId[newp.id]
         if (screenId) {
             let path = `router.screens.${screenId}.components.${newp.id}.`
+            const adaptedData = {}
             Object.keys(newp).forEach(key => {
-                data[path + key] = newp[key]
+                const propDescription = schema.getDescription(path + key)
+                if (editingCustomWidth && propDescription && propDescription.adaptedForCustomWidth) {
+                    // если ширина кастомная и свойство помечено как адаптивное то сохраняем его отдельно в адаптацию
+                    adaptedData[key] = newp[key]
+                } else {
+                    data[path + key] = newp[key]
+                }
             })
+            if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
+                // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
+                saveAdaptedProps(screenId, newp.id, adaptedData)
+            }
         }
-    })
+    }
     if (Object.keys(data).length > 0) {
         setData(data)
         if (options && options.putStateHistory === true) {
@@ -1377,6 +1226,10 @@ function calcComponentIdScreenIdHash(screens) {
 
 export function getState() {
     return store.getState()
+}
+
+export function getStore() {
+    return store
 }
 
 export function getProperty(path) {
@@ -1421,11 +1274,11 @@ const remix = {
     undo,
     redo,
     postMessage,
+    getSchema,
 
     // for debug
     _setScreenEvents,
     _triggerActions,
-    _getSchema: () => schema,
     getState: () => store.getState(),
     _putOuterEventInQueue,
     _sendOuterEvents,

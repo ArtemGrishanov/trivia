@@ -313,8 +313,8 @@ class LayoutContainer extends React.Component {
      */
     computeComponentProps() {
         const aPropsMap =
-                this.props.adaptedui && this.props.adaptedui[this.props.width]
-                    ? this.props.adaptedui[this.props.width]
+                this.props.adaptedui && this.props.adaptedui[this.props.width] && this.props.adaptedui[this.props.width].props
+                    ? this.props.adaptedui[this.props.width].props
                     : {},
             deltas = {},
             result = {}
@@ -352,7 +352,6 @@ class LayoutContainer extends React.Component {
     render() {
         if (this.props.width > 0 && this.props.height > 0) {
             const magnetsVertical = Object.values(this.state.magnets).flat()
-
             this.childrenComputedProps = this.computeComponentProps()
             this.childrenWithProps = React.Children.map(this.props.children, child => {
                 return React.cloneElement(child, {
