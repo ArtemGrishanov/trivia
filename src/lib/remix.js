@@ -116,6 +116,10 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
         addHashlistElement(data.propertyPath, data.index, { newElement: data.newElement })
         putStateHistory()
     }
+    if (data.method === 'insertafterhashlistelement') {
+        insertAfterHashlistElement(data.propertyPath, data.beforeId, { newElement: data.newElement })
+        putStateHistory()
+    }
     if (data.method === 'clonehashlistelement') {
         cloneHashlistElement(data.propertyPath, data.elementId)
         putStateHistory()
@@ -343,6 +347,35 @@ function addHashlistElement(hashlistPropPath, index, elementData = {}) {
     if (!schema.getDescription(hashlistPropPath)) {
         throw new Error(`Remix.addElement: ${hashlistPropPath} is not described in schema`)
     }
+    const d = {
+        type: REMIX_HASHLIST_ADD_ACTION,
+        path: hashlistPropPath,
+        index: index,
+    }
+    if (elementData.hasOwnProperty('newElement')) {
+        d.newElement = elementData.newElement
+    }
+    if (elementData.hasOwnProperty('prototypeIndex')) {
+        d.prototypeIndex = elementData.prototypeIndex
+    }
+    store.dispatch(d)
+}
+
+/**
+ *
+ * @param {string} hashlistPropPath
+ * @param {string} beforeId
+ * @param {*} elementData.newElement
+ * @param {number} elementData.prototypeIndex
+ */
+function insertAfterHashlistElement(hashlistPropPath, beforeId, elementData = {}) {
+    if (hashlistPropPath === undefined) {
+        throw new Error('Remix.addElement: hashlistPropPath is not specified')
+    }
+    if (!schema.getDescription(hashlistPropPath)) {
+        throw new Error(`Remix.addElement: ${hashlistPropPath} is not described in schema`)
+    }
+    const index = fetchHashlist(getState(), hashlistPropPath).getIndex(beforeId) + 1
     const d = {
         type: REMIX_HASHLIST_ADD_ACTION,
         path: hashlistPropPath,
@@ -1264,6 +1297,7 @@ const remix = {
     getScreens,
     getComponents,
     addHashlistElement,
+    insertAfterHashlistElement,
     changePositionInHashlist,
     deleteHashlistElement,
     serialize,
