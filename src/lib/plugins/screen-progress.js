@@ -5,8 +5,7 @@
  * @param {array} options.screenTag
  */
 export default function initScreenProgress(options = { remix: null, screenTag: null }) {
-    const COMPONENT_ID = 'screen-progress:progressComponentId',
-        screenTag = options.screenTag,
+    const screenTag = options.screenTag,
         remix = options.remix
 
     /**
@@ -35,7 +34,6 @@ export default function initScreenProgress(options = { remix: null, screenTag: n
                     // create progress component first time
                     event.remix.addScreenComponent(scr.hashlistId, {
                         displayName: 'Progress',
-                        id: COMPONENT_ID,
                         left: 48,
                         top: 30,
                         fontSize: 20,
@@ -85,6 +83,6 @@ export default function initScreenProgress(options = { remix: null, screenTag: n
     })
 
     function getProgressComponent(screen) {
-        return screen.components.toArray().find(c => c.id === COMPONENT_ID)
+        return screen.components.toArray().find(c => c.displayName === 'Progress')
     }
 }
