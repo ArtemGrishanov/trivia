@@ -7,6 +7,12 @@ import schema from '../remix/schemas/events.js'
 import DataSchema from '../schema.js'
 import HashList from '../hashlist.js'
 
+// реально триггер сработает около 300+ ms после вызова Remix.setData()
+// 1. setData по умолчанию асинхронный и будет 100ms агрегировать данные для пдейта
+// 2. Далее diff middleware также срабатывает с задержкой 200ms после чего вызовет Remix.fireEvent('property_updated') на который и запустится trigger executor
+// 3. trigger executor запустится в новом цикле event loop
+const TIME_GUARANTEED_FOR_TRIGGERS_AND_DIFFS = 400
+
 var testSchema = new DataSchema({
     'app.my.property': {
         type: 'number',
@@ -140,7 +146,7 @@ describe('Remix', () => {
     })
 
     describe('#changeProperty trigger', () => {
-        it('property_updated simple trigger', () => {
+        it('property_updated simple trigger', done => {
             Remix.clearTriggersAndEvents()
 
             var c = 0
@@ -154,20 +160,26 @@ describe('Remix', () => {
                 },
                 then: Remix.registerTriggerAction('custom', evt => {
                     expect(evt.trigger.when.eventType).toEqual('property_updated')
+                    debugger
                     c++
                 }),
             })
 
             expect(store.getState().session.events).toHaveLength(0)
-
             Remix.setData({ 'app.my.property': 88 })
-            expect(c).toEqual(1)
 
-            Remix.setData({ 'app.my.property': 99 })
-            expect(c).toEqual(2)
+            setTimeout(() => {
+                expect(c).toEqual(1)
+                Remix.setData({ 'app.my.property': 99 })
+
+                setTimeout(() => {
+                    expect(c).toEqual(2)
+                    done()
+                }, TIME_GUARANTEED_FOR_TRIGGERS_AND_DIFFS)
+            }, TIME_GUARANTEED_FOR_TRIGGERS_AND_DIFFS)
         })
 
-        it('2 triggers on the same property_updated', () => {
+        it('2 triggers on the same property_updated', done => {
             Remix.clearTriggersAndEvents()
 
             var c1 = 0
@@ -199,14 +211,24 @@ describe('Remix', () => {
 
             expect(store.getState().session.events).toHaveLength(0)
 
-            Remix.setData({ 'app.my.property': 88 }) // triggers custom1
-            Remix.setData({ 'app.my.property': 99 }) // triggers custom2
+            // реально здесь сработает только 1 вызов, последний. Потому что setData асинхронно агрегируются в один вызов в только после вызывается
+            Remix.setData({ 'app.my.property': 88 })
+            Remix.setData({ 'app.my.property': 99 })
+            Remix.setData({ 'app.my.property': 991 })
+            Remix.setData({ 'app.my.property': 992 })
+            Remix.setData({ 'app.my.property': 993 })
+            Remix.setData({ 'app.my.property': 994 }) // только это значение установится по факту и сработают триггеры в этом тесте 1 раз
 
-            expect(c1).toEqual(2)
-            expect(c2).toEqual(2)
+            setTimeout(() => {
+                expect(c1).toEqual(1)
+                expect(c2).toEqual(1)
+                expect(store.getState().session.events).toHaveLength(1) // только 1 раз срабатывает триггер
+                expect(Remix.getState().app.my.property).toEqual(994)
+                done()
+            }, TIME_GUARANTEED_FOR_TRIGGERS_AND_DIFFS)
         })
 
-        it('property_updated trigger inside other trigger execution', () => {
+        it('property_updated trigger inside other trigger execution', done => {
             Remix.clearTriggersAndEvents()
 
             var c1 = 0
@@ -241,12 +263,15 @@ describe('Remix', () => {
 
             Remix.setData({ 'app.my.property': 88 }) // triggers custom1
 
-            expect(store.getState().session.events).toHaveLength(2) // 2 fireEvent
-            expect(c1).toEqual(1)
-            expect(c2).toEqual(1)
+            setTimeout(() => {
+                expect(store.getState().session.events).toHaveLength(2) // 2 fireEvent
+                expect(c1).toEqual(1)
+                expect(c2).toEqual(1)
+                done()
+            }, TIME_GUARANTEED_FOR_TRIGGERS_AND_DIFFS * 2)
         })
 
-        it('MATCH clause', () => {
+        it('MATCH clause', done => {
             Remix.clearTriggersAndEvents()
 
             let c1 = 0
@@ -275,7 +300,11 @@ describe('Remix', () => {
             Remix.setData({ [`app.screens.${scrId}.tag`]: 'tagggggs' }) // no trigger
             Remix.setData({ [`app.screens.${scrId}.name`]: 'edited_name' }) // // MATCH_TRIGGER again
 
-            expect(c1).toEqual(2)
+            setTimeout(() => {
+                expect(store.getState().session.events).toHaveLength(1)
+                expect(c1).toEqual(1)
+                done()
+            }, TIME_GUARANTEED_FOR_TRIGGERS_AND_DIFFS)
         })
     })
 })

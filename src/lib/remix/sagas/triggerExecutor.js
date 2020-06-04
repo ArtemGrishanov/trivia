@@ -13,7 +13,6 @@ const processedEventIds = {}
  * @param {Object} action
  */
 function* runTriggers(action) {
-    // console.log('Saga triggers. start');
     const state = yield select()
     const eventsToProcess = []
     // get unprocessed events from the history
@@ -33,7 +32,6 @@ function* runTriggers(action) {
             executeTriggers(texec)
         }
     })
-    // console.log('/Saga triggers. end');
 }
 
 function executeTriggers(toExecute) {
