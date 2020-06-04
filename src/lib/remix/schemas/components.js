@@ -74,6 +74,30 @@ const schemaData = {
         max: 9999,
         default: 100,
     },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szTop': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szLeft': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szRight': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szBottom': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+    },
 }
 
 // add common component properties from RemixWrapper
