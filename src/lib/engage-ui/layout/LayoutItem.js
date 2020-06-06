@@ -318,6 +318,7 @@ export default function LayoutItem() {
                                 },
                                 {
                                     putStateHistory: true,
+                                    immediate: true,
                                 },
                             )
                             this.setState({
@@ -369,12 +370,6 @@ export default function LayoutItem() {
                     window.removeEventListener('mouseup', this.onWindowMouseUp)
                 }
 
-                onContentSize(size) {
-                    // if (!this.props.editable) {
-                    //     this.checkVerticalOverflow();
-                    // }
-                }
-
                 onClick() {
                     if (this.props.editable) {
                     } else {
@@ -401,19 +396,6 @@ export default function LayoutItem() {
                         cst.overflow = 'visible'
                     }
 
-                    //TODO
-                    // была попытка определить минимальный размер контента при установке размера блока 1х1 пиксель
-                    // но далеко не всегда это работает например текст вытягивается по вертикали сильно, картинки надо проверить и тп
-                    // if (this.state.contentMinWidth === undefined) {
-                    //     cst.width = '1px';
-                    //     cst.height = '1px';
-                    // }
-                    //TODO
-
-                    const sizemsg =
-                        Math.round(toPx(this.state.width, this.props.containerWidth)) +
-                        'x' +
-                        Math.round(this.state.height)
                     return (
                         <div
                             ref={this.thisRef}
@@ -437,10 +419,7 @@ export default function LayoutItem() {
                                 style={cst}
                             >
                                 {/* Передать измененные width,height из this.state которые пользователь изменил при перетаскивании и ресайзе */}
-                                <Component
-                                    {...this.props}
-                                    {...this.state} /*onSize={this.onContentSize.bind(this)}*/
-                                ></Component>
+                                <Component {...this.props} {...this.state}></Component>
                             </div>
                             {this.props.bordered && <div className={'rmx-layout_item_selection_cnt __selected'}></div>}
                             {this.props.editable && !this.state.doubleClicked && (

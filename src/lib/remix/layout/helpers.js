@@ -14,8 +14,6 @@ import {
 import { getAdaptedChildrenProps } from './adapter.js'
 import { debounce } from '../util/util'
 
-export const APP_BOTTOM_PADDING = 20
-
 /**
  * Сохранить адаптированные свойства для компонента
  * Если нет полной адаптации для текущей ширины приложения, то она также будет создана
@@ -179,7 +177,8 @@ function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects
     })
 
     // установить адаптированные свойства в экраны
-    setData(adata)
+    // 3-й параметр: immediate=true так как последует пересчет высоты и надо установить синхронно свойства в стейт
+    setData(adata, false, true)
 
     return {
         props: filteredProps,
@@ -283,16 +282,18 @@ function getMaxContentHeight() {
         scr.components.toArray().forEach(c => {
             const aprops = adaptScr ? adaptScr[c.hashlistId] : null
             let top = c.top,
-                height = c.height
+                height = c.height,
+                szBottom = c.szBottom || 0
             if (aprops) {
                 top = typeof aprops.top === 'number' ? aprops.top : top
                 height = typeof aprops.height === 'number' ? aprops.height : height
+                szBottom = typeof aprops.szBottom === 'number' ? aprops.szBottom : szBottom
             }
-            maxH = Math.max(maxH, top + height)
+            maxH = Math.max(maxH, top + height + szBottom)
         })
     })
 
-    maxH = Math.round(maxH + APP_BOTTOM_PADDING)
+    maxH = Math.round(maxH)
     if (maxH < state.app.size.height) {
         maxH = state.app.size.height
     }

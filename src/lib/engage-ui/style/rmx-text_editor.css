@@ -1,7 +1,6 @@
 .rmx-text-editor {
     position: relative;
     margin: 0 auto;
-    width: 99%; /* когда 100% по умолчанию то иногда возникает скролл по горизонтали если буква подходит вполтную к краю */
 }
 /* quill text editor */
 .quill {
@@ -26,6 +25,7 @@
 }
 .ql-editor {
     padding: 10px 0 !important;
+    overflow: hidden !important;
 }
 .ql-toolbar {
     white-space: nowrap !important;
