@@ -15,26 +15,6 @@ import { getAdaptedChildrenProps } from './adapter.js'
 import { debounce } from '../util/util'
 
 /**
- * Сохранить адаптированные свойства для компонента
- * Если нет полной адаптации для текущей ширины приложения, то она также будет создана
- *
- * @param {string} componentId
- * @param {object} props
- */
-export function saveAdaptedProps(screenId, componentId, props, immediate = false) {
-    const state = getState()
-    // сохраняем некоторые свойства, если они были изменены при другой ширине приложения
-    // например: геометрические свойства (top, left, width, height) сохраняем для мобильной версии приложения
-    const data = {}
-    Object.keys(props).forEach(key => {
-        data[`router.screens.${screenId}.adaptedui.${state.session.size.width}.props.${componentId}.${key}`] =
-            props[key]
-    })
-    setData(data, false, immediate)
-    updateAppHeight()
-}
-
-/**
  * Обновить размер приложения в рамках сессии
  * Запустится процедура адаптации UI для новой ширины
  *
