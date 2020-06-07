@@ -14,6 +14,7 @@ import initCoverScreen from './lib/plugins/cover-screen'
 import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initFacebookAnalytics from './lib/plugins/facebook-pixel'
 import initButtonBehavior from './lib/plugins/button-behavior'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
@@ -74,6 +75,8 @@ initShare({
 })
 
 initGoogleAnalytics({ remix: Remix })
+
+initFacebookAnalytics({ remix: Remix })
 
 ReactDOM.render(
     <Provider store={store}>
