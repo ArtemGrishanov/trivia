@@ -108,6 +108,9 @@ export default class Normalizer {
             case 'object': {
                 return this.processObject(propDescription, value)
             }
+            case 'array': {
+                return this.processArray(propDescription, value)
+            }
             default: {
                 if (value === undefined) {
                     return propDescription.default
@@ -197,5 +200,22 @@ export default class Normalizer {
             return info.default
         }
         return value
+    }
+
+    /**
+     *
+     * @param {{default: []}} info
+     * @param {*} value
+     */
+    processArray(info, value) {
+        if (Array.isArray(value)) {
+            return value
+        }
+
+        if (Array.isArray(info.default)) {
+            return info.default
+        }
+
+        return []
     }
 }
