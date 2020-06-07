@@ -100,7 +100,7 @@ export class Selector {
         }
         switch (operand) {
             case 'indexOf':
-                return data[key].indexOf(value)
+                return data[key].indexOf(value) !== -1
             case 'equal':
                 return data[key] === value
             default:
