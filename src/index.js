@@ -9,13 +9,13 @@ import store from './store'
 import Remix from './lib/remix'
 import initRemixRouting from './lib/plugins/remix-routing'
 import initScreenProgress from './lib/plugins/screen-progress'
-import initQuizPoints from './lib/plugins/quiz-points'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 import initQuizAnalytics from './lib/plugins/quiz-analytics'
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import initButtonBehavior from './lib/plugins/button-behavior'
+import initQuizPoints from './lib/plugins/quiz-points'
 
 Remix.setStore(store)
 
@@ -46,7 +46,7 @@ initScreenProgress({
 
 initQuizPoints({
     remix: Remix,
-    tag: 'option',
+    optionTag: 'option',
 })
 
 initShare({

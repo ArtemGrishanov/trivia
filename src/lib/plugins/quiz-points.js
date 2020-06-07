@@ -1,32 +1,99 @@
+import { Selector } from '../object-path'
+import { DYNAMIC_CONTENT_PROP, ContentPropsList, Schemas } from '../engage-ui/DynamicContent'
+
 /**
- * Плагин добавляет
  *
- * @param {array} options.pointElementTag
+ * @param {{remix: *}} param0
  */
-export default function initQuizPoints(options = { remix: null, tag: null }) {
-    const pointElementTag = options.tag,
-        remix = options.remix
+const initQuizPoints = ({ remix, optionTag = 'option' }) => {
+    const CORRECT_OPTION_MARKER = 'CORRECT_OPTION_MARKER'
+    const BASE_SELECTOR = `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ tags=~${optionTag}]`
+    const POINTS_SELECTOR = `${BASE_SELECTOR}.data.points`
+    const DYNAMIC_CONTENT_SELECTOR = `${BASE_SELECTOR}.${DYNAMIC_CONTENT_PROP}`
+
+    const ICON_STYLES = {
+        icons: [
+            {
+                name: 'correctOption',
+                color: '#2990FB',
+            },
+        ],
+        hAlign: 'right',
+        vAlign: 'top',
+        vPadding: 5,
+        hPadding: 5,
+        gap: 5,
+    }
 
     remix.extendSchema({
-        'router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ tags=~option].data.points': {
+        [POINTS_SELECTOR]: {
             type: 'number',
             min: 0,
             max: 1,
             default: 0,
         },
+        [DYNAMIC_CONTENT_SELECTOR]: {
+            type: 'object',
+            default: {},
+        },
+        ...Object.fromEntries(
+            Object.entries(Schemas.iconList._schm).map(([key, node]) => {
+                const path = `${DYNAMIC_CONTENT_SELECTOR}.${ContentPropsList.ICON_LIST}.${key}`
+
+                return [path, node]
+            }),
+        ),
     })
 
-    //TODO
-    // 'points" добавляется к лишним компонентам не по тегу
-    // в итоге контролов лишних на установку поинтов создается слишком много
-    //  schema по тегу
+    const pointsSelector = new Selector(POINTS_SELECTOR)
+    remix.registerTriggerAction(CORRECT_OPTION_MARKER, event => {
+        const state = event.remix.getState()
+        const mode = state.session.mode
 
-    //
-    // можно ли положиться на тег? Если теги могут меняться?
-    //      -- другие плагины уже полагаются
-    // ...
-    // подумать над автотестами, а то как то слишком много зависимостей?
-    //
-    //
-    //
+        const data = [...event.eventData.diff.added, ...event.eventData.diff.changed]
+            .filter(({ path }) => {
+                return pointsSelector.match(path, state)
+            })
+            .map(({ path, value }) => [path.replace('.data.points', ''), !!value])
+            .map(([path, needShowIcon]) => {
+                const evalPath = path
+                    .split('.')
+                    .map(part => `['${part}']`)
+                    .join('')
+                const dynamicContent = eval(`state${evalPath}`)[DYNAMIC_CONTENT_PROP]
+
+                if (needShowIcon && mode === 'edit') {
+                    const update = {
+                        ...(dynamicContent || {}),
+                        [ContentPropsList.ICON_LIST]: { ...ICON_STYLES },
+                    }
+
+                    return [`${path}.${DYNAMIC_CONTENT_PROP}`, update]
+                } else if (dynamicContent !== void 0) {
+                    const update = JSON.parse(JSON.stringify(dynamicContent))
+                    delete update[ContentPropsList.ICON_LIST]
+
+                    return [`${path}.${DYNAMIC_CONTENT_PROP}`, update]
+                } else {
+                    return false
+                }
+            })
+            .filter(data => data !== false)
+
+        remix.setData(Object.fromEntries(data))
+    })
+
+    remix.addTrigger({
+        when: {
+            eventType: 'property_updated',
+            condition: {
+                prop: 'path',
+                clause: 'MATCH',
+                value: POINTS_SELECTOR,
+            },
+        },
+        then: { actionType: CORRECT_OPTION_MARKER },
+    })
 }
+
+export default initQuizPoints
