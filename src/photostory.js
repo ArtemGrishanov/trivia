@@ -15,12 +15,20 @@ import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 import initButtonBehavior from './lib/plugins/button-behavior'
+import initQuizAnalytics from './lib/plugins/quiz-analytics'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 
 Remix.setStore(store)
 
+initQuizAnalytics({
+    remix: Remix,
+    questionScreenTag: 'photostoryitem',
+    resultScreenTag: 'final',
+})
+
 initButtonBehavior({ remix: Remix })
+
 initScreenCollage({
     remix: Remix,
     screenTag: 'final',
