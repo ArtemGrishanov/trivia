@@ -66,6 +66,31 @@ const COMPONENTS = [
             percent={88}
         />
     </Control>,
+    <Control id={505} schema={TextOptionSchema} width={800} height={200}>
+        <TextOption
+            id={'textoption2'}
+            width={400}
+            height={120}
+            correctIndicator="correct"
+            percent={1}
+            text="У меня работают умные сотрудники! Пусть придумают алгоритм создания паролей и на него ориентируются. Главное, не забыть схему."
+            dynamicContent={{
+                iconList: {
+                    icons: [
+                        {
+                            name: 'link',
+                            color: '#2990FB',
+                        },
+                    ],
+                    hAlign: 'right',
+                    vAlign: 'top',
+                    vPadding: 5,
+                    hPadding: 5,
+                    gap: 5,
+                },
+            }}
+        />
+    </Control>,
     <Control id={517} schema={TextOptionSchema} width={800} height={200}>
         <TextOption
             id={'textoption4'}

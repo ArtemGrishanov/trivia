@@ -131,4 +131,50 @@ describe('Selector', function () {
             )
         })
     })
+
+    describe('#Array', function () {
+        it('Normalization', function () {
+            const s = new DataSchema({
+                arr: {
+                    type: 'array',
+                    default: [],
+                },
+            })
+
+            const n = new Normalizer(s)
+            ;[(void 0, null, '', 0, false, {})].forEach(v => {
+                const o = n.process({ arr: v })
+                expect(Array.isArray(o.arr)).toBeTruthy()
+            })
+
+            const o = n.process({ arr: ['1', '2', '3'] })
+            expect(Array.isArray(o.arr)).toBeTruthy()
+            expect(o.arr).toHaveLength(3)
+            expect(o.arr[0]).toEqual('1')
+            expect(o.arr[2]).toEqual('3')
+            expect(o.arr).toEqual(expect.arrayContaining(['1', '2', '3']))
+        })
+
+        it('Schema validation', function () {
+            expect(() => {
+                new DataSchema({
+                    oneArray: {
+                        type: 'array',
+                        min: 1, // illegal attribute
+                        max: 10, // illegal attribute
+                        default: [],
+                    },
+                })
+            }).toThrowError(`DataSchema: invalid attribute "min". Valid attributes: default for type "array`)
+
+            expect(() => {
+                new DataSchema({
+                    oneArray: {
+                        type: 'array',
+                        // no default attr
+                    },
+                })
+            }).toThrowError('DataSchema: attribute "default" is missed in "oneArray"')
+        })
+    })
 })

@@ -1065,13 +1065,13 @@ export function getComponents(filter = {}) {
     store
         .getState()
         .router.screens.toArray()
-        .filter(scr => (filter.screenTag ? scr.tags.indexOf(filter.screenTag) > 0 : true))
+        .filter(scr => (filter.screenTag ? scr.tags.indexOf(filter.screenTag) >= 0 : true))
         .forEach(scr => {
             scr.components
                 .toArray()
                 .forEach(c =>
                     (!filter.displayName || c.displayName === filter.displayName) &&
-                    (!filter.tag || c.tags.indexOf(filter.tag) > 0)
+                    (!filter.tag || c.tags.indexOf(filter.tag) >= 0)
                         ? components.push({ ...c, screen: scr })
                         : null,
                 )

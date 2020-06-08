@@ -5,6 +5,7 @@ import CorrectIcon from './CorrectIcon'
 import TextEditor from '../bricks/TextEditor'
 import RemixWrapper from '../RemixWrapper'
 import BasicImage from '../bricks/BasicImage'
+import DynamicContent, { DYNAMIC_CONTENT_PROP } from '../DynamicContent'
 
 class TextOption extends React.Component {
     static getDerivedStateFromProps(props, state) {
@@ -91,6 +92,9 @@ class TextOption extends React.Component {
                     )} */}
                     {doubleClicked ? null : <Icon name={correctIndicator} align={align} />}
                     <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
+                    {this.props[DYNAMIC_CONTENT_PROP] ? (
+                        <DynamicContent structure={this.props[DYNAMIC_CONTENT_PROP]} />
+                    ) : null}
                 </div>
                 {/* </div> */}
             </div>
