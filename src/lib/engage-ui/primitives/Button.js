@@ -57,12 +57,15 @@ class Button extends React.Component {
             iconGap,
             openUrl,
             styleVariant,
+            imageSrc,
         } = props
 
         const st = Button.replaceDefaultStyle(styleVariant, {
             textAlign: 'initial',
             boxSizing: 'border-box',
             borderStyle: 'solid',
+            backgroundImage: imageSrc.length ? `url('${imageSrc}')` : void 0,
+            backgroundSize: '100%',
             ...Object.fromEntries(
                 ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor'].map(prop => {
                     const value = this.props[prop]
@@ -134,6 +137,7 @@ const Icon = ({ name, position, gap, color }) => {
     const st = {
         [position === 'left' ? 'marginRight' : 'marginLeft']: `${gap}px`,
         order: position === 'left' ? 0 : 1,
+        position: 'relative',
     }
 
     return Icn ? <Icn style={st} color={color} /> : null
@@ -229,6 +233,10 @@ const schm = {
     openUrl: {
         type: 'string',
         maxLength: 1024,
+        default: '',
+    },
+    imageSrc: {
+        type: 'string',
         default: '',
     },
     //TODO color format for strings, +tests
