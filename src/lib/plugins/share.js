@@ -56,23 +56,24 @@ export default function initShare(options = {}) {
                 }
                 newEntities.push(ne)
             })
-            remix.setData({ 'app.share.entities': new HashList(newEntities) })
+
+            const result = new HashList(newEntities)
+            remix.setData({ 'app.share.entities': result })
 
             if (!fbApiEmbedded && newEntities.length > 0) {
                 embedFbCode()
                 fbApiEmbedded = true
             }
+            return result
         },
-        updatePreviews = function () {
-            const state = remix.getState()
-
+        updatePreviews = function (entities) {
             if (getMainPreviewHTML) {
                 remix.setData({ 'app.share.previewHtml': getMainPreviewHTML(remix) })
             }
 
-            if (getShareEntityPreviewHTML && state.app.share && state.app.share.entities) {
+            if (getShareEntityPreviewHTML && entities && entities.length > 0) {
                 const previews = {}
-                state.app.share.entities.toArray().forEach(share => {
+                entities.toArray().forEach(share => {
                     previews[`app.share.entities.${share.hashlistId}.previewHtml`] = getShareEntityPreviewHTML(
                         remix,
                         share,
@@ -175,8 +176,8 @@ export default function initShare(options = {}) {
     })
 
     Remix.addMessageListener('getshareentities', data => {
-        updateShare()
-        updatePreviews()
+        const entities = updateShare()
+        updatePreviews(entities)
         const share = JSON.parse(JSON.stringify(Remix.getState().app.share))
         if (share.entities) {
             delete share.entities._orderedIds
@@ -188,13 +189,14 @@ export default function initShare(options = {}) {
     })
     Remix.registerTriggerAction('share:update_share_entities', event => {
         // синхронизировать 'app.share.entities' с существующими шаринг кнопками в приложении
-        updateShare()
-        updatePreviews()
+        const entities = updateShare()
+        updatePreviews(entities)
     })
 
-    Remix.registerTriggerAction('share:update_share_previews', event => {
-        updatePreviews()
-    })
+    //TODO 09.06.2020 Artem: зачем этот экшн? не нашел в коде вызовов его или ссылок на него
+    // Remix.registerTriggerAction('share:update_share_previews', event => {
+    //     updatePreviews()
+    // })
 
     remix.addTrigger({
         when: { eventType: 'remix_inited' },
