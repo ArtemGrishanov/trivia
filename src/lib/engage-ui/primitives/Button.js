@@ -66,6 +66,8 @@ class Button extends React.Component {
             borderStyle: 'solid',
             backgroundImage: imageSrc.length ? `url('${imageSrc}')` : void 0,
             backgroundSize: '100%',
+            backgroundPosition: '50% 50%',
+            backgroundRepeat: 'no-repeat',
             ...Object.fromEntries(
                 ['borderRadius', 'borderWidth', 'borderColor', 'backgroundColor'].map(prop => {
                     const value = this.props[prop]
@@ -135,7 +137,7 @@ const Icon = ({ name, position, gap, color }) => {
     const Icn = icons[name]
 
     const st = {
-        [position === 'left' ? 'marginRight' : 'marginLeft']: `${gap}px`,
+        [position === 'left' ? 'marginRight' : 'marginLeft']: `${gap - 12}px`,
         order: position === 'left' ? 0 : 1,
         position: 'relative',
     }
