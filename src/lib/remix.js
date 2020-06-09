@@ -1320,6 +1320,7 @@ const remix = {
     redo,
     postMessage,
     getSchema,
+    getProperty,
 
     // for debug
     _setScreenEvents,

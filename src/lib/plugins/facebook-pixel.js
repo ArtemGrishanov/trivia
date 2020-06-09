@@ -38,28 +38,28 @@ export default function initFacebookAnalytics(options = {}) {
         },
     })
 
-    if (remix.getMode() === 'published') {
-        remix.registerTriggerAction('fb:embed_code', event => {
+    remix.registerTriggerAction('fb:embed_code', event => {
+        if (remix.getMode() === 'published') {
             if (!trackingCodeEmbedded) {
                 const trackingId = event.remix.getProperty('app.facebook.trackingId')
                 if (trackingId) {
-                    embedCode()
+                    embedCode(trackingId)
                     trackingCodeEmbedded = true
                 }
             }
-        })
+        }
+    })
 
-        remix.addTrigger({
-            when: { eventType: 'remix_inited' },
-            then: { actionType: 'fb:embed_code' },
-        })
+    remix.addTrigger({
+        when: { eventType: 'remix_inited' },
+        then: { actionType: 'fb:embed_code' },
+    })
 
-        remix.addTrigger({
-            when: {
-                eventType: 'property_updated',
-                condition: { prop: 'path', clause: 'EQUALS', value: 'app.facebook.trackingId' },
-            },
-            then: { actionType: 'fb:embed_code' },
-        })
-    }
+    remix.addTrigger({
+        when: {
+            eventType: 'property_updated',
+            condition: { prop: 'path', clause: 'EQUALS', value: 'app.facebook.trackingId' },
+        },
+        then: { actionType: 'fb:embed_code' },
+    })
 }

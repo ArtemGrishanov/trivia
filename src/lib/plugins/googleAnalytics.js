@@ -35,28 +35,28 @@ export default function initGoogleAnalytics(options = {}) {
         },
     })
 
-    if (remix.getMode() === 'published') {
-        remix.registerTriggerAction('ga:embed_code', event => {
+    remix.registerTriggerAction('ga:embed_code', event => {
+        if (remix.getMode() === 'published') {
             if (!trackingCodeEmbedded) {
                 const trackingId = event.remix.getProperty('app.google.trackingId')
                 if (trackingId) {
-                    embedCode()
+                    embedCode(trackingId)
                     trackingCodeEmbedded = true
                 }
             }
-        })
+        }
+    })
 
-        remix.addTrigger({
-            when: { eventType: 'remix_inited' },
-            then: { actionType: 'ga:embed_code' },
-        })
+    remix.addTrigger({
+        when: { eventType: 'remix_inited' },
+        then: { actionType: 'ga:embed_code' },
+    })
 
-        remix.addTrigger({
-            when: {
-                eventType: 'property_updated',
-                condition: { prop: 'path', clause: 'EQUALS', value: 'app.google.trackingId' },
-            },
-            then: { actionType: 'ga:embed_code' },
-        })
-    }
+    remix.addTrigger({
+        when: {
+            eventType: 'property_updated',
+            condition: { prop: 'path', clause: 'EQUALS', value: 'app.google.trackingId' },
+        },
+        then: { actionType: 'ga:embed_code' },
+    })
 }
