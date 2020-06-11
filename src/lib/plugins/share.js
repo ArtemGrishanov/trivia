@@ -16,7 +16,7 @@ export default function initShare(options = {}) {
     const getMainPreviewHTML = options.getMainPreviewHTML,
         getShareEntityPreviewHTML = options.getShareEntityPreviewHTML,
         remix = options.remix,
-        updateShare = function () {
+        updateShare = function (immediate = false) {
             const state = remix.getState(),
                 // try to request existing share entities
                 entProps = getPropertiesBySelector(state, 'app.share.entities')
@@ -52,7 +52,7 @@ export default function initShare(options = {}) {
             })
 
             const result = new HashList(newEntities)
-            remix.setData({ 'app.share.entities': result })
+            remix.setData({ 'app.share.entities': result }, false, immediate)
 
             if (!fbApiEmbedded && newEntities.length > 0) {
                 embedFbCode()
@@ -60,9 +60,9 @@ export default function initShare(options = {}) {
             }
             return result
         },
-        updatePreviews = function (entities) {
+        updatePreviews = function (entities, immediate = false) {
             if (getMainPreviewHTML) {
-                remix.setData({ 'app.share.previewHtml': getMainPreviewHTML(remix) })
+                remix.setData({ 'app.share.previewHtml': getMainPreviewHTML(remix) }, false, immediate)
             }
 
             if (getShareEntityPreviewHTML && entities && entities.length > 0) {
@@ -73,7 +73,7 @@ export default function initShare(options = {}) {
                         share,
                     )
                 })
-                remix.setData(previews)
+                remix.setData(previews, false, immediate)
             }
         }
 
@@ -165,13 +165,14 @@ export default function initShare(options = {}) {
     Remix.addMessageListener('setshareentities', data => {
         const share = Remix.getState().app.share
         if (share) {
-            Remix.setData({ ...flattenProperties(data.data, 'app.share') })
+            Remix.setData({ ...flattenProperties(data.data, 'app.share') }, false, true)
         }
     })
 
     Remix.addMessageListener('getshareentities', data => {
-        const entities = updateShare()
-        updatePreviews(entities)
+        // синхронно обновить и установить свойства ширинг, так как необходимо вернуть их в контейнер прямо сейчас
+        const entities = updateShare(true)
+        updatePreviews(entities, true)
         const share = JSON.parse(JSON.stringify(Remix.getState().app.share))
         if (share.entities) {
             delete share.entities._orderedIds
