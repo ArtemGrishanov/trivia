@@ -48,20 +48,14 @@ export default function initShare(options = {}) {
                             tags: state.router.screens[screenId].tags,
                         },
                         componentId,
-                        title: '',
-                        description: '',
+                        title: 'Interacty – engaging content',
+                        description: 'Try it yourself!',
                         imageId: '',
                         imageUrl: '',
                         href: '',
                         customImage: false,
                         ...Object.values(oldEntities).find(e => e.componentId === componentId),
                     }
-                if (!ne.title) {
-                    ne.title = 'Project title'
-                }
-                if (!ne.description) {
-                    ne.description = 'Project description'
-                }
                 newEntities.push(ne)
             })
             remix.setData({ 'app.share.entities': new HashList(newEntities) })
@@ -181,7 +175,6 @@ export default function initShare(options = {}) {
             Remix.setData({ ...flattenProperties(data.data, 'app.share') })
         }
     })
-
     Remix.addMessageListener('getshareentities', data => {
         updateShare()
         updatePreviews()
@@ -194,12 +187,12 @@ export default function initShare(options = {}) {
             data: { share },
         }
     })
+
     Remix.registerTriggerAction('share:update_share_entities', event => {
         // синхронизировать 'app.share.entities' с существующими шаринг кнопками в приложении
         updateShare()
         updatePreviews()
     })
-
     Remix.registerTriggerAction('share:update_share_previews', event => {
         updatePreviews()
     })
