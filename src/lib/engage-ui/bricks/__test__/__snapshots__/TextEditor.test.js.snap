@@ -1,0 +1,163 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`<TextEditor /> should match <TextEditor /> snapshot 1`] = `
+<div
+  className="rmx-text-editor __readonly"
+>
+  <Quill
+    modules={
+      Object {
+        "toolbar": Array [
+          Array [
+            "bold",
+            "italic",
+            "underline",
+          ],
+          Array [
+            Object {
+              "size": Array [
+                "small",
+                false,
+                "large",
+                "huge",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "color": Array [],
+            },
+            Object {
+              "background": Array [],
+            },
+          ],
+          Array [
+            Object {
+              "font": Array [
+                "Roboto",
+                "RobotoCondensed",
+                "OpenSans",
+                "Lato",
+                "Montserrat",
+                "Oswald",
+                "Merriweather",
+                "Ubuntu",
+                "Lobster",
+                "Pacifico",
+                "Vollkorn",
+                "Cuprum",
+                "AlegreyaSans",
+                "RussoOne",
+                "PlayfairDisplaySC",
+                "Alice",
+                "PressStart2P",
+                "BadScript",
+                "YesevaOne",
+                "Marmelad",
+                "RubikMonoOne",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "align": Array [],
+            },
+          ],
+          Array [
+            "link",
+            "clean",
+          ],
+        ],
+      }
+    }
+    onChange={[Function]}
+    readOnly={true}
+    theme="snow"
+    value="
+                <p class=\\"ql-align-center\\">
+                    <strong class=\\"ql-size-huge\\" style=\\"color: rgb(255, 255, 255);\\">ARE YOU GOOD AT GEOGRAPHY?</strong>
+                </p>"
+  />
+</div>
+`;
+
+exports[`<TextEditor /> should match <TextEditor /> snapshot in readOnly mode 1`] = `
+<div
+  className="rmx-text-editor "
+>
+  <Quill
+    modules={
+      Object {
+        "toolbar": Array [
+          Array [
+            "bold",
+            "italic",
+            "underline",
+          ],
+          Array [
+            Object {
+              "size": Array [
+                "small",
+                false,
+                "large",
+                "huge",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "color": Array [],
+            },
+            Object {
+              "background": Array [],
+            },
+          ],
+          Array [
+            Object {
+              "font": Array [
+                "Roboto",
+                "RobotoCondensed",
+                "OpenSans",
+                "Lato",
+                "Montserrat",
+                "Oswald",
+                "Merriweather",
+                "Ubuntu",
+                "Lobster",
+                "Pacifico",
+                "Vollkorn",
+                "Cuprum",
+                "AlegreyaSans",
+                "RussoOne",
+                "PlayfairDisplaySC",
+                "Alice",
+                "PressStart2P",
+                "BadScript",
+                "YesevaOne",
+                "Marmelad",
+                "RubikMonoOne",
+              ],
+            },
+          ],
+          Array [
+            Object {
+              "align": Array [],
+            },
+          ],
+          Array [
+            "link",
+            "clean",
+          ],
+        ],
+      }
+    }
+    onChange={[Function]}
+    readOnly={false}
+    theme="snow"
+    value="
+                <p class=\\"ql-align-center\\">
+                    <strong class=\\"ql-size-huge\\" style=\\"color: rgb(255, 255, 255);\\">ARE YOU GOOD AT GEOGRAPHY?</strong>
+                </p>"
+  />
+</div>
+`;

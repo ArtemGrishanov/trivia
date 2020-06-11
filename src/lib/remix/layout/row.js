@@ -1,4 +1,4 @@
-import { cloneLayoutItemProps } from './LayoutAdapter'
+import { cloneLayoutItemProps } from './adapter'
 
 /**
  * Ряд - класс представляющий горизонтальную последовательность flow элементов
@@ -53,10 +53,10 @@ export default class Row {
             } else {
                 c.width = Math.round(c.width * (this.containerWidth / this.originalContainerWidth))
             }
-            sumWidth += c.width
+            sumWidth += this._getw(c)
         })
 
-        // ШАГ 2 - сдвинуть left в завосомости от стратегии компонентов
+        // ШАГ 2 - сдвинуть left в зависимости от стратегии компонентов
         this.components.forEach(c => {
             if (c.leftStrategy === 'fixed') {
                 // do nothing
@@ -73,7 +73,7 @@ export default class Row {
                     c.left = Math.round(l * r)
                 }
                 if (c.left < 0) {
-                    c.left = 0
+                    c.left = c.szLeft
                 }
                 // чтобы сохранить минимальный отступ между элементами и не лепить вплотную
                 // uncomment?
@@ -85,7 +85,10 @@ export default class Row {
         // ШАГ 3 - определить есть ли пересечения в ряду и если есть отцентровать все элементы (уже не пытаемся сохранить прежнее положение элементов по горизонтали)
         for (let i = 1; i < this.components.length; i++) {
             let prev = this.components[i - 1]
-            if (prev.left + prev.width + this.horizMargin > this.components[i].left) {
+            if (
+                prev.left + prev.width + prev.szRight + this.horizMargin >
+                this.components[i].left - this.components[i].szLeft
+            ) {
                 this.center()
                 break
             }
@@ -97,7 +100,7 @@ export default class Row {
         // i > 0 - как минимум один компонент должен остаться
         for (let i = this.components.length - 1; i > 0; i--) {
             const c = this.components[i]
-            if (c.left + c.width >= this.containerWidth) {
+            if (c.left + c.width + c.szRight >= this.containerWidth) {
                 droppedComponents.push(this.deleteRightComponent())
                 this.center()
             } else {
@@ -109,13 +112,13 @@ export default class Row {
         // ШАГ 5 - когда остался один компонент проверяем что его ширина не больше ширины котейнера
         if (this.components.length === 1) {
             const c = this.components[0]
-            if (c.left + c.width >= this.containerWidth) {
-                c.left = this.containerWidth - c.width
-                if (c.left < 0) {
-                    c.left = 0
+            if (c.left + c.width + c.szRight >= this.containerWidth) {
+                c.left = this.containerWidth - c.width - c.szLeft - c.szRight
+                if (c.left < c.szLeft) {
+                    c.left = c.szLeft
                 }
-                if (c.left + c.width > this.containerWidth) {
-                    c.width = this.containerWidth
+                if (c.left + c.width + c.szRight > this.containerWidth) {
+                    c.width = this.containerWidth - c.szRight - c.szLeft
                 }
             }
         } else if (droppedComponents.length > 0) {
@@ -142,29 +145,6 @@ export default class Row {
     }
 
     /**
-     * Возвращает overflow по высоте который мог возникнуть. Если нет, то вернет 0
-     * Логика просто: рекурсивно класс 'clipped' и по нему определяем vertical overflow. Это стандартный класс для многих remix ui элементов
-     * Если эта логика покажет себя плохо, потребуется написание функции для каждого компонента из библиотеки для определения overflow индивидуально
-     * Например для текста реально считать его высоту
-     *
-     * @param {HTMLElement} element
-     * @param {number} height
-     */
-    getElementOverflowHeight(element, height, depth = 0) {
-        if (depth === 3) return 0
-        if (element.classList.contains('clipped') && element.scrollHeight > height) {
-            return element.scrollHeight - height
-        }
-        for (let i = 0; i < element.children.length; i++) {
-            const ov = this.getElementOverflowHeight(element.children[i], height, depth + 1)
-            if (ov > 0) {
-                return ov
-            }
-        }
-        return 0
-    }
-
-    /**
      * Отцентровать содержимое ряда
      */
     center() {
@@ -172,8 +152,8 @@ export default class Row {
             (this.containerWidth - this._allComponentsWidth - this.horizMargin * (this.components.length - 1)) / 2,
         )
         this.components.forEach(c => {
-            c.left = l
-            l += c.width + this.horizMargin
+            c.left = l + c.szLeft
+            l += c.width + c.szRight + this.horizMargin
         })
     }
 
@@ -207,8 +187,8 @@ export default class Row {
         } else {
             this.components.splice(index, -1, pr)
         }
-        this._allComponentsWidth += pr.width
-        this._height = Math.max(this._height, pr.height)
+        this._allComponentsWidth += this._getw(pr)
+        this._height = Math.max(this._height, this._geth(pr))
         if (centerize) {
             this.center()
         }
@@ -216,10 +196,10 @@ export default class Row {
 
     deleteRightComponent() {
         const c = this.components.pop()
-        this._allComponentsWidth -= c.width
-        if (this._height === c.height) {
+        this._allComponentsWidth -= this._getw(c)
+        if (this._height === this._geth(c)) {
             if (this.components.length > 0) {
-                this._height = this.components.reduce((memo, c) => Math.max(memo, c.height), 0)
+                this._height = this.components.reduce((memo, c) => Math.max(memo, this._geth(c)), 0)
             } else {
                 this._height = 0
             }
@@ -232,7 +212,7 @@ export default class Row {
      * @param {*} componentProps
      */
     canAdd(componentProps) {
-        return this._allComponentsWidth + this.horizMargin + componentProps.width < this.containerWidth
+        return this._allComponentsWidth + this.horizMargin + this._getw(componentProps) < this.containerWidth
     }
 
     /**
@@ -244,5 +224,13 @@ export default class Row {
      */
     isRelated(component) {
         //TODO
+    }
+
+    _getw(component) {
+        return component.szLeft + component.width + component.szRight
+    }
+
+    _geth(component) {
+        return component.szTop + component.height + component.szBottom
     }
 }

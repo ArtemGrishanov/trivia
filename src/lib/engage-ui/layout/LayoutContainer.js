@@ -1,6 +1,9 @@
 import '../style/rmx-layout.css'
 import React from 'react'
+import { connect } from 'react-redux'
 import DataSchema from '../../schema'
+import { intersectRect, tryToMagnet, throttle, objectMinus } from '../../remix/util/util'
+import { setComponentProps, selectComponents, getActiveScreenId, getActiveScreen } from '../../remix'
 
 class LayoutContainer extends React.Component {
     static getDerivedStateFromProps(props, state) {
@@ -27,19 +30,176 @@ class LayoutContainer extends React.Component {
             magnets: {},
             // компоненты вокруг которых показать рамку для их подсветки
             borderedComponents: [],
+            selectRect: null,
+            groupRect: null,
+            groupComponents: null,
+            componentPropsDeltas: null,
         }
         if (props.globalTestId) {
             window[props.globalTestId] = this
         }
+        this.childrenWithProps = null
         this.onMouseDown = this.onMouseDown.bind(this)
+        this.onWindowMouseMove = this.onWindowMouseMove.bind(this)
+        this.onMouseUp = this.onMouseUp.bind(this)
         this.onDragAndMagnetsAttached = this.onDragAndMagnetsAttached.bind(this)
         this.onLayoutItemUpdate = this.onLayoutItemUpdate.bind(this)
+        this.selectionRequestedByChild = this.selectionRequestedByChild.bind(this)
         // магниты видимые в данный момент, те которых коснулся перетаскиваемый компонент
         this.visibleMagnetsComponents = {}
         this.unmounted = false
+        this.selectStartPoint = null
+        this.groupMouseDown = false
+        this.groupDragging = false
+        this.childrenComputedProps = {}
+        this.magnetsForGroup = null
+        this.groupRectRef = React.createRef()
     }
 
-    onMouseDown(e) {}
+    onMouseDown(e) {
+        if (this.props.editable) {
+            this.selectStartPoint = {
+                left: e.nativeEvent.offsetX,
+                top: e.nativeEvent.offsetY,
+                clientX: e.clientX,
+                clientY: e.clientY,
+            }
+            if (this.state.groupComponents) {
+                this.groupMouseDown = true
+            } else {
+                this.setState({ groupComponents: null, groupRect: null, componentPropsDeltas: null })
+            }
+        }
+    }
+
+    onWindowMouseMove(e) {
+        if (this.props.editable && this.selectStartPoint) {
+            const cx = e.clientX - this.selectStartPoint.clientX,
+                cy = e.clientY - this.selectStartPoint.clientY
+            if (this.groupMouseDown && !this.groupDragging) {
+                // сделать подготовку к перетаскиванию. Указать что выделенные компоненты находятся в режиме перетаскивания, это нужно например чтобы скрыть контекстное меню в редакторе и тп
+                this.selectGroupComponents(true)
+                // оставить только те магниты, которые не созданы компонетами группы
+                this.magnetsForGroup = Object.values(objectMinus(this.state.magnets, this.state.groupComponents)).flat()
+                this.groupDragging = true
+            }
+            if (this.groupDragging) {
+                const { left, magnets } = tryToMagnet(
+                    this.state.groupRect.left + cx,
+                    this.state.groupRect.width,
+                    Number.NaN,
+                    this.magnetsForGroup,
+                )
+                if (magnets && magnets.length > 0) {
+                    this.setState({
+                        componentPropsDeltas: {
+                            left: left - this.state.groupRect.left,
+                            top: cy,
+                        },
+                    })
+                    this.onDragAndMagnetsAttached(magnets, { props: { id: '__group__' } })
+                } else {
+                    this.setState({
+                        componentPropsDeltas: {
+                            left: cx,
+                            top: cy,
+                        },
+                    })
+                    this.onDragAndMagnetsAttached([], { props: { id: '__group__' } })
+                }
+            } else {
+                const selectRect = {
+                    top: Math.min(this.selectStartPoint.top, this.selectStartPoint.top + cy),
+                    left: Math.min(this.selectStartPoint.left, this.selectStartPoint.left + cx),
+                    width: Math.abs(cx),
+                    height: Math.abs(cy),
+                }
+                this.setState({ selectRect })
+                this.filterSelected(this.childrenWithProps, selectRect)
+            }
+            e.stopPropagation()
+            e.preventDefault()
+        }
+    }
+
+    onMouseUp(e) {
+        if (this.props.editable) {
+            if (this.groupMouseDown) {
+                if (this.groupDragging) {
+                    this.saveGroupComponentsPosition()
+                    // так как обновили позицию компонентов, то дальше надо обновить и локальный стейт: прямоугольник выделения.
+                    // и сбросить дельты тоже - теперь изменения координат записы в сами компоненты
+                    this.setState(prevState => {
+                        return {
+                            groupRect: {
+                                ...prevState.groupRect,
+                                top: prevState.groupRect.top + prevState.componentPropsDeltas.top,
+                                left: prevState.groupRect.left + prevState.componentPropsDeltas.left,
+                            },
+                            componentPropsDeltas: null,
+                            selectRect: null,
+                        }
+                    })
+                    this.groupDragging = false
+                    this.magnetsForGroup = null
+                    this.onDragAndMagnetsAttached([], { props: { id: '__group__' } })
+                } else {
+                    this.clearGroupState()
+                }
+            } else if (this.selectStartPoint) {
+                this.selectGroupComponents()
+                this.setState({
+                    selectRect: null,
+                })
+            }
+            this.groupMouseDown = false
+            this.selectStartPoint = null
+        }
+    }
+
+    saveGroupComponentsPosition() {
+        if (this.state.groupComponents) {
+            const pos = Object.keys(this.state.groupComponents).map(id =>
+                this.childrenComputedProps[id]
+                    ? {
+                          top: this.childrenComputedProps[id].top,
+                          left: this.childrenComputedProps[id].left,
+                          width: this.childrenComputedProps[id].width,
+                          height: this.childrenComputedProps[id].height,
+                          id,
+                      }
+                    : void 0,
+            )
+            // immediate=true необходимо синхронно сразу установить позиции компонентов в этом случае
+            setComponentProps(pos, { putStateHistory: true, immediate: true })
+        }
+    }
+
+    filterSelected = throttle((children, rect) => {
+        const groupComponents = {},
+            groupRect = {
+                top: Number.MAX_SAFE_INTEGER,
+                left: Number.MAX_SAFE_INTEGER,
+                right: Number.MIN_SAFE_INTEGER,
+                bottom: Number.MIN_SAFE_INTEGER,
+            }
+        children.forEach(c => {
+            if (intersectRect(c.props, rect)) {
+                groupComponents[c.props.id] = true
+                groupRect.top = Math.min(groupRect.top, c.props.top)
+                groupRect.left = Math.min(groupRect.left, c.props.left)
+                groupRect.right = Math.max(groupRect.right, c.props.left + c.props.width)
+                groupRect.bottom = Math.max(groupRect.bottom, c.props.top + c.props.height)
+            }
+        })
+        if (Object.keys(groupComponents).length === 0) {
+            this.setState({ groupComponents: null, groupRect: null })
+        } else {
+            groupRect.width = groupRect.right - groupRect.left
+            groupRect.height = groupRect.bottom - groupRect.top
+            this.setState({ groupComponents, groupRect })
+        }
+    }, 100)
 
     /**
      * Вызывается когда компонент перетаскивается и прилепился к одному из магнитов
@@ -104,21 +264,89 @@ class LayoutContainer extends React.Component {
         })
     }
 
+    selectGroupComponents(dragging = false) {
+        // use selection mode for external services (like Editor)
+        // and keep element selected (show selection border)
+        if (this.state.groupComponents) {
+            const componentProps = {}
+            this.childrenWithProps.forEach(c => {
+                componentProps[c.props.id] = { ...c.props }
+            })
+            selectComponents(Object.keys(this.state.groupComponents), {
+                componentProps,
+                clientRect: this.groupRectRef.current ? this.groupRectRef.current.getBoundingClientRect() : {},
+                screenProps: { ...getActiveScreen() },
+                screenId: getActiveScreenId(),
+                doubleClicked: false,
+                dragging,
+            })
+        } else {
+            selectComponents([])
+        }
+    }
+
+    /**
+     * Дочерние компоненты LayoutItem в контейнере запрашивают выделение или сброс выделения
+     *
+     * @param {Array} componentIds
+     * @param {object} data
+     */
+    selectionRequestedByChild(componentIds = [], data) {
+        if (!this.state.groupComponents) {
+            selectComponents(componentIds, data)
+        }
+    }
+
+    /**
+     * Вычислить геометрические пропсы дочерних компонентов
+     * Зависит от перетаскивания и адаптированных "мобильных" свойств
+     */
+    computeComponentProps() {
+        const aPropsMap =
+                this.props.adaptedui &&
+                this.props.adaptedui[this.props.width] &&
+                this.props.adaptedui[this.props.width].props
+                    ? this.props.adaptedui[this.props.width].props
+                    : {},
+            deltas = {},
+            result = {}
+
+        if (this.state.componentPropsDeltas && this.state.groupComponents) {
+            this.props.children.forEach(c => {
+                if (this.state.groupComponents[c.props.id]) {
+                    deltas[c.props.id] = {
+                        left: c.props.left + this.state.componentPropsDeltas.left,
+                        top: c.props.top + this.state.componentPropsDeltas.top,
+                    }
+                    const cp = aPropsMap[c.props.id]
+                    if (cp) {
+                        deltas[c.props.id].top = cp.top + this.state.componentPropsDeltas.top
+                        deltas[c.props.id].left = cp.left + this.state.componentPropsDeltas.left
+                    }
+                }
+            })
+        }
+
+        if (this.props.children) {
+            this.props.children.forEach(child => {
+                result[child.props.id] = {
+                    ...child.props,
+                    ...aPropsMap[child.props.id],
+                    ...deltas[child.props.id],
+                }
+            })
+        }
+
+        return result
+    }
+
     render() {
-        let childrenWithProps = null
-        // state.width comes from 'sizeMe' wrapper
         if (this.props.width > 0 && this.props.height > 0) {
-            // container inited and measured
-            // we can render children now
-
-            const magnetsVertical = Object.values(this.state.magnets).flat(),
-                aPropsMap =
-                    this.props.adaptedui && this.props.adaptedui[this.props.width]
-                        ? this.props.adaptedui[this.props.width]
-                        : {}
-
-            childrenWithProps = React.Children.map(this.props.children, child => {
+            const magnetsVertical = Object.values(this.state.magnets).flat()
+            this.childrenComputedProps = this.computeComponentProps()
+            this.childrenWithProps = React.Children.map(this.props.children, child => {
                 return React.cloneElement(child, {
+                    requestSelection: this.selectionRequestedByChild,
                     containerWidth: this.props.width,
                     containerHeight: this.props.height,
                     magnetsVertical,
@@ -126,15 +354,20 @@ class LayoutContainer extends React.Component {
                     editable: this.props.editable,
                     onDragAndMagnetsAttached: this.onDragAndMagnetsAttached,
                     onLayoutItemUpdate: this.onLayoutItemUpdate,
-                    bordered: this.state.borderedComponents.includes(child.props.id),
-                    ...aPropsMap[child.props.id],
+                    // когда компонент входит в выделеннуую группу то подсвечивается рамкой, или когда к нему примагнитился другой компонент
+                    bordered:
+                        this.state.borderedComponents.includes(child.props.id) ||
+                        (this.state.groupComponents ? this.state.groupComponents[child.props.id] : false),
+                    // если выделена группа, то не надо передавать пропс 'selected' так как иначе будут доступна маркеры ресайза и компонент можно будет ресайзить а это не нужно в группе
+                    selected: this.state.groupComponents ? false : this.props.remixSelectedComponents[child.props.id],
+                    ...this.childrenComputedProps[child.props.id],
                 })
             })
         }
 
         return (
-            <div className="rmx-layout_container" onMouseDown={this.onMouseDown}>
-                {childrenWithProps}
+            <div className="rmx-layout_container" onMouseDown={this.onMouseDown} onMouseUp={this.onMouseUp}>
+                {this.childrenWithProps}
                 {this.props.editable &&
                     this.state.visibleMagnets &&
                     this.state.visibleMagnets.map(mv => {
@@ -144,11 +377,47 @@ class LayoutContainer extends React.Component {
                             )
                         }
                     })}
+                {this.state.selectRect && (
+                    <div
+                        style={{
+                            position: 'absolute',
+                            top: this.state.selectRect.top + 'px',
+                            left: this.state.selectRect.left + 'px',
+                            width: this.state.selectRect.width + 'px',
+                            height: this.state.selectRect.height + 'px',
+                            pointerEvents: 'none',
+                        }}
+                    >
+                        <div className="rmx-layout_item_selection_cnt __selected"></div>
+                    </div>
+                )}
+                {this.state.groupRect && (
+                    <div
+                        ref={this.groupRectRef}
+                        style={{
+                            position: 'absolute',
+                            top:
+                                this.state.groupRect.top +
+                                (this.state.componentPropsDeltas ? this.state.componentPropsDeltas.top : 0) +
+                                'px',
+                            left:
+                                this.state.groupRect.left +
+                                (this.state.componentPropsDeltas ? this.state.componentPropsDeltas.left : 0) +
+                                'px',
+                            width: this.state.groupRect.width + 'px',
+                            height: this.state.groupRect.height + 'px',
+                        }}
+                    >
+                        <div className="rmx-layout_item_selection_cnt __selected"></div>
+                    </div>
+                )}
             </div>
         )
     }
 
-    componentDidMount() {}
+    componentDidMount() {
+        window.addEventListener('mousemove', this.onWindowMouseMove)
+    }
 
     componentDidUpdate(prevProps) {
         if (this.props.width >= 0 && !this.state.magnets['default']) {
@@ -165,10 +434,36 @@ class LayoutContainer extends React.Component {
                 }
             })
         }
+        if (prevProps.screenId !== this.props.screenId && (this.state.selectRect || this.state.groupRect)) {
+            this.clearGroupState()
+        }
     }
 
     componentWillUnmount() {
+        window.removeEventListener('mousemove', this.onWindowMouseMove)
         this.unmounted = true
+    }
+
+    clearGroupState() {
+        this.setState({
+            groupComponents: null,
+            groupRect: null,
+            componentPropsDeltas: null,
+            selectRect: null,
+        })
+        this.selectStartPoint = null
+        this.groupMouseDown = false
+        this.groupDragging = false
+        this.childrenComputedProps = {}
+        this.magnetsForGroup = null
+    }
+}
+
+const mapStateToProps = (state, ownProps) => {
+    const remixSelectedComponents = {}
+    state.session.selectedComponentIds.forEach(id => (remixSelectedComponents[id] = true))
+    return {
+        remixSelectedComponents,
     }
 }
 
@@ -179,4 +474,4 @@ export const Schema = new DataSchema({
     },
 })
 
-export default LayoutContainer
+export default connect(mapStateToProps)(LayoutContainer)

@@ -15,13 +15,13 @@ describe('Selector', function () {
             const n = new Normalizer(s)
 
             let o = n.process({ oneString: null })
-            chai.assert.equal(o.oneString, 'abc', 'String default value')
+            expect(o.oneString).toEqual('abc')
 
             o = n.process({ oneString: 'verylongstring_verylongstring' })
-            chai.assert.equal(o.oneString, 'verylongst', 'Max length normalization')
+            expect(o.oneString).toEqual('verylongst')
 
             o = n.process({ oneString: '' })
-            chai.assert.equal(o.oneString, 'abc', 'Min length normalization')
+            expect(o.oneString).toEqual('abc')
         })
 
         it('String enum', function () {
@@ -35,13 +35,13 @@ describe('Selector', function () {
             const n = new Normalizer(s)
 
             let o = n.process({})
-            chai.assert.equal(o.enstr, 'center', 'String default value')
+            expect(o.enstr).toEqual('center')
 
             o = n.process({ enstr: 'illegal' })
-            chai.assert.equal(o.enstr, 'center', 'Only enum values')
+            expect(o.enstr).toEqual('center')
 
             o = n.process({ enstr: 'right' })
-            chai.assert.equal(o.enstr, 'right', 'Only enum values')
+            expect(o.enstr).toEqual('right')
 
             const s2 = new DataSchema({
                 enstr: {
@@ -53,14 +53,14 @@ describe('Selector', function () {
             const n2 = new Normalizer(s2)
 
             let o2 = n2.process({ enstr: 42 })
-            chai.assert.equal(o2.enstr, '42', 'Number being casted to string')
+            expect(o2.enstr).toEqual('42')
 
             o2 = n2.process({ enstr: false })
-            chai.assert.equal(o2.enstr, 'false', 'boolean being casting to string')
+            expect(o2.enstr).toEqual('false')
         })
 
         it('Schema validation', function () {
-            chai.expect(() => {
+            expect(() => {
                 new DataSchema({
                     oneString: {
                         type: 'string',
@@ -69,16 +69,18 @@ describe('Selector', function () {
                         default: 'norm',
                     },
                 })
-            }).to.throw(Error, 'invalid attribute')
+            }).toThrowError(
+                `DataSchema: invalid attribute "min". Valid attributes: default,serialize,adaptedForCustomWidth,enum,minLength,maxLength for type "string`,
+            )
 
-            chai.expect(() => {
+            expect(() => {
                 new DataSchema({
                     oneString: {
                         type: 'string',
                         // no default attr
                     },
                 })
-            }).to.throw(Error, '"default" is missed')
+            }).toThrowError('DataSchema: attribute "default" is missed in "oneString"')
         })
     })
 
@@ -93,16 +95,16 @@ describe('Selector', function () {
             const n = new Normalizer(s)
 
             let o = n.process({ boo: undefined })
-            chai.assert.equal(o.boo, true, 'Boolean default value when undefined')
+            expect(o.boo).toBeTruthy()
 
             o = n.process({ boo: null })
-            chai.assert.equal(o.boo, false, 'Null considered as false')
+            expect(o.boo).toBeFalsy()
 
             o = n.process({ boo: false })
-            chai.assert.equal(o.boo, false)
+            expect(o.boo).toBeFalsy()
 
             o = n.process({ boo: 'false' }) // special case string 'false' must be considered as boolean false
-            chai.assert.equal(o.boo, false)
+            expect(o.boo).toBeFalsy()
 
             const s2 = new DataSchema({
                 boo: {
@@ -112,11 +114,11 @@ describe('Selector', function () {
             })
             const n2 = new Normalizer(s2)
             let o2 = n2.process({})
-            chai.assert.equal(o2.boo, true, 'Boolean default value')
+            expect(o2.boo).toBeTruthy()
         })
 
         it('Schema validation', function () {
-            chai.expect(() => {
+            expect(() => {
                 new DataSchema({
                     boo: {
                         type: 'boolean',
@@ -124,7 +126,55 @@ describe('Selector', function () {
                         default: true,
                     },
                 })
-            }).to.throw(Error, 'invalid attribute')
+            }).toThrowError(
+                'DataSchema: invalid attribute "min". Valid attributes: default,serialize,adaptedForCustomWidth,enum for type "boolean"',
+            )
+        })
+    })
+
+    describe('#Array', function () {
+        it('Normalization', function () {
+            const s = new DataSchema({
+                arr: {
+                    type: 'array',
+                    default: [],
+                },
+            })
+
+            const n = new Normalizer(s)
+            ;[(void 0, null, '', 0, false, {})].forEach(v => {
+                const o = n.process({ arr: v })
+                expect(Array.isArray(o.arr)).toBeTruthy()
+            })
+
+            const o = n.process({ arr: ['1', '2', '3'] })
+            expect(Array.isArray(o.arr)).toBeTruthy()
+            expect(o.arr).toHaveLength(3)
+            expect(o.arr[0]).toEqual('1')
+            expect(o.arr[2]).toEqual('3')
+            expect(o.arr).toEqual(expect.arrayContaining(['1', '2', '3']))
+        })
+
+        it('Schema validation', function () {
+            expect(() => {
+                new DataSchema({
+                    oneArray: {
+                        type: 'array',
+                        min: 1, // illegal attribute
+                        max: 10, // illegal attribute
+                        default: [],
+                    },
+                })
+            }).toThrowError(`DataSchema: invalid attribute "min". Valid attributes: default for type "array`)
+
+            expect(() => {
+                new DataSchema({
+                    oneArray: {
+                        type: 'array',
+                        // no default attr
+                    },
+                })
+            }).toThrowError('DataSchema: attribute "default" is missed in "oneArray"')
         })
     })
 })

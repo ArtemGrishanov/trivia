@@ -1,20 +1,19 @@
 import { getPropertiesBySelector } from '../object-path'
 import HashList from '../hashlist'
 import { getScreenIdFromPath, debounce, flattenProperties } from '../remix/util/util'
+import { getComponents } from '../remix'
 
 /**
  * Плагин отслеживает все шаринг кнопки и создает сущности для шаринга в свойства app.share.entities
  *
  * Общий шаринг для проекта отдельно - для этого создаются 'app.share.defaultTitle', 'app.share.defaultDescription', 'app.share.defaultImage'
  *
- *
- * @param {array} options.displayTypes
  */
 export default function initShare(options = {}) {
+    const SHARE_BTN_TAG = 'share'
     let fbApiEmbedded = false
 
-    const displayTypes = options.displayTypes,
-        getMainPreviewHTML = options.getMainPreviewHTML,
+    const getMainPreviewHTML = options.getMainPreviewHTML,
         getShareEntityPreviewHTML = options.getShareEntityPreviewHTML,
         remix = options.remix,
         updateShare = function () {
@@ -31,21 +30,14 @@ export default function initShare(options = {}) {
             }
 
             // fetch all sharing buttons from the app
-            displayTypes.forEach(type => {
-                sharingButtons = sharingButtons.concat(
-                    getPropertiesBySelector(
-                        state,
-                        `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ displayName=${type}]`,
-                    ),
-                )
-            })
+            sharingButtons = getComponents({ tag: SHARE_BTN_TAG })
+
             sharingButtons.forEach(button => {
-                const screenId = getScreenIdFromPath(button.path),
-                    componentId = button.propName,
+                const componentId = button.hashlistId,
                     ne = {
                         screen: {
-                            id: screenId,
-                            tags: state.router.screens[screenId].tags,
+                            id: button.screen.hashlistId,
+                            tags: button.screen.tags,
                         },
                         componentId,
                         title: 'Interacty – engaging content',
@@ -58,23 +50,24 @@ export default function initShare(options = {}) {
                     }
                 newEntities.push(ne)
             })
-            remix.setData({ 'app.share.entities': new HashList(newEntities) })
+
+            const result = new HashList(newEntities)
+            remix.setData({ 'app.share.entities': result })
 
             if (!fbApiEmbedded && newEntities.length > 0) {
                 embedFbCode()
                 fbApiEmbedded = true
             }
+            return result
         },
-        updatePreviews = function () {
-            const state = remix.getState()
-
+        updatePreviews = function (entities) {
             if (getMainPreviewHTML) {
                 remix.setData({ 'app.share.previewHtml': getMainPreviewHTML(remix) })
             }
 
-            if (getShareEntityPreviewHTML && state.app.share && state.app.share.entities) {
+            if (getShareEntityPreviewHTML && entities && entities.length > 0) {
                 const previews = {}
-                state.app.share.entities.toArray().forEach(share => {
+                entities.toArray().forEach(share => {
                     previews[`app.share.entities.${share.hashlistId}.previewHtml`] = getShareEntityPreviewHTML(
                         remix,
                         share,
@@ -175,9 +168,10 @@ export default function initShare(options = {}) {
             Remix.setData({ ...flattenProperties(data.data, 'app.share') })
         }
     })
+
     Remix.addMessageListener('getshareentities', data => {
-        updateShare()
-        updatePreviews()
+        const entities = updateShare()
+        updatePreviews(entities)
         const share = JSON.parse(JSON.stringify(Remix.getState().app.share))
         if (share.entities) {
             delete share.entities._orderedIds
@@ -187,15 +181,16 @@ export default function initShare(options = {}) {
             data: { share },
         }
     })
-
     Remix.registerTriggerAction('share:update_share_entities', event => {
         // синхронизировать 'app.share.entities' с существующими шаринг кнопками в приложении
-        updateShare()
-        updatePreviews()
+        const entities = updateShare()
+        updatePreviews(entities)
     })
-    Remix.registerTriggerAction('share:update_share_previews', event => {
-        updatePreviews()
-    })
+
+    //TODO 09.06.2020 Artem: зачем этот экшн? не нашел в коде вызовов его или ссылок на него
+    // Remix.registerTriggerAction('share:update_share_previews', event => {
+    //     updatePreviews()
+    // })
 
     remix.addTrigger({
         when: { eventType: 'remix_inited' },

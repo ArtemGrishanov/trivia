@@ -1,5 +1,6 @@
 .rmx-text-editor {
     position: relative;
+    margin: 0;
 }
 /* quill text editor */
 .quill {
@@ -17,12 +18,14 @@
 .rmx-text-editor.__readonly .quill {
     margin-top: 0 !important;
 }
+.rmx-pointer .rmx-text-editor.__readonly .ql-editor > *,
 .rmx-button .rmx-text-editor.__readonly .ql-editor > *,
 .rmx-option .rmx-text-editor.__readonly .ql-editor > * {
     cursor: pointer !important;
 }
 .ql-editor {
     padding: 10px 0 !important;
+    overflow: hidden !important;
 }
 .ql-toolbar {
     white-space: nowrap !important;
@@ -50,21 +53,21 @@
 
 /* @import url('https://fonts.googleapis.com/css2?family=Roboto Condensed'); */
 /* text=Roboto Condensed */
-.ql-font span[data-value='Roboto-Condensed']::before {
+.ql-font span[data-value='RobotoCondensed']::before {
     font-family: 'Roboto Condensed';
     content: 'Roboto Condensed' !important;
 }
-.ql-font-Roboto-Condensed {
+.ql-font-RobotoCondensed {
     font-family: 'Roboto Condensed';
 }
 
 /* @import url('https://fonts.googleapis.com/css2?family=Open Sans'); */
 /* text=Open Sans */
-.ql-font span[data-value='Open-Sans']::before {
+.ql-font span[data-value='OpenSans']::before {
     font-family: 'Open Sans';
     content: 'Open Sans' !important;
 }
-.ql-font-Open-Sans {
+.ql-font-OpenSans {
     font-family: 'Open Sans';
 }
 
@@ -160,31 +163,31 @@
 
 /* @import url('https://fonts.googleapis.com/css2?family=Alegreya Sans'); */
 /* text=Alegreya Sans */
-.ql-font span[data-value='Alegreya-Sans']::before {
+.ql-font span[data-value='AlegreyaSans']::before {
     font-family: 'Alegreya Sans';
     content: 'Alegreya Sans' !important;
 }
-.ql-font-Alegreya-Sans {
+.ql-font-AlegreyaSans {
     font-family: 'Alegreya Sans';
 }
 
 /* @import url('https://fonts.googleapis.com/css2?family=Russo One'); */
 /* text=Russo One */
-.ql-font span[data-value='Russo-One']::before {
+.ql-font span[data-value='RussoOne']::before {
     font-family: 'Russo One';
     content: 'Russo One' !important;
 }
-.ql-font-Russo-One {
+.ql-font-RussoOne {
     font-family: 'Russo One';
 }
 
 /* @import url('https://fonts.googleapis.com/css2?family=Playfair Display SC'); */
 /* text=Playfair Display SC */
-.ql-font span[data-value='Playfair-Display-SC']::before {
+.ql-font span[data-value='PlayfairDisplaySC']::before {
     font-family: 'Playfair Display SC';
     content: 'Playfair Display SC' !important;
 }
-.ql-font-Playfair-Display-SC {
+.ql-font-PlayfairDisplaySC {
     font-family: 'Playfair Display SC';
 }
 
@@ -200,31 +203,31 @@
 
 /* @import url('https://fonts.googleapis.com/css2?family=Press Start 2P'); */
 /* text=Press Start 2P */
-.ql-font span[data-value='Press-Start-2P']::before {
+.ql-font span[data-value='PressStart2P']::before {
     font-family: 'Press Start 2P';
     content: 'Press Start 2P' !important;
 }
-.ql-font-Press-Start-2P {
+.ql-font-PressStart2P {
     font-family: 'Press Start 2P';
 }
 
 /* @import url('https://fonts.googleapis.com/css2?family=Bad Script'); */
 /* text=Bad Script */
-.ql-font span[data-value='Bad-Script']::before {
+.ql-font span[data-value='BadScript']::before {
     font-family: 'Bad Script';
     content: 'Bad Script' !important;
 }
-.ql-font-Bad-Script {
+.ql-font-BadScript {
     font-family: 'Bad Script';
 }
 
 /* @import url('https://fonts.googleapis.com/css2?family=Yeseva One'); */
 /* text=Yeseva One */
-.ql-font span[data-value='Yeseva-One']::before {
+.ql-font span[data-value='YesevaOne']::before {
     font-family: 'Yeseva One';
     content: 'Yeseva One' !important;
 }
-.ql-font-Yeseva-One {
+.ql-font-YesevaOne {
     font-family: 'Yeseva One';
 }
 
@@ -240,11 +243,11 @@
 
 /* @import url('https://fonts.googleapis.com/css2?family=Rubik Mono One'); */
 /* text=Rubik Mono One */
-.ql-font span[data-value='Rubik-Mono-One']::before {
+.ql-font span[data-value='RubikMonoOne']::before {
     font-family: 'Rubik Mono One';
     content: 'Rubik Mono One' !important;
 }
-.ql-font-Rubik-Mono-One {
+.ql-font-RubikMonoOne {
     font-family: 'Rubik Mono One';
 }
 /* /quill custom fonts */

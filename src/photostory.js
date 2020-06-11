@@ -7,18 +7,29 @@ import App from './App'
 
 import store from './store'
 import Remix from './lib/remix'
+
 import initRemixRouting from './lib/plugins/remix-routing'
 import initScreenProgress from './lib/plugins/screen-progress'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initScreenCollage from './lib/plugins/screen-collage'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initFacebookAnalytics from './lib/plugins/facebook-pixel'
+import initButtonBehavior from './lib/plugins/button-behavior'
+import initQuizAnalytics from './lib/plugins/quiz-analytics'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 
 Remix.setStore(store)
 
+initQuizAnalytics({
+    remix: Remix,
+    questionScreenTag: 'photostoryitem',
+    resultScreenTag: 'final',
+})
+
 initButtonBehavior({ remix: Remix })
+
 initScreenCollage({
     remix: Remix,
     screenTag: 'final',
@@ -50,7 +61,6 @@ initScreenProgress({
 
 initShare({
     remix: Remix,
-    displayTypes: ['FbButton'],
     /**
      * Функция для генерации главного превью приложения в виде HTML
      * Отсылается вовне, в редактор, где на основе этого html кода будет создано графическое превью
@@ -73,6 +83,8 @@ initShare({
 })
 
 initGoogleAnalytics({ remix: Remix })
+
+initFacebookAnalytics({ remix: Remix })
 
 ReactDOM.render(
     <Provider store={store}>

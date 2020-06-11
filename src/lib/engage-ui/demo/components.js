@@ -66,6 +66,31 @@ const COMPONENTS = [
             percent={88}
         />
     </Control>,
+    <Control id={505} schema={TextOptionSchema} width={800} height={200}>
+        <TextOption
+            id={'textoption2'}
+            width={400}
+            height={120}
+            correctIndicator="correct"
+            percent={1}
+            text="У меня работают умные сотрудники! Пусть придумают алгоритм создания паролей и на него ориентируются. Главное, не забыть схему."
+            dynamicContent={{
+                iconList: {
+                    icons: [
+                        {
+                            name: 'link',
+                            color: '#2990FB',
+                        },
+                    ],
+                    hAlign: 'right',
+                    vAlign: 'top',
+                    vPadding: 5,
+                    hPadding: 5,
+                    gap: 5,
+                },
+            }}
+        />
+    </Control>,
     <Control id={517} schema={TextOptionSchema} width={800} height={200}>
         <TextOption
             id={'textoption4'}
@@ -134,7 +159,7 @@ const COMPONENTS = [
             openUrl={'https://www.google.com/'}
         />
     </Control>,
-    <Control id={525} schema={ButtonSchema} width={800} height={300}>
+    <Control id={526} schema={ButtonSchema} width={800} height={300}>
         <Button
             id={'button2'}
             text={
@@ -149,6 +174,24 @@ const COMPONENTS = [
             iconColor={'#787878'}
             iconPosition={'left'}
             iconGap={13}
+        />
+    </Control>,
+    <Control id={527} schema={ButtonSchema} width={800} height={300}>
+        <Button
+            id={'button2'}
+            text={
+                '<p class="ql-align-center"><span class="ql-size-normal ql-font-Roboto" style="color: #787878">Download</span></p>'
+            }
+            width={136}
+            height={44}
+            backgroundColor={'white'}
+            borderRadius={40}
+            borderWidth={0}
+            iconName={'link'}
+            iconColor={'#787878'}
+            iconPosition={'left'}
+            iconGap={13}
+            imageSrc={'https://interactive-examples.mdn.mozilla.net/media/examples/grapefruit-slice-332-332.jpg'}
         />
     </Control>,
     <Control id={507} schema={FbButtonSchema} width={800} height={300}>

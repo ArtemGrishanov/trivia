@@ -1,4 +1,4 @@
-import Row from './Row'
+import Row from './row'
 
 /**
  * Получить новые props для компонентов в соответствии с параметрами пережаннами в init
@@ -12,7 +12,7 @@ export function getAdaptedChildrenProps(
         origCntWidth,
         containerWidth,
         HORIZ_ROW_DEVIATION = 9, // разброс координат в этих пределах - считается одним и рем же рядом
-        HORIZ_MARGIN = 6,
+        HORIZ_MARGIN = 0,
         VERTICAL_MARGIN = 12,
     },
     returnedAttributes = {},
@@ -94,6 +94,10 @@ export function cloneLayoutItemProps(props) {
         width: props.width,
         widthStrategy: props.widthStrategy,
         height: props.height,
+        szTop: props.szTop,
+        szLeft: props.szLeft,
+        szRight: props.szRight,
+        szBottom: props.szBottom,
         id: props.id,
     }
 }

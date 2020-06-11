@@ -1,12 +1,11 @@
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
-import MemoryCard from './MemoryCard'
+import MemoryCard, { backCoverImgBase64 } from './MemoryCard'
 
 import '../style/rmx-memory.css'
 
 const mainStyleClass = 'rmx-memory'
-const CARD_BACK_IMG_URL = ''
 
 class MemoryPlayground extends React.Component {
     constructor(props) {
@@ -155,7 +154,7 @@ class MemoryPlayground extends React.Component {
 
     render() {
         const { renderSet } = this.state
-        const { cardRowOption, indent } = this.props
+        const { cardRowOption, indent, cardBackImgSrc } = this.props
         const [cardRowsCount, cardsInRowCount] = cardRowOption.split('x').map(x => Number(x))
         const height = `${100 / cardRowsCount}%`
         const cardWidth = `${100 / cardsInRowCount}%`
@@ -173,7 +172,7 @@ class MemoryPlayground extends React.Component {
                                 padding={indent}
                                 height={height}
                                 width={cardWidth}
-                                backCoverSrc={CARD_BACK_IMG_URL}
+                                backCoverSrc={cardBackImgSrc}
                                 src={card.src}
                                 gameKey={card.gameKey}
                                 isActive={card.isActive}
@@ -202,6 +201,10 @@ export const Schema = new DataSchema({
         type: 'string',
         enum: ['4x2', '4x3', '4x4', '5x2', '5x4', '6x3', '6x4', '6x6'],
         default: '4x4',
+    },
+    cardBackImgSrc: {
+        type: 'string',
+        default: backCoverImgBase64,
     },
 })
 

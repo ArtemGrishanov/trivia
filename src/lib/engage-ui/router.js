@@ -3,8 +3,9 @@ import RemixWrapper from './RemixWrapper'
 import DataSchema from '../schema'
 import HashList from '../hashlist'
 import Screen from './Screen'
+import { removeUnnecessaryItemsFromScreen, debounce } from '../remix/util/util'
 
-const refs = {}
+let refs = {}
 
 /**
  *
@@ -22,7 +23,7 @@ class Router extends React.Component {
             visibilityScr: 'visible',
             visibilityScrPrev: 'hidden',
         }
-        this.timeoutId = null
+        this.prevMarkUpList = {}
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -83,25 +84,53 @@ class Router extends React.Component {
         }
     }
 
-    renderStaticMarkup() {
-        if (this.timeoutId) {
-            clearTimeout(this.timeoutId)
+    resetPrevMarkUpList() {
+        const refKeys = Object.keys(refs)
+        const prevMarkUpListKeys = Object.keys(this.prevMarkUpList)
+        if (prevMarkUpListKeys.length > refKeys.length) {
+            const prevMarkUpListTmp = {}
+            refKeys.forEach(k => (prevMarkUpListTmp[k] = this.prevMarkUpList[k]))
+            this.prevMarkUpList = prevMarkUpListTmp
         }
-        this.timeoutId = setTimeout(() => {
-            this.timeoutId = null
-            const markupData = {}
-            Object.keys(refs).forEach(screenId => {
-                if (refs[screenId].current) {
-                    const sm = refs[screenId].current.innerHTML
-                    if (this.props.screens[screenId].staticMarkup != sm) {
-                        markupData[`router.screens.${screenId}.staticMarkup`] = sm
-                    }
+    }
+
+    renderStaticMarkup = debounce(() => {
+        this.resetPrevMarkUpList()
+        const markupData = {}
+        Object.keys(refs).forEach(screenId => {
+            if (refs[screenId].current) {
+                if (!this.prevMarkUpList[screenId]) {
+                    this.prevMarkUpList[screenId] = ''
                 }
-            })
-            if (Object.keys(markupData).length > 0) {
-                this.props.setData(markupData)
+                const sm = removeUnnecessaryItemsFromScreen(refs[screenId].current).innerHTML
+
+                if (this.prevMarkUpList[screenId] !== sm) {
+                    this.prevMarkUpList[screenId] = sm
+                    markupData[`router.screens.${screenId}.staticMarkup`] = sm
+                }
             }
-        }, 3000) // don't render too often. User can perform many microoperations: dragging, resizing, changing colors etc...
+        })
+        if (Object.keys(markupData).length > 0) {
+            this.props.setData(markupData)
+        }
+    }, 1500)
+
+    updateRefs() {
+        const screens = this.props.screens.toArray()
+
+        if (screens.length === Object.keys(refs).length) {
+            return
+        }
+
+        const refsTmp = {}
+        this.props.screens.toArray().forEach(s => {
+            if (refs[s.hashlistId]) {
+                refsTmp[s.hashlistId] = refs[s.hashlistId]
+            } else {
+                refsTmp[s.hashlistId] = React.createRef()
+            }
+        })
+        refs = refsTmp
     }
 
     render() {
@@ -115,9 +144,7 @@ class Router extends React.Component {
             editable = this.props.mode === 'edit'
 
         if (editable) {
-            this.props.screens.toArray().forEach(s => {
-                if (!refs[s.hashlistId]) refs[s.hashlistId] = React.createRef()
-            })
+            this.updateRefs()
         }
 
         const switchEffectStyle = {

@@ -48,9 +48,10 @@ export class Selector {
     /**
      *
      * @param {string} propertyPath
+     * @param {object} filterObject
      * @return {boolean}
      */
-    match(propertyPath, startTokenIndex = 0) {
+    match(propertyPath, filterObject, startTokenIndex = 0) {
         //match(propertyPath, filtrationData, startTokenIndex = 0) {
         if (propertyPath === this._selector) return true
         if (propertyPath === '' && startTokenIndex === this._tokens.length)
@@ -63,24 +64,48 @@ export class Selector {
             const pathElems = propertyPath.split('.')
             const ppart0 = pathElems[0]
             const ti = this._getSelectorTokenInfo(this._tokens[startTokenIndex])
-            // const filtered = ti.filter === null ? true : (filtrationData !== void 0 && this._filter(ti.filter, filtrationData[ppart0]));
+            const filtered = ti.filter === null || !filterObject ? true : this._filter(ti.filter, filterObject[ppart0])
+            if (!filtered) {
+                return false
+            }
             if (ti.name === ppart0) {
-                return this.match(pathElems.slice(1).join('.'), startTokenIndex + 1)
-                // return this.match(pathElems.slice(1).join('.'), filtrationData, startTokenIndex + 1) && filtered;
+                return this.match(
+                    pathElems.slice(1).join('.'),
+                    typeof filterObject === 'object' ? filterObject[ppart0] : void 0,
+                    startTokenIndex + 1,
+                )
             }
             // regex check. Expression expected in slashes /.../
             if (this._isRegExpString(ti.name)) {
                 const reg = new RegExp(ti.name.substring(1, ti.name.length - 1))
                 if (reg.exec(ppart0)) {
-                    return this.match(pathElems.slice(1).join('.'), startTokenIndex + 1)
-                    // return this.match(pathElems.slice(1).join('.'), filtrationData, startTokenIndex + 1) && filtered;
+                    return this.match(
+                        pathElems.slice(1).join('.'),
+                        typeof filterObject === 'object' ? filterObject[ppart0] : void 0,
+                        startTokenIndex + 1,
+                    )
                 }
                 return false
             }
             return false
-            //return this.match(pathElems.slice(1).join('.'), startTokenIndex+1);
-        } catch (e) {}
+        } catch (err) {
+            console.error(err)
+        }
         return false
+    }
+
+    _filter({ key, value, operand }, data) {
+        if (data[key] === void 0) {
+            return false
+        }
+        switch (operand) {
+            case 'indexOf':
+                return data[key].indexOf(value) !== -1
+            case 'equal':
+                return data[key] === value
+            default:
+                throw Error('undescribed case')
+        }
     }
 
     /**
@@ -160,7 +185,7 @@ export class Selector {
     }
 
     _isRegExpString(str) {
-        return str.length > 2 && str[0] === '/' && str[str.length - 1] === '/'
+        return str && str.length > 2 && str[0] === '/' && str[str.length - 1] === '/'
     }
 
     /**
@@ -272,7 +297,7 @@ export class Selector {
         let name = token,
             filter = null,
             type = null
-        if (token.length > 2 && token[0] === '[' && token[token.length - 1] === ']') {
+        if (token && token.length > 2 && token[0] === '[' && token[token.length - 1] === ']') {
             const pair = token.substring(1, token.length - 1).split(' ')
             if (typeof pair[1] === 'string' && pair[1].indexOf('=') >= 0) {
                 // key=value filter
@@ -344,12 +369,11 @@ export function getPathes(obj, selector, resolvedPathesOnly = false) {
  *
  * @param {string} propertyPath "quiz.questions.ugltc7.text"
  * @param {string} selector "quiz.[questions Hashlist].text"
+ * @param {object} filterObject (optional) object to match filters and check types
  *
  * @return {boolean}
  */
-export function matchPropertyPath(propertyPath, selector) {
-    //export function matchPropertyPath(propertyPath, selector, filtrationData) {
+export function matchPropertyPath(propertyPath, selector, filterObject = {}) {
     const s = new Selector(selector)
-    //return s.match(propertyPath, filtrationData);
-    return s.match(propertyPath)
+    return s.match(propertyPath, filterObject)
 }

@@ -5,6 +5,7 @@ import CorrectIcon from './CorrectIcon'
 import TextEditor from '../bricks/TextEditor'
 import RemixWrapper from '../RemixWrapper'
 import BasicImage from '../bricks/BasicImage'
+import DynamicContent, { DYNAMIC_CONTENT_PROP } from '../DynamicContent'
 
 class TextOption extends React.Component {
     static getDerivedStateFromProps(props, state) {
@@ -58,25 +59,25 @@ class TextOption extends React.Component {
         // const withPercent = this.props.percent > 0
 
         return (
-            <div className={`rmx-component`}>
-                <div className={`clipped`}>
-                    <div className="rmx-option" style={st}>
-                        {this.props.imageSrc && (
-                            <div className="rmx-option_backimg_wr">
-                                <BasicImage
-                                    width={this.props.width}
-                                    height={this.props.height}
-                                    src={this.props.imageSrc}
-                                    backgroundSize={'cover'}
-                                    blur={blur}
-                                    grayscale={grayscale}
-                                    borderRadius={this.props.borderRadius}
-                                    borderColor={this.props.borderColor}
-                                    borderWidth={this.props.borderWidth}
-                                ></BasicImage>
-                            </div>
-                        )}
-                        {/* {this.props.percent > 0 && (
+            <div className="rmx-component rmx-pointer">
+                <div className={`clipped`} style={st}>
+                    {/* <div className="rmx-option" style={st}> */}
+                    {this.props.imageSrc && (
+                        <div className="rmx-option_backimg_wr">
+                            <BasicImage
+                                width={this.props.width}
+                                height={this.props.height}
+                                src={this.props.imageSrc}
+                                backgroundSize={'cover'}
+                                blur={blur}
+                                grayscale={grayscale}
+                                borderRadius={this.props.borderRadius}
+                                borderColor={this.props.borderColor}
+                                borderWidth={this.props.borderWidth}
+                            ></BasicImage>
+                        </div>
+                    )}
+                    {/* {this.props.percent > 0 && (
                         <div className="rmx-percent_info">
                             <div className="rmx-pb_wr">
                                 <div
@@ -89,10 +90,13 @@ class TextOption extends React.Component {
                             </p>
                         </div>
                     )} */}
-                        {doubleClicked ? null : <Icon name={correctIndicator} align={align} />}
-                        <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
-                    </div>
+                    {doubleClicked ? null : <Icon name={correctIndicator} align={align} />}
+                    <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
+                    {this.props[DYNAMIC_CONTENT_PROP] ? (
+                        <DynamicContent structure={this.props[DYNAMIC_CONTENT_PROP]} />
+                    ) : null}
                 </div>
+                {/* </div> */}
             </div>
         )
     }

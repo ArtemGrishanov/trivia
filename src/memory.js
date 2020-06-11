@@ -11,6 +11,9 @@ import initRemixRouting from './lib/plugins/remix-routing'
 import initCoverScreen from './lib/plugins/cover-screen'
 import initShare from './lib/plugins/share'
 import initGoogleAnalytics from './lib/plugins/googleAnalytics'
+import initFacebookAnalytics from './lib/plugins/facebook-pixel'
+import initButtonBehavior from './lib/plugins/button-behavior'
+import initQuizAnalytics from './lib/plugins/quiz-analytics'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import HashList from './lib/hashlist'
@@ -19,6 +22,12 @@ Remix.setStore(store)
 
 const PROJECT_TAG = 'memory'
 const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
+
+initQuizAnalytics({
+    remix: Remix,
+    questionScreenTag: PROJECT_ITEM_TAG,
+    resultScreenTag: 'final',
+})
 
 initButtonBehavior({ remix: Remix })
 
@@ -70,7 +79,6 @@ initRemixRouting({
 
 initShare({
     remix: Remix,
-    displayTypes: ['FbButton'],
     /**
      * Функция для генерации главного превью приложения в виде HTML
      * Отсылается вовне, в редактор, где на основе этого html кода будет создано графическое превью
@@ -95,6 +103,8 @@ initShare({
 extendMemorySchema()
 
 initGoogleAnalytics({ remix: Remix })
+
+initFacebookAnalytics({ remix: Remix })
 
 ReactDOM.render(
     <Provider store={store}>
