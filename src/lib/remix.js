@@ -7,13 +7,14 @@ import {
     combineReducers,
     getScreenIdFromPath,
     getComponentIdFromPath,
+    getPropNameFromPath,
     debounce,
     callOncePerTime,
     htmlEncode,
     htmlDecode,
     throttle,
 } from './remix/util/util.js'
-import { updateWindowSize, saveAdaptedProps, updateAppHeight } from './remix/layout/helpers'
+import { updateWindowSize, updateAppHeight } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
@@ -194,6 +195,26 @@ export function setData(data, forceFeedback = false, immediate = false) {
     if (typeof data !== 'object') {
         throw new Error(`You must pass data object as first argument, example {'path.to.the.property': 123}`)
     }
+    const state = store.getState()
+
+    Object.keys(data).forEach(path => {
+        const propDescription = schema.getDescription(path)
+        if (propDescription && propDescription.redirect) {
+            if (!propDescription.redirect.to || !propDescription.redirect.when) {
+                throw new Error('You must set "to" and "when" function for redirect')
+            }
+            if (propDescription.redirect.when({ state })) {
+                const screenId = getScreenIdFromPath(path),
+                    componentId = getComponentIdFromPath(path)
+                const newPath = propDescription.redirect.to({ state, screenId, componentId })
+                if (newPath) {
+                    data[newPath] = data[path]
+                    delete data[path]
+                }
+            }
+        }
+    })
+
     if (immediate) {
         store.dispatch({
             type: REMIX_UPDATE_ACTION,
@@ -1209,14 +1230,7 @@ export function setComponentProps(newProps, options = {}) {
     newProps = !Array.isArray(newProps) ? [newProps] : newProps
 
     const data = {},
-        state = store.getState(),
-        editingCustomWidth =
-            state.session.mode === 'edit' &&
-            state.session.size.width > 0 &&
-            state.app.size.width > 0 &&
-            state.app.size.width !== state.session.size.width
-
-    let needUpdateHeight = false
+        state = store.getState()
 
     newProps.forEach(newp => {
         if (!newp.id) {
@@ -1228,33 +1242,15 @@ export function setComponentProps(newProps, options = {}) {
         const screenId = _componentIdToScreenId[newp.id]
         if (screenId) {
             let path = `router.screens.${screenId}.components.${newp.id}.`
-            const adaptedData = {}
             Object.keys(newp).forEach(key => {
-                const propDescription = schema.getDescription(path + key)
-                if (editingCustomWidth && propDescription && propDescription.adaptedForCustomWidth) {
-                    // если ширина кастомная и свойство помечено как адаптивное то сохраняем его отдельно в адаптацию
-                    adaptedData[key] = newp[key]
-                } else {
-                    data[path + key] = newp[key]
-                }
-                if (!needUpdateHeight) {
-                    // любое изменение гееометрический свойств компонента может привести в изменению высоты приложения
-                    needUpdateHeight = key === 'top' || key === 'left' || key === 'width' || key === 'height'
-                }
+                data[path + key] = newp[key]
             })
-            if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
-                // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
-                saveAdaptedProps(screenId, newp.id, adaptedData, options.immediate)
-            }
         }
     })
     if (Object.keys(data).length > 0) {
         setData(data, false, options.immediate)
         if (options && options.putStateHistory === true) {
             putStateHistory()
-        }
-        if (needUpdateHeight) {
-            updateAppHeight()
         }
     }
 }
@@ -1282,6 +1278,10 @@ export function getProperty(path) {
         return r[0].value
     }
     return undefined
+}
+
+export function updateHeight() {
+    updateAppHeight()
 }
 
 const remix = {
@@ -1321,6 +1321,7 @@ const remix = {
     postMessage,
     getSchema,
     getProperty,
+    updateHeight,
 
     // for debug
     _setScreenEvents,

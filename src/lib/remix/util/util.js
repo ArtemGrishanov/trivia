@@ -30,7 +30,18 @@ export function getScreenIdFromPath(path) {
  * @return {string} screenId, example zbnkhy
  */
 export function getComponentIdFromPath(path) {
-    const regex = /^router\.screens\.[A-z0-9]+.components\.([A-z0-9]+)/g,
+    const regex = /^router\.screens\.[A-z0-9]+\.components\.([A-z0-9]+)/g,
+        m = regex.exec(path)
+    return m && m[0] && m[1] ? m[1] : null
+}
+
+/**
+ * Вернуть имя свойства из строки
+ * @param {string} path например 'router.screens.8wruuz.components.zbnkhy.fontShadow'
+ * @return {string} 'fontShadow'
+ */
+export function getPropNameFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+\.components\.[A-z0-9]+\.([A-z0-9]+)$/g,
         m = regex.exec(path)
     return m && m[0] && m[1] ? m[1] : null
 }

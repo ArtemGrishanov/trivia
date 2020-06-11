@@ -36,7 +36,6 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
-        adaptedForCustomWidth: true,
     },
     widthStrategy: {
         type: 'string',
@@ -48,14 +47,22 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
-        adaptedForCustomWidth: true,
     },
     left: {
         type: 'number',
         min: -1000,
         max: 9999,
         default: 100,
-        adaptedForCustomWidth: true,
+        redirect: {
+            to: ({ state, screenId, componentId }) =>
+                screenId && state.session.size.width && componentId
+                    ? `router.screens.${screenId}.adaptedui.${state.session.size.width}.props.${componentId}.left`
+                    : void 0,
+            when: ({ state }) =>
+                !!state.session.size.width &&
+                !!state.app.size.width &&
+                state.app.size.width !== state.session.size.width,
+        },
     },
     leftStrategy: {
         type: 'string',
@@ -67,35 +74,49 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
-        adaptedForCustomWidth: true,
+        redirect: {
+            /**
+             * Эта настройка позволяет настроить перенаправление свойства на чтение/запись при условиях
+             * Например: пишем/читаем данные из router.screens.br3lcy.components.a5zqu2.top,
+             * но при условии state.app.size.width !== state.session.size.width
+             * Реально запись/чтение происходит в 'router.screens.br3lcy.adaptedui.320.props.a5zqu2.top'
+             *
+             * Однако, надо не забыть создать схему для редирект свойства. См components.js -> 'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top'
+             *
+             */
+            to: ({ state, screenId, componentId }) =>
+                screenId && state.session.size.width && componentId
+                    ? `router.screens.${screenId}.adaptedui.${state.session.size.width}.props.${componentId}.top`
+                    : void 0,
+            when: ({ state }) =>
+                !!state.session.size.width &&
+                !!state.app.size.width &&
+                state.app.size.width !== state.session.size.width,
+        },
     },
     szLeft: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
     },
     szRight: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
     },
     szTop: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
     },
     szBottom: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
     },
     displayType: {
         type: 'string',
