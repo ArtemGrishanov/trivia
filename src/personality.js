@@ -39,9 +39,9 @@ function extendPersonalitySchema() {
         },
         'app.personality.[links HashList]./^[0-9a-z]+$/.weight': {
             type: 'number',
-            min: 0,
+            min: 1,
             max: 2,
-            default: 0,
+            default: 1,
         },
     })
 }
@@ -103,54 +103,43 @@ initQuizAnalytics({ remix: Remix })
  */
 Remix.addCustomFunction('calcPersonalityRes', () => {
     const state = Remix.getState(),
-        questionsCount = Remix.getScreens({ tag: 'question' }).length,
-        results = Remix.getScreens({ tag: 'result' })
+        questionsCount = Remix.getScreens({ tag: 'question' }).length
 
-    let alloc = {}
+    const personality_data = state.app.personality
 
-    console.log('state:', state)
-    console.log('questionsCount:', questionsCount)
-    console.log('results:', results)
-
-    let q = 0,
-        resObj
-
+    let res = {},
+        q = 0
     for (var i = state.session.events.length - 1; i >= 0; i--) {
         const evt = state.session.events[i]
         if (evt.eventType === 'onclick' && evt.eventData.tags.indexOf('option') > 0) {
             q++
-            console.log('evt.eventData.data:', evt.eventData.data)
+            const option_id = evt.eventData.id
+            const opt_arr = personality_data.links.toArray().filter(el => el.optionId === option_id)
+            if (opt_arr.length) {
+                for (const item of opt_arr) {
+                    if (res[item.resultId]) {
+                        res[item.resultId] = res[item.resultId] + item.weight
+                    } else {
+                        res[item.resultId] = item.weight
+                    }
+                }
+            }
         }
         if (q >= questionsCount) {
             break
         }
     }
-    console.log('q:', q)
 
-    // // подсчитаем распределение ответов, то есть таблицу соотношения <количество баллов> = <ид результата>
-    // // для любого возможного количества баллов
-    // let resGap = Math.floor(questionsCount / results.length), // длина промежутка на шкале распределения, которая приходится на один результат
-    //     g = 1,
-    //     resIndex = results.length - 1 // начинаем распределять с конца
-    // if (resGap < 1) {
-    //     resGap = 1
-    // }
-    // if (resIndex >= 0) {
-    //     let currentResultId = results[resIndex].hashlistId
-    //     for (let i = maxPoints; i >= 0; i--) {
-    //         // >= важно!
-    //         resultPointsAllocation[i] = currentResultId
-    //         g++
-    //         if (g > resGap) {
-    //             g = 1
-    //             if (resIndex) {
-    //                 resIndex--
-    //                 currentResultId = results[resIndex].hashlistId
-    //             }
-    //         }
-    //     }
-    // }
-    // return resultPointsAllocation[points]
+    const res_sorted_arr = Object.entries(res)
+        .map(el => {
+            return {
+                result_id: el[0],
+                weight: el[1],
+            }
+        })
+        .sort((a, b) => (a.weight > b.weight ? -1 : 1))
+
+    return res_sorted_arr[0].result_id
 })
 
 extendPersonalitySchema()
