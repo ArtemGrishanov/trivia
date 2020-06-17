@@ -53,15 +53,41 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
-        redirect: {
-            to: ({ state, screenId, componentId }) =>
-                screenId && state.session.size.width && componentId
-                    ? `router.screens.${screenId}.adaptedui.${state.session.size.width}.props.${componentId}.left`
-                    : void 0,
-            when: ({ state }) =>
-                !!state.session.size.width &&
-                !!state.app.size.width &&
-                state.app.size.width !== state.session.size.width,
+        /**
+         *
+         * Решить: до setData или после setData сделать обновления условия
+         *
+         */
+        condition: {
+            dependOn: ['state.session.size.width'],
+
+            //beforeSetData
+            whatToSaveInConditions: ({ path, state, setdata }) => {
+                let adp = {}
+                if (false) {
+                    // первый раз надо сделать автоматическую адаптацию для удобства пользователя
+
+                    // setdata не содержит адаптации
+                    // и state не содержит адаптации
+
+                    // ключ будет использован для сохранения в условиях
+                    adp = { [state.session.size.width]: getAdaptedProps() }
+                }
+
+                // просто обычное сохранение left
+                return { ...adp, [`${state.session.size.width}.${componentId}.left`]: setdata[path] }
+            },
+
+            /**
+             * НЕ в режиме редактирования выбрать одно из сохраненных условных значений
+             * Пример.
+             * Пользователь сохранил такие свойства
+             *      router.screens.1234.adapted.320.props.123.props.left = 78
+             *       router.screens.1234.adapted.500.props.123.props.left = 130
+             *       router.screens.1234.adapted.800.props.123.props.left = 160
+             * Надо выбрать одно ближайшее из них, наиболее подходящее
+             */
+            select: ({ state, setdata }) => {},
         },
     },
     leftStrategy: {
@@ -74,7 +100,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
-        redirect: {
+        condition: {
             /**
              * Эта настройка позволяет настроить перенаправление свойства на чтение/запись при условиях
              * Например: пишем/читаем данные из router.screens.br3lcy.components.a5zqu2.top,

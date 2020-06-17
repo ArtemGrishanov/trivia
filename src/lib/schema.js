@@ -3,19 +3,28 @@ import { getTokens, matchPropertyPath } from './object-path.js'
 
 const types = {
     string: {
-        attributes: ['default', 'serialize', 'redirect', 'enum', 'minLength', 'maxLength'],
+        attributes: ['default', 'serialize', 'condition', 'enum', 'minLength', 'maxLength'],
         mandatory: ['default'],
     },
     number: {
-        attributes: ['default', 'serialize', 'redirect', 'min', 'max', 'enum', 'appWidthProperty', 'appHeightProperty'],
+        attributes: [
+            'default',
+            'serialize',
+            'condition',
+            'min',
+            'max',
+            'enum',
+            'appWidthProperty',
+            'appHeightProperty',
+        ],
         mandatory: ['default', 'min', 'max'],
     },
     boolean: {
-        attributes: ['default', 'serialize', 'redirect', 'enum'], // do not need to specify enum ['true', 'false']
+        attributes: ['default', 'serialize', 'condition', 'enum'], // do not need to specify enum ['true', 'false']
         mandatory: ['default'],
     },
     hashlist: {
-        attributes: ['default', 'serialize', 'redirect', 'minLength', 'maxLength', 'elementSchema', 'prototypes'],
+        attributes: ['default', 'serialize', 'condition', 'minLength', 'maxLength', 'elementSchema', 'prototypes'],
         mandatory: ['default'],
     },
     array: {
@@ -23,15 +32,15 @@ const types = {
         mandatory: ['default'],
     },
     object: {
-        attributes: ['default', 'serialize', 'redirect'],
+        attributes: ['default', 'serialize', 'condition'],
         mandatory: ['default'],
     },
     url: {
-        attributes: ['default', 'serialize', 'redirect'],
+        attributes: ['default', 'serialize', 'condition'],
         mandatory: ['default'],
     },
     color: {
-        attributes: ['default', 'serialize', 'redirect'],
+        attributes: ['default', 'serialize', 'condition'],
         mandatory: ['default'],
     },
 }
