@@ -5,16 +5,15 @@ import { DYNAMIC_CONTENT_PROP, ContentPropsList, Schemas } from '../engage-ui/Dy
  *
  * @param {{remix: *}} param0
  */
-const initQuizPoints = ({ remix, optionTag = 'option' }) => {
-    const CORRECT_OPTION_MARKER = 'CORRECT_OPTION_MARKER'
+const initPersonalityChain = ({ remix, optionTag = 'option' }) => {
+    const CHAIN_MARKER = 'CHAIN_MARKER'
     const BASE_SELECTOR = `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ tags=~${optionTag}]`
-    const POINTS_SELECTOR = `${BASE_SELECTOR}.data.points`
     const DYNAMIC_CONTENT_SELECTOR = `${BASE_SELECTOR}.${DYNAMIC_CONTENT_PROP}`
 
-    const ICON_STYLES = {
+    let ICON_STYLES = {
         icons: [
             {
-                name: 'correctOption',
+                name: 'chainOption',
             },
         ],
         hAlign: 'right',
@@ -25,12 +24,6 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
     }
 
     remix.extendSchema({
-        [POINTS_SELECTOR]: {
-            type: 'number',
-            min: 0,
-            max: 1,
-            default: 0,
-        },
         [DYNAMIC_CONTENT_SELECTOR]: {
             type: 'object',
             default: {},
@@ -44,35 +37,40 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
         ),
     })
 
-    const pointsSelector = new Selector(POINTS_SELECTOR)
-    remix.registerTriggerAction(CORRECT_OPTION_MARKER, event => {
+    const baseSelector = new Selector(DYNAMIC_CONTENT_SELECTOR)
+    remix.registerTriggerAction(CHAIN_MARKER, event => {
         const state = event.remix.getState()
         const mode = state.session.mode
 
         const data = [...event.eventData.diff.added, ...event.eventData.diff.changed]
             .filter(({ path }) => {
-                return pointsSelector.match(path, state)
+                return baseSelector.match(path, state)
             })
-            .map(({ path, value }) => [path.replace('.data.points', ''), !!value])
-            .map(([path, needShowIcon]) => {
+            .map(({ path }) => {
                 const evalPath = path
                     .split('.')
                     .map(part => `['${part}']`)
                     .join('')
-                const dynamicContent = eval(`state${evalPath}`)[DYNAMIC_CONTENT_PROP]
+                const dynamicContent = eval(`state${evalPath}`)
 
-                if (needShowIcon && mode === 'edit') {
+                if (mode === 'edit') {
                     const update = {
                         ...(dynamicContent || {}),
-                        [ContentPropsList.ICON_LIST]: { ...ICON_STYLES },
+                        [ContentPropsList.ICON_LIST]: {
+                            ...ICON_STYLES,
+                            payload: {
+                                screen_id: path.split('screens.').pop().split('.components')[0],
+                                option_id: path.split('components.').pop().split('.dynamicContent')[0],
+                            },
+                        },
                     }
 
-                    return [`${path}.${DYNAMIC_CONTENT_PROP}`, update]
+                    return [`${path}`, update]
                 } else if (dynamicContent !== void 0) {
                     const update = JSON.parse(JSON.stringify(dynamicContent))
                     delete update[ContentPropsList.ICON_LIST]
 
-                    return [`${path}.${DYNAMIC_CONTENT_PROP}`, update]
+                    return [`${path}`, update]
                 } else {
                     return false
                 }
@@ -88,11 +86,11 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
             condition: {
                 prop: 'path',
                 clause: 'MATCH',
-                value: POINTS_SELECTOR,
+                value: DYNAMIC_CONTENT_SELECTOR,
             },
         },
-        then: { actionType: CORRECT_OPTION_MARKER },
+        then: { actionType: CHAIN_MARKER },
     })
 }
 
-export default initQuizPoints
+export default initPersonalityChain

@@ -16,6 +16,7 @@ import initQuizAnalytics from './lib/plugins/quiz-analytics'
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import initButtonBehavior from './lib/plugins/button-behavior'
 import HashList from './lib/hashlist'
+import initPersonalityChain from './lib/plugins/personality-chain'
 
 Remix.setStore(store)
 
@@ -67,6 +68,11 @@ initRemixRouting({
 initScreenProgress({
     remix: Remix,
     screenTag: 'question',
+})
+
+initPersonalityChain({
+    remix: Remix,
+    optionTag: 'option',
 })
 
 initShare({
