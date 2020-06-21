@@ -2,6 +2,7 @@ import PropsNormalizer from './PropsNormalizer'
 import { connect } from 'react-redux'
 import LayoutItem from './layout/LayoutItem'
 import { setData } from '../remix'
+import { getConditionConfig } from '../remix/util/condition'
 
 const componentClassMap = {}
 
@@ -36,6 +37,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        adaptedForCustomWidth: true,
     },
     widthStrategy: {
         type: 'string',
@@ -47,48 +49,15 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        adaptedForCustomWidth: true,
     },
     left: {
         type: 'number',
         min: -1000,
         max: 9999,
         default: 100,
-        /**
-         *
-         * Решить: до setData или после setData сделать обновления условия
-         *
-         */
-        condition: {
-            dependOn: ['state.session.size.width'],
-
-            //beforeSetData
-            whatToSaveInConditions: ({ path, state, setdata }) => {
-                let adp = {}
-                if (false) {
-                    // первый раз надо сделать автоматическую адаптацию для удобства пользователя
-
-                    // setdata не содержит адаптации
-                    // и state не содержит адаптации
-
-                    // ключ будет использован для сохранения в условиях
-                    adp = { [state.session.size.width]: getAdaptedProps() }
-                }
-
-                // просто обычное сохранение left
-                return { ...adp, [`${state.session.size.width}.${componentId}.left`]: setdata[path] }
-            },
-
-            /**
-             * НЕ в режиме редактирования выбрать одно из сохраненных условных значений
-             * Пример.
-             * Пользователь сохранил такие свойства
-             *      router.screens.1234.adapted.320.props.123.props.left = 78
-             *       router.screens.1234.adapted.500.props.123.props.left = 130
-             *       router.screens.1234.adapted.800.props.123.props.left = 160
-             * Надо выбрать одно ближайшее из них, наиболее подходящее
-             */
-            select: ({ state, setdata }) => {},
-        },
+        condition: getConditionConfig('left'),
+        adaptedForCustomWidth: true,
     },
     leftStrategy: {
         type: 'string',
@@ -100,25 +69,8 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
-        condition: {
-            /**
-             * Эта настройка позволяет настроить перенаправление свойства на чтение/запись при условиях
-             * Например: пишем/читаем данные из router.screens.br3lcy.components.a5zqu2.top,
-             * но при условии state.app.size.width !== state.session.size.width
-             * Реально запись/чтение происходит в 'router.screens.br3lcy.adaptedui.320.props.a5zqu2.top'
-             *
-             * Однако, надо не забыть создать схему для редирект свойства. См components.js -> 'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top'
-             *
-             */
-            to: ({ state, screenId, componentId }) =>
-                screenId && state.session.size.width && componentId
-                    ? `router.screens.${screenId}.adaptedui.${state.session.size.width}.props.${componentId}.top`
-                    : void 0,
-            when: ({ state }) =>
-                !!state.session.size.width &&
-                !!state.app.size.width &&
-                state.app.size.width !== state.session.size.width,
-        },
+        condition: getConditionConfig('top'),
+        adaptedForCustomWidth: true,
     },
     szLeft: {
         type: 'number',

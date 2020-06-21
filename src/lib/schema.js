@@ -16,6 +16,7 @@ const types = {
             'enum',
             'appWidthProperty',
             'appHeightProperty',
+            'adaptedForCustomWidth',
         ],
         mandatory: ['default', 'min', 'max'],
     },

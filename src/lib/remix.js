@@ -1,6 +1,6 @@
 import DataSchema from './schema.js'
 import Normalizer from './normalizer.js'
-import { assignByPropertyString, getPropertiesBySelector } from './object-path.js'
+import { assignByPropertyString, getPropertiesBySelector, getPathes } from './object-path.js'
 import {
     getUniqueId,
     isHashlistInstance,
@@ -13,6 +13,7 @@ import {
     htmlEncode,
     htmlDecode,
     throttle,
+    parseComponentPath,
 } from './remix/util/util.js'
 import { updateWindowSize, updateAppHeight } from './remix/layout/helpers'
 
@@ -30,7 +31,6 @@ export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
 export const REMIX_PRE_RENDER = '__Remix_pre_render__'
-export const REMIX_SET_SESSION_SIZE = '__Remix_set_session_size__'
 
 //TODO specify origin during publishing?
 //const containerOrigin = "http://localhost:8080";
@@ -45,6 +45,7 @@ let logging = LOG_BY_DEFAULT,
     containerWindow = null,
     store = null,
     schema = null,
+    _masters = {},
     customFunctions = {},
     normalizer = null,
     extActions = null,
@@ -188,7 +189,7 @@ function onWindowResize() {
 /**
  * Assign new property values to store
  *
- * @param {object} data, exmaple {'path.to.the.property': 'newvalue'}
+ * @param {object} data, example {'path.to.the.property': 'newvalue'}
  */
 let __data = {}
 export function setData(data, forceFeedback = false, immediate = false) {
@@ -197,23 +198,7 @@ export function setData(data, forceFeedback = false, immediate = false) {
     }
     const state = store.getState()
 
-    Object.keys(data).forEach(path => {
-        const propDescription = schema.getDescription(path)
-        if (propDescription && propDescription.redirect) {
-            if (!propDescription.redirect.to || !propDescription.redirect.when) {
-                throw new Error('You must set "to" and "when" function for redirect')
-            }
-            if (propDescription.redirect.when({ state })) {
-                const screenId = getScreenIdFromPath(path),
-                    componentId = getComponentIdFromPath(path)
-                const newPath = propDescription.redirect.to({ state, screenId, componentId })
-                if (newPath) {
-                    data[newPath] = data[path]
-                    delete data[path]
-                }
-            }
-        }
-    })
+    data = { ...data, ...calcConditionalProperties(state, data) }
 
     if (immediate) {
         store.dispatch({
@@ -241,6 +226,79 @@ function setCurrentScreen(screenId) {
         type: REMIX_SET_CURRENT_SCREEN,
         screenId,
     })
+}
+
+function calcConditionalProperties(state, data) {
+    let conditionalData = {}
+
+    Object.keys(data).forEach(path => {
+        if (_masters[path]) {
+            // несколько свойств зависят от этого мастер-свойства
+            _masters[path].forEach(mp => {
+                const slaveProperties = getPropertiesBySelector(state, mp.selector)
+                slaveProperties.forEach(slave => {
+                    const { screenId, componentId, propName } = parseComponentPath(slave.path),
+                        condSlaveSelector = mp.condition.conditionPath({ screenId, componentId, propName }),
+                        savedValues = {}
+
+                    getPathes(state, condSlaveSelector).forEach(condPath => {
+                        const k = mp.condition.parseKey(condPath)
+                        savedValues[k] = getProperty(condPath)
+                    })
+
+                    debugger
+                    const dd = mp.condition.onMasterChanged({
+                        masterValue: data[path],
+                        savedValues,
+                    })
+                    if (dd) {
+                        if (dd.key === undefined || dd.value === undefined) {
+                            throw new Error(`"onMasterChanged" must return key-value object. Path: ${path}`)
+                        }
+                        console.log(
+                            `Master property "${path}" changed to "${data[path]}". And slave property changed: "router.screens.${screenId}.components.${componentId}.${propName}" to "${dd.value}"`,
+                        )
+                        conditionalData = {
+                            ...conditionalData,
+                            [`router.screens.${screenId}.components.${componentId}.${propName}`]: dd.value,
+                        }
+                    }
+                })
+            })
+        }
+    })
+
+    Object.keys(data).forEach(path => {
+        const d = schema.getDescription(path)
+        if (d && d.condition) {
+            if (!d.condition.onSave || !d.condition.onMasterChanged) {
+                throw new Error(`You must set "onSave" and "onMasterChanged" function for conditonal property ${path}`)
+            }
+
+            const { screenId, componentId, propName } = parseComponentPath(path)
+
+            if (!screenId || !componentId || !propName) {
+                throw new Error(
+                    `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
+                )
+            }
+
+            const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
+            const dt = d.condition.onSave({ masterValue, path, data, state, screenId, componentId })
+            if (dt) {
+                //debugger;
+                Object.keys(dt).forEach(key => {
+                    // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                    conditionalData = {
+                        ...conditionalData,
+                        [d.condition.conditionPath({ screenId, componentId, key })]: dt[key],
+                    }
+                })
+            }
+        }
+    })
+
+    return conditionalData
 }
 
 /**
@@ -568,6 +626,7 @@ export function remixReducer({ reducers, dataSchema }) {
         throw new Error('Remix: schema must be instance of DataSchema class')
     }
     schema = dataSchema
+    cacheMasterProperties(schema)
     normalizer = new Normalizer(schema)
     // clients reducers + standart remix reducers
     const reducer = combineReducers({ ...reducers, app, router, session })
@@ -743,15 +802,6 @@ function session(
                 ...state,
                 prerender: {
                     components: action.components,
-                },
-            }
-        }
-        case REMIX_SET_SESSION_SIZE: {
-            return {
-                ...state,
-                size: {
-                    width: action.width,
-                    height: action.height,
                 },
             }
         }
@@ -1168,7 +1218,28 @@ export function redo() {
  */
 function extendSchema(schm) {
     schema = schema.extend(schm)
+    cacheMasterProperties(schema)
     normalizer = new Normalizer(schema)
+}
+
+function cacheMasterProperties(schm) {
+    _masters = {}
+    Object.keys(schm._schm).forEach(selector => {
+        const desc = schm._schm[selector]
+        if (desc.condition && desc.condition.master) {
+            if (!_masters[desc.condition.master]) {
+                // несколько селекторов могут зависеть от одного мастера
+                _masters[desc.condition.master] = []
+            }
+            if (typeof desc.condition.master !== 'string') {
+                throw new Error(`"master" must be a string. ${selector}`)
+            }
+            _masters[desc.condition.master].push({
+                condition: desc.condition,
+                selector,
+            })
+        }
+    })
 }
 
 /**
@@ -1272,8 +1343,9 @@ export function getStore() {
     return store
 }
 
-export function getProperty(path) {
-    const r = getPropertiesBySelector(store.getState(), path)
+export function getProperty(path, state) {
+    state = state || store.getState()
+    const r = getPropertiesBySelector(state, path)
     if (r.length > 0) {
         return r[0].value
     }
@@ -1330,6 +1402,7 @@ const remix = {
     _putOuterEventInQueue,
     _sendOuterEvents,
     _getStateHistory: () => stateHistory,
+    _receiveMessage: receiveMessage,
 }
 
 export default remix

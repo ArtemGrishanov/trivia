@@ -28,6 +28,8 @@ const componentSchemas = {
 const schemaData = {
     'app.size.width': EngageAppSchema.getDescription('width'),
     'app.size.height': EngageAppSchema.getDescription('height'),
+    'app.sessionsize.width': EngageAppSchema.getDescription('width'),
+    'app.sessionsize.height': EngageAppSchema.getDescription('height'),
     'router.[screens HashList]': RouterScreensSchema.getDescription('screens'),
     'router.currentScreenId': RouterScreensSchema.getDescription('currentScreenId'),
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),
@@ -39,17 +41,8 @@ const schemaData = {
     'router.[screens HashList]./^[0-9a-z]+$/.tags': ScreenComponentsSchema.getDescription('tags'),
     'router.[screens HashList]./^[0-9a-z]+$/.staticMarkup': ScreenComponentsSchema.getDescription('staticMarkup'),
     'router.[screens HashList]./^[0-9a-z]+$/.disabled': ScreenComponentsSchema.getDescription('disabled'),
-    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui': {
-        type: 'object',
-        default: {},
-    },
-    // кастомные расположения компонентов для различных ширин
-    // Example: router.screens.ho3etc.adaptedui.320.props.emeh5y
-    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/': {
-        type: 'object',
-        default: {},
-    },
-    // Свойства компонентов
+    // Условные свойства компонентов
+    // например 'router.screens.u2xt9e.__c.800.fjxjnr.top'
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
         type: 'number',
         min: -9999,

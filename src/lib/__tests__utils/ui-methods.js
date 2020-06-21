@@ -5,7 +5,7 @@ export function addScreen() {
     return Remix.getState().router.screens.getLast().hashlistId
 }
 
-export function addComponent(screenId) {
+export function addComponent(screenId, props = {}) {
     Remix.addHashlistElement(`router.screens.${screenId}.components`, undefined, {
         newElement: {
             displayName: 'Text',
@@ -16,6 +16,7 @@ export function addComponent(screenId) {
             left: 15,
             top: 120,
             text: 'Sample text',
+            ...props,
         },
     })
     return Remix.getState().router.screens[screenId].components.getLast().hashlistId

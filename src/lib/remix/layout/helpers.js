@@ -6,7 +6,6 @@ import {
     getMode,
     getSchema,
     getScreens,
-    REMIX_SET_SESSION_SIZE,
     REMIX_PRE_RENDER,
     getComponents,
 } from '../../remix'
@@ -34,15 +33,18 @@ export function updateWindowSize(root) {
         height = window.innerHeight
     }
     // width === 0 | height === 0, window may be not loaded yet
-    if (width > 0 && height > 0 && (width !== state.session.size.width || height !== state.session.size.height)) {
+    if (width > 0 && height > 0 && (width !== state.app.sessionsize.width || height !== state.app.sessionsize.height)) {
         console.log(`updateWindowSize ${width} ${height}`)
         const defaultWidth = state.app.size.width
 
-        store.dispatch({
-            type: REMIX_SET_SESSION_SIZE,
-            width,
-            height,
-        })
+        setData(
+            {
+                'app.sessionsize.width': width,
+                'app.sessionsize.height': height,
+            },
+            false,
+            true,
+        )
 
         if (defaultWidth !== width) {
             // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
@@ -71,10 +73,10 @@ export function updateAppHeight() {
     // set session height and request container size change
     const appHeight = getMaxContentHeight(),
         state = getState()
-    if (Math.round(state.session.size.height) !== Math.round(appHeight)) {
+    if (Math.round(state.app.sessionsize.height) !== Math.round(appHeight)) {
         postMessage('requestSetSize', {
             size: {
-                width: state.session.size.width,
+                width: state.app.sessionsize.width,
                 height: appHeight,
             },
         })
@@ -96,6 +98,8 @@ function getAdaptationProps(scr, width) {
  * @param {object} boundingRects (опционально) рассчитанные размеры компонентов width,height
  */
 function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects }) {
+    console.log('calcAdaptedProps: adaptation running...')
+
     let props = {},
         maxContentHeight = 0
 
@@ -196,9 +200,9 @@ window.runVerticalNormalization = () => runVerticalNormalization(getStore())
 export const setComponentsRects = debounce(boundingRects => {
     const state = getState()
 
-    if (state.app.size.width !== state.session.size.width) {
+    if (state.app.size.width !== state.app.sessionsize.width) {
         console.log(
-            `setComponentsRects: vertical adaptation running for width=${state.session.size.width} ...`,
+            `setComponentsRects: vertical adaptation running for width=${state.app.sessionsize.width} ...`,
             boundingRects,
         )
 
@@ -255,7 +259,7 @@ function getScreenNearestAdaptation({ screen, defaultWidth, width }) {
 function getMaxContentHeight() {
     let maxH = 0,
         state = getState(),
-        width = state.session.size.width
+        width = state.app.sessionsize.width
 
     getScreens().forEach(scr => {
         const adaptScr = getAdaptationProps(scr, width)

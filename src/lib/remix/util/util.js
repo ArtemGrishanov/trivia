@@ -47,6 +47,26 @@ export function getPropNameFromPath(path) {
 }
 
 /**
+ * метод парсит с=строку свойства компонентов и возвращает объект со свойствами {screenId, componentId, propName}
+ */
+const _parsedPathes = {}
+export function parseComponentPath(path) {
+    if (_parsedPathes[path]) {
+        return _parsedPathes[path]
+    }
+    const regex = /^router\.screens\.([A-z0-9]+)\.components\.([A-z0-9]+)\.([A-z0-9]+)$/g,
+        m = regex.exec(path)
+    if (m && m[1] && m[2] && m[3]) {
+        _parsedPathes[path] = {
+            screenId: m[1],
+            componentId: m[2],
+            propName: m[3],
+        }
+        return _parsedPathes[path]
+    }
+}
+
+/**
  * From https://github.com/reduxjs/redux/blob/master/src/combineReducers.js
  * TODO import normally
  * This function for automated tests
