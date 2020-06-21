@@ -84,11 +84,56 @@ describe('Remix', () => {
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.left`)).toEqual(100)
         })
 
-        it('', () => {
-            // условные свойства без адаптации и других сложностей
-            // safeZone
-        })
+        it('should select nearest key for safe zone properties', () => {
+            const container = getDiv()
+            Remix.init({
+                mode: 'edit',
+                container,
+            })
 
-        // переключать по адаптациям и посмотреть какой выбран был ключ
+            const screenId = addScreen()
+            const componentId = addComponent(screenId)
+            setSize(container, 800, 600)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(10)
+            //expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(10) // ???
+            // должно ли быть сразу в условных? подумать
+
+            Remix.setData({ [`router.screens.${screenId}.components.${componentId}.szLeft`]: 1 }, false, true)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
+
+            setSize(container, 320, 600)
+            Remix.setData({ [`router.screens.${screenId}.components.${componentId}.szLeft`]: 2 }, false, true)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
+
+            setSize(container, 500, 600)
+            // был выбран ключ 320
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.500.props.${componentId}.szLeft`)).toEqual(
+                undefined,
+            )
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
+
+            setSize(container, 700, 600)
+            // был выбран ключ 320
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.700.props.${componentId}.szLeft`)).toEqual(
+                undefined,
+            )
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
+
+            setSize(container, 790, 600)
+            // был выбран ключ 800
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(2)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.790.props.${componentId}.szLeft`)).toEqual(
+                undefined,
+            )
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
+        })
     })
 })

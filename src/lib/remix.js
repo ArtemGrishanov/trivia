@@ -242,17 +242,20 @@ function calcConditionalProperties(state, data) {
                         savedValues = {}
 
                     getPathes(state, condSlaveSelector).forEach(condPath => {
-                        const k = mp.condition.parseKey(condPath)
-                        savedValues[k] = getProperty(condPath)
+                        const k = mp.condition.parseKey(condPath),
+                            v = getProperty(condPath)
+                        if (k && v) {
+                            savedValues[k] = v
+                        }
                     })
 
-                    debugger
                     const dd = mp.condition.onMasterChanged({
                         masterValue: data[path],
                         savedValues,
                     })
                     if (dd) {
                         if (dd.key === undefined || dd.value === undefined) {
+                            debugger
                             throw new Error(`"onMasterChanged" must return key-value object. Path: ${path}`)
                         }
                         console.log(

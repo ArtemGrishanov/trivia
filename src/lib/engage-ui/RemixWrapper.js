@@ -37,6 +37,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        condition: getConditionConfig('width'),
         adaptedForCustomWidth: true,
     },
     widthStrategy: {
@@ -49,6 +50,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        condition: getConditionConfig('height'),
         adaptedForCustomWidth: true,
     },
     left: {
@@ -77,24 +79,28 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 0,
         max: 1024,
         default: 10,
+        condition: getConditionConfig('szLeft'),
     },
     szRight: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        condition: getConditionConfig('szRight'),
     },
     szTop: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        condition: getConditionConfig('szTop'),
     },
     szBottom: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        condition: getConditionConfig('szBottom'),
     },
     displayType: {
         type: 'string',

@@ -72,24 +72,28 @@ const schemaData = {
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szLeft': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szRight': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szBottom': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
     },
 }
 

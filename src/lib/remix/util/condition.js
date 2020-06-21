@@ -35,6 +35,14 @@ export function getConditionConfig(propName) {
 }
 
 /**
+ * Выбрать подходящую шинину на основе данных о сохраненных ширинах
+ * Пример
+ * Ширина экрана устройства 700px
+ *  Имеется base = {'320': data1, '800': data2}
+ * Функция выбирает '320'. Так как по итогам обсуждений: лучше сильно растянуть UI, чем сжать
+ *
+ * Если ширина экрана устройства 780px
+ * Функция выбирает 800, так как немного сжать UI все-таки можно. Для этого оставлен зазор 49 px
  *
  * @param {number} val
  * @param {hash of number} base
@@ -47,7 +55,7 @@ export function selectWidth(val, base) {
     if (widthes.length > 0) {
         let result = widthes[0]
         for (let i = 1; i < widthes.length; i++) {
-            if (val > widthes[i] - 10) {
+            if (val > widthes[i] - 49) {
                 result = widthes[i]
             }
         }

@@ -3,7 +3,7 @@ import { getTokens, matchPropertyPath } from './object-path.js'
 
 const types = {
     string: {
-        attributes: ['default', 'serialize', 'condition', 'enum', 'minLength', 'maxLength'],
+        attributes: ['default', 'serialize', 'condition', 'enum', 'minLength', 'maxLength', 'canBeUndefined'],
         mandatory: ['default'],
     },
     number: {
@@ -17,31 +17,41 @@ const types = {
             'appWidthProperty',
             'appHeightProperty',
             'adaptedForCustomWidth',
+            'canBeUndefined',
         ],
         mandatory: ['default', 'min', 'max'],
     },
     boolean: {
-        attributes: ['default', 'serialize', 'condition', 'enum'], // do not need to specify enum ['true', 'false']
+        attributes: ['default', 'serialize', 'condition', 'enum', 'canBeUndefined'], // do not need to specify enum ['true', 'false']
         mandatory: ['default'],
     },
     hashlist: {
-        attributes: ['default', 'serialize', 'condition', 'minLength', 'maxLength', 'elementSchema', 'prototypes'],
+        attributes: [
+            'default',
+            'serialize',
+            'condition',
+            'minLength',
+            'maxLength',
+            'elementSchema',
+            'prototypes',
+            'canBeUndefined',
+        ],
         mandatory: ['default'],
     },
     array: {
-        attributes: ['default'],
+        attributes: ['default', 'condition', 'canBeUndefined'],
         mandatory: ['default'],
     },
     object: {
-        attributes: ['default', 'serialize', 'condition'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined'],
         mandatory: ['default'],
     },
     url: {
-        attributes: ['default', 'serialize', 'condition'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined'],
         mandatory: ['default'],
     },
     color: {
-        attributes: ['default', 'serialize', 'condition'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined'],
         mandatory: ['default'],
     },
 }
