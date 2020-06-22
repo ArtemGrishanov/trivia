@@ -14,6 +14,7 @@ const initPersonalityChain = ({ remix, optionTag = 'option' }) => {
         icons: [
             {
                 name: 'chainOption',
+                clickable: true,
             },
         ],
         hAlign: 'right',

@@ -27,6 +27,19 @@
     border: solid 1px #979797;
     box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1);
 } */
+
+.rmx-option-icons {
+    position: absolute;
+    background-color: transparent;
+}
+.rmx-option-icons--item {
+    font-size: 0;
+}
+.rmx-option-icons--item.clickable {
+    position: relative;
+    z-index: 10;
+}
+
 .rmx-option_indicator {
     position: absolute;
     top: 14px;

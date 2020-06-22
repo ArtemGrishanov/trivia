@@ -35,7 +35,7 @@ const dynamicComponents = {
         }
 
         return (
-            <div style={{ position: 'absolute', backgroundColor: 'transparent', ...style }}>
+            <div className="rmx-option-icons" style={style}>
                 {icons.map((icon, i) => {
                     if (typeof icon.name !== 'string') {
                         return null
@@ -44,7 +44,11 @@ const dynamicComponents = {
                     const Icon = defaultIcons[icon.name]
 
                     return Icon ? (
-                        <div onClick={evt => onClick(icon.name, payload)} key={i} style={{ fontSize: 0 }}>
+                        <div
+                            className={`rmx-option-icons--item${icon.clickable ? ' clickable' : ''}`}
+                            onClick={evt => (icon.clickable ? onClick(icon.name, payload) : evt.preventDefault())}
+                            key={i}
+                        >
                             <Icon style={i > 0 ? { marginLeft: `${gap}px` } : {}} />
                         </div>
                     ) : null

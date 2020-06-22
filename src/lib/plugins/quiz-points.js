@@ -15,6 +15,7 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
         icons: [
             {
                 name: 'correctOption',
+                clickable: false,
             },
         ],
         hAlign: 'right',
