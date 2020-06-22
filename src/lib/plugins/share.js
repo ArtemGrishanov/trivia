@@ -40,14 +40,20 @@ export default function initShare(options = {}) {
                             tags: button.screen.tags,
                         },
                         componentId,
-                        title: 'Interacty – engaging content',
-                        description: 'Try it yourself!',
+                        title: '',
+                        description: '',
                         imageId: '',
                         imageUrl: '',
                         href: '',
                         customImage: false,
                         ...Object.values(oldEntities).find(e => e.componentId === componentId),
                     }
+                if (!ne.title) {
+                    ne.title = 'Interacty – engaging content'
+                }
+                if (!ne.description) {
+                    ne.description = 'Try it yourself!'
+                }
                 newEntities.push(ne)
             })
 
