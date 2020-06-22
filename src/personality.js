@@ -115,6 +115,9 @@ Remix.addCustomFunction('calcPersonalityRes', () => {
 
     let res = {},
         q = 0
+    // проходимся по кликам на опшены. на каждом клике смотрим есть ли связь этого опшена
+    // к результату - если есть берем вес привязки и смотрим если ли в объекте res ключ равный resultId
+    // если есть - добавляем значение weight к найденному resultId, если нет - сохраняет "resultId: weight" как новые
     for (var i = state.session.events.length - 1; i >= 0; i--) {
         const evt = state.session.events[i]
         if (evt.eventType === 'onclick' && evt.eventData.tags.indexOf('option') > 0) {
@@ -135,7 +138,9 @@ Remix.addCustomFunction('calcPersonalityRes', () => {
             break
         }
     }
-
+    // отсортируем результаты в полрядке убывания weight
+    // возможно ситуация что у нескольких result_id одинаковый weight, это не обрабатывается отдельно, также
+    // возьмется просто нулевой элемент
     const res_sorted_arr = Object.entries(res)
         .map(el => {
             return {

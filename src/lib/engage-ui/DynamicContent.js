@@ -26,7 +26,8 @@ const dynamicComponents = {
 
         function onClick(iconName, payload) {
             if (iconName === 'chainOption') {
-                postMessage('personality_chain', {
+                postMessage('request_data_layer', {
+                    layer_type: 'personality_chain',
                     screen_id: payload.screen_id,
                     option_id: payload.option_id,
                 })
