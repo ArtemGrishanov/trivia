@@ -73,7 +73,6 @@ describe('Remix', () => {
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.left`)).toEqual(100)
 
             // переключить обратно на 800 и посмотреть значения
-            debugger
             setSize(container, 800, 600)
             expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.left`)).toEqual(100)
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.left`)).toEqual(99)
@@ -96,7 +95,7 @@ describe('Remix', () => {
 
             const screenId = addScreen()
             const componentId = addComponent(screenId)
-            debugger
+
             // не ставит размер так как уже ровняется ширина 800
             setSize(container, 800, 600)
             expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(10)
@@ -145,7 +144,73 @@ describe('Remix', () => {
             console.log('THE END')
         })
 
-        it('todo', () => {
+        it('add screen under custom width', () => {})
+
+        it('serialization', () => {
+            const container = getDiv()
+            Remix.reset()
+            Remix.init({
+                mode: 'edit',
+                container,
+            })
+
+            // прямое изменение app.sessionsize.width не вызовет расчета адаптации (Remix.setData({ [`app.sessionsize.width`]: 800 }, false, true))
+            setSize(container, 800, 600)
+            expect(Remix.getProperty(`app.sessionsize.width`)).toEqual(800)
+
+            const screenId = addScreen()
+            const componentId = addComponent(screenId)
+
+            setSize(container, 800, 600)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(10)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(
+                10,
+            )
+
+            setSize(container, 320, 600)
+            Remix.setData({ [`router.screens.${screenId}.components.${componentId}.szLeft`]: 1 }, false, true)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(1)
+
+            debugger
+            const serData = Remix.serialize2()
+
+            Remix.reset()
+            expect(Remix.getState().router.screens.toArray()).toHaveLength(0)
+            Remix.init({
+                mode: 'edit',
+                container,
+                defaultProperties: serData,
+            })
+            // размеры контейнера 320 были установлены последний раз
+            expect(Remix.getProperty(`app.sessionsize.width`)).toEqual(320)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(
+                10,
+            )
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(1)
+
+            setSize(container, 800, 600)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(10)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(
+                10,
+            )
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(1)
+
+            setSize(container, 500, 600)
+            Remix.reset()
+            Remix.init({
+                mode: 'edit',
+                container,
+                defaultProperties: serData,
+            })
+            expect(Remix.getProperty(`app.sessionsize.width`)).toEqual(500)
+            expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(
+                10,
+            )
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(1)
+
             // 6)
             // serialize
             // deserialize

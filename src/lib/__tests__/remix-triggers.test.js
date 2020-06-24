@@ -160,7 +160,6 @@ describe('Remix', () => {
                 },
                 then: Remix.registerTriggerAction('custom', evt => {
                     expect(evt.trigger.when.eventType).toEqual('property_updated')
-                    debugger
                     c++
                 }),
             })

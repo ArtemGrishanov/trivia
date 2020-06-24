@@ -28,8 +28,20 @@ const componentSchemas = {
 const schemaData = {
     'app.size.width': EngageAppSchema.getDescription('width'),
     'app.size.height': EngageAppSchema.getDescription('height'),
-    'app.sessionsize.width': EngageAppSchema.getDescription('width'),
-    'app.sessionsize.height': EngageAppSchema.getDescription('height'),
+    'app.sessionsize.width': {
+        type: 'number',
+        min: 80,
+        max: 4000,
+        default: 800,
+        serialize: false,
+    },
+    'app.sessionsize.height': {
+        type: 'number',
+        min: 18,
+        max: 12000,
+        default: 600,
+        serialize: false,
+    },
     'router.[screens HashList]': RouterScreensSchema.getDescription('screens'),
     'router.currentScreenId': RouterScreensSchema.getDescription('currentScreenId'),
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),

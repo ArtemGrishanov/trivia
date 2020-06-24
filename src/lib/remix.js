@@ -15,7 +15,7 @@ import {
     throttle,
     parseComponentPath,
 } from './remix/util/util.js'
-import { updateWindowSize, updateAppHeight } from './remix/layout/helpers'
+import { updateWindowSize, updateAppHeight, getContainerSize } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
 export const REMIX_RESET_STATE = '__Remix_reset_state__'
@@ -237,7 +237,6 @@ function setCurrentScreen(screenId) {
 function calcConditionalProperties(state, data) {
     let conditionalData = {}
 
-    debugger
     Object.keys(data).forEach(path => {
         if (_masters[path]) {
             // меняется мастер свойство
@@ -616,12 +615,18 @@ function init({ externalActions = [], container = null, mode = 'none', defaultPr
     containerWindow = source
     logging = typeof log === 'boolean' ? log : LOG_BY_DEFAULT
     extActions = externalActions || []
+    const { width, height } = getContainerSize(root, mode),
+        // необходимо установить размер приложения при десериализации, чтобы условные свойства выставились верно
+        additionalData = {
+            'app.sessionsize.width': width,
+            'app.sessionsize.height': height,
+        }
     if (defaultProperties) {
-        deserialize2(defaultProperties)
+        deserialize2(defaultProperties, { additionalData })
     } else if (window.__REMIX_DEFAULT_PROPERTIES__) {
         try {
             // один из способов передать свойства для запуска приложения. Используется при публикации
-            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__)
+            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__, { additionalData })
         } catch (err) {
             console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message)
         }
@@ -1114,10 +1119,10 @@ export function deserialize(json) {
  *
  * @param {string} json
  */
-export function deserialize2(json) {
+export function deserialize2(json, options = {}) {
     if (typeof json === 'string') {
         const st = JSON.parse(json)
-        const data = {}
+        let data = {}
         schema.selectorsInProcessOrder.forEach(selector => {
             const props = getPropertiesBySelector(st, selector, {
                 typeCheckers: {
@@ -1132,6 +1137,9 @@ export function deserialize2(json) {
                 data[p.path] = v
             })
         })
+        if (options.additionalData) {
+            data = { ...data, ...options.additionalData }
+        }
         log('deserialize2:', data)
         remix.setData(data, false, true)
     } else {

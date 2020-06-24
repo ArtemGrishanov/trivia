@@ -14,6 +14,25 @@ import { getAdaptedChildrenProps } from './adapter.js'
 import { debounce } from '../util/util'
 
 /**
+ *
+ * @param {string} [mode]
+ */
+export function getContainerSize(root, mode) {
+    mode = mode || getMode()
+    if (mode === 'edit') {
+        const rect = root.getBoundingClientRect()
+        return {
+            width: Math.round(rect.width),
+            height: Math.round(rect.height),
+        }
+    }
+    return {
+        width: window.innerWidth,
+        height: window.innerHeight,
+    }
+}
+
+/**
  * Обновить размер приложения в рамках сессии
  * Запустится процедура адаптации UI для новой ширины
  *
@@ -22,16 +41,8 @@ import { debounce } from '../util/util'
 export function updateWindowSize(root) {
     const store = getStore()
     let state = store.getState(),
-        width,
-        height
-    if (getMode() === 'edit') {
-        const rect = root.getBoundingClientRect()
-        width = Math.round(rect.width)
-        height = Math.round(rect.height)
-    } else {
-        width = window.innerWidth
-        height = window.innerHeight
-    }
+        { width, height } = getContainerSize(root)
+
     // width === 0 | height === 0, window may be not loaded yet
     if (width > 0 && height > 0 && (width !== state.app.sessionsize.width || height !== state.app.sessionsize.height)) {
         // console.log(`updateWindowSize ${width} ${height}`)
