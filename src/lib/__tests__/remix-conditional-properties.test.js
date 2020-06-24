@@ -10,6 +10,7 @@ describe('Remix', () => {
 
     describe('#conditional_properties', () => {
         it('should set and save conditional property', () => {
+            Remix.reset()
             Remix.init({
                 mode: 'edit',
                 container: getDiv(),
@@ -37,6 +38,7 @@ describe('Remix', () => {
 
         it('should launch auto adaptation for master property first time', () => {
             const container = getDiv()
+            Remix.reset()
             Remix.init({
                 mode: 'edit',
                 container,
@@ -86,6 +88,7 @@ describe('Remix', () => {
 
         it('should select nearest key for safe zone properties', () => {
             const container = getDiv()
+            Remix.reset()
             Remix.init({
                 mode: 'edit',
                 container,
@@ -93,10 +96,14 @@ describe('Remix', () => {
 
             const screenId = addScreen()
             const componentId = addComponent(screenId)
+            debugger
+            // не ставит размер так как уже ровняется ширина 800
             setSize(container, 800, 600)
             expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(10)
-            //expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(10) // ???
-            // должно ли быть сразу в условных? подумать
+            // при добавлении нового компонента свойство сохраняется в условные сразу же при текущем мастер свойстве
+            expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(
+                10,
+            )
 
             Remix.setData({ [`router.screens.${screenId}.components.${componentId}.szLeft`]: 1 }, false, true)
             expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
@@ -134,6 +141,20 @@ describe('Remix', () => {
                 undefined,
             )
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
+
+            console.log('THE END')
+        })
+
+        it('todo', () => {
+            // 6)
+            // serialize
+            // deserialize
+            // 7)
+            // // to other test case
+            // set `router.screens.${screenId}.components.${componentId}.top` = 1000
+            // // check if app height updated
+            // 8)
+            // add new component later
         })
     })
 })

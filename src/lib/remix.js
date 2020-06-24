@@ -18,6 +18,7 @@ import {
 import { updateWindowSize, updateAppHeight } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
+export const REMIX_RESET_STATE = '__Remix_reset_state__'
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
 export const REMIX_HASHLIST_ADD_ACTION = '__Remix_hashlist_update_action__'
 export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_position_action__'
@@ -171,7 +172,7 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
         }
     }
     if (data.method === 'set_remix_container_size') {
-        console.log(`set_remix_container_size ${data.size.width} ${data.size.height}`)
+        // console.log(`set_remix_container_size ${data.size.width} ${data.size.height}`)
         if (data.size.width > 0) {
             root.style.width = data.size.width + 'px'
         }
@@ -228,11 +229,18 @@ function setCurrentScreen(screenId) {
     })
 }
 
+/**
+ *
+ * @param {*} state текущий стейт
+ * @param {*} data данные которые будут установлены в setState
+ */
 function calcConditionalProperties(state, data) {
     let conditionalData = {}
 
+    debugger
     Object.keys(data).forEach(path => {
         if (_masters[path]) {
+            // меняется мастер свойство
             // несколько свойств зависят от этого мастер-свойства
             _masters[path].forEach(mp => {
                 const slaveProperties = getPropertiesBySelector(state, mp.selector)
@@ -255,12 +263,11 @@ function calcConditionalProperties(state, data) {
                     })
                     if (dd) {
                         if (dd.key === undefined || dd.value === undefined) {
-                            debugger
                             throw new Error(`"onMasterChanged" must return key-value object. Path: ${path}`)
                         }
-                        console.log(
-                            `Master property "${path}" changed to "${data[path]}". And slave property changed: "router.screens.${screenId}.components.${componentId}.${propName}" to "${dd.value}"`,
-                        )
+                        // console.log(
+                        //     `Master property "${path}" changed to "${data[path]}". And slave property changed: "router.screens.${screenId}.components.${componentId}.${propName}" to "${dd.value}"`,
+                        // )
                         conditionalData = {
                             ...conditionalData,
                             [`router.screens.${screenId}.components.${componentId}.${propName}`]: dd.value,
@@ -289,7 +296,6 @@ function calcConditionalProperties(state, data) {
             const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
             const dt = d.condition.onSave({ masterValue, path, data, state, screenId, componentId })
             if (dt) {
-                //debugger;
                 Object.keys(dt).forEach(key => {
                     // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
                     conditionalData = {
@@ -302,6 +308,56 @@ function calcConditionalProperties(state, data) {
     })
 
     return conditionalData
+}
+
+/**
+ * Пройти по всем условным свойствам и установить их значения при текущем мастере
+ * Во-первых это нужно после при добавлении новых экранов/компонентов, при появлении новых свойств
+ *
+ * Похоже на 'calcConditionalProperties' но делаем это для всех условных свойств
+ */
+function normalizeConditionalProperties() {
+    const state = getState(),
+        masterValues = {}
+    let conditionalData = {}
+
+    Object.keys(schema._schm).forEach(selector => {
+        const desc = schema._schm[selector]
+        if (desc.condition && desc.condition.master) {
+            if (!masterValues[desc.condition.master]) {
+                masterValues[desc.condition.master] = getProperty(desc.condition.master, state)
+            }
+
+            const masterValue = masterValues[desc.condition.master],
+                pathes = getPropertiesBySelector(state, selector)
+
+            pathes.forEach(prop => {
+                const path = prop.path
+                const { screenId, componentId, propName } = parseComponentPath(path)
+
+                if (!screenId || !componentId || !propName) {
+                    throw new Error(
+                        `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
+                    )
+                }
+
+                const data = { [prop.path]: prop.value }
+                const dt = desc.condition.onSave({ masterValue, path, data, state, screenId, componentId })
+                if (dt) {
+                    Object.keys(dt).forEach(key => {
+                        // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                        conditionalData = {
+                            ...conditionalData,
+                            [desc.condition.conditionPath({ screenId, componentId, key })]: dt[key],
+                        }
+                    })
+                }
+            })
+        }
+    })
+    if (Object.keys(conditionalData).length > 0) {
+        setData(conditionalData, false, true)
+    }
 }
 
 /**
@@ -441,6 +497,8 @@ function addHashlistElement(hashlistPropPath, index, elementData = {}) {
         d.prototypeIndex = elementData.prototypeIndex
     }
     store.dispatch(d)
+    // так как появились новые свойства, то для них надо запустить проверку условных свойств
+    normalizeConditionalProperties()
 }
 
 /**
@@ -470,6 +528,7 @@ function insertAfterHashlistElement(hashlistPropPath, beforeId, elementData = {}
         d.prototypeIndex = elementData.prototypeIndex
     }
     store.dispatch(d)
+    normalizeConditionalProperties()
 }
 
 /**
@@ -577,6 +636,12 @@ function init({ externalActions = [], container = null, mode = 'none', defaultPr
     Remix.fireEvent('remix_inited')
 }
 
+function reset() {
+    store.dispatch({
+        type: REMIX_RESET_STATE,
+    })
+}
+
 /**
  * Конвертация rgba(126,0,255,100) -> #7e00ff
  * @param {string} rgb
@@ -638,12 +703,10 @@ export function remixReducer({ reducers, dataSchema }) {
     return (state, action) => {
         log(`remixReducer: action.type="${action.type}" state=`, state)
         let nextState = null
-        // if (action.type === REMIX_INIT_ACTION) {
-        //     // empty data action, for data normalization
-        //     nextState = {...state};
-        // }
-        // else
-        if (action.type === REMIX_UPDATE_ACTION) {
+
+        if (action.type === REMIX_RESET_STATE) {
+            nextState = undefined
+        } else if (action.type === REMIX_UPDATE_ACTION) {
             if (!action.data) {
                 throw new Error('Remix: action.data is not specified')
             }
@@ -658,24 +721,10 @@ export function remixReducer({ reducers, dataSchema }) {
                 ? action.newElement
                 : clone(schema.getDescription(action.path).prototypes[protIndex].data)
             targetHashlist.addElement(newElement, action.index)
-            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-
-            //TODO
-            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_ADDED", property: action.path})};
-            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
-            // - например перераспределить баллы по результатам с появлением нового вопроса
-            // - например создать новый экран (хотя это в компонентах может быть)
         } else if (action.type === REMIX_HASHLIST_CHANGE_POSITION_ACTION) {
             nextState = _cloneState(state)
             const targetHashlist = fetchHashlist(nextState, action.path, action.type)
             targetHashlist.changePosition(action.elementIndex, action.newElementIndex)
-            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-
-            //TODO
-            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_POSITION_WAS_CHANGED", property: action.path})};
-            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
-            // - например перераспределить баллы по результатам с появлением нового вопроса
-            // - например создать новый экран (хотя это в компонентах может быть)
         } else if (action.type === REMIX_HASHLIST_DELETE_ACTION) {
             nextState = _cloneState(state)
             const targetHashlist = fetchHashlist(nextState, action.path, action.type)
@@ -686,13 +735,6 @@ export function remixReducer({ reducers, dataSchema }) {
             } else {
                 throw new Error('Remix: can not delete hashlist element. You must specify "elementId" or "index"')
             }
-            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-
-            //TODO
-            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_DELETED", property: action.path})};
-            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
-            // - например перераспределить баллы по результатам с появлением нового вопроса
-            // - например создать новый экран (хотя это в компонентах может быть)
         } else {
             // it maybe @@redux/INITx.x.x.x actions
             // it maybe a regular app action
@@ -705,21 +747,11 @@ export function remixReducer({ reducers, dataSchema }) {
             nextState = normalizer.process(nextState)
             log('remixReducer: normalized next state: ', nextState)
         }
-        // _lastUpdDiff = diff(state, nextState);
-        // const changed = _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0;
-        // if (changed) {
-        //     log('Diff', _lastUpdDiff);
-        // }
-        // if (action.forceFeedback/* || changed*/) {
-        //     _putOuterEventInQueue('properties_updated', {...getLastDiff(), state: serialize2(nextState)});
-        // }
         _sendOuterEvents()
         return nextState
     }
 }
 
-//TODO если объявить свойство в схеме и не использовать редюсер, то оно стирается каждый раз, и потом нормализуется (дефолтное значение). Не решил пока проблема ли это.
-// где пользователю объявлять кастомные данные типа getState().my.property
 function app(state = {}) {
     return state
 }
@@ -1397,6 +1429,7 @@ const remix = {
     getSchema,
     getProperty,
     updateHeight,
+    reset,
 
     // for debug
     _setScreenEvents,

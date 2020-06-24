@@ -6,7 +6,6 @@ export function getConditionConfig(propName) {
          * Сохранить значение на основе мастер свойства
          */
         onSave: ({ path, data, masterValue }) => {
-            // просто обычное сохранение left
             if (masterValue !== undefined) {
                 return { [masterValue]: data[path] }
             }

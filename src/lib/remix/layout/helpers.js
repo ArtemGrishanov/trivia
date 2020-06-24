@@ -34,7 +34,7 @@ export function updateWindowSize(root) {
     }
     // width === 0 | height === 0, window may be not loaded yet
     if (width > 0 && height > 0 && (width !== state.app.sessionsize.width || height !== state.app.sessionsize.height)) {
-        console.log(`updateWindowSize ${width} ${height}`)
+        // console.log(`updateWindowSize ${width} ${height}`)
         const defaultWidth = state.app.size.width
 
         setData(
@@ -98,7 +98,7 @@ function getAdaptationProps(scr, width) {
  * @param {object} boundingRects (опционально) рассчитанные размеры компонентов width,height
  */
 function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects }) {
-    console.log('calcAdaptedProps: adaptation running...')
+    // console.log('calcAdaptedProps: adaptation running...')
 
     let props = {},
         maxContentHeight = 0
