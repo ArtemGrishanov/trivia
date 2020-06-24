@@ -60,24 +60,32 @@ const schemaData = {
         min: -9999,
         max: 9999,
         default: 0,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.left': {
         type: 'number',
         min: -9999,
         max: 9999,
         default: 0,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.width': {
         type: 'number',
         min: 0,
         max: 9999,
         default: 100,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.height': {
         type: 'number',
         min: 0,
         max: 9999,
         default: 100,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szTop': {
         type: 'number',
@@ -85,6 +93,8 @@ const schemaData = {
         max: 1024,
         default: 10,
         canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szLeft': {
         type: 'number',
@@ -92,6 +102,8 @@ const schemaData = {
         max: 1024,
         default: 10,
         canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szRight': {
         type: 'number',
@@ -99,6 +111,8 @@ const schemaData = {
         max: 1024,
         default: 10,
         canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szBottom': {
         type: 'number',
@@ -106,6 +120,8 @@ const schemaData = {
         max: 1024,
         default: 10,
         canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
 }
 

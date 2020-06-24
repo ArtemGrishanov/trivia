@@ -7,13 +7,13 @@ import {
     combineReducers,
     getScreenIdFromPath,
     getComponentIdFromPath,
-    getPropNameFromPath,
     debounce,
     callOncePerTime,
     htmlEncode,
     htmlDecode,
     throttle,
     parseComponentPath,
+    parseComponentAdapteduiPath,
 } from './remix/util/util.js'
 import { updateWindowSize, updateAppHeight, getContainerSize } from './remix/layout/helpers'
 
@@ -237,10 +237,10 @@ function setCurrentScreen(screenId) {
 function calcConditionalProperties(state, data) {
     let conditionalData = {}
 
+    // меняется мастер свойство
+    // несколько свойств зависят от этого мастер-свойства и их надо пересчитать
     Object.keys(data).forEach(path => {
         if (_masters[path]) {
-            // меняется мастер свойство
-            // несколько свойств зависят от этого мастер-свойства
             _masters[path].forEach(mp => {
                 const slaveProperties = getPropertiesBySelector(state, mp.selector)
                 slaveProperties.forEach(slave => {
@@ -277,6 +277,7 @@ function calcConditionalProperties(state, data) {
         }
     })
 
+    // устанавливаем условное свойство, надо сохранить условия
     Object.keys(data).forEach(path => {
         const d = schema.getDescription(path)
         if (d && d.condition) {
@@ -302,6 +303,33 @@ function calcConditionalProperties(state, data) {
                         [d.condition.conditionPath({ screenId, componentId, key })]: dt[key],
                     }
                 })
+            }
+        }
+    })
+
+    // сохраняем условие, и надо проверить стоит ли обновить текущее значение свойства
+    // пример: после расчета адаптации. Ведь адаптационных алгоритм обновляет только adapted свойство и не ставит текущие напрямую
+    Object.keys(data).forEach(path => {
+        // если path подходит под conditionPath
+        const condDesc = schema.getDescription(path)
+        if (condDesc.conditionOf) {
+            const { screenId, masterKey, componentId, propName } = parseComponentAdapteduiPath(path)
+            if (screenId && masterKey && componentId && propName) {
+                const mainPath = condDesc.conditionOf({ screenId, componentId, propName })
+                const d = schema.getDescription(mainPath)
+                if (d) {
+                    const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
+                    if (masterKey == masterValue) {
+                        conditionalData = {
+                            ...conditionalData,
+                            [mainPath]: data[path],
+                        }
+                    }
+                } else {
+                    throw new Error(`Condition path not found for ${path}`)
+                }
+            } else {
+                throw new Error(`This conditional ${path} not supported`)
             }
         }
     })

@@ -3,7 +3,16 @@ import { getTokens, matchPropertyPath } from './object-path.js'
 
 const types = {
     string: {
-        attributes: ['default', 'serialize', 'condition', 'enum', 'minLength', 'maxLength', 'canBeUndefined'],
+        attributes: [
+            'default',
+            'serialize',
+            'condition',
+            'enum',
+            'minLength',
+            'maxLength',
+            'canBeUndefined',
+            'conditionOf',
+        ],
         mandatory: ['default'],
     },
     number: {
@@ -18,11 +27,12 @@ const types = {
             'appHeightProperty',
             'adaptedForCustomWidth',
             'canBeUndefined',
+            'conditionOf',
         ],
         mandatory: ['default', 'min', 'max'],
     },
     boolean: {
-        attributes: ['default', 'serialize', 'condition', 'enum', 'canBeUndefined'], // do not need to specify enum ['true', 'false']
+        attributes: ['default', 'serialize', 'condition', 'enum', 'canBeUndefined', 'conditionOf'], // do not need to specify enum ['true', 'false']
         mandatory: ['default'],
     },
     hashlist: {
@@ -35,23 +45,24 @@ const types = {
             'elementSchema',
             'prototypes',
             'canBeUndefined',
+            'conditionOf',
         ],
         mandatory: ['default'],
     },
     array: {
-        attributes: ['default', 'condition', 'canBeUndefined'],
+        attributes: ['default', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
     object: {
-        attributes: ['default', 'serialize', 'condition', 'canBeUndefined'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
     url: {
-        attributes: ['default', 'serialize', 'condition', 'canBeUndefined'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
     color: {
-        attributes: ['default', 'serialize', 'condition', 'canBeUndefined'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
 }

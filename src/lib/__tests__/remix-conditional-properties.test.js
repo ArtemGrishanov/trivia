@@ -1,6 +1,6 @@
 import Remix from '../remix.js'
 import store from '../../store'
-import { addScreen, addComponent } from '../__tests__utils/ui-methods.js'
+import { addScreen, addComponent, getProp } from '../__tests__utils/ui-methods.js'
 import { getDiv, setSize } from '../__tests__utils/ui-mocks.js'
 
 Remix.setStore(store)
@@ -140,11 +140,7 @@ describe('Remix', () => {
                 undefined,
             )
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.800.props.${componentId}.szLeft`)).toEqual(1)
-
-            console.log('THE END')
         })
-
-        it('add screen under custom width', () => {})
 
         it('serialization', () => {
             const container = getDiv()
@@ -172,7 +168,6 @@ describe('Remix', () => {
             expect(Remix.getProperty(`router.screens.${screenId}.components.${componentId}.szLeft`)).toEqual(1)
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(1)
 
-            debugger
             const serData = Remix.serialize2()
 
             Remix.reset()
@@ -211,15 +206,68 @@ describe('Remix', () => {
             )
             expect(Remix.getProperty(`router.screens.${screenId}.adaptedui.320.props.${componentId}.szLeft`)).toEqual(1)
 
-            // 6)
-            // serialize
-            // deserialize
             // 7)
             // // to other test case
             // set `router.screens.${screenId}.components.${componentId}.top` = 1000
             // // check if app height updated
             // 8)
             // add new component later
+        })
+
+        it('add components under custom width', () => {
+            const container = getDiv()
+            Remix.reset()
+            Remix.init({
+                mode: 'edit',
+                container,
+            })
+
+            setSize(container, 800, 600)
+            const screenId = addScreen()
+            const componentId = addComponent(screenId)
+            Remix.setData({ [`router.screens.${screenId}.components.${componentId}.left`]: 55 }, false, true)
+
+            expect(getProp(screenId, componentId, 'left')).toEqual(55)
+            expect(getProp(screenId, componentId, 'left', 800)).toEqual(55)
+            expect(getProp(screenId, componentId, 'szLeft')).toEqual(10)
+            expect(getProp(screenId, componentId, 'szLeft', 800)).toEqual(10)
+
+            debugger
+            setSize(container, 320, 600)
+            expect(getProp(screenId, componentId, 'left') < 55).toEqual(true) // произошла адаптация и left сместился
+            const component_adapted_left = Remix.getProperty(
+                `router.screens.${screenId}.components.${componentId}.left`,
+            )
+            expect(getProp(screenId, componentId, 'left', 800)).toEqual(55)
+            expect(getProp(screenId, componentId, 'left', 320)).toEqual(component_adapted_left)
+            expect(getProp(screenId, componentId, 'szLeft')).toEqual(10) // это не адаптируется, просто условное свойство
+            expect(getProp(screenId, componentId, 'szLeft', 800)).toEqual(10)
+            expect(getProp(screenId, componentId, 'szLeft', 320)).toEqual(undefined) // адаптации не было, и намеренно не ставили свойство это. Значит пока undefined
+
+            const screenId2 = addScreen()
+            const componentId2 = addComponent(screenId2)
+            Remix.setData({ [`router.screens.${screenId2}.components.${componentId2}.left`]: 44 }, false, true)
+
+            expect(getProp(screenId2, componentId2, 'left')).toEqual(44)
+            expect(getProp(screenId2, componentId2, 'left', 320)).toEqual(44)
+            expect(getProp(screenId2, componentId2, 'szLeft')).toEqual(10)
+            expect(getProp(screenId2, componentId2, 'szLeft', 320)).toEqual(10)
+
+            setSize(container, 800, 600)
+            // первый компонент - все как и раньше ничего не меняли
+            expect(getProp(screenId, componentId, 'left')).toEqual(55)
+            expect(getProp(screenId, componentId, 'left', 800)).toEqual(55)
+            expect(getProp(screenId, componentId, 'left', 320)).toEqual(component_adapted_left)
+            expect(getProp(screenId, componentId, 'szLeft')).toEqual(10)
+            expect(getProp(screenId, componentId, 'szLeft', 800)).toEqual(10)
+            expect(getProp(screenId, componentId, 'szLeft', 320)).toEqual(undefined)
+            // второй компонент
+            expect(getProp(screenId2, componentId2, 'left')).toEqual(44)
+            expect(getProp(screenId2, componentId2, 'left', 320)).toEqual(44)
+            expect(getProp(screenId2, componentId2, 'left', 800)).toEqual(undefined) // никогда не ставили на этой ширине экрана
+            expect(getProp(screenId2, componentId2, 'szLeft')).toEqual(10)
+            expect(getProp(screenId2, componentId2, 'szLeft', 320)).toEqual(10)
+            expect(getProp(screenId2, componentId2, 'szLeft', 800)).toEqual(undefined)
         })
     })
 })

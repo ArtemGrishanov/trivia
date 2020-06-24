@@ -66,6 +66,24 @@ export function parseComponentPath(path) {
     }
 }
 
+const _parsedCondPathes = {}
+export function parseComponentAdapteduiPath(path) {
+    if (_parsedCondPathes[path]) {
+        return _parsedCondPathes[path]
+    }
+    const regex = /^router\.screens\.([A-z0-9]+)\.adaptedui\.([A-z0-9]+)\.props.([A-z0-9]+).([A-z0-9]+)$/g,
+        m = regex.exec(path)
+    if (m && m[1] && m[2] && m[3] && m[4]) {
+        _parsedCondPathes[path] = {
+            screenId: m[1],
+            masterKey: m[2],
+            componentId: m[3],
+            propName: m[4],
+        }
+        return _parsedCondPathes[path]
+    }
+}
+
 /**
  * From https://github.com/reduxjs/redux/blob/master/src/combineReducers.js
  * TODO import normally

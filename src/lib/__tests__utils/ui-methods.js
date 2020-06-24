@@ -21,3 +21,10 @@ export function addComponent(screenId, props = {}) {
     })
     return Remix.getState().router.screens[screenId].components.getLast().hashlistId
 }
+
+export function getProp(screenId, componentId, propName, masterKey = undefined) {
+    if (masterKey === undefined) {
+        return Remix.getProperty(`router.screens.${screenId}.components.${componentId}.${propName}`)
+    }
+    return Remix.getProperty(`router.screens.${screenId}.adaptedui.${masterKey}.props.${componentId}.${propName}`)
+}
