@@ -25,7 +25,10 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
         const state = remix.getState()
 
         // разобраться почему вызывается этот экшен на экранах без тэга USER_FORM_SCREEN_TAG
-        if (!state.router.screens[state.router.currentScreenId].tags.includes(USER_FORM_SCREEN_TAG)) {
+        if (
+            state.router.screens[state.router.currentScreenId] === void 0 ||
+            !state.router.screens[state.router.currentScreenId].tags.includes(USER_FORM_SCREEN_TAG)
+        ) {
             return
         }
 
@@ -56,6 +59,7 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
     })
 
     remix.registerTriggerAction(UPDATE_USER_FORM_SCREEN, event => {
+        console.log(UPDATE_USER_FORM_SCREEN)
         const { remix } = event
 
         const enable = remix.getProperty('app.userForm.enable')
@@ -82,7 +86,7 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
                 height: 460,
             })
         } else {
-            remix.setData({ [`router.screens.${userFormScreen.hashlistId}.disabled`]: !enable })
+            remix.setData({ [`router.screens.${userFormScreen.hashlistId}.disabled`]: !enable }, void 0, true)
         }
     })
 
