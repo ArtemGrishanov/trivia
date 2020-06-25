@@ -109,7 +109,7 @@ function getAdaptationProps(scr, width) {
  * @param {object} boundingRects (опционально) рассчитанные размеры компонентов width,height
  */
 function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects }) {
-    // console.log('calcAdaptedProps: adaptation running...')
+    // console.log(`calcAdaptedProps: adaptation running for ${screenId} on width ${width}`)
 
     let props = {},
         maxContentHeight = 0

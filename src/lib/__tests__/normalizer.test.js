@@ -70,7 +70,7 @@ describe('Selector', function () {
                     },
                 })
             }).toThrowError(
-                `DataSchema: invalid attribute "min". Valid attributes: default,serialize,adaptedForCustomWidth,enum,minLength,maxLength for type "string`,
+                `DataSchema: invalid attribute "min". Valid attributes: default,serialize,condition,enum,minLength,maxLength,canBeUndefined,conditionOf for type "string`,
             )
 
             expect(() => {
@@ -127,7 +127,7 @@ describe('Selector', function () {
                     },
                 })
             }).toThrowError(
-                'DataSchema: invalid attribute "min". Valid attributes: default,serialize,adaptedForCustomWidth,enum for type "boolean"',
+                'DataSchema: invalid attribute "min". Valid attributes: default,serialize,condition,enum,canBeUndefined,conditionOf for type "boolean"',
             )
         })
     })
@@ -165,7 +165,9 @@ describe('Selector', function () {
                         default: [],
                     },
                 })
-            }).toThrowError(`DataSchema: invalid attribute "min". Valid attributes: default for type "array`)
+            }).toThrowError(
+                `DataSchema: invalid attribute "min". Valid attributes: default,condition,canBeUndefined,conditionOf for type "array`,
+            )
 
             expect(() => {
                 new DataSchema({

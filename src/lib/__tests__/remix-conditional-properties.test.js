@@ -260,11 +260,12 @@ describe('Remix', () => {
             expect(getProp(screenId, componentId, 'left', 320)).toEqual(component_adapted_left)
             expect(getProp(screenId, componentId, 'szLeft')).toEqual(10)
             expect(getProp(screenId, componentId, 'szLeft', 800)).toEqual(10)
-            expect(getProp(screenId, componentId, 'szLeft', 320)).toEqual(undefined)
+            expect(getProp(screenId, componentId, 'szLeft', 320)).toEqual(10) // уже не undefined, так как при этой ширине добавили экран,компонент и произошла запись для всех условных свойств
             // второй компонент
-            expect(getProp(screenId2, componentId2, 'left')).toEqual(44)
+            const left2_800 = getProp(screenId2, componentId2, 'left')
+            expect(left2_800 > 44).toEqual(true) // добавляли этот экран при 320, и теперь на 800 произошла адаптация, left увеличился
             expect(getProp(screenId2, componentId2, 'left', 320)).toEqual(44)
-            expect(getProp(screenId2, componentId2, 'left', 800)).toEqual(undefined) // никогда не ставили на этой ширине экрана
+            expect(getProp(screenId2, componentId2, 'left', 800)).toEqual(left2_800) // никогда не ставили на этой ширине экрана
             expect(getProp(screenId2, componentId2, 'szLeft')).toEqual(10)
             expect(getProp(screenId2, componentId2, 'szLeft', 320)).toEqual(10)
             expect(getProp(screenId2, componentId2, 'szLeft', 800)).toEqual(undefined)
