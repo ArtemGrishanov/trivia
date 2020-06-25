@@ -24,37 +24,31 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
         const { remix, eventData } = event
         const state = remix.getState()
 
-        // разобраться почему вызывается этот экшен на экранах без тэга USER_FORM_SCREEN_TAG
-        if (
-            state.router.screens[state.router.currentScreenId] === void 0 ||
-            !state.router.screens[state.router.currentScreenId].tags.includes(USER_FORM_SCREEN_TAG)
-        ) {
+        const currentScreen = state.router.screens[state.router.currentScreenId]
+        if (currentScreen === void 0 || !currentScreen.tags.includes(USER_FORM_SCREEN_TAG)) {
             return
         }
 
-        let nextScreenId = void 0
-        eventData.diff.changed
-            .filter(({ path }) => userDataFormSelector.match(path, state))
-            .forEach(({ path, value }) => {
-                const [, screenId, componentId] = path.match(
-                    /router\.screens\.([0-9a-z]{6})\.components\.([0-9a-z]{6})/,
-                )
+        const diff = eventData.diff.changed.filter(({ path }) => userDataFormSelector.match(path, state))
 
-                const formValues = Object.entries(value)
-                    .filter(([_, value]) => value !== '')
-                    .map(([fieldType, value]) => ({ fieldType, value }))
+        let needNext = false
+        diff.forEach(({ path, value }) => {
+            const [, screenId, componentId] = path.match(/router\.screens\.([0-9a-z]{6})\.components\.([0-9a-z]{6})/)
 
-                if (formValues.length) {
-                    remix.postMessage('user-data', { formId: screenId, formValues })
+            const formValues = Object.entries(value)
+                .filter(([_, value]) => value !== '')
+                .map(([fieldType, value]) => ({ fieldType, value }))
 
-                    nextScreenId = remix.getProperty(`router.screens.${screenId}.data.nextScreenId`)
-                    remix.setData({ [`router.screens.${screenId}.data.nextScreenId`]: '' }, void 0, true)
-                    remix.setData({ [`router.screens.${screenId}.components.${componentId}.data`]: {} }, void 0, true)
-                }
-            })
+            if (formValues.length) {
+                remix.postMessage('user-data', { formId: screenId, formValues })
+                remix.setData({ [`router.screens.${screenId}.components.${componentId}.data`]: {} }, void 0, true)
 
-        if (nextScreenId !== void 0 && nextScreenId !== '') {
-            remix.setCurrentScreen(nextScreenId)
+                needNext = true
+            }
+        })
+
+        if (needNext) {
+            remix.fireEvent('request_next_screen', currentScreen.data)
         }
     })
 

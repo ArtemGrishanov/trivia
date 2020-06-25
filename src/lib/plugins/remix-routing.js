@@ -30,6 +30,8 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
     const restartTag = options.restartTag
     const nextTag = options.nextTag
     const prevTag = options.prevTag
+    const resultScreenTag = options.resultScreenTag
+    const userFormScreenTag = options.userFormScreenTag
 
     let screenIds = null
 
@@ -113,8 +115,8 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
         let isCustomFunc = false
         const paramName = 'nextScreenId'
         let nsId = event.eventData ? event.eventData[paramName] : null
+        const state = event.remix.getState()
         if (!nsId) {
-            const state = event.remix.getState()
             const sid = state.router.currentScreenId
             if (sid) {
                 const scr = state.router.screens[sid]
@@ -131,9 +133,27 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
             }
         }
         if (nsId) {
-            event.remix.setCurrentScreen(nsId)
+            const resultScreenIds = event.remix.getScreens({ tag: resultScreenTag }).map(({ hashlistId }) => hashlistId)
 
-            remix.fireEvent('remix-routing:next_screen', event.remix.getState().router.screens[nsId])
+            if (resultScreenIds.includes(nsId)) {
+                const userFormScreen = remix.getScreens({ tag: userFormScreenTag, includeDisabled: true })[0]
+
+                if (userFormScreen && state.router.currentScreenId !== userFormScreen.hashlistId) {
+                    event.remix.setCurrentScreen(userFormScreen.hashlistId)
+                    event.remix.setData(
+                        { [`router.screens.${userFormScreen.hashlistId}.data.nextScreenId`]: nsId },
+                        void 0,
+                        true,
+                    )
+                    remix.fireEvent('remix-routing:next_screen', state.router.screens[userFormScreen.hashlistId])
+                } else {
+                    event.remix.setCurrentScreen(nsId)
+                    remix.fireEvent('remix-routing:next_screen', state.router.screens[nsId])
+                }
+            } else {
+                event.remix.setCurrentScreen(nsId)
+                remix.fireEvent('remix-routing:next_screen', state.router.screens[nsId])
+            }
         } else {
             if (isCustomFunc) {
                 console.warn(
@@ -204,6 +224,11 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
             then: { actionType: 'go_next_screen' },
         })
     }
+
+    remix.addTrigger({
+        when: { eventType: 'request_next_screen' },
+        then: { actionType: 'go_next_screen' },
+    })
 
     if (prevTag) {
         remix.addTrigger({
