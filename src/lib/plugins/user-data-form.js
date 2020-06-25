@@ -84,27 +84,6 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
         }
     })
 
-    // let resultIntercepted = false
-    // remix.registerTriggerAction(INTERCEPT_CURRENT_SCREEN_CHANGE, event => {
-    //     console.log(INTERCEPT_CURRENT_SCREEN_CHANGE)
-    //     const { remix } = event
-    //     const { currentScreenId } = remix.getState().router
-    //     const resultScreenIds = remix.getScreens({ tag: resultTag }).map(({ hashlistId }) => hashlistId)
-
-    //     if (resultScreenIds.includes(currentScreenId)) {
-    //         if (resultIntercepted) {
-    //             resultIntercepted = false
-    //         } else {
-    //             const userFormScreen = remix.getScreens({ tag: USER_FORM_SCREEN_TAG, includeDisabled: true })[0]
-
-    //             if (userFormScreen) {
-    //                 resultIntercepted = true
-    //                 remix.setData({ 'router.currentScreenId': userFormScreen.hashlistId })
-    //             }
-    //         }
-    //     }
-    // })
-
     remix.addTrigger({
         when: {
             eventType: 'property_updated',
@@ -124,14 +103,6 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
         },
         then: { actionType: UPDATE_USER_FORM_SCREEN },
     })
-
-    // remix.addTrigger({
-    //     when: {
-    //         eventType: 'property_updated',
-    //         condition: { prop: 'path', clause: 'EQUALS', value: 'router.currentScreenId' },
-    //     },
-    //     then: { actionType: INTERCEPT_CURRENT_SCREEN_CHANGE },
-    // })
 }
 
 export default initUserForm
