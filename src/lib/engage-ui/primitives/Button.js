@@ -5,7 +5,7 @@ import TextEditor from '../bricks/TextEditor'
 import Arrow from '../bricks/Arrow'
 import * as icons from '../icons'
 
-class Button extends React.Component {
+export class Button extends React.Component {
     static primaryDefaultStyle = {
         color: '#FFFFFF',
     }
