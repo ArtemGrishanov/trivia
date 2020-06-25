@@ -145,14 +145,14 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
                         void 0,
                         true,
                     )
-                    remix.fireEvent('remix-routing:next_screen', state.router.screens[userFormScreen.hashlistId])
+                    event.remix.fireEvent('remix-routing:next_screen', state.router.screens[userFormScreen.hashlistId])
                 } else {
                     event.remix.setCurrentScreen(nsId)
-                    remix.fireEvent('remix-routing:next_screen', state.router.screens[nsId])
+                    event.remix.fireEvent('remix-routing:next_screen', state.router.screens[nsId])
                 }
             } else {
                 event.remix.setCurrentScreen(nsId)
-                remix.fireEvent('remix-routing:next_screen', state.router.screens[nsId])
+                event.remix.fireEvent('remix-routing:next_screen', state.router.screens[nsId])
             }
         } else {
             if (isCustomFunc) {
