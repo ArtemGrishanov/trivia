@@ -149,7 +149,7 @@ class MemoryPlayground extends React.Component {
     }
 
     finalScreen() {
-        Remix.setCurrentScreen(Remix.getScreens({ tag: 'final' })[0].hashlistId)
+        Remix.fireEvent('request_next_screen')
     }
 
     render() {
@@ -199,7 +199,7 @@ export const Schema = new DataSchema({
     },
     cardRowOption: {
         type: 'string',
-        enum: ['4x2', '4x3', '4x4', '5x2', '5x4', '6x3', '6x4', '6x6'],
+        enum: ['4x2', '4x3', '4x4', '5x2', '5x4', '3x6', '6x4', '6x6'],
         default: '4x4',
     },
     cardBackImgSrc: {
