@@ -46,13 +46,19 @@ class BasicImage extends React.Component {
         this.onClick = this.onClick.bind(this)
         this.reveal1Timer = null
         this.reveal2Timer = null
+        this.containerRef = React.createRef()
+        this.containerRect = null
     }
 
     componentDidUpdate() {
+        this.containerRect = this.containerRef.current.getBoundingClientRect()
+
         this.startLoading()
     }
 
     componentDidMount() {
+        this.containerRect = this.containerRef.current.getBoundingClientRect()
+
         this.startLoading()
     }
 
@@ -165,11 +171,12 @@ class BasicImage extends React.Component {
             this.isThumbLoaded() && (this.state.step === STATE_LOADING || this.state.step === STATE_REVEALING)
         const showOriginal = this.isLoaded() && (this.state.step === STATE_REVEALING || this.state.step === STATE_SHOW)
         const originImgStyle = {}
+        const { width, height } = this.containerRect || this.props
         if (this.props.backgroundSize === 'cover') {
             // originImgStyle['marginLeft'] = '-100%';
             // originImgStyle['marginRight'] = '-100%';
             // console.log(`Progr Img render w=${this.props.width} h=${this.props.height}`)
-            if (this.state.imageRatio > this.props.width / this.props.height) {
+            if (this.state.imageRatio > width / height) {
                 originImgStyle['maxWidth'] = 'none'
                 originImgStyle['height'] = '100%'
             } else {
@@ -205,7 +212,7 @@ class BasicImage extends React.Component {
         }
         let thumbImgCl = this.state.thumbImageMods
         return (
-            <div className={`image_cnt ${cntCl}`} style={cntSt} onClick={this.onClick}>
+            <div className={`image_cnt ${cntCl}`} style={cntSt} onClick={this.onClick} ref={this.containerRef}>
                 {showThumb && (
                     <div className="image_align_cnt" style={alignCntSt}>
                         <img alt="" className={'preview ' + thumbImgCl} src={this.props.srcThumb} />
