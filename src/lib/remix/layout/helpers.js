@@ -12,6 +12,7 @@ import {
 
 import { getAdaptedChildrenProps } from './adapter.js'
 import { debounce } from '../util/util'
+import { selectWidth } from '../util/condition'
 
 /**
  *
@@ -46,7 +47,6 @@ export function updateWindowSize(root) {
     // width === 0 | height === 0, window may be not loaded yet
     if (width > 0 && height > 0 && (width !== state.app.sessionsize.width || height !== state.app.sessionsize.height)) {
         // console.log(`updateWindowSize ${width} ${height}`)
-        const defaultWidth = state.app.size.width
 
         setData(
             {
@@ -57,23 +57,21 @@ export function updateWindowSize(root) {
             true,
         )
 
-        if (defaultWidth !== width) {
-            // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
-            let adaptationNeeded = false
-            getScreens().forEach(scr => {
-                if (!getAdaptationProps(scr, width)) {
-                    adaptationNeeded = true
-                    calcAdaptedProps({
-                        screen: scr,
-                        screenId: scr.hashlistId,
-                        defaultWidth,
-                        width,
-                    }).props
-                }
-            })
-            if (adaptationNeeded) {
-                runVerticalNormalization(store)
+        // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
+        let adaptationNeeded = false
+        getScreens().forEach(scr => {
+            if (!getAdaptationProps(scr, width)) {
+                adaptationNeeded = true
+                calcAdaptedProps({
+                    screen: scr,
+                    screenId: scr.hashlistId,
+                    width,
+                    sessionWidth: state.app.sessionsize.width,
+                }).props
             }
+        })
+        if (adaptationNeeded) {
+            runVerticalNormalization(store)
         }
 
         updateAppHeight()
@@ -104,20 +102,19 @@ function getAdaptationProps(scr, width) {
  * Получить адаптированные свойства компонентов для ширины и с вычисленными размерами компонентов boundingRects
  *
  * @param {Screen} screen
- * @param {Screen} defaultWidth
+ * @param {number} sessionWidth
  * @param {number} width ширина для которой рассчитать новые свойства
  * @param {object} boundingRects (опционально) рассчитанные размеры компонентов width,height
  */
-function calcAdaptedProps({ screen, screenId, defaultWidth, width, boundingRects }) {
+function calcAdaptedProps({ screen, screenId, sessionWidth, width, boundingRects }) {
     // console.log(`calcAdaptedProps: adaptation running for ${screenId} on width ${width}`)
 
     let props = {},
         maxContentHeight = 0
 
     const schema = getSchema(),
-        nearestAdaptation = getScreenNearestAdaptation({ screen, defaultWidth, width }),
-        // если нет адаптации то берем дефолтную ширину app.size.width при которой пользователь настроил весь основной UI
-        originWidth = nearestAdaptation ? nearestAdaptation.width : defaultWidth,
+        nearestAdaptation = getScreenNearestAdaptation({ screen, sessionWidth, width }),
+        originWidth = nearestAdaptation ? nearestAdaptation.width : sessionWidth,
         nearestProps = nearestAdaptation && nearestAdaptation.props ? nearestAdaptation.props : null,
         components = [],
         attrs = {}
@@ -211,26 +208,24 @@ window.runVerticalNormalization = () => runVerticalNormalization(getStore())
 export const setComponentsRects = debounce(boundingRects => {
     const state = getState()
 
-    if (state.app.size.width !== state.app.sessionsize.width) {
-        console.log(
-            `setComponentsRects: vertical adaptation running for width=${state.app.sessionsize.width} ...`,
+    console.log(
+        `setComponentsRects: vertical adaptation running for width=${state.app.sessionsize.width} ...`,
+        boundingRects,
+    )
+
+    const { width, height } = state.app.sessionsize
+
+    getScreens().forEach(scr => {
+        calcAdaptedProps({
+            screen: scr,
+            screenId: scr.hashlistId,
+            sessionWidth: width,
+            width,
             boundingRects,
-        )
-
-        const { width, height } = state.session.size
-
-        getScreens().forEach(scr => {
-            calcAdaptedProps({
-                screen: scr,
-                screenId: scr.hashlistId,
-                defaultWidth: state.app.size.width,
-                width,
-                boundingRects,
-            })
         })
+    })
 
-        updateAppHeight()
-    }
+    updateAppHeight()
 }, VETICAL_ADAPTATION_DEBOUNCE)
 
 /**
@@ -243,25 +238,32 @@ export const setComponentsRects = debounce(boundingRects => {
  * @param {number} width ширина приложения
  */
 function getScreenNearestAdaptation({ screen, defaultWidth, width }) {
+    const r = selectWidth(width, screen.adaptedui)
+    if (r) {
+        return {
+            width: r.key,
+            props: r.value,
+        }
+    }
     //при наличии нескольких адаптаций здесь придется переделать. Но пока предполагается только одна моб адаптация и смена дефолтного размера
     //также предполагается что апаптация меньше по ширине чем defaultWidth
-    const DEFAULT_WIDTH_DEVIATION = 50,
-        aKeys = screen.adaptedui ? Object.keys(screen.adaptedui) : null
+    // const DEFAULT_WIDTH_DEVIATION = 50,
+    //     aKeys = screen.adaptedui ? Object.keys(screen.adaptedui) : null
 
-    if (!aKeys || aKeys.length === 0) {
-        return undefined
-    }
+    // if (!aKeys || aKeys.length === 0) {
+    //     return undefined
+    // }
 
-    if (defaultWidth - DEFAULT_WIDTH_DEVIATION < width) {
-        // нет адаптации, использоваться будут дефолтные свойства компонентов (которые выставлены пользователем от размера defaultWidth)
-        return undefined
-    }
+    // if (defaultWidth - DEFAULT_WIDTH_DEVIATION < width) {
+    //     // нет адаптации, использоваться будут дефолтные свойства компонентов (которые выставлены пользователем от размера defaultWidth)
+    //     return undefined
+    // }
 
-    return {
-        width: parseInt(aKeys[0]),
-        contentHeight: screen.adaptedui[aKeys[0]].height,
-        props: screen.adaptedui[aKeys[0]].props,
-    }
+    // return {
+    //     width: parseInt(aKeys[0]),
+    //     contentHeight: screen.adaptedui[aKeys[0]].height,
+    //     props: screen.adaptedui[aKeys[0]].props,
+    // }
 }
 
 /**

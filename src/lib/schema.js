@@ -23,8 +23,6 @@ const types = {
             'min',
             'max',
             'enum',
-            'appWidthProperty',
-            'appHeightProperty',
             'adaptedForCustomWidth',
             'canBeUndefined',
             'conditionOf',

@@ -1,4 +1,3 @@
-import { EngageAppSchema } from '../../engage-ui/EngageApp.js'
 import DataSchema from '../../schema.js'
 import { Schema as ScreenComponentsSchema } from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema } from '../../engage-ui/router.js'
@@ -26,8 +25,12 @@ const componentSchemas = {
 }
 
 const schemaData = {
-    'app.size.width': EngageAppSchema.getDescription('width'),
-    'app.size.height': EngageAppSchema.getDescription('height'),
+    'app.size.height': {
+        type: 'number',
+        min: 100,
+        max: 4000,
+        default: 600,
+    },
     'app.sessionsize.width': {
         type: 'number',
         min: 80,

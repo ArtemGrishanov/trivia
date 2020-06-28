@@ -44,6 +44,7 @@ let logging = LOG_BY_DEFAULT,
     root = null,
     containerOrigin = null,
     containerWindow = null,
+    _onPostMessage = null,
     store = null,
     schema = null,
     _masters = {},
@@ -113,7 +114,6 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
     if (data.method === 'setsize') {
         // сообщение от контейнера по установке размера не имеет смысла
         // так как remix-приложение всегда width:100%;height:100% а реальный размер ставится в параметрах контейнера
-        //setSize(data.width, data.height);
     }
     if (data.method === 'addhashlistelement') {
         addHashlistElement(data.propertyPath, data.index, { newElement: data.newElement })
@@ -387,45 +387,6 @@ function normalizeConditionalProperties() {
     }
 }
 
-/**
- * Sets default application width and height
- * Application will start with this size if width/height not specified in init()
- *
- * Value will be set, if not "undefined"
- *
- * It changes value in state only. In fact width-height are governed by rcontainer (and by loader.js params)
- *
- * @param {number} width
- * @param {number} height
- */
-export function setSize(width, height) {
-    // find propertes in schema responsible for width and height
-    const data = {}
-    if (width !== undefined) {
-        const wprop = schema.getDescriptionsWithAttribute('appWidthProperty')
-        if (wprop && wprop.length > 0) {
-            if (wprop.length === 1) {
-                data[wprop[0].selector] = width
-            } else {
-                throw new Error(`Remix: found more than one selectors with "appWidthProperty" attribute`)
-            }
-        }
-    }
-    if (height !== undefined) {
-        const hprop = schema.getDescriptionsWithAttribute('appHeightProperty')
-        if (hprop && hprop.length > 0) {
-            if (hprop.length === 1) {
-                data[hprop[0].selector] = height
-            } else {
-                throw new Error(`Remix: found more than one selectors with "appHeightProperty" attribute`)
-            }
-        }
-    }
-    if (Object.keys(data).length > 0) {
-        setData(data)
-    }
-}
-
 function registerTriggerAction(name, fn) {
     _triggerActions[name] = fn
     return { actionType: name }
@@ -637,10 +598,20 @@ export function setStore(astore) {
  * Inites remix framework
  * Method for external init in index.html
  */
-function init({ externalActions = [], container = null, mode = 'none', defaultProperties = '', origin, source, log }) {
+function init({
+    externalActions = [],
+    container = null,
+    mode = 'none',
+    defaultProperties = '',
+    origin,
+    source,
+    log,
+    onPostMessage,
+}) {
     root = container
     containerOrigin = origin
     containerWindow = source
+    _onPostMessage = onPostMessage
     logging = typeof log === 'boolean' ? log : LOG_BY_DEFAULT
     extActions = externalActions || []
     const { width, height } = getContainerSize(root, mode),
@@ -914,6 +885,9 @@ function _putOuterEventInQueue(method, data, eventIndex) {
     } else {
         _outerEvents.push({ method: method, data: data })
     }
+    if (_onPostMessage) {
+        _onPostMessage({ method: method, data: data })
+    }
 }
 
 //TODO очередь зачем? реализовать отправку по таймеру?
@@ -1039,7 +1013,7 @@ function clone(obj) {
  */
 function _cloneState(state) {
     const json = serialize(state)
-    // important to clone all embedded objects in path, ex. "app" and "size" in ""app.size.width"
+    // important to clone all embedded objects in path, ex. "app" and "size" in "app.size.width"
     const newState = JSON.parse(JSON.stringify(state))
     // then assign all dynamic properties. because we must instantiate Hashlist with hashlist func constructor (not "object", when clonning JSON.parse - JSON.stringify)
     // TODO ideally you may write custom clone algorythm
@@ -1436,7 +1410,6 @@ const remix = {
     addScreenComponent,
     deleteScreenComponent,
     setData,
-    setSize,
     getScreens,
     getComponents,
     addHashlistElement,

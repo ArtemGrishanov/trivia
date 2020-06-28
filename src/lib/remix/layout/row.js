@@ -65,6 +65,7 @@ export default class Row {
                 // координата смещается пропорционально изменению ширины
                 const l = parseInt(c.left),
                     r = this.containerWidth / this.originalContainerWidth
+
                 if (c.widthStrategy === 'fixed') {
                     // ширина остается постоянной, и значит мы сильнее сдвигаем left для выравнивания
                     c.left = Math.round((l + c.width / 2) * r - c.width / 2)

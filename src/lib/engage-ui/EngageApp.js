@@ -40,25 +40,4 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = {}
 
-/**
- * Props schema
- * Which props could be edited and how (types, range and other rules)
- */
-export const EngageAppSchema = new DataSchema({
-    width: {
-        type: 'number',
-        min: 80,
-        max: 4000,
-        default: 444,
-        appWidthProperty: true,
-    },
-    height: {
-        type: 'number',
-        min: 18,
-        max: 12000,
-        default: 444,
-        appHeightProperty: true,
-    },
-})
-
 export default connect(mapStateToProps, mapDispatchToProps)(EngageApp)

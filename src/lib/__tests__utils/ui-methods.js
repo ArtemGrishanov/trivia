@@ -28,3 +28,7 @@ export function getProp(screenId, componentId, propName, masterKey = undefined) 
     }
     return Remix.getProperty(`router.screens.${screenId}.adaptedui.${masterKey}.props.${componentId}.${propName}`)
 }
+
+export function setProp(screenId, componentId, propName, v) {
+    Remix.setData({ [`router.screens.${screenId}.components.${componentId}.${propName}`]: v }, false, true)
+}
