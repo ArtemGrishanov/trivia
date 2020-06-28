@@ -8,6 +8,7 @@ import {
     getScreens,
     REMIX_PRE_RENDER,
     getComponents,
+    getRoot,
 } from '../../remix'
 
 import { getAdaptedChildrenProps } from './adapter.js'
@@ -40,8 +41,8 @@ export function getContainerSize(root, mode) {
  * @param {*} root
  */
 export function updateWindowSize(root) {
-    const store = getStore()
-    let state = store.getState(),
+    const store = getStore(),
+        state = store.getState(),
         { width, height } = getContainerSize(root)
 
     // width === 0 | height === 0, window may be not loaded yet
@@ -57,24 +58,33 @@ export function updateWindowSize(root) {
             true,
         )
 
-        // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
-        let adaptationNeeded = false
-        getScreens().forEach(scr => {
-            if (!getAdaptationProps(scr, width)) {
-                adaptationNeeded = true
-                calcAdaptedProps({
-                    screen: scr,
-                    screenId: scr.hashlistId,
-                    width,
-                    sessionWidth: state.app.sessionsize.width,
-                }).props
-            }
-        })
-        if (adaptationNeeded) {
-            runVerticalNormalization(store)
-        }
-
+        checkScreensAdaptation(width)
         updateAppHeight()
+    }
+}
+
+export function checkScreensAdaptation(width) {
+    width = width || getContainerSize(getRoot(), getMode()).width
+    const store = getStore()
+
+    debugger
+    // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
+    let adaptationNeeded = false
+    getScreens().forEach(scr => {
+        if (!getAdaptationProps(scr, width)) {
+            const state = store.getState()
+            adaptationNeeded = true
+            calcAdaptedProps({
+                screen: scr,
+                screenId: scr.hashlistId,
+                width,
+                sessionWidth: state.app.sessionsize.width,
+            }).props
+        }
+    })
+
+    if (adaptationNeeded) {
+        runVerticalNormalization(store)
     }
 }
 

@@ -15,7 +15,7 @@ import {
     parseComponentPath,
     parseComponentAdapteduiPath,
 } from './remix/util/util.js'
-import { updateWindowSize, updateAppHeight, getContainerSize } from './remix/layout/helpers'
+import { updateWindowSize, updateAppHeight, getContainerSize, checkScreensAdaptation } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
 export const REMIX_RESET_STATE = '__Remix_reset_state__'
@@ -485,6 +485,9 @@ function addHashlistElement(hashlistPropPath, index, elementData = {}) {
         d.prototypeIndex = elementData.prototypeIndex
     }
     store.dispatch(d)
+    if (hashlistPropPath === 'router.screens') {
+        checkScreensAdaptation()
+    }
     // так как появились новые свойства, то для них надо запустить проверку условных свойств
     normalizeConditionalProperties()
 }
@@ -516,6 +519,9 @@ function insertAfterHashlistElement(hashlistPropPath, beforeId, elementData = {}
         d.prototypeIndex = elementData.prototypeIndex
     }
     store.dispatch(d)
+    if (hashlistPropPath === 'router.screens') {
+        checkScreensAdaptation()
+    }
     normalizeConditionalProperties()
 }
 
@@ -1388,6 +1394,10 @@ export function getStore() {
     return store
 }
 
+export function getRoot() {
+    return root
+}
+
 export function getProperty(path, state) {
     state = state || store.getState()
     const r = getPropertiesBySelector(state, path)
@@ -1413,6 +1423,7 @@ const remix = {
     getScreens,
     getComponents,
     addHashlistElement,
+    cloneHashlistElement,
     insertAfterHashlistElement,
     changePositionInHashlist,
     deleteHashlistElement,
@@ -1437,6 +1448,7 @@ const remix = {
     postMessage,
     getSchema,
     getProperty,
+    getRoot,
     updateHeight,
     reset,
 

@@ -48,19 +48,21 @@ export function getConditionConfig(propName) {
  */
 export function selectWidth(val, base) {
     // выбрать наиболее подходящее значение из сохраненных
-    const widthes = Object.keys(base)
-        .map(k => parseInt(k))
-        .sort()
-    if (widthes.length > 0) {
-        let result = widthes[0]
-        for (let i = 1; i < widthes.length; i++) {
-            if (val > widthes[i] - 49) {
-                result = widthes[i]
+    if (base) {
+        const widthes = Object.keys(base)
+            .map(k => parseInt(k))
+            .sort()
+        if (widthes.length > 0) {
+            let result = widthes[0]
+            for (let i = 1; i < widthes.length; i++) {
+                if (val > widthes[i] - 49) {
+                    result = widthes[i]
+                }
             }
-        }
-        return {
-            key: result,
-            value: base[result],
+            return {
+                key: result,
+                value: base[result],
+            }
         }
     }
 }
