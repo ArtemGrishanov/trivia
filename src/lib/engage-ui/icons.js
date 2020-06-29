@@ -100,17 +100,6 @@ export const CompletionIcon = ({ color = 'white', style = {}, className = '' }) 
     </svg>
 )
 
-// export const correctOption = ({ color = 'white', style = {} }) => (
-//     <svg style={style} width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-//         <path
-//             fillRule="evenodd"
-//             clipRule="evenodd"
-//             d="M8 15C11.866 15 15 11.866 15 8C15 6.52329 14.5427 5.15338 13.7621 4.02414L8.18713 10.3311C8.09702 10.4331 7.96927 10.4939 7.83334 10.4996C7.6974 10.5052 7.56503 10.4553 7.46675 10.3612L4.65425 7.66889C4.45477 7.47793 4.44786 7.16142 4.63881 6.96195C4.82977 6.76247 5.14627 6.75556 5.34575 6.94651L7.78243 9.27906L13.1264 3.23338C11.8483 1.85944 10.0245 1 8 1C4.13401 1 1 4.13401 1 8C1 11.866 4.13401 15 8 15Z"
-//             fill={color}
-//         />
-//     </svg>
-// )
-
 export const correctOption = () => (
     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <circle cx="12" cy="12" r="12" fill="#2990FB" />
