@@ -92,9 +92,12 @@ export class TextEditor extends React.Component {
     // 1. when you open editor first time in edit mode import all fonts
     // 2. always - check which fonts is used and add styles dynamically
     render() {
-        const { readOnly } = this.props
+        const { readOnly, className = '' } = this.props
         return (
-            <div className={`rmx-text-editor ${readOnly ? '__readonly' : ''}`} ref={this.contentRef}>
+            <div
+                className={`rmx-text-editor ${readOnly ? '__readonly' : ''}${className.length ? ` ${className}` : ''}`}
+                ref={this.contentRef}
+            >
                 <ReactQuill
                     readOnly={readOnly}
                     modules={this.modules}

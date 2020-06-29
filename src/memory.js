@@ -14,6 +14,7 @@ import initGoogleAnalytics from './lib/plugins/googleAnalytics'
 import initFacebookAnalytics from './lib/plugins/facebook-pixel'
 import initButtonBehavior from './lib/plugins/button-behavior'
 import initQuizAnalytics from './lib/plugins/quiz-analytics'
+import initUserDataForm from './lib/plugins/user-data-form'
 
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import HashList from './lib/hashlist'
@@ -22,6 +23,8 @@ Remix.setStore(store)
 
 const PROJECT_TAG = 'memory'
 const PROJECT_ITEM_TAG = `${PROJECT_TAG}item`
+
+initUserDataForm({ remix: Remix })
 
 initQuizAnalytics({
     remix: Remix,
@@ -66,6 +69,8 @@ initCoverScreen({
 
 initRemixRouting({
     remix: Remix,
+    resultScreenTag: 'final',
+    userFormScreenTag: 'user_form_screen_tag',
     // some params specially for Remix-Routing plugin
     screenRoute: [
         { tag: 'start' }, // show all screens with tag in linear order

@@ -17,8 +17,11 @@ import initQuizAnalytics from './lib/plugins/quiz-analytics'
 import { getScreenHTMLPreview } from './lib/remix/util/util'
 import initButtonBehavior from './lib/plugins/button-behavior'
 import initQuizPoints from './lib/plugins/quiz-points'
+import initUserDataForm from './lib/plugins/user-data-form'
 
 Remix.setStore(store)
+
+initUserDataForm({ remix: Remix })
 
 initButtonBehavior({ remix: Remix })
 
@@ -30,6 +33,8 @@ initCoverScreen({
 
 initRemixRouting({
     remix: Remix,
+    resultScreenTag: 'result',
+    userFormScreenTag: 'user_form_screen_tag',
     // some params specially for Remix-Routing plugin
     screenRoute: [
         { tag: 'start' }, // show all scrrens with tag in linear order
