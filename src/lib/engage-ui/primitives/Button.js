@@ -5,7 +5,7 @@ import TextEditor from '../bricks/TextEditor'
 import Arrow from '../bricks/Arrow'
 import * as icons from '../icons'
 
-class Button extends React.Component {
+export class Button extends React.Component {
     static primaryDefaultStyle = {
         color: '#FFFFFF',
     }
@@ -137,7 +137,7 @@ const Icon = ({ name, position, gap, color }) => {
     const Icn = icons[name]
 
     const st = {
-        [position === 'left' ? 'marginRight' : 'marginLeft']: `${gap - 12}px`,
+        [position === 'left' ? 'marginRight' : 'marginLeft']: `${gap}px`,
         order: position === 'left' ? 0 : 1,
         position: 'relative',
     }
