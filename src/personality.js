@@ -70,10 +70,10 @@ initScreenProgress({
     screenTag: 'question',
 })
 
-initPersonalityChain({
-    remix: Remix,
-    optionTag: 'option',
-})
+// initPersonalityChain({
+//     remix: Remix,
+//     optionTag: 'option',
+// })
 
 initShare({
     remix: Remix,
