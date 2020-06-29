@@ -56,7 +56,16 @@ class UserDataForm extends React.Component {
     }
 
     render() {
-        const { id, doubleClicked, firstNameField, lastNameField, phoneField, emailField, needTitle } = this.props
+        const {
+            id,
+            doubleClicked,
+            firstNameField,
+            lastNameField,
+            phoneField,
+            emailField,
+            needTitle,
+            authorPrivacyPolicy,
+        } = this.props
 
         return (
             <div className="user-data-form clipped">
@@ -153,7 +162,17 @@ class UserDataForm extends React.Component {
                         <input type="checkbox" onChange={event => this.setLicenseAgreement(event.target.checked)} />
                         <span>
                             Agree with{' '}
-                            <a onClick={() => window.open('https://interacty.me/privacy-policy')}>Privacy Policy</a>
+                            <a
+                                onClick={() =>
+                                    window.open(
+                                        `https://interacty.me/policy${
+                                            authorPrivacyPolicy.length ? `?authorPolicy=${authorPrivacyPolicy}` : ''
+                                        }`,
+                                    )
+                                }
+                            >
+                                Privacy Policy
+                            </a>
                         </span>
                     </div>
                 </div>
@@ -182,6 +201,10 @@ const schema = {
     emailField: {
         type: 'boolean',
         default: false,
+    },
+    authorPrivacyPolicy: {
+        type: 'string',
+        default: '',
     },
     data: {
         type: 'object',
