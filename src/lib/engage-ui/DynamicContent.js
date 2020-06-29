@@ -43,7 +43,7 @@ const dynamicComponents = {
 
                     const Icon = defaultIcons[icon.name]
 
-                    return Icon && icon.name !== 'chainOption' ? (
+                    return Icon ? (
                         <div
                             className={`rmx-option-icons--item${icon.clickable ? ' clickable' : ''}`}
                             onClick={evt => (icon.clickable ? onClick(icon.name, payload) : evt.preventDefault())}
