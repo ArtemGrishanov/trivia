@@ -49,10 +49,10 @@ export default function initShare(options = {}) {
                         ...Object.values(oldEntities).find(e => e.componentId === componentId),
                     }
                 if (!ne.title) {
-                    ne.title = 'Project title'
+                    ne.title = 'Interacty – engaging content'
                 }
                 if (!ne.description) {
-                    ne.description = 'Project description'
+                    ne.description = 'Try it yourself!'
                 }
                 newEntities.push(ne)
             })

@@ -100,20 +100,42 @@ export const CompletionIcon = ({ color = 'white', style = {}, className = '' }) 
     </svg>
 )
 
-export const correctOption = ({ color = 'white', style = {} }) => (
-    <svg style={style} width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <circle cx="12" cy="12" r="12" fill={color} />
-        <mask id="mask0" mask-type="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
-            <circle cx="12" cy="12" r="12" fill={color} />
+export const correctOption = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="12" fill="#2990FB" />
+        <mask id="mask0" maskType="alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+            <circle cx="12" cy="12" r="12" fill="#2990FB" />
         </mask>
         <g mask="url(#mask0)">
             <path
                 d="M7 11.8947L11.0877 16L18 8"
                 stroke="white"
-                stroke-width="1.2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
+                strokeWidth="1.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
             />
         </g>
+    </svg>
+)
+
+export const chainOption = () => (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="12" cy="12" r="12" fill="#2990FB" />
+        <rect
+            x="4.6665"
+            y="8"
+            width="9.33333"
+            height="5.33333"
+            rx="2.66667"
+            stroke="white"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+        />
+        <path
+            d="M10 13.3332C10 11.8604 11.1939 10.6665 12.6667 10.6665H16.6667C18.1394 10.6665 19.3333 11.8604 19.3333 13.3332V13.3332C19.3333 14.8059 18.1394 15.9998 16.6667 15.9998H12.6667C11.1939 15.9998 10 14.8059 10 13.3332V13.3332Z"
+            stroke="white"
+            strokeWidth="1.2"
+            strokeLinecap="round"
+        />
     </svg>
 )

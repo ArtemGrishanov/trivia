@@ -4,6 +4,8 @@ import {
     getComponentIdFromPath,
     debounce,
     getPropNameFromPath,
+    isObject,
+    objectEquals,
 } from '../util/util.js'
 import { getPropertiesBySelector, deserialize } from '../../object-path.js'
 
@@ -142,6 +144,14 @@ function diff(schema = null, prevState = {}, nextState = {}) {
                 if (isHashlistInstance(psProp.value) && isHashlistInstance(nsProp.value)) {
                     // hashlist comparison
                     if (!psProp.value.equal(nsProp.value)) {
+                        result.changed.push(nsProp)
+                        if (isRouterScreens) result.routerScreensUpdates = true
+                        if (screenId && !result.updatedScreens[screenId])
+                            result.updatedScreens[screenId] = nextState.router.screens[screenId]
+                    }
+                } else if (isObject(psProp.value) && isObject(nsProp.value)) {
+                    // object comparison
+                    if (!objectEquals(psProp.value, nsProp.value)) {
                         result.changed.push(nsProp)
                         if (isRouterScreens) result.routerScreensUpdates = true
                         if (screenId && !result.updatedScreens[screenId])
