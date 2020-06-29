@@ -197,7 +197,7 @@ export function getScreenHTMLPreview({ screen, defaultTitle }) {
             background-image:url(${screen.backgroundImage});
             background-size:cover;
             background-position:center;
-            background-color:${screen.backgroundColor};
+            background-color:#2990fb;
             color:#fff;
             font-size:48px;
             display:flex;
