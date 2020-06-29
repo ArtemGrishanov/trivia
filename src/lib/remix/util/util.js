@@ -198,6 +198,7 @@ export function getScreenHTMLPreview({ screen, defaultTitle }) {
             background-size:cover;
             background-position:center;
             background-color:#2990fb;
+            font-family:Arial,sans-serif;
             color:#fff;
             font-size:48px;
             display:flex;
