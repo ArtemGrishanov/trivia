@@ -19,8 +19,16 @@ import { Schema as FbButtonSchema } from '../primitives/social/FbButton'
 import Screen from '../Screen'
 import Progress from './../primitives/Progress'
 import { Schema as ProgressSchema } from './../primitives/Progress'
+import Input, { Schema as InputSchema } from '../primitives/Input'
+import UserDataForm, { Schema as UserDataFormSchema } from '../UserDataForm'
 
 const COMPONENTS = [
+    <Control id={200} schema={UserDataFormSchema} width={800} height={300}>
+        <UserDataForm id={'userdataform1'} width={480} height={460} />
+    </Control>,
+    <Control id={300} schema={InputSchema} width={800} height={300}>
+        <Input id={'input1'} width={252} height={66} />
+    </Control>,
     <Control id={500} schema={TextSchema} width={800} height={300}>
         <Text
             id={'text1'}
