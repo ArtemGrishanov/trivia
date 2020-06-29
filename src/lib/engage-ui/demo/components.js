@@ -78,7 +78,7 @@ const COMPONENTS = [
                 iconList: {
                     icons: [
                         {
-                            name: 'link',
+                            name: 'correctOption',
                             color: '#2990FB',
                         },
                     ],
