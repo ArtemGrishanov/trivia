@@ -94,7 +94,7 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
     // method 'embed' - managed by index.html
 
     if (data.method === 'setdata') {
-        setData(data.data, data.forceFeedback)
+        setData(data.data, data.forceFeedback, data.immediate)
         putStateHistory()
     }
     if (data.method === 'serialize') {
@@ -1220,7 +1220,7 @@ export function setComponentProps(newProps, options = {}) {
 
     newProps.forEach(newp => {
         if (!newp.id) {
-            throw new Error('You must set a component id in new props')
+            throw new Error('You must setsetData a component id in new props')
         }
         if (!_componentIdToScreenId[newp.id]) {
             calcComponentIdScreenIdHash(state.router.screens)

@@ -3,13 +3,15 @@ import React from 'react'
 import DataSchema from '../schema'
 import * as defaultIcons from './icons'
 
+import { postMessage } from '../../lib/remix'
+
 export const DYNAMIC_CONTENT_PROP = 'dynamicContent'
 export const ContentPropsList = {
     ICON_LIST: 'iconList',
 }
 
 const dynamicComponents = {
-    [ContentPropsList.ICON_LIST]: ({ icons, vAlign, hAlign, vPadding, hPadding, gap }) => {
+    [ContentPropsList.ICON_LIST]: ({ icons, vAlign, hAlign, vPadding, hPadding, gap, payload }) => {
         const style = {
             padding: `${hPadding}px ${vPadding}px`,
         }
@@ -22,20 +24,33 @@ const dynamicComponents = {
             style[vAlign] = '0'
         }
 
+        function onClick(iconName, payload) {
+            if (iconName === 'chainOption') {
+                postMessage('request_data_layer', {
+                    layer_type: 'personality_chain',
+                    screen_id: payload.screen_id,
+                    option_id: payload.option_id,
+                })
+            }
+        }
+
         return (
-            <div style={{ position: 'absolute', backgroundColor: 'transparent', ...style }}>
+            <div className="rmx-option-icons" style={style}>
                 {icons.map((icon, i) => {
                     if (typeof icon.name !== 'string') {
                         return null
-                    }
-                    if (typeof icon.color !== 'string') {
-                        delete icon.color
                     }
 
                     const Icon = defaultIcons[icon.name]
 
                     return Icon ? (
-                        <Icon color={icon.color} style={i > 0 ? { marginLeft: `${gap}px` } : {}} key={i} />
+                        <div
+                            className={`rmx-option-icons--item${icon.clickable ? ' clickable' : ''}`}
+                            onClick={evt => (icon.clickable ? onClick(icon.name, payload) : evt.preventDefault())}
+                            key={i}
+                        >
+                            <Icon style={i > 0 ? { marginLeft: `${gap}px` } : {}} />
+                        </div>
                     ) : null
                 })}
             </div>
