@@ -37,14 +37,14 @@ const schemaData = {
     },
     'app.sessionsize.width': {
         type: 'number',
-        min: 80,
+        min: 300,
         max: 4000,
         default: 800,
         serialize: false,
     },
     'app.sessionsize.height': {
         type: 'number',
-        min: 18,
+        min: 100,
         max: 12000,
         default: 600,
         serialize: false,

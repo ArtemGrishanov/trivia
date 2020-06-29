@@ -193,13 +193,15 @@ function onWindowResize() {
  * @param {object} data, example {'path.to.the.property': 'newvalue'}
  */
 let __data = {}
-export function setData(data, forceFeedback = false, immediate = false) {
+export function setData(data, forceFeedback = false, immediate = false, calcConditions = true) {
     if (typeof data !== 'object') {
         throw new Error(`You must pass data object as first argument, example {'path.to.the.property': 123}`)
     }
     const state = store.getState()
 
-    data = { ...data, ...calcConditionalProperties(state, data) }
+    if (calcConditions) {
+        data = { ...data, ...calcConditionalProperties(state, data) }
+    }
 
     if (immediate) {
         store.dispatch({
@@ -620,18 +622,15 @@ function init({
     _onPostMessage = onPostMessage
     logging = typeof log === 'boolean' ? log : LOG_BY_DEFAULT
     extActions = externalActions || []
-    const { width, height } = getContainerSize(root, mode),
-        // необходимо установить размер приложения при десериализации, чтобы условные свойства выставились верно
-        additionalData = {
-            'app.sessionsize.width': width,
-            'app.sessionsize.height': height,
-        }
+    const additionalData = {}
     if (defaultProperties) {
-        deserialize2(defaultProperties, { additionalData })
+        // calcConditions: false - условия рассчитаем позже, при услановке размера контейнера.
+        // если сразу устанавливать то функция calcConditionalProperties не может обработать эту ситуацию
+        deserialize2(defaultProperties, { additionalData, calcConditions: false })
     } else if (window.__REMIX_DEFAULT_PROPERTIES__) {
         try {
             // один из способов передать свойства для запуска приложения. Используется при публикации
-            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__, { additionalData })
+            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__, { additionalData, calcConditions: false })
         } catch (err) {
             console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message)
         }
@@ -1128,6 +1127,9 @@ export function deserialize(json) {
  * @param {string} json
  */
 export function deserialize2(json, options = {}) {
+    if (typeof options.calcConditions !== 'boolean') {
+        options.calcConditions = true
+    }
     if (typeof json === 'string') {
         const st = JSON.parse(json)
         let data = {}
@@ -1149,7 +1151,7 @@ export function deserialize2(json, options = {}) {
             data = { ...data, ...options.additionalData }
         }
         log('deserialize2:', data)
-        remix.setData(data, false, true)
+        remix.setData(data, false, true, options.calcConditions)
     } else {
         throw new Error('Remix: json string expected')
     }

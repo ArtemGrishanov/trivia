@@ -183,6 +183,7 @@ function screenConnect() {
             return {
                 ...state.router.screens[ownProps.id],
                 ...state.session,
+                size: state.app.sessionsize,
             }
         }
         return {}

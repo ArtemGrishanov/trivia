@@ -67,7 +67,6 @@ export function checkScreensAdaptation(width) {
     width = width || getContainerSize(getRoot(), getMode()).width
     const store = getStore()
 
-    debugger
     // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
     let adaptationNeeded = false
     getScreens().forEach(scr => {
