@@ -13,7 +13,7 @@ export function getAdaptedChildrenProps(
         containerWidth,
         HORIZ_ROW_DEVIATION = 9, // разброс координат в этих пределах - считается одним и рем же рядом
         HORIZ_MARGIN = 0,
-        VERTICAL_MARGIN = 12,
+        VERTICAL_MARGIN = 2,
     },
     returnedAttributes = {},
 ) {

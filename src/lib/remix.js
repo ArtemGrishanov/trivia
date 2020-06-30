@@ -279,7 +279,7 @@ function calcConditionalProperties(state, data) {
         }
     })
 
-    // устанавливаем условное свойство, надо сохранить условия
+    // устанавливаем условное свойство, надо сохранить adaptedui свойства
     Object.keys(data).forEach(path => {
         const d = schema.getDescription(path)
         if (d && d.condition) {
@@ -341,7 +341,8 @@ function calcConditionalProperties(state, data) {
 
 /**
  * Пройти по всем условным свойствам и установить их значения при текущем мастере
- * Во-первых это нужно после при добавлении новых экранов/компонентов, при появлении новых свойств
+ * Во-первых это нужно после добавления новых экранов/компонентов, при появлении новых свойств
+ * Во-вторых при открытии шаблона в котором нет adaptedui
  *
  * Похоже на 'calcConditionalProperties' но делаем это для всех условных свойств
  */
@@ -639,6 +640,10 @@ function init({
     // это произойдет потом единым событием
     setMode(mode)
     updateWindowSize(root)
+    if (mode === 'edit') {
+        // при открытии шаблона в котором может еще не быть adaptedui надо сделать запись условных свойств
+        normalizeConditionalProperties()
+    }
     window.addEventListener('resize', debounce(onWindowResize, 500), false)
     stateHistory = []
     putStateHistory()
