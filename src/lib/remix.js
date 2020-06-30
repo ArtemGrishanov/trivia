@@ -375,10 +375,13 @@ function normalizeConditionalProperties() {
                 const dt = desc.condition.onSave({ masterValue, path, data, state, screenId, componentId })
                 if (dt) {
                     Object.keys(dt).forEach(key => {
-                        // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
-                        conditionalData = {
-                            ...conditionalData,
-                            [desc.condition.conditionPath({ screenId, componentId, key })]: dt[key],
+                        const condPath = desc.condition.conditionPath({ screenId, componentId, key })
+                        if (!getProperty(condPath, state)) {
+                            // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                            conditionalData = {
+                                ...conditionalData,
+                                [condPath]: dt[key],
+                            }
                         }
                     })
                 }
