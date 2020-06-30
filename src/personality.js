@@ -55,10 +55,12 @@ initCoverScreen({
 
 initRemixRouting({
     remix: Remix,
+    resultScreenTag: 'result',
+    userFormScreenTag: 'user_form_screen_tag',
     // some params specially for Remix-Routing plugin
     screenRoute: [
-        { tag: 'start' }, // show all scrrens with tag in linear order
-        { tag: 'question', shuffle: true }, // show all scrrens with tag and shuffle them
+        { tag: 'start' }, // show all screens with tag in linear order
+        { tag: 'question', shuffle: true }, // show all screens with tag and shuffle them
         { idByFunction: 'calcPersonalityRes' }, // show one screenId returned by function 'calcPersonalityRes'
     ],
     restartTag: 'restart',
