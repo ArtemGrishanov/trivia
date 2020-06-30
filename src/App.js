@@ -110,8 +110,6 @@ const mapStateToProps = state => {
     return {
         // currentQuestionIndex: state.session.currentQuestionIndex,
         // questionIds: state.session.questionIds,
-        // width: state.app.size.width,
-        // height: state.app.size.height,
         loading: state.app.loading,
         // questionHashlist: state.quiz.questions,
         // questions: state.quiz.questions.toArray(),

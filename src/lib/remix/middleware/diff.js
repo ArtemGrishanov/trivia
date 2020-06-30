@@ -3,6 +3,7 @@ import {
     getScreenIdFromPath,
     getComponentIdFromPath,
     debounce,
+    getPropNameFromPath,
     isObject,
     objectEquals,
 } from '../util/util.js'
@@ -49,12 +50,41 @@ const scheduleDiff = debounce(() => {
                 Remix._sendOuterEvents()
             }
         }
+        checkIfHeightAffected(lastUpdDiff)
         // это событие может вызвать другие actions а значит и эти diffMiddleware обработчики
         // поэтому вызываем в конце (как при рекурсии)
         Remix.fireEvent('property_updated', { diff: lastUpdDiff })
     }
     prevState = nextState
 }, 200)
+
+/**
+ * Проверить изменились ли свойства которые могли повлиять на высоту приложения
+ * И если да то вызвать пересчет высоты.
+ */
+function checkIfHeightAffected(diff) {
+    const arr = [...diff.added, ...diff.changed, ...diff.deleted]
+    for (let i = 0; i < arr.length; i++) {
+        const p = arr[i]
+        if (p.path) {
+            const key = getPropNameFromPath(p.path)
+            if (
+                key &&
+                (key === 'top' ||
+                    key === 'left' ||
+                    key === 'width' ||
+                    key === 'height' ||
+                    key === 'szBottom' ||
+                    key === 'szTop' ||
+                    key === 'szLeft' ||
+                    key === 'szRight')
+            ) {
+                Remix.updateHeight()
+                return
+            }
+        }
+    }
+}
 
 /**
  * Returns arrays:

@@ -72,9 +72,12 @@ export default class Normalizer {
                         assignByPropertyString(state, res.path, normValue)
                     })
                 } else {
-                    // unresolved path, we must assign it
-                    const normValue = this.processValue(path, undefined) // "undefined" - we have not any specific value, processValue function will determine default value
-                    assignByPropertyString(state, path, normValue)
+                    const propDescription = this.dataSchema.getDescription(path)
+                    if (!propDescription.canBeUndefined) {
+                        // unresolved path, we must assign it
+                        const normValue = this.processValue(path, undefined) // "undefined" - we have not any specific value, processValue function will determine default value
+                        assignByPropertyString(state, path, normValue)
+                    }
                 }
             })
         })

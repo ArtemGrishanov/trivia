@@ -1,6 +1,6 @@
 import DataSchema from './schema.js'
 import Normalizer from './normalizer.js'
-import { assignByPropertyString, getPropertiesBySelector } from './object-path.js'
+import { assignByPropertyString, getPropertiesBySelector, getPathes } from './object-path.js'
 import {
     getUniqueId,
     isHashlistInstance,
@@ -12,10 +12,13 @@ import {
     htmlEncode,
     htmlDecode,
     throttle,
+    parseComponentPath,
+    parseComponentAdapteduiPath,
 } from './remix/util/util.js'
-import { updateWindowSize, saveAdaptedProps, updateAppHeight } from './remix/layout/helpers'
+import { updateWindowSize, updateAppHeight, getContainerSize, checkScreensAdaptation } from './remix/layout/helpers'
 
 export const REMIX_UPDATE_ACTION = '__Remix_update_action__'
+export const REMIX_RESET_STATE = '__Remix_reset_state__'
 //export const REMIX_INIT_ACTION = '__Remix_init_action__'; redux standart init action is used
 export const REMIX_HASHLIST_ADD_ACTION = '__Remix_hashlist_update_action__'
 export const REMIX_HASHLIST_CHANGE_POSITION_ACTION = '__Remix_hashlist_change_position_action__'
@@ -29,7 +32,6 @@ export const REMIX_SET_CURRENT_SCREEN = '__Remix_set_current_screen__'
 export const REMIX_SELECT_COMPONENT = '__Remix_select_component__'
 export const REMIX_SET_MODE = '__Remix_set_mode__'
 export const REMIX_PRE_RENDER = '__Remix_pre_render__'
-export const REMIX_SET_SESSION_SIZE = '__Remix_set_session_size__'
 
 //TODO specify origin during publishing?
 //const containerOrigin = "http://localhost:8080";
@@ -42,8 +44,10 @@ let logging = LOG_BY_DEFAULT,
     root = null,
     containerOrigin = null,
     containerWindow = null,
+    _onPostMessage = null,
     store = null,
     schema = null,
+    _masters = {},
     customFunctions = {},
     normalizer = null,
     extActions = null,
@@ -110,7 +114,6 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
     if (data.method === 'setsize') {
         // сообщение от контейнера по установке размера не имеет смысла
         // так как remix-приложение всегда width:100%;height:100% а реальный размер ставится в параметрах контейнера
-        //setSize(data.width, data.height);
     }
     if (data.method === 'addhashlistelement') {
         addHashlistElement(data.propertyPath, data.index, { newElement: data.newElement })
@@ -169,7 +172,7 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
         }
     }
     if (data.method === 'set_remix_container_size') {
-        console.log(`set_remix_container_size ${data.size.width} ${data.size.height}`)
+        // console.log(`set_remix_container_size ${data.size.width} ${data.size.height}`)
         if (data.size.width > 0) {
             root.style.width = data.size.width + 'px'
         }
@@ -187,13 +190,19 @@ function onWindowResize() {
 /**
  * Assign new property values to store
  *
- * @param {object} data, exmaple {'path.to.the.property': 'newvalue'}
+ * @param {object} data, example {'path.to.the.property': 'newvalue'}
  */
 let __data = {}
-export function setData(data, forceFeedback = false, immediate = false) {
+export function setData(data, forceFeedback = false, immediate = false, calcConditions = true) {
     if (typeof data !== 'object') {
         throw new Error(`You must pass data object as first argument, example {'path.to.the.property': 123}`)
     }
+    const state = store.getState()
+
+    if (calcConditions) {
+        data = { ...data, ...calcConditionalProperties(state, data) }
+    }
+
     if (immediate) {
         store.dispatch({
             type: REMIX_UPDATE_ACTION,
@@ -223,41 +232,164 @@ function setCurrentScreen(screenId) {
 }
 
 /**
- * Sets default application width and height
- * Application will start with this size if width/height not specified in init()
  *
- * Value will be set, if not "undefined"
- *
- * It changes value in state only. In fact width-height are governed by rcontainer (and by loader.js params)
- *
- * @param {number} width
- * @param {number} height
+ * @param {*} state текущий стейт
+ * @param {*} data данные которые будут установлены в setState
  */
-export function setSize(width, height) {
-    // find propertes in schema responsible for width and height
-    const data = {}
-    if (width !== undefined) {
-        const wprop = schema.getDescriptionsWithAttribute('appWidthProperty')
-        if (wprop && wprop.length > 0) {
-            if (wprop.length === 1) {
-                data[wprop[0].selector] = width
-            } else {
-                throw new Error(`Remix: found more than one selectors with "appWidthProperty" attribute`)
+function calcConditionalProperties(state, data) {
+    let conditionalData = {}
+
+    // меняется мастер свойство
+    // несколько свойств зависят от этого мастер-свойства и их надо пересчитать
+    Object.keys(data).forEach(path => {
+        if (_masters[path]) {
+            _masters[path].forEach(mp => {
+                const slaveProperties = getPropertiesBySelector(state, mp.selector)
+                slaveProperties.forEach(slave => {
+                    const { screenId, componentId, propName } = parseComponentPath(slave.path),
+                        condSlaveSelector = mp.condition.conditionPath({ screenId, componentId, propName }),
+                        savedValues = {}
+
+                    getPathes(state, condSlaveSelector).forEach(condPath => {
+                        const k = mp.condition.parseKey(condPath),
+                            v = getProperty(condPath)
+                        if (k && v) {
+                            savedValues[k] = v
+                        }
+                    })
+
+                    const dd = mp.condition.onMasterChanged({
+                        masterValue: data[path],
+                        savedValues,
+                    })
+                    if (dd) {
+                        if (dd.key === undefined || dd.value === undefined) {
+                            throw new Error(`"onMasterChanged" must return key-value object. Path: ${path}`)
+                        }
+                        // console.log(
+                        //     `Master property "${path}" changed to "${data[path]}". And slave property changed: "router.screens.${screenId}.components.${componentId}.${propName}" to "${dd.value}"`,
+                        // )
+                        conditionalData = {
+                            ...conditionalData,
+                            [`router.screens.${screenId}.components.${componentId}.${propName}`]: dd.value,
+                        }
+                    }
+                })
+            })
+        }
+    })
+
+    // устанавливаем условное свойство, надо сохранить adaptedui свойства
+    Object.keys(data).forEach(path => {
+        const d = schema.getDescription(path)
+        if (d && d.condition) {
+            if (!d.condition.onSave || !d.condition.onMasterChanged) {
+                throw new Error(`You must set "onSave" and "onMasterChanged" function for conditonal property ${path}`)
+            }
+
+            const { screenId, componentId, propName } = parseComponentPath(path)
+
+            if (!screenId || !componentId || !propName) {
+                throw new Error(
+                    `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
+                )
+            }
+
+            const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
+            const dt = d.condition.onSave({ masterValue, path, data, state, screenId, componentId })
+            if (dt) {
+                Object.keys(dt).forEach(key => {
+                    // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                    conditionalData = {
+                        ...conditionalData,
+                        [d.condition.conditionPath({ screenId, componentId, key })]: dt[key],
+                    }
+                })
             }
         }
-    }
-    if (height !== undefined) {
-        const hprop = schema.getDescriptionsWithAttribute('appHeightProperty')
-        if (hprop && hprop.length > 0) {
-            if (hprop.length === 1) {
-                data[hprop[0].selector] = height
+    })
+
+    // сохраняем условие, и надо проверить стоит ли обновить текущее значение свойства
+    // пример: после расчета адаптации. Ведь адаптационных алгоритм обновляет только adapted свойство и не ставит текущие напрямую
+    Object.keys(data).forEach(path => {
+        // если path подходит под conditionPath
+        const condDesc = schema.getDescription(path)
+        if (condDesc.conditionOf) {
+            const { screenId, masterKey, componentId, propName } = parseComponentAdapteduiPath(path)
+            if (screenId && masterKey && componentId && propName) {
+                const mainPath = condDesc.conditionOf({ screenId, componentId, propName })
+                const d = schema.getDescription(mainPath)
+                if (d) {
+                    const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
+                    if (masterKey == masterValue) {
+                        conditionalData = {
+                            ...conditionalData,
+                            [mainPath]: data[path],
+                        }
+                    }
+                } else {
+                    throw new Error(`Condition path not found for ${path}`)
+                }
             } else {
-                throw new Error(`Remix: found more than one selectors with "appHeightProperty" attribute`)
+                throw new Error(`This conditional ${path} not supported`)
             }
         }
-    }
-    if (Object.keys(data).length > 0) {
-        setData(data)
+    })
+
+    return conditionalData
+}
+
+/**
+ * Пройти по всем условным свойствам и установить их значения при текущем мастере
+ * Во-первых это нужно после добавления новых экранов/компонентов, при появлении новых свойств
+ * Во-вторых при открытии шаблона в котором нет adaptedui
+ *
+ * Похоже на 'calcConditionalProperties' но делаем это для всех условных свойств
+ */
+function normalizeConditionalProperties() {
+    const state = getState(),
+        masterValues = {}
+    let conditionalData = {}
+
+    Object.keys(schema._schm).forEach(selector => {
+        const desc = schema._schm[selector]
+        if (desc.condition && desc.condition.master) {
+            if (!masterValues[desc.condition.master]) {
+                masterValues[desc.condition.master] = getProperty(desc.condition.master, state)
+            }
+
+            const masterValue = masterValues[desc.condition.master],
+                pathes = getPropertiesBySelector(state, selector)
+
+            pathes.forEach(prop => {
+                const path = prop.path
+                const { screenId, componentId, propName } = parseComponentPath(path)
+
+                if (!screenId || !componentId || !propName) {
+                    throw new Error(
+                        `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
+                    )
+                }
+
+                const data = { [prop.path]: prop.value }
+                const dt = desc.condition.onSave({ masterValue, path, data, state, screenId, componentId })
+                if (dt) {
+                    Object.keys(dt).forEach(key => {
+                        const condPath = desc.condition.conditionPath({ screenId, componentId, key })
+                        if (!getProperty(condPath, state)) {
+                            // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                            conditionalData = {
+                                ...conditionalData,
+                                [condPath]: dt[key],
+                            }
+                        }
+                    })
+                }
+            })
+        }
+    })
+    if (Object.keys(conditionalData).length > 0) {
+        setData(conditionalData, false, true)
     }
 }
 
@@ -359,6 +491,11 @@ function addHashlistElement(hashlistPropPath, index, elementData = {}) {
         d.prototypeIndex = elementData.prototypeIndex
     }
     store.dispatch(d)
+    if (hashlistPropPath === 'router.screens') {
+        checkScreensAdaptation()
+    }
+    // так как появились новые свойства, то для них надо запустить проверку условных свойств
+    normalizeConditionalProperties()
 }
 
 /**
@@ -388,6 +525,10 @@ function insertAfterHashlistElement(hashlistPropPath, beforeId, elementData = {}
         d.prototypeIndex = elementData.prototypeIndex
     }
     store.dispatch(d)
+    if (hashlistPropPath === 'router.screens') {
+        checkScreensAdaptation()
+    }
+    normalizeConditionalProperties()
 }
 
 /**
@@ -469,18 +610,31 @@ export function setStore(astore) {
  * Inites remix framework
  * Method for external init in index.html
  */
-function init({ externalActions = [], container = null, mode = 'none', defaultProperties = '', origin, source, log }) {
+function init({
+    externalActions = [],
+    container = null,
+    mode = 'none',
+    defaultProperties = '',
+    origin,
+    source,
+    log,
+    onPostMessage,
+}) {
     root = container
     containerOrigin = origin
     containerWindow = source
+    _onPostMessage = onPostMessage
     logging = typeof log === 'boolean' ? log : LOG_BY_DEFAULT
     extActions = externalActions || []
+    const additionalData = {}
     if (defaultProperties) {
-        deserialize2(defaultProperties)
+        // calcConditions: false - условия рассчитаем позже, при услановке размера контейнера.
+        // если сразу устанавливать то функция calcConditionalProperties не может обработать эту ситуацию
+        deserialize2(defaultProperties, { additionalData, calcConditions: false })
     } else if (window.__REMIX_DEFAULT_PROPERTIES__) {
         try {
             // один из способов передать свойства для запуска приложения. Используется при публикации
-            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__)
+            deserialize2(window.__REMIX_DEFAULT_PROPERTIES__, { additionalData, calcConditions: false })
         } catch (err) {
             console.error('Cannot deserialize __REMIX_DEFAULT_PROPERTIES__ ', err.message)
         }
@@ -489,10 +643,20 @@ function init({ externalActions = [], container = null, mode = 'none', defaultPr
     // это произойдет потом единым событием
     setMode(mode)
     updateWindowSize(root)
+    if (mode === 'edit') {
+        // при открытии шаблона в котором может еще не быть adaptedui надо сделать запись условных свойств
+        normalizeConditionalProperties()
+    }
     window.addEventListener('resize', debounce(onWindowResize, 500), false)
     stateHistory = []
     putStateHistory()
     Remix.fireEvent('remix_inited')
+}
+
+function reset() {
+    store.dispatch({
+        type: REMIX_RESET_STATE,
+    })
 }
 
 /**
@@ -547,6 +711,7 @@ export function remixReducer({ reducers, dataSchema }) {
         throw new Error('Remix: schema must be instance of DataSchema class')
     }
     schema = dataSchema
+    cacheMasterProperties(schema)
     normalizer = new Normalizer(schema)
     // clients reducers + standart remix reducers
     const reducer = combineReducers({ ...reducers, app, router, session })
@@ -555,12 +720,10 @@ export function remixReducer({ reducers, dataSchema }) {
     return (state, action) => {
         log(`remixReducer: action.type="${action.type}" state=`, state)
         let nextState = null
-        // if (action.type === REMIX_INIT_ACTION) {
-        //     // empty data action, for data normalization
-        //     nextState = {...state};
-        // }
-        // else
-        if (action.type === REMIX_UPDATE_ACTION) {
+
+        if (action.type === REMIX_RESET_STATE) {
+            nextState = undefined
+        } else if (action.type === REMIX_UPDATE_ACTION) {
             if (!action.data) {
                 throw new Error('Remix: action.data is not specified')
             }
@@ -575,24 +738,10 @@ export function remixReducer({ reducers, dataSchema }) {
                 ? action.newElement
                 : clone(schema.getDescription(action.path).prototypes[protIndex].data)
             targetHashlist.addElement(newElement, action.index)
-            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-
-            //TODO
-            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_ADDED", property: action.path})};
-            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
-            // - например перераспределить баллы по результатам с появлением нового вопроса
-            // - например создать новый экран (хотя это в компонентах может быть)
         } else if (action.type === REMIX_HASHLIST_CHANGE_POSITION_ACTION) {
             nextState = _cloneState(state)
             const targetHashlist = fetchHashlist(nextState, action.path, action.type)
             targetHashlist.changePosition(action.elementIndex, action.newElementIndex)
-            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-
-            //TODO
-            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_POSITION_WAS_CHANGED", property: action.path})};
-            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
-            // - например перераспределить баллы по результатам с появлением нового вопроса
-            // - например создать новый экран (хотя это в компонентах может быть)
         } else if (action.type === REMIX_HASHLIST_DELETE_ACTION) {
             nextState = _cloneState(state)
             const targetHashlist = fetchHashlist(nextState, action.path, action.type)
@@ -603,13 +752,6 @@ export function remixReducer({ reducers, dataSchema }) {
             } else {
                 throw new Error('Remix: can not delete hashlist element. You must specify "elementId" or "index"')
             }
-            //assignByPropertyString(nextState, action.path, targetHashlist); не обязательно, так мы ранее полностью склонировали стейт и создали новые hashlist в том числе
-
-            //TODO
-            //nextState = {...reducer(nextState, {type: "REMIX_HASHLIST_ELEMENT_WAS_DELETED", property: action.path})};
-            //клиентской логике приложения возможно надо запустить какую-то свою бизнес-логику
-            // - например перераспределить баллы по результатам с появлением нового вопроса
-            // - например создать новый экран (хотя это в компонентах может быть)
         } else {
             // it maybe @@redux/INITx.x.x.x actions
             // it maybe a regular app action
@@ -622,21 +764,11 @@ export function remixReducer({ reducers, dataSchema }) {
             nextState = normalizer.process(nextState)
             log('remixReducer: normalized next state: ', nextState)
         }
-        // _lastUpdDiff = diff(state, nextState);
-        // const changed = _lastUpdDiff.added.length > 0 || _lastUpdDiff.changed.length > 0 || _lastUpdDiff.deleted.length > 0;
-        // if (changed) {
-        //     log('Diff', _lastUpdDiff);
-        // }
-        // if (action.forceFeedback/* || changed*/) {
-        //     _putOuterEventInQueue('properties_updated', {...getLastDiff(), state: serialize2(nextState)});
-        // }
         _sendOuterEvents()
         return nextState
     }
 }
 
-//TODO если объявить свойство в схеме и не использовать редюсер, то оно стирается каждый раз, и потом нормализуется (дефолтное значение). Не решил пока проблема ли это.
-// где пользователю объявлять кастомные данные типа getState().my.property
 function app(state = {}) {
     return state
 }
@@ -725,15 +857,6 @@ function session(
                 },
             }
         }
-        case REMIX_SET_SESSION_SIZE: {
-            return {
-                ...state,
-                size: {
-                    width: action.width,
-                    height: action.height,
-                },
-            }
-        }
         default:
             return state
     }
@@ -774,6 +897,9 @@ function _putOuterEventInQueue(method, data, eventIndex) {
         _outerEvents.splice(eventIndex, 0, { method: method, data: data })
     } else {
         _outerEvents.push({ method: method, data: data })
+    }
+    if (_onPostMessage) {
+        _onPostMessage({ method: method, data: data })
     }
 }
 
@@ -900,7 +1026,7 @@ function clone(obj) {
  */
 function _cloneState(state) {
     const json = serialize(state)
-    // important to clone all embedded objects in path, ex. "app" and "size" in ""app.size.width"
+    // important to clone all embedded objects in path, ex. "app" and "size" in "app.size.width"
     const newState = JSON.parse(JSON.stringify(state))
     // then assign all dynamic properties. because we must instantiate Hashlist with hashlist func constructor (not "object", when clonning JSON.parse - JSON.stringify)
     // TODO ideally you may write custom clone algorythm
@@ -1008,10 +1134,13 @@ export function deserialize(json) {
  *
  * @param {string} json
  */
-export function deserialize2(json) {
+export function deserialize2(json, options = {}) {
+    if (typeof options.calcConditions !== 'boolean') {
+        options.calcConditions = true
+    }
     if (typeof json === 'string') {
         const st = JSON.parse(json)
-        const data = {}
+        let data = {}
         schema.selectorsInProcessOrder.forEach(selector => {
             const props = getPropertiesBySelector(st, selector, {
                 typeCheckers: {
@@ -1026,8 +1155,11 @@ export function deserialize2(json) {
                 data[p.path] = v
             })
         })
+        if (options.additionalData) {
+            data = { ...data, ...options.additionalData }
+        }
         log('deserialize2:', data)
-        remix.setData(data, false, true)
+        remix.setData(data, false, true, options.calcConditions)
     } else {
         throw new Error('Remix: json string expected')
     }
@@ -1147,7 +1279,28 @@ export function redo() {
  */
 function extendSchema(schm) {
     schema = schema.extend(schm)
+    cacheMasterProperties(schema)
     normalizer = new Normalizer(schema)
+}
+
+function cacheMasterProperties(schm) {
+    _masters = {}
+    Object.keys(schm._schm).forEach(selector => {
+        const desc = schm._schm[selector]
+        if (desc.condition && desc.condition.master) {
+            if (!_masters[desc.condition.master]) {
+                // несколько селекторов могут зависеть от одного мастера
+                _masters[desc.condition.master] = []
+            }
+            if (typeof desc.condition.master !== 'string') {
+                throw new Error(`"master" must be a string. ${selector}`)
+            }
+            _masters[desc.condition.master].push({
+                condition: desc.condition,
+                selector,
+            })
+        }
+    })
 }
 
 /**
@@ -1209,14 +1362,7 @@ export function setComponentProps(newProps, options = {}) {
     newProps = !Array.isArray(newProps) ? [newProps] : newProps
 
     const data = {},
-        state = store.getState(),
-        editingCustomWidth =
-            state.session.mode === 'edit' &&
-            state.session.size.width > 0 &&
-            state.app.size.width > 0 &&
-            state.app.size.width !== state.session.size.width
-
-    let needUpdateHeight = false
+        state = store.getState()
 
     newProps.forEach(newp => {
         if (!newp.id) {
@@ -1228,33 +1374,15 @@ export function setComponentProps(newProps, options = {}) {
         const screenId = _componentIdToScreenId[newp.id]
         if (screenId) {
             let path = `router.screens.${screenId}.components.${newp.id}.`
-            const adaptedData = {}
             Object.keys(newp).forEach(key => {
-                const propDescription = schema.getDescription(path + key)
-                if (editingCustomWidth && propDescription && propDescription.adaptedForCustomWidth) {
-                    // если ширина кастомная и свойство помечено как адаптивное то сохраняем его отдельно в адаптацию
-                    adaptedData[key] = newp[key]
-                } else {
-                    data[path + key] = newp[key]
-                }
-                if (!needUpdateHeight) {
-                    // любое изменение гееометрический свойств компонента может привести в изменению высоты приложения
-                    needUpdateHeight = key === 'top' || key === 'left' || key === 'width' || key === 'height'
-                }
+                data[path + key] = newp[key]
             })
-            if (editingCustomWidth && Object.keys(adaptedData).length > 0) {
-                // если было сделано хотя бы одно изменение пользователем компонентов при нестандартной ширине, то сохраняем как отдельную адаптацию
-                saveAdaptedProps(screenId, newp.id, adaptedData, options.immediate)
-            }
         }
     })
     if (Object.keys(data).length > 0) {
         setData(data, false, options.immediate)
         if (options && options.putStateHistory === true) {
             putStateHistory()
-        }
-        if (needUpdateHeight) {
-            updateAppHeight()
         }
     }
 }
@@ -1276,12 +1404,21 @@ export function getStore() {
     return store
 }
 
-export function getProperty(path) {
-    const r = getPropertiesBySelector(store.getState(), path)
+export function getRoot() {
+    return root
+}
+
+export function getProperty(path, state) {
+    state = state || store.getState()
+    const r = getPropertiesBySelector(state, path)
     if (r.length > 0) {
         return r[0].value
     }
     return undefined
+}
+
+export function updateHeight() {
+    updateAppHeight()
 }
 
 const remix = {
@@ -1293,10 +1430,10 @@ const remix = {
     addScreenComponent,
     deleteScreenComponent,
     setData,
-    setSize,
     getScreens,
     getComponents,
     addHashlistElement,
+    cloneHashlistElement,
     insertAfterHashlistElement,
     changePositionInHashlist,
     deleteHashlistElement,
@@ -1321,6 +1458,9 @@ const remix = {
     postMessage,
     getSchema,
     getProperty,
+    getRoot,
+    updateHeight,
+    reset,
 
     // for debug
     _setScreenEvents,
@@ -1329,6 +1469,7 @@ const remix = {
     _putOuterEventInQueue,
     _sendOuterEvents,
     _getStateHistory: () => stateHistory,
+    _receiveMessage: receiveMessage,
 }
 
 export default remix

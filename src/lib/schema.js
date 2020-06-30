@@ -3,52 +3,64 @@ import { getTokens, matchPropertyPath } from './object-path.js'
 
 const types = {
     string: {
-        attributes: ['default', 'serialize', 'adaptedForCustomWidth', 'enum', 'minLength', 'maxLength'],
+        attributes: [
+            'default',
+            'serialize',
+            'condition',
+            'enum',
+            'minLength',
+            'maxLength',
+            'canBeUndefined',
+            'conditionOf',
+        ],
         mandatory: ['default'],
     },
     number: {
         attributes: [
             'default',
             'serialize',
-            'adaptedForCustomWidth',
+            'condition',
             'min',
             'max',
             'enum',
-            'appWidthProperty',
-            'appHeightProperty',
+            'adaptedForCustomWidth',
+            'canBeUndefined',
+            'conditionOf',
         ],
         mandatory: ['default', 'min', 'max'],
     },
     boolean: {
-        attributes: ['default', 'serialize', 'adaptedForCustomWidth', 'enum'], // do not need to specify enum ['true', 'false']
+        attributes: ['default', 'serialize', 'condition', 'enum', 'canBeUndefined', 'conditionOf'], // do not need to specify enum ['true', 'false']
         mandatory: ['default'],
     },
     hashlist: {
         attributes: [
             'default',
             'serialize',
-            'adaptedForCustomWidth',
+            'condition',
             'minLength',
             'maxLength',
             'elementSchema',
             'prototypes',
+            'canBeUndefined',
+            'conditionOf',
         ],
         mandatory: ['default'],
     },
     array: {
-        attributes: ['default'],
+        attributes: ['default', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
     object: {
-        attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
     url: {
-        attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
     color: {
-        attributes: ['default', 'serialize', 'adaptedForCustomWidth'],
+        attributes: ['default', 'serialize', 'condition', 'canBeUndefined', 'conditionOf'],
         mandatory: ['default'],
     },
 }

@@ -358,6 +358,16 @@ class HashList {
     }
 
     /**
+     * Returns a copy of the last hashlist element
+     */
+    getLast() {
+        if (this._orderedIds.length > 0) {
+            const id = this._orderedIds[this._orderedIds.length - 1]
+            return { ...this[id], hashlistId: id }
+        }
+    }
+
+    /**
      *
      * @param obj
      * @param result

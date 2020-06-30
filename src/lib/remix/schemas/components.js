@@ -1,4 +1,3 @@
-import { EngageAppSchema } from '../../engage-ui/EngageApp.js'
 import DataSchema from '../../schema.js'
 import { Schema as ScreenComponentsSchema } from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema } from '../../engage-ui/router.js'
@@ -30,8 +29,26 @@ const componentSchemas = {
 }
 
 const schemaData = {
-    'app.size.width': EngageAppSchema.getDescription('width'),
-    'app.size.height': EngageAppSchema.getDescription('height'),
+    'app.size.height': {
+        type: 'number',
+        min: 100,
+        max: 4000,
+        default: 600,
+    },
+    'app.sessionsize.width': {
+        type: 'number',
+        min: 300,
+        max: 4000,
+        default: 800,
+        serialize: false,
+    },
+    'app.sessionsize.height': {
+        type: 'number',
+        min: 100,
+        max: 12000,
+        default: 600,
+        serialize: false,
+    },
     'router.[screens HashList]': RouterScreensSchema.getDescription('screens'),
     'router.currentScreenId': RouterScreensSchema.getDescription('currentScreenId'),
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),
@@ -43,64 +60,75 @@ const schemaData = {
     'router.[screens HashList]./^[0-9a-z]+$/.tags': ScreenComponentsSchema.getDescription('tags'),
     'router.[screens HashList]./^[0-9a-z]+$/.staticMarkup': ScreenComponentsSchema.getDescription('staticMarkup'),
     'router.[screens HashList]./^[0-9a-z]+$/.disabled': ScreenComponentsSchema.getDescription('disabled'),
-    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui': {
-        type: 'object',
-        default: {},
-    },
-    // кастомные расположения компонентов для различных ширин
-    // Example: router.screens.ho3etc.adaptedui.320.props.emeh5y
-    'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/': {
-        type: 'object',
-        default: {},
-    },
-    // Свойства компонентов
+    // Условные свойства компонентов
+    // например 'router.screens.u2xt9e.__c.800.fjxjnr.top'
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
         type: 'number',
         min: -9999,
         max: 9999,
         default: 0,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.left': {
         type: 'number',
         min: -9999,
         max: 9999,
         default: 0,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.width': {
         type: 'number',
         min: 0,
         max: 9999,
         default: 100,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.height': {
         type: 'number',
         min: 0,
         max: 9999,
         default: 100,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szTop': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szLeft': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szRight': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szBottom': {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, componentId, propName }) =>
+            `router.screens.${screenId}.components.${componentId}.${propName}`,
     },
 }
 

@@ -30,9 +30,58 @@ export function getScreenIdFromPath(path) {
  * @return {string} screenId, example zbnkhy
  */
 export function getComponentIdFromPath(path) {
-    const regex = /^router\.screens\.[A-z0-9]+.components\.([A-z0-9]+)/g,
+    const regex = /^router\.screens\.[A-z0-9]+\.components\.([A-z0-9]+)/g,
         m = regex.exec(path)
     return m && m[0] && m[1] ? m[1] : null
+}
+
+/**
+ * Вернуть имя свойства из строки
+ * @param {string} path например 'router.screens.8wruuz.components.zbnkhy.fontShadow'
+ * @return {string} 'fontShadow'
+ */
+export function getPropNameFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+\.components\.[A-z0-9]+\.([A-z0-9]+)$/g,
+        m = regex.exec(path)
+    return m && m[0] && m[1] ? m[1] : null
+}
+
+/**
+ * метод парсит с=строку свойства компонентов и возвращает объект со свойствами {screenId, componentId, propName}
+ */
+const _parsedPathes = {}
+export function parseComponentPath(path) {
+    if (_parsedPathes[path]) {
+        return _parsedPathes[path]
+    }
+    const regex = /^router\.screens\.([A-z0-9]+)\.components\.([A-z0-9]+)\.([A-z0-9]+)$/g,
+        m = regex.exec(path)
+    if (m && m[1] && m[2] && m[3]) {
+        _parsedPathes[path] = {
+            screenId: m[1],
+            componentId: m[2],
+            propName: m[3],
+        }
+        return _parsedPathes[path]
+    }
+}
+
+const _parsedCondPathes = {}
+export function parseComponentAdapteduiPath(path) {
+    if (_parsedCondPathes[path]) {
+        return _parsedCondPathes[path]
+    }
+    const regex = /^router\.screens\.([A-z0-9]+)\.adaptedui\.([A-z0-9]+)\.props.([A-z0-9]+).([A-z0-9]+)$/g,
+        m = regex.exec(path)
+    if (m && m[1] && m[2] && m[3] && m[4]) {
+        _parsedCondPathes[path] = {
+            screenId: m[1],
+            masterKey: m[2],
+            componentId: m[3],
+            propName: m[4],
+        }
+        return _parsedCondPathes[path]
+    }
 }
 
 /**

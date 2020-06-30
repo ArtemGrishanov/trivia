@@ -111,7 +111,7 @@
                     cntSource.postMessage({
                         method: 'inited',
                         initialProperties: Remix.getProperties(),
-                        schema: Remix.getSchema(),
+                        schema: JSON.parse(JSON.stringify(Remix.getSchema())),
                         state: Remix.serialize2(),
                         screens: Remix.getScreens(),
                         appId: appId,

@@ -2,6 +2,7 @@ import PropsNormalizer from './PropsNormalizer'
 import { connect } from 'react-redux'
 import LayoutItem from './layout/LayoutItem'
 import { setData } from '../remix'
+import { getConditionConfig } from '../remix/util/condition'
 
 const componentClassMap = {}
 
@@ -36,6 +37,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        condition: getConditionConfig('width'),
         adaptedForCustomWidth: true,
     },
     widthStrategy: {
@@ -48,6 +50,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 1,
         max: 9999,
         default: 50,
+        condition: getConditionConfig('height'),
         adaptedForCustomWidth: true,
     },
     left: {
@@ -55,6 +58,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
+        condition: getConditionConfig('left'),
         adaptedForCustomWidth: true,
     },
     leftStrategy: {
@@ -67,6 +71,7 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: -1000,
         max: 9999,
         default: 100,
+        condition: getConditionConfig('top'),
         adaptedForCustomWidth: true,
     },
     szLeft: {
@@ -74,28 +79,28 @@ export const REMIX_COMPONENTS_COMMON_PROPS_SCHEMA = {
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
+        condition: getConditionConfig('szLeft'),
     },
     szRight: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
+        condition: getConditionConfig('szRight'),
     },
     szTop: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
+        condition: getConditionConfig('szTop'),
     },
     szBottom: {
         type: 'number',
         min: 0,
         max: 1024,
         default: 10,
-        adaptedForCustomWidth: true,
+        condition: getConditionConfig('szBottom'),
     },
     displayType: {
         type: 'string',
@@ -178,6 +183,7 @@ function screenConnect() {
             return {
                 ...state.router.screens[ownProps.id],
                 ...state.session,
+                size: state.app.sessionsize,
             }
         }
         return {}

@@ -46,7 +46,7 @@ class Prerender extends React.Component {
 }
 
 const mapStateToProps = state => {
-    const width = state.session.size.width
+    const width = state.app.sessionsize.width
     let props = {}
     if (state.session.prerender.components) {
         state.router.screens.toArray().forEach(scr => {
@@ -57,7 +57,7 @@ const mapStateToProps = state => {
     }
     return {
         width,
-        height: state.session.size.height,
+        height: state.app.sessionsize.height,
         preRenderComponents: state.session.prerender.components,
         adaptedui: { [width]: { props } },
     }
