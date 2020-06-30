@@ -64,7 +64,7 @@ export function updateWindowSize(root) {
     }
 }
 
-let adaptationNeededForScreens = []
+let adaptationNeededForScreens = {}
 export function checkScreensAdaptation(width, originWidth) {
     const store = getStore(),
         state = store.getState()
@@ -73,10 +73,9 @@ export function checkScreensAdaptation(width, originWidth) {
     originWidth = originWidth || state.app.sessionsize.width
 
     // проверить что есть адаптации для всех экранов, если нет - запустить расчет недостающих адаптационных свойств
-    adaptationNeededForScreens = []
     getScreens().forEach(scr => {
         if (!getAdaptationProps(scr, width)) {
-            adaptationNeededForScreens.push(scr.hashlistId)
+            adaptationNeededForScreens[scr.hashlistId] = true
             calcAdaptedProps({
                 screen: scr,
                 screenId: scr.hashlistId,
@@ -86,7 +85,7 @@ export function checkScreensAdaptation(width, originWidth) {
         }
     })
 
-    if (adaptationNeededForScreens.length > 0) {
+    if (Object.values(adaptationNeededForScreens).includes(true)) {
         runVerticalNormalization(store)
     }
 }
@@ -229,7 +228,7 @@ export const setComponentsRects = debounce(boundingRects => {
     const { width, height } = state.app.sessionsize
 
     getScreens().forEach(scr => {
-        if (adaptationNeededForScreens.includes(scr.hashlistId)) {
+        if (adaptationNeededForScreens[scr.hashlistId]) {
             calcAdaptedProps({
                 screen: scr,
                 screenId: scr.hashlistId,
@@ -237,6 +236,7 @@ export const setComponentsRects = debounce(boundingRects => {
                 actualWidth: width,
                 boundingRects,
             })
+            adaptationNeededForScreens[scr.hashlistId] = false
         }
     })
 
