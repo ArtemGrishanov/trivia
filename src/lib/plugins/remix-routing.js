@@ -135,7 +135,7 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
         if (nsId) {
             const resultScreenIds = event.remix.getScreens({ tag: resultScreenTag }).map(({ hashlistId }) => hashlistId)
 
-            if (resultScreenIds.includes(nsId)) {
+            if (resultScreenIds.includes(nsId) && state.app.userForm?.enable) {
                 const userFormScreen = remix.getScreens({ tag: userFormScreenTag, includeDisabled: true })[0]
 
                 if (userFormScreen && state.router.currentScreenId !== userFormScreen.hashlistId) {
