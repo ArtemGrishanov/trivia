@@ -17,6 +17,7 @@ import { getScreenHTMLPreview } from './lib/remix/util/util'
 import initButtonBehavior from './lib/plugins/button-behavior'
 import HashList from './lib/hashlist'
 import initPersonalityChain from './lib/plugins/personality-chain'
+import initUserDataForm from './lib/plugins/user-data-form'
 
 Remix.setStore(store)
 
@@ -46,6 +47,8 @@ function extendPersonalitySchema() {
         },
     })
 }
+
+initUserDataForm({ remix: Remix })
 
 initCoverScreen({
     remix: Remix,
