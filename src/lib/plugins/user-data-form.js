@@ -53,7 +53,6 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
     })
 
     remix.registerTriggerAction(UPDATE_USER_FORM_SCREEN, event => {
-        console.log(UPDATE_USER_FORM_SCREEN)
         const { remix } = event
 
         const enable = remix.getProperty('app.userForm.enable')
