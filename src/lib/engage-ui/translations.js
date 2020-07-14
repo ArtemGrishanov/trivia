@@ -9,7 +9,7 @@ const translations = {
     },
     email: {
         en: 'Email',
-        ru: 'Почта',
+        ru: 'Эл. адрес',
     },
     phone: {
         en: 'Phone',
@@ -26,6 +26,14 @@ const translations = {
     agree_with: {
         en: 'Agree with',
         ru: 'Согласен с',
+    },
+    invalid_email: {
+        en: 'Please enter a valid email address',
+        ru: 'Пожалуйста, введите валидный адрес электронной почты',
+    },
+    invalid_phone: {
+        en: 'Please enter a valid phone number',
+        ru: 'Пожалуйста, введите валидный телефонный номер',
     },
 }
 
