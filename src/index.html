@@ -98,6 +98,10 @@
                 if (data.marginBottom) {
                     root.style.marginBottom = data.marginBottom + 'px';
                 }
+                if (data.lng) {
+                    window.localStorage.setItem('lng', data.lng)
+                }
+
                 Remix.init({
                     appStore: store,
                     container: root,
