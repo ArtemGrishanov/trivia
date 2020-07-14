@@ -73,8 +73,8 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
 
             remix.addScreenComponent(screen.hashlistId, {
                 displayName: 'UserDataForm',
-                left: 100,
-                top: 30,
+                left: 160,
+                top: 70,
                 width: 480,
                 height: 460,
             })
