@@ -29,11 +29,11 @@ const translations = {
     },
     invalid_email: {
         en: 'Please enter a valid email address',
-        ru: 'Пожалуйста, введите валидный адрес электронной почты',
+        ru: 'Введите валидный адрес эл. почты',
     },
     invalid_phone: {
         en: 'Please enter a valid phone number',
-        ru: 'Пожалуйста, введите валидный телефонный номер',
+        ru: 'Введите валидный телефонный номер',
     },
 }
 
