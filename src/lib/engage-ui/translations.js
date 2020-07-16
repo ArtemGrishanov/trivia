@@ -37,6 +37,14 @@ const translations = {
     },
 }
 
-const getLang = () => window.localStorage.getItem('lng') || 'en'
+const getLang = () => {
+    try {
+        return window.localStorage.getItem('lng') || 'en'
+    } catch (err) {
+        console.error(err)
+
+        return 'en'
+    }
+}
 
 export const getTranslation = key => translations[key][getLang()]

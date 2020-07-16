@@ -99,7 +99,11 @@
                     root.style.marginBottom = data.marginBottom + 'px';
                 }
                 if (data.lng) {
-                    window.localStorage.setItem('lng', data.lng)
+                    try {
+                        window.localStorage.setItem('lng', data.lng)
+                    } catch (err) {
+                        console.error(err)
+                    }
                 }
 
                 Remix.init({
