@@ -253,7 +253,7 @@ function calcConditionalProperties(state, data) {
                     getPathes(state, condSlaveSelector).forEach(condPath => {
                         const k = mp.condition.parseKey(condPath),
                             v = getProperty(condPath)
-                        if (k && v) {
+                        if (k !== undefined && v !== undefined) {
                             savedValues[k] = v
                         }
                     })

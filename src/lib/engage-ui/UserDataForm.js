@@ -6,6 +6,7 @@ import { Input } from './primitives/Input'
 import { Button } from './primitives/Button'
 import { TextEditor } from './bricks/TextEditor'
 // import BasicImage from './bricks/BasicImage'
+import { getTranslation } from './translations'
 
 import './style/rmx-user-data-form.css'
 
@@ -55,6 +56,10 @@ class UserDataForm extends React.Component {
         return licenseAgreement && isFirstName && isLastName && isPhone && isEmail
     }
 
+    componentDidMount() {
+        // console.log(window)
+    }
+
     render() {
         const {
             id,
@@ -95,7 +100,7 @@ class UserDataForm extends React.Component {
                     {firstNameField ? (
                         <div className="user-data-form__text-input">
                             <Input
-                                description="First name"
+                                description={getTranslation('firstName')}
                                 dataType="any"
                                 dataSize={128}
                                 width={252}
@@ -107,7 +112,7 @@ class UserDataForm extends React.Component {
                     {lastNameField ? (
                         <div className="user-data-form__text-input">
                             <Input
-                                description="Last name"
+                                description={getTranslation('lastName')}
                                 dataType="any"
                                 dataSize={128}
                                 width={252}
@@ -119,7 +124,7 @@ class UserDataForm extends React.Component {
                     {phoneField ? (
                         <div className="user-data-form__text-input">
                             <Input
-                                description="Phone"
+                                description={getTranslation('phone')}
                                 dataType="phone"
                                 dataSize={32}
                                 width={252}
@@ -131,7 +136,7 @@ class UserDataForm extends React.Component {
                     {emailField ? (
                         <div className="user-data-form__text-input">
                             <Input
-                                description="Email"
+                                description={getTranslation('email')}
                                 dataType="email"
                                 dataSize={64}
                                 width={252}
@@ -147,7 +152,9 @@ class UserDataForm extends React.Component {
                         <Button
                             width={252}
                             height={44}
-                            text={`<p class="ql-align-center"><span class="ql-size-large ql-font-Roboto" style="color: #FFFFFF">Next</span></p>`}
+                            text={`<p class="ql-align-center"><span class="ql-size-large ql-font-Roboto" style="color: #FFFFFF">${getTranslation(
+                                'next',
+                            )}</span></p>`}
                             imageSrc={''}
                             borderRadius={4}
                             borderWidth={0}
@@ -161,7 +168,7 @@ class UserDataForm extends React.Component {
                     <div className="user-data-form__agree">
                         <input type="checkbox" onChange={event => this.setLicenseAgreement(event.target.checked)} />
                         <span>
-                            Agree with{' '}
+                            {getTranslation('agree_with')}{' '}
                             <a
                                 onClick={() =>
                                     window.open(
@@ -171,7 +178,7 @@ class UserDataForm extends React.Component {
                                     )
                                 }
                             >
-                                Privacy Policy
+                                {getTranslation('privacy_policy')}
                             </a>
                         </span>
                     </div>
