@@ -1,0 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@500&display=swap');
+
+.rank-battle-playground {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
+
+.rank-battle-card {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    border-radius: 4px;
+    position: relative;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.14);
+}
+
+.rank-battle-card:active .rank-battle-card_active {
+    display: block;
+}
+
+.rank-battle-card_active {
+    display: none;
+    background-color: black;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.1;
+    z-index: 1;
+}
+
+.rank-battle-card__img-wrapper {
+    position: relative;
+    flex-grow: 2;
+
+    overflow: hidden;
+    border-radius: 4px 4px 0px 0px;
+    background-color: transparent;
+}
+
+.rank-battle-card__img-wrapper2 {
+    position: relative;
+    height: calc(100% + 400px);
+    width: calc(100% + 400px);
+    top: -200px;
+    left: -200px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.rank-battle-card__img {
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    height: calc(100% - 400px);
+    width: calc(100% - 400px);
+
+    transition: height 150ms, width 150ms, top 150ms, left 150ms, transform 150ms;
+    transform-origin: center;
+}
+
+.rank-battle-card:hover .rank-battle-card__img {
+    height: calc(100% - 375px);
+    width: calc(100% - 375px);
+    /* transform: scale(1.05); */
+}
+
+.rank-battle-card__votes {
+    position: relative;
+    height: 100px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    border-radius: 0px 0px 4px 4px;
+}
+
+.rank-battle-card__votes > div {
+    margin-bottom: 32px;
+}
+
+.rank-battle-card__votes-text {
+    font-family: Ubuntu;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 24px;
+    line-height: 24px;
+    z-index: 2;
+}
+
+.rank-battle-card__votes-count {
+    font-family: Ubuntu;
+    font-style: bold;
+    font-weight: 500;
+    font-size: 24px;
+    line-height: 24px;
+    z-index: 2;
+}
+
+.rank-battle-card__vote-icon-wrapper {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    transform: scale(1);
+    animation: pulse 3.5s infinite;
+    overflow: hidden;
+    bottom: 23px;
+
+    z-index: 2;
+}
+
+.rank-battle-card__vote-icon {
+    position: absolute;
+    /* bottom: 54px; */
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+    20% {
+        transform: scale(1.125);
+    }
+    40% {
+        transform: scale(1);
+    }
+    60% {
+        transform: scale(1.125);
+    }
+    80% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.rank-battle-card__leader_mobile {
+    display: none;
+}
+
+.rank-battle-card__leader_desktop {
+    border: 2px solid #ffffff;
+    border-radius: 40px;
+    position: absolute;
+    width: 110px;
+    height: 32px;
+    top: 12px;
+    right: 12px;
+    font-family: Ubuntu;
+    font-style: normal;
+    font-weight: normal;
+    font-size: 16px;
+    line-height: 16px;
+    /* identical to box height, or 100% */
+
+    color: #ffffff;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1;
+}
+
+.rank-battle-card__leader_desktop span {
+    margin-left: 6px;
+}
+
+.rank-battle-card_2 {
+    width: calc(50% - 8px);
+    height: 100%;
+}
+
+.rank-battle-playground_2 .rank-battle-card_2:first-child {
+    margin-right: 16px;
+}
+
+.rank-battle-card_3 {
+}
+
+.rank-battle-card_4 {
+}
+
+@media (max-width: 380px) {
+    .rank-battle-card {
+        flex-direction: row;
+        overflow: hidden;
+    }
+
+    .rank-battle-card__votes {
+        height: 100% !important;
+        width: 100px;
+        justify-content: center;
+        align-items: flex-end;
+        flex-wrap: wrap;
+    }
+
+    .rank-battle-card__leader_mobile {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        font-family: Ubuntu;
+        font-style: normal;
+        font-weight: normal;
+        font-size: 20px;
+        line-height: 16px;
+        /* identical to box height, or 80% */
+
+        text-align: center;
+
+        color: #ffffff;
+
+        position: absolute;
+        top: 20px;
+        right: 17px;
+    }
+
+    .rank-battle-card__leader_mobile span {
+        margin-top: 14px;
+    }
+
+    .rank-battle-card__votes span {
+        width: 73px !important;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .rank-battle-card__votes div {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0px !important;
+    }
+
+    .rank-battle-card__votes span:first-child {
+        margin-bottom: 2px !important;
+    }
+
+    .rank-battle-card__votes span:last-child {
+        margin-bottom: 32px !important;
+        align-self: center;
+    }
+
+    .rank-battle-card__vote-icon-wrapper {
+        right: 102px;
+        bottom: 8px;
+    }
+
+    .rank-battle-card__votes-text {
+        font-size: 20px !important;
+        z-index: 2;
+    }
+
+    .rank-battle-card__votes-count {
+        font-size: 34px !important;
+        margin-left: 0;
+        justify-content: flex-start !important;
+        z-index: 2;
+    }
+
+    .rank-battle-card__votes,
+    .rank-battle-card__img-wrapper {
+        border-radius: 0px !important;
+    }
+
+    .rank-battle-card__leader_desktop {
+        display: none;
+    }
+
+    .rank-battle-card_2 {
+        width: 100% !important;
+    }
+
+    .rank-battle-card_2:not(:first-child) {
+        margin-top: 8px;
+    }
+
+    .rank-battle-playground_2 {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 380px) {
+    .like-wave__container {
+        right: 102px !important;
+        bottom: 8px !important;
+    }
+}
+
+.like-wave__container {
+    bottom: 23px;
+
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.like-wave__element {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    animation: wave-fade 1s ease-out;
+    position: absolute;
+    transform: scale(0.95);
+}
+
+@keyframes wave-fade {
+    0% {
+        transform: scale(1.25);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(3);
+        opacity: 0;
+    }
+}
