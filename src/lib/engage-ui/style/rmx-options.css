@@ -37,7 +37,7 @@
 }
 .rmx-option-icons--item.clickable {
     position: relative;
-    z-index: 10;
+    z-index: 1;
 }
 
 .rmx-option_indicator {
