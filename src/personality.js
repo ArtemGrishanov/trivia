@@ -112,9 +112,16 @@ initQuizAnalytics({ remix: Remix })
  * Personality quiz custom result calculation
  *
  */
+
+function randomInteger(min, max) {
+    let rand = min + Math.random() * (max + 1 - min)
+    return Math.floor(rand)
+}
+
 Remix.addCustomFunction('calcPersonalityRes', () => {
     const state = Remix.getState(),
-        questionsCount = Remix.getScreens({ tag: 'question' }).length
+        questionsCount = Remix.getScreens({ tag: 'question' }).length,
+        results = Remix.getScreens({ tag: 'result' })
 
     const personality_data = state.app.personality
 
@@ -155,7 +162,17 @@ Remix.addCustomFunction('calcPersonalityRes', () => {
         })
         .sort((a, b) => (a.weight > b.weight ? -1 : 1))
 
-    return res_sorted_arr[0].result_id
+    if (res_sorted_arr.length) {
+        return res_sorted_arr[0].result_id
+    }
+    // если попали сюда - значит привязки заданы не корректно и путь ответов не привел ни к одному из результатов
+    // но чтобы скрыть баг и сделать вид что все нормально - покажем рандомный результат (если они вообще есть)
+    if (results.length) {
+        console.warn('Result is random')
+        const randomIndex = randomInteger(0, results.length - 1)
+        return results[randomIndex].hashlistId
+    }
+    throw new Error('Results not found')
 })
 
 extendPersonalitySchema()
