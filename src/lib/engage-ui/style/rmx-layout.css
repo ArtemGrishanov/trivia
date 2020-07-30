@@ -15,13 +15,15 @@
 .rmx-layout_item {
     display: block;
     position: absolute;
+}
+
+.rmx-layout_item:hover {
     z-index: 1;
 }
 
 .rmx-layout_item_selection_cnt {
     display: none;
     position: absolute;
-    z-index: 2;
     left: 0;
     top: 0;
     width: 100%;
