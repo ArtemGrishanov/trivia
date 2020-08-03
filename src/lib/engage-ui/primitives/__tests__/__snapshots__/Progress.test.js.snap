@@ -1,17 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`<Progress /> should match <Progress /> snapshot as variant0 1`] = `
-<p
+<div
   className="rmx-text"
   style={
     Object {
+      "alignItems": "center",
       "color": "green",
+      "display": "flex",
       "fontSize": 14,
+      "height": "100%",
+      "justifyContent": "center",
+      "width": "100%",
     }
   }
 >
-  2/5
-</p>
+  <span>
+    2/5
+  </span>
+</div>
 `;
 
 exports[`<Progress /> should match <Progress /> snapshot as variant1 1`] = `
