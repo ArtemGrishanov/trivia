@@ -1,6 +1,6 @@
 .ql-toolbar.ql-snow {
     position: relative;
-    z-index: 2;
+    z-index: 11;
 }
 
 .rmx-layout_container {
@@ -35,13 +35,13 @@
 .rmx-layout_item_selection_cnt.__selected,
 .rmx-layout_item:hover .rmx-layout_item_selection_cnt {
     display: block;
+    z-index: 2;
 }
 
 .rmx-l-sel-m {
     position: absolute;
     width: 10px;
     height: 10px;
-    border: 99px;
     border: 1px solid #59d2f7;
     background-color: rgba(89, 210, 247, 0.5);
 }

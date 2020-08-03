@@ -2,6 +2,9 @@
     position: relative;
     margin: 0;
 }
+.rmx-text-editor:not(.__readonly) {
+    z-index: 10;
+}
 /* quill text editor */
 .quill {
     /* shift component up to show .ql-toolbar in edit mode */
