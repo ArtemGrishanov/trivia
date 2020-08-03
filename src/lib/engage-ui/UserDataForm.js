@@ -70,6 +70,7 @@ class UserDataForm extends React.Component {
             emailField,
             needTitle,
             authorPrivacyPolicy,
+            text,
         } = this.props
 
         return (
@@ -90,11 +91,7 @@ class UserDataForm extends React.Component {
                 <div className="user-data-form__content">
                     {needTitle ? (
                         <div className="user-data-form__title">
-                            <TextEditor
-                                parentId={id}
-                                readOnly={!doubleClicked}
-                                text={`<span class="ql-size-huge ql-font-Roboto" style="color: #000000">Your title</span>`}
-                            />
+                            <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                         </div>
                     ) : null}
                     {firstNameField ? (
@@ -216,6 +213,12 @@ const schema = {
     data: {
         type: 'object',
         default: {},
+    },
+    text: {
+        type: 'string',
+        minLength: 0,
+        maxLength: 4096,
+        default: `<span class="ql-size-huge ql-font-Roboto" style="color: #000000">Your title</span>`,
     },
 }
 
