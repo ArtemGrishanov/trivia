@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { connect } from 'react-redux'
 
 import DataSchema from '../schema'
 import { setComponentProps, _componentIdToScreenId, getScreenIdByComponentId, postMessage } from '../remix'
@@ -357,7 +358,7 @@ class RankBattlePlayground extends React.Component {
     }
 
     render() {
-        const { numberOfCards, baseColor, highlightColor, imageLinks } = this.props
+        const { numberOfCards, baseColor, highlightColor, imageLinks, screen } = this.props
         const { votes } = this.state
 
         if (Object.entries(votes).length === 0) {
@@ -368,7 +369,7 @@ class RankBattlePlayground extends React.Component {
         const leadingValue = this.getLeadingValue(sortedVotes.map(([, v]) => v))
 
         return (
-            <div className={`rank-battle-playground rank-battle-playground_${numberOfCards}`}>
+            <div className={`${screen} rank-battle-playground rank-battle-playground_${numberOfCards}`}>
                 {Object.entries(votes).map(([cardId, votes]) => {
                     return (
                         <RankBattleCard
@@ -421,4 +422,8 @@ export const Schema = new DataSchema({
     },
 })
 
-export default RemixWrapper(RankBattlePlayground, Schema, 'RankBattlePlayground')
+const mapStateToProps = state => {
+    return { screen: state.app.screen }
+}
+
+export default RemixWrapper(connect(mapStateToProps, null)(RankBattlePlayground), Schema, 'RankBattlePlayground')
