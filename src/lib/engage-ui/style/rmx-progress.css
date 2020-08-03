@@ -1,9 +1,19 @@
+.progress-variant-1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 100%;
+}
+
 .progress-variant-1 .ql-editor {
     padding: 0 !important;
 }
 
 .progress-variant-2 {
     display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
 }
 
 .progress-variant-2__completed-icon {
