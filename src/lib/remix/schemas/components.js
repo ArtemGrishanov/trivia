@@ -37,6 +37,11 @@ const schemaData = {
         max: 4000,
         default: 600,
     },
+    'app.screen': {
+        type: 'string',
+        enum: ['mobile', 'desktop'],
+        default: 'desktop',
+    },
     'app.sessionsize.width': {
         type: 'number',
         min: 300,
