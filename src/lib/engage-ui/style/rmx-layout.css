@@ -1,3 +1,8 @@
+.ql-toolbar.ql-snow {
+    position: relative;
+    z-index: 2;
+}
+
 .rmx-layout_container {
     position: absolute;
     left: 0;
@@ -10,6 +15,7 @@
 .rmx-layout_item {
     display: block;
     position: absolute;
+    z-index: 1;
 }
 
 .rmx-layout_item_selection_cnt {

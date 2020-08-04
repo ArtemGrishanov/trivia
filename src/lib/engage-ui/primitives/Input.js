@@ -2,6 +2,7 @@ import React from 'react'
 import { setComponentProps } from '../../remix'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
+import { getTranslation } from '../translations'
 
 import '../style/rmx-input.css'
 
@@ -10,11 +11,11 @@ class Input extends React.Component {
         const helpData = {
             email: {
                 pattern: /[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?/g,
-                errMsg: 'Please enter a valid email address',
+                errMsg: getTranslation('invalid_email'),
             },
             phone: {
                 pattern: /^\s*(?:\+?(\d{1,3}))?([-. (]*(\d{3})[-. )]*)?((\d{3})[-. ]*(\d{2,4})(?:[-.x ]*(\d+))?)\s*$/gm,
-                errMsg: 'Please enter a valid phone number',
+                errMsg: getTranslation('invalid_phone'),
             },
         }
 

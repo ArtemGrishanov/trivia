@@ -153,12 +153,17 @@ export class Progress extends React.Component {
                 const st = {
                     fontSize,
                     color,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                    height: '100%',
                 }
                 const text = this.props.step + '/' + this.props.max
                 return (
-                    <p className="rmx-text" style={st}>
-                        {text}
-                    </p>
+                    <div className="rmx-text" style={st}>
+                        <span>{text}</span>
+                    </div>
                 )
             }
         }
