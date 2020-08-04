@@ -35,6 +35,14 @@ const translations = {
         en: 'Please enter a valid phone number',
         ru: 'Введите корректный телефонный номер',
     },
+    votes: {
+        en: 'VOTES',
+        ru: 'ГОЛОСА',
+    },
+    leading: {
+        en: 'leading',
+        ru: 'лидирует',
+    },
 }
 
 const getLang = () => {

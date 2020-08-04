@@ -11,6 +11,7 @@ import { Schema as FbButton } from '../../engage-ui/primitives/social/FbButton.j
 import { Schema as ProgressiveImageSchema } from '../../engage-ui/primitives/ProgressiveImage.js'
 import { Schema as InputSchema } from '../../engage-ui/primitives/Input'
 import { Schema as UserDataFormSchema } from '../../engage-ui/UserDataForm'
+import { Schema as RankBattlePlaygroundSchema } from '../../engage-ui/RankBattlePlayground'
 //INSTRUCTION 1: add your new component schema before this line with name ComponentName+'Schema'
 
 //INSTRUCTION 2: add your new component schema to this object:
@@ -25,6 +26,7 @@ const componentSchemas = {
     ProgressiveImageSchema,
     InputSchema,
     UserDataFormSchema,
+    RankBattlePlaygroundSchema,
     // put new schema here before just this line
 }
 
@@ -34,6 +36,11 @@ const schemaData = {
         min: 100,
         max: 4000,
         default: 600,
+    },
+    'app.screen': {
+        type: 'string',
+        enum: ['mobile', 'desktop'],
+        default: 'desktop',
     },
     'app.sessionsize.width': {
         type: 'number',

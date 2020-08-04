@@ -59,6 +59,8 @@ let logging = LOG_BY_DEFAULT,
     _componentIdToScreenId = {},
     _externalListeners = {}
 
+export const getScreenIdByComponentId = componentId => _componentIdToScreenId[componentId]
+
 // establish communication with RemixContainer
 window.addEventListener('message', receiveMessage, false)
 window.addEventListener('keydown', onKeyDown, false)
@@ -1277,7 +1279,7 @@ export function redo() {
  * Add new properties descriptions to app schema
  * Plugins may use this method
  */
-function extendSchema(schm) {
+export function extendSchema(schm) {
     schema = schema.extend(schm)
     cacheMasterProperties(schema)
     normalizer = new Normalizer(schema)
