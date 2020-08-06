@@ -12,6 +12,7 @@ import { Schema as ProgressiveImageSchema } from '../../engage-ui/primitives/Pro
 import { Schema as InputSchema } from '../../engage-ui/primitives/Input'
 import { Schema as UserDataFormSchema } from '../../engage-ui/UserDataForm'
 import { Schema as RankBattlePlaygroundSchema } from '../../engage-ui/RankBattlePlayground'
+import { Schema as BeforeAfterSchema } from '../../engage-ui/BeforeAfter'
 //INSTRUCTION 1: add your new component schema before this line with name ComponentName+'Schema'
 
 //INSTRUCTION 2: add your new component schema to this object:
@@ -27,6 +28,7 @@ const componentSchemas = {
     InputSchema,
     UserDataFormSchema,
     RankBattlePlaygroundSchema,
+    BeforeAfterSchema,
     // put new schema here before just this line
 }
 
