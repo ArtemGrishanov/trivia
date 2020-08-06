@@ -37,7 +37,10 @@
 }
 .rmx-option-icons--item.clickable {
     position: relative;
-    z-index: 1;
+}
+/*dirty hack*/
+.rmx-layout_item:hover .rmx-option-icons--item.clickable {
+    z-index: 5;
 }
 
 .rmx-option_indicator {
