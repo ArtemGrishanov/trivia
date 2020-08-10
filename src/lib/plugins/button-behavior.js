@@ -1,7 +1,3 @@
-import { Selector } from '../object-path'
-import { getComponentIdFromPath, getScreenIdFromPath } from '../../lib/remix/util/util'
-
-const INIT = 'INIT'
 const FACEBOOK_SHARE = 'FACEBOOK_SHARE'
 const FACEBOOK_SHARE_TAG = 'facebook'
 const VK_SHARE = 'VK_SHARE'
