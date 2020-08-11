@@ -1,7 +1,7 @@
 import React, { createRef, useEffect, useState } from 'react'
-import ReactDOM from 'react-dom'
 
 import DataSchema from '../schema'
+import { postMessage } from '../remix'
 
 import RemixWrapper from './RemixWrapper'
 
@@ -54,8 +54,10 @@ class BeforeAfter extends React.Component {
             position: 50,
             componentWidth: undefined,
         }
-        this.wrapperElement = null
+        this.wrapperElement = createRef()
     }
+
+    engagement = 0
 
     setPosition = p => {
         if (p < 0) p = 0
@@ -65,9 +67,52 @@ class BeforeAfter extends React.Component {
         })
     }
 
-    onMouseMove = e => {
+    touchMoveEventHandler = e => {
         const cx = e.touches ? e.touches[0].clientX : e.clientX
-        this.setPosition(((cx - e.currentTarget.offsetLeft) / e.currentTarget.clientWidth) * 100)
+        const diff = ((cx - this.startClientX) / this.wrapperElement.current.clientWidth) * 100
+
+        this.setPosition(this.startPosition + diff)
+
+        if (this.engagement === 0) {
+            this.engagement++
+
+            postMessage('analytics', {
+                type: 'engagement',
+                actionType: 'screens',
+                engagement: this.engagement,
+            })
+        }
+    }
+
+    mouseMoveEventHandler = ev => {
+        if (this.draggable) this.touchMoveEventHandler(ev)
+    }
+
+    touchStartEventHandler = ev => {
+        this.startClientX = ev.touches ? ev.touches[0].clientX : ev.clientX
+        this.startPosition = this.state.position
+    }
+
+    mouseDownEventHandler = ev => {
+        this.startClientX = ev.touches ? ev.touches[0].clientX : ev.clientX
+        this.startPosition = this.state.position
+        this.draggable = true
+    }
+
+    mouseUpEventHandler = () => {
+        this.draggable = false
+    }
+
+    componentWillMount() {
+        window.addEventListener('touchmove', this.touchMoveEventHandler)
+        window.addEventListener('mousemove', this.mouseMoveEventHandler)
+        window.addEventListener('mouseup', this.mouseUpEventHandler)
+    }
+
+    componentWillUnmount() {
+        window.removeEventListener('touchmove', this.touchMoveEventHandler)
+        window.removeEventListener('mousemove', this.mouseMoveEventHandler)
+        window.removeEventListener('mouseup', this.mouseUpEventHandler)
     }
 
     render() {
@@ -83,17 +128,10 @@ class BeforeAfter extends React.Component {
 
         return (
             <div
+                ref={this.wrapperElement}
                 className="tstx_jaxtapose_wr"
-                onTouchMove={this.onMouseMove}
-                onMouseMove={ev => {
-                    if (this.draggable) this.onMouseMove(ev)
-                }}
-                onMouseDown={() => {
-                    this.draggable = true
-                }}
-                onMouseUp={() => {
-                    this.draggable = false
-                }}
+                onTouchStart={this.touchStartEventHandler}
+                onMouseDown={this.mouseDownEventHandler}
             >
                 <div style={{ backgroundImage: `url(${leftImage})`, ...childStyle }} />
                 <ClipRect left={`${position}%`}>
