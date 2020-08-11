@@ -31,7 +31,13 @@
     margin-left: -2px;
     display: flex;
     align-items: center;
+    transition: opacity 250ms;
 }
+
+.tstx-jaxtapose_delimeter:hover {
+    opacity: 0.7;
+}
+
 .tstx-jaxtapose_delimeter svg {
     position: absolute;
     margin-left: -22px;

@@ -53,6 +53,7 @@ class BeforeAfter extends React.Component {
         this.state = {
             position: 50,
             componentWidth: undefined,
+            opacity: 1,
         }
         this.wrapperElement = createRef()
     }
@@ -97,10 +98,12 @@ class BeforeAfter extends React.Component {
         this.startClientX = ev.touches ? ev.touches[0].clientX : ev.clientX
         this.startPosition = this.state.position
         this.draggable = true
+        this.setState({ opacity: 0.7 })
     }
 
     mouseUpEventHandler = () => {
         this.draggable = false
+        this.setState({ opacity: 1 })
     }
 
     componentWillMount() {
@@ -139,7 +142,11 @@ class BeforeAfter extends React.Component {
                 </ClipRect>
                 <div
                     className="tstx-jaxtapose_delimeter"
-                    style={{ left: this.state.position + '%', backgroundColor: dividerColor }}
+                    style={{
+                        left: this.state.position + '%',
+                        backgroundColor: dividerColor,
+                        opacity: this.state.opacity,
+                    }}
                 >
                     <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <circle cx="24" cy="24" r="24" fill="black" fillOpacity="0.4" />
