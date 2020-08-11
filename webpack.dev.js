@@ -1,3 +1,4 @@
+const webpack = require('webpack')
 const merge = require('webpack-merge')
 const common = require('./webpack.common.js')
 
@@ -10,5 +11,11 @@ module.exports = env => {
         devServer: {
             contentBase: './dist',
         },
+        plugins: [
+            new webpack.DefinePlugin({
+                'process.env.NODE_ENV': JSON.stringify('development'),
+                'process.env.PROJECT_TYPE': JSON.stringify(PROJECT_TYPE === 'index' ? 'trivia' : PROJECT_TYPE),
+            }),
+        ],
     })
 }

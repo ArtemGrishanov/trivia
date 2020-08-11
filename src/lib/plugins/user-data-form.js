@@ -41,6 +41,7 @@ const initUserForm = ({ remix, screenTag = 'question', resultTag = 'result' }) =
 
             if (formValues.length) {
                 remix.postMessage('user-data', { formId: screenId, formValues })
+                remix.fireEvent('form_data_sent', currentScreen)
                 remix.setData({ [`router.screens.${screenId}.components.${componentId}.data`]: {} }, void 0, true)
 
                 needNext = true

@@ -89,7 +89,7 @@ initShare({
 
 initGoogleAnalytics({ remix: Remix })
 
-initFacebookAnalytics({ remix: Remix })
+initFacebookAnalytics({ remix: Remix, questionScreenTag: 'photostoryitem', resultScreenTag: 'final' })
 
 ReactDOM.render(
     <Provider store={store}>
