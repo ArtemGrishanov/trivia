@@ -9,25 +9,29 @@ const maxBy = (values, mapFn) => {
 }
 
 const getTitleFromComponents = components => {
-    const textComponents = Object.values(components).filter(
-        component => typeof component === 'object' && component.displayName === 'Text' && component.text !== void 0,
-    )
+    try {
+        const textComponents = Object.values(components).filter(
+            component => typeof component === 'object' && component.displayName === 'Text' && component.text !== void 0,
+        )
 
-    const [_, mainComponentText] = maxBy(
-        textComponents.map(component => {
-            let score = 0
+        const [_, mainComponentText] = maxBy(
+            textComponents.map(component => {
+                let score = 0
 
-            component.text.includes('-huge') && ++score
-            component.text.includes('-center') && ++score
+                component.text.includes('-huge') && ++score
+                component.text.includes('-center') && ++score
 
-            return [score, component.text]
-        }),
-        ([score]) => score,
-    )
+                return [score, component.text]
+            }),
+            ([score]) => score,
+        )
 
-    const texts = mainComponentText.match(/[^<>]+(?=[<])/g) || [mainComponentText]
+        const texts = mainComponentText.match(/[^<>]+(?=[<])/g) || [mainComponentText]
 
-    return texts.join(' ')
+        return texts.join(' ')
+    } catch (err) {
+        return ''
+    }
 }
 
 const getCurrentScreen = remix => {
