@@ -871,11 +871,7 @@ function session(
  */
 function _doUpdate(state, data) {
     const pathesArr = Array.isArray(data) ? data.map(p => p.path) : Object.keys(data)
-    const pathesValues = Array.isArray(data)
-        ? data.reduce((res, elem) => {
-              return { ...res, [elem.path]: elem.value }
-          }, {})
-        : data
+    const pathesValues = Array.isArray(data) ? Object.fromEntries(data.map(elem => [elem.path, elem.value])) : data
     pathesArr.forEach(path => {
         const propDescription = schema.getDescription(path)
         if (!propDescription) {
