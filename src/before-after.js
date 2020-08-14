@@ -49,11 +49,22 @@ initRemixRouting({
 function getScreenHTMLPreview({ screen, defaultTitle }) {
     const FB_SHARE_WIDTH = 1200, // поддерживаем пока один фикс размер шаринг картинки
         FB_SHARE_HEIGHT = 630,
-        backStyle = `position: absolute;
-            width:${FB_SHARE_WIDTH}px;
-            height:${FB_SHARE_HEIGHT}px;
-            background-color: #DDE1E8;
-            `
+        backStyle = `width:${FB_SHARE_WIDTH}px;
+        height:${FB_SHARE_HEIGHT}px;
+        padding:100px;
+        box-sizing:border-box;
+        text-align:center;
+        background-image:url(${screen.backgroundImage});
+        background-size:cover;
+        background-position:center;
+        background-color:#C86445;
+        font-family:Arial,sans-serif;
+        color:#fff;
+        font-size:48px;
+        display:flex;
+        justify-content:center;
+        align-items:center;`
+
     return `<div style="${backStyle}">
                 ${defaultTitle}
             </div>`
@@ -69,7 +80,7 @@ initShare({
     getMainPreviewHTML: remix => {
         const state = remix.getState(),
             screen = state.router.screens.getByIndex(0) // это может быть кавер скрин или первый вопрос
-        return getScreenHTMLPreview({ screen, defaultTitle: 'Rank Battle' })
+        return getScreenHTMLPreview({ screen, defaultTitle: 'Then/Now' })
     },
     /**
      * Функция для генерации превью для каждого отдельного результата шаринга
@@ -78,7 +89,7 @@ initShare({
         const screenId = shareEntity.screen.id,
             state = remix.getState(),
             resultScreen = state.router.screens[screenId]
-        return getScreenHTMLPreview({ screen: resultScreen, defaultTitle: 'Result title' })
+        return getScreenHTMLPreview({ screen: resultScreen, defaultTitle: 'Then/Now' })
     },
 })
 
