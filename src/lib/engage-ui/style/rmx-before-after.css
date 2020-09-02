@@ -1,0 +1,44 @@
+.tstx_jaxtapose_wr {
+    /* position: relative; Notice: doesnot work with min-height  */
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.tstx_jaxtapose_wr img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
+}
+
+.overflow-hidden {
+    overflow: hidden;
+}
+
+.tstx-jaxtapose_delimeter {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 4px;
+    height: 100%;
+    margin-left: -2px;
+    display: flex;
+    align-items: center;
+    transition: opacity 250ms;
+}
+
+.tstx-jaxtapose_delimeter:hover {
+    opacity: 0.7;
+}
+
+.tstx-jaxtapose_delimeter svg {
+    position: absolute;
+    margin-left: -22px;
+}
