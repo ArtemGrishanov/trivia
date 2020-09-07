@@ -111,7 +111,7 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
      * 2. nextScreenId ищется в свойстве 'data' у текущего экрана
      * 3. Если id найден, то выполняется показ нового экрана
      */
-    Remix.registerTriggerAction('go_next_screen', event => {
+    Remix.registerTriggerAction('go_next_screen', async event => {
         let isCustomFunc = false
         const paramName = 'nextScreenId'
         let nsId = event.eventData ? event.eventData[paramName] : null
@@ -133,6 +133,14 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
             }
         }
         if (nsId) {
+            if (state.app.popups.enable) {
+                const popupId = remix.getProperty('data.popupId', event.eventData)
+
+                if (typeof popupId === 'string' && popupId.length) {
+                    await waitingForPopupToClose()
+                }
+            }
+
             const resultScreenIds = event.remix.getScreens({ tag: resultScreenTag }).map(({ hashlistId }) => hashlistId)
 
             if (resultScreenIds.includes(nsId) && state.app.userForm?.enable) {
@@ -236,4 +244,40 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
             then: { actionType: 'go_prev_screen' },
         })
     }
+
+    const waitingForPopupToClose = (() => {
+        let resolve = () => {}
+
+        let isWaiting = false
+
+        const waiting = async () => {
+            isWaiting = true
+
+            const id = setInterval(
+                () => console.warn('WARN: while waiting for popup to close, something may have gone wrong'),
+                1000 * 60,
+            )
+
+            await new Promise(res => (resolve = res))
+
+            isWaiting = false
+
+            clearInterval(id)
+        }
+
+        remix.registerTriggerAction('watchPopupClose', event => {
+            if (!isWaiting) return
+            if (event.remix.getState().router.showPopup === false) resolve()
+        })
+
+        remix.addTrigger({
+            when: {
+                eventType: 'property_updated',
+                condition: { prop: 'path', clause: 'EQUALS', value: 'router.showPopup' },
+            },
+            then: { actionType: 'watchPopupClose' },
+        })
+
+        return waiting
+    })()
 }

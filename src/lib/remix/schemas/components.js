@@ -1,6 +1,8 @@
 import DataSchema from '../../schema.js'
 import { Schema as ScreenComponentsSchema } from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema } from '../../engage-ui/router.js'
+import { Schema as PopupSchema } from '../../engage-ui/Popup'
+
 import { Schema as TextSchema } from '../../engage-ui/primitives/Text.js'
 import { Schema as ProgressSchema } from '../../engage-ui/primitives/Progress.js'
 import { Schema as TextOptionSchema } from '../../engage-ui/primitives/TextOption.js'
@@ -61,12 +63,26 @@ const schemaData = {
     'router.displayMode': RouterScreensSchema.getDescription('displayMode'),
     'router.backgroundColor': RouterScreensSchema.getDescription('backgroundColor'),
     'router.switchEffect': RouterScreensSchema.getDescription('switchEffect'),
+    'router.showPopup': RouterScreensSchema.getDescription('showPopup'),
+    'router.activePopupId': RouterScreensSchema.getDescription('activePopupId'),
     'router.[screens HashList]./^[0-9a-z]+$/.backgroundColor': ScreenComponentsSchema.getDescription('backgroundColor'),
     'router.[screens HashList]./^[0-9a-z]+$/.backgroundImage': ScreenComponentsSchema.getDescription('backgroundImage'),
     'router.[screens HashList]./^[0-9a-z]+$/.components': ScreenComponentsSchema.getDescription('components'),
     'router.[screens HashList]./^[0-9a-z]+$/.tags': ScreenComponentsSchema.getDescription('tags'),
     'router.[screens HashList]./^[0-9a-z]+$/.staticMarkup': ScreenComponentsSchema.getDescription('staticMarkup'),
     'router.[screens HashList]./^[0-9a-z]+$/.disabled': ScreenComponentsSchema.getDescription('disabled'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups': ScreenComponentsSchema.getDescription('popups'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.margin': PopupSchema.getDescription('margin'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.backgroundColor': PopupSchema.getDescription(
+        'backgroundColor',
+    ),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.backgroundImage': PopupSchema.getDescription(
+        'backgroundImage',
+    ),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.components': PopupSchema.getDescription('components'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.staticMarkup': PopupSchema.getDescription(
+        'staticMarkup',
+    ),
     // Условные свойства компонентов
     // например 'router.screens.u2xt9e.__c.800.fjxjnr.top'
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
@@ -144,12 +160,16 @@ const schemaData = {
 
 // grab component schemas in one application schema
 // Note: inside RemiwWrapper component schemas were extended with common properties: id, left, top etc..
-const componentRootPath = `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/`
-Object.keys(componentSchemas).forEach(s => {
-    const componentName = s.replace(/Schema/, '')
-    Object.keys(componentSchemas[s]._schm).forEach(prop => {
-        const path = `${componentRootPath} displayName=${componentName}].${prop}`
-        schemaData[path] = componentSchemas[s]._schm[prop]
+;[
+    `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/`,
+    `router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/`,
+].forEach(componentRootPath => {
+    Object.keys(componentSchemas).forEach(s => {
+        const componentName = s.replace(/Schema/, '')
+        Object.keys(componentSchemas[s]._schm).forEach(prop => {
+            const path = `${componentRootPath} displayName=${componentName}].${prop}`
+            schemaData[path] = componentSchemas[s]._schm[prop]
+        })
     })
 })
 

@@ -31,10 +31,13 @@
 .rmx-option-icons {
     position: absolute;
     background-color: transparent;
+    display: flex;
+    align-items: center;
 }
 .rmx-option-icons--item {
     font-size: 0;
 }
+
 .rmx-option-icons--item.clickable {
     position: relative;
 }

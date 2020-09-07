@@ -14,6 +14,8 @@ import {
     throttle,
     parseComponentPath,
     parseComponentAdapteduiPath,
+    getPopupIdFromPath,
+    getPopupComponentIdFromPath,
 } from './remix/util/util.js'
 import { updateWindowSize, updateAppHeight, getContainerSize, checkScreensAdaptation } from './remix/layout/helpers'
 
@@ -57,9 +59,28 @@ let logging = LOG_BY_DEFAULT,
     _orderCounter = 0,
     _triggerActions = {},
     _componentIdToScreenId = {},
+    _componentIdToPath = {},
     _externalListeners = {}
 
-export const getScreenIdByComponentId = componentId => _componentIdToScreenId[componentId]
+export const getScreenIdByComponentId = (componentId, state) => {
+    state = state || store.getState()
+
+    if (!_componentIdToScreenId[componentId]) {
+        calcComponentIdScreenIdHash(state.router.screens)
+    }
+
+    return _componentIdToScreenId[componentId]
+}
+
+export const getPathByComponentId = (componentId, state) => {
+    state = state || store.getState()
+
+    if (typeof _componentIdToPath[componentId] !== 'string') {
+        calcComponentIdStatePath(state.router, 'router')
+    }
+
+    return _componentIdToPath[componentId]
+}
 
 // establish communication with RemixContainer
 window.addEventListener('message', receiveMessage, false)
@@ -100,7 +121,7 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
     // method 'embed' - managed by index.html
 
     if (data.method === 'setdata') {
-        setData(data.data, data.forceFeedback, data.immediate)
+        setData(data.data, data.forceFeedback, data.immediate, data.calcConditions)
         putStateHistory()
     }
     if (data.method === 'serialize') {
@@ -282,61 +303,67 @@ function calcConditionalProperties(state, data) {
     })
 
     // устанавливаем условное свойство, надо сохранить adaptedui свойства
-    Object.keys(data).forEach(path => {
-        const d = schema.getDescription(path)
-        if (d && d.condition) {
-            if (!d.condition.onSave || !d.condition.onMasterChanged) {
-                throw new Error(`You must set "onSave" and "onMasterChanged" function for conditonal property ${path}`)
-            }
+    Object.keys(data)
+        .filter(path => !path.includes('.popups.'))
+        .forEach(path => {
+            const d = schema.getDescription(path)
+            if (d && d.condition) {
+                if (!d.condition.onSave || !d.condition.onMasterChanged) {
+                    throw new Error(
+                        `You must set "onSave" and "onMasterChanged" function for conditonal property ${path}`,
+                    )
+                }
 
-            const { screenId, componentId, propName } = parseComponentPath(path)
+                const { screenId, componentId, propName } = parseComponentPath(path)
 
-            if (!screenId || !componentId || !propName) {
-                throw new Error(
-                    `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
-                )
-            }
+                if (!screenId || !componentId || !propName) {
+                    throw new Error(
+                        `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
+                    )
+                }
 
-            const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
-            const dt = d.condition.onSave({ masterValue, path, data, state, screenId, componentId })
-            if (dt) {
-                Object.keys(dt).forEach(key => {
-                    // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
-                    conditionalData = {
-                        ...conditionalData,
-                        [d.condition.conditionPath({ screenId, componentId, key })]: dt[key],
-                    }
-                })
+                const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
+                const dt = d.condition.onSave({ masterValue, path, data, state, screenId, componentId })
+                if (dt) {
+                    Object.keys(dt).forEach(key => {
+                        // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                        conditionalData = {
+                            ...conditionalData,
+                            [d.condition.conditionPath({ screenId, componentId, key })]: dt[key],
+                        }
+                    })
+                }
             }
-        }
-    })
+        })
 
     // сохраняем условие, и надо проверить стоит ли обновить текущее значение свойства
     // пример: после расчета адаптации. Ведь адаптационных алгоритм обновляет только adapted свойство и не ставит текущие напрямую
-    Object.keys(data).forEach(path => {
-        // если path подходит под conditionPath
-        const condDesc = schema.getDescription(path)
-        if (condDesc.conditionOf) {
-            const { screenId, masterKey, componentId, propName } = parseComponentAdapteduiPath(path)
-            if (screenId && masterKey && componentId && propName) {
-                const mainPath = condDesc.conditionOf({ screenId, componentId, propName })
-                const d = schema.getDescription(mainPath)
-                if (d) {
-                    const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
-                    if (masterKey == masterValue) {
-                        conditionalData = {
-                            ...conditionalData,
-                            [mainPath]: data[path],
+    Object.keys(data)
+        .filter(path => !path.includes('.popups.'))
+        .forEach(path => {
+            // если path подходит под conditionPath
+            const condDesc = schema.getDescription(path)
+            if (condDesc.conditionOf) {
+                const { screenId, masterKey, componentId, propName } = parseComponentAdapteduiPath(path)
+                if (screenId && masterKey && componentId && propName) {
+                    const mainPath = condDesc.conditionOf({ screenId, componentId, propName })
+                    const d = schema.getDescription(mainPath)
+                    if (d) {
+                        const masterValue = data[d.condition.master] || getProperty(d.condition.master, state)
+                        if (masterKey == masterValue) {
+                            conditionalData = {
+                                ...conditionalData,
+                                [mainPath]: data[path],
+                            }
                         }
+                    } else {
+                        throw new Error(`Condition path not found for ${path}`)
                     }
                 } else {
-                    throw new Error(`Condition path not found for ${path}`)
+                    throw new Error(`This conditional ${path} not supported`)
                 }
-            } else {
-                throw new Error(`This conditional ${path} not supported`)
             }
-        }
-    })
+        })
 
     return conditionalData
 }
@@ -363,31 +390,37 @@ function normalizeConditionalProperties() {
             const masterValue = masterValues[desc.condition.master],
                 pathes = getPropertiesBySelector(state, selector)
 
-            pathes.forEach(prop => {
-                const path = prop.path
-                const { screenId, componentId, propName } = parseComponentPath(path)
+            pathes
+                .filter(({ path }) => !path.includes('.popups.'))
+                .forEach(prop => {
+                    try {
+                        const path = prop.path
+                        const { screenId, componentId, propName } = parseComponentPath(path)
 
-                if (!screenId || !componentId || !propName) {
-                    throw new Error(
-                        `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
-                    )
-                }
-
-                const data = { [prop.path]: prop.value }
-                const dt = desc.condition.onSave({ masterValue, path, data, state, screenId, componentId })
-                if (dt) {
-                    Object.keys(dt).forEach(key => {
-                        const condPath = desc.condition.conditionPath({ screenId, componentId, key })
-                        if (!getProperty(condPath, state)) {
-                            // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
-                            conditionalData = {
-                                ...conditionalData,
-                                [condPath]: dt[key],
-                            }
+                        if (!screenId || !componentId || !propName) {
+                            throw new Error(
+                                `Only component conditional properties are supported now, example: "router.screens.123.components.123.propname"`,
+                            )
                         }
-                    })
-                }
-            })
+
+                        const data = { [prop.path]: prop.value }
+                        const dt = desc.condition.onSave({ masterValue, path, data, state, screenId, componentId })
+                        if (dt) {
+                            Object.keys(dt).forEach(key => {
+                                const condPath = desc.condition.conditionPath({ screenId, componentId, key })
+                                if (!getProperty(condPath, state)) {
+                                    // Условные значения будут сохранены в экране: например  router.screens.${screenId}.adaptedui.320.props.${componentId}.left
+                                    conditionalData = {
+                                        ...conditionalData,
+                                        [condPath]: dt[key],
+                                    }
+                                }
+                            })
+                        }
+                    } catch (err) {
+                        console.log(err)
+                    }
+                })
         }
     })
     if (Object.keys(conditionalData).length > 0) {
@@ -442,7 +475,7 @@ function addTrigger({ when = {}, then = null }) {
  * @param {string} eventType
  * @param {object} eventData
  */
-function fireEvent(eventType, eventData) {
+export function fireEvent(eventType, eventData) {
     if (eventType === undefined) {
         throw new Error('Remix.fireEvent: eventType is not specified')
     }
@@ -1232,6 +1265,8 @@ function getProperties() {
                 value: prop.value,
                 screenId: getScreenIdFromPath(prop.path),
                 componentId: getComponentIdFromPath(prop.path),
+                popupId: getPopupIdFromPath(prop.path),
+                popupComponentId: getPopupComponentIdFromPath(prop.path),
             })
         })
     })
@@ -1366,12 +1401,10 @@ export function setComponentProps(newProps, options = {}) {
         if (!newp.id) {
             throw new Error('You must setsetData a component id in new props')
         }
-        if (!_componentIdToScreenId[newp.id]) {
-            calcComponentIdScreenIdHash(state.router.screens)
-        }
-        const screenId = _componentIdToScreenId[newp.id]
-        if (screenId) {
-            let path = `router.screens.${screenId}.components.${newp.id}.`
+
+        const pathToComponent = getPathByComponentId(newp.id, state)
+        if (typeof pathToComponent === 'string') {
+            const path = `${_componentIdToPath[newp.id]}.${newp.id}.`
             Object.keys(newp).forEach(key => {
                 data[path + key] = newp[key]
             })
@@ -1392,6 +1425,26 @@ function calcComponentIdScreenIdHash(screens) {
             _componentIdToScreenId[cmp.hashlistId] = scr.hashlistId
         })
     })
+}
+
+function calcComponentIdStatePath(state, pathToState = '') {
+    _componentIdToPath = {}
+
+    const recursive = (obj, pathToObj) => {
+        for (const key of Object.keys(obj)) {
+            const newPath = pathToObj.length ? `${pathToObj}.${key}` : key
+
+            if (key === 'components') {
+                obj[key].toArray().forEach(cmp => {
+                    _componentIdToPath[cmp.hashlistId] = newPath
+                })
+            } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+                recursive(obj[key], newPath)
+            }
+        }
+    }
+
+    if (state) recursive(state, pathToState)
 }
 
 export function getState() {

@@ -36,6 +36,24 @@ export function getComponentIdFromPath(path) {
 }
 
 /**
+ * Parses property path and returns popup id
+ *
+ * @param {string} path, property path, example 'router.screens.8wruuz.components.zbnkhy.fontShadow'
+ * @return {string} screenId, example 8wruuz
+ */
+export function getPopupIdFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+\.popups\.([A-z0-9]+)/g,
+        m = regex.exec(path)
+    return m && m[0] && m[1] ? m[1] : null
+}
+
+export function getPopupComponentIdFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+\.popups\.[A-z0-9]+\.components\.([A-z0-9]+)/g,
+        m = regex.exec(path)
+    return m && m[0] && m[1] ? m[1] : null
+}
+
+/**
  * Вернуть имя свойства из строки
  * @param {string} path например 'router.screens.8wruuz.components.zbnkhy.fontShadow'
  * @return {string} 'fontShadow'

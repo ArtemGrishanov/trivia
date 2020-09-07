@@ -83,6 +83,16 @@ export const Schema = new DataSchema({
         ]),
         prototypes: [{ id: 'dumb_component', data: { displayName: 'Element', backgroundColor: '#fff' } }],
     },
+    popups: {
+        type: 'hashlist',
+        default: new HashList([
+            //no popups in app by default
+            //{ displayName: 'Popup', backgroundColor: 'yellow' }
+        ]),
+        minLength: 0,
+        maxLength: 32,
+        // prototypes: [{ id: 'default_prototype', data: { displayName: 'Popup', backgroundColor: 'green' } }],
+    },
     tags: {
         type: 'string',
         minLength: 0,

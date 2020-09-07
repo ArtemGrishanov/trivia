@@ -12,12 +12,12 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
     const DYNAMIC_CONTENT_SELECTOR = `${BASE_SELECTOR}.${DYNAMIC_CONTENT_PROP}`
 
     const ICON_STYLES = {
-        icons: [
-            {
+        icons: {
+            quizCorrectOption: {
                 name: 'correctOption',
                 clickable: false,
             },
-        ],
+        },
         hAlign: 'right',
         vAlign: 'top',
         vPadding: 5,
@@ -35,6 +35,7 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
         [DYNAMIC_CONTENT_SELECTOR]: {
             type: 'object',
             default: {},
+            serialize: false,
         },
         ...Object.fromEntries(
             Object.entries(Schemas.iconList._schm).map(([key, node]) => {
@@ -60,18 +61,26 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
                     .split('.')
                     .map(part => `['${part}']`)
                     .join('')
-                const dynamicContent = eval(`state${evalPath}`)[DYNAMIC_CONTENT_PROP]
+                const dynamicContent = eval(`state${evalPath}`)[DYNAMIC_CONTENT_PROP] || {
+                    [ContentPropsList.ICON_LIST]: { icons: {} },
+                }
 
                 if (needShowIcon && mode === 'edit') {
                     const update = {
-                        ...(dynamicContent || {}),
-                        [ContentPropsList.ICON_LIST]: { ...ICON_STYLES },
+                        ...dynamicContent,
+                        [ContentPropsList.ICON_LIST]: {
+                            ...ICON_STYLES,
+                            icons: {
+                                ...dynamicContent[ContentPropsList.ICON_LIST].icons,
+                                ...ICON_STYLES.icons,
+                            },
+                        },
                     }
 
                     return [`${path}.${DYNAMIC_CONTENT_PROP}`, update]
                 } else if (dynamicContent !== void 0) {
                     const update = JSON.parse(JSON.stringify(dynamicContent))
-                    delete update[ContentPropsList.ICON_LIST]
+                    delete update[ContentPropsList.ICON_LIST].icons.quizCorrectOption
 
                     return [`${path}.${DYNAMIC_CONTENT_PROP}`, update]
                 } else {
@@ -80,7 +89,7 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
             })
             .filter(data => data !== false)
 
-        remix.setData(Object.fromEntries(data))
+        remix.setData(Object.fromEntries(data), false, true)
     })
 
     remix.addTrigger({

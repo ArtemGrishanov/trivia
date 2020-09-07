@@ -127,6 +127,10 @@ export default (Component, Schema, DisplayName) => {
             composed = compose(screenConnect(), withPropNormalizer(Schema, DisplayName))(Component)
             break
         }
+        case 'Popup': {
+            composed = compose(popupConnect(), withPropNormalizer(Schema, DisplayName))(Component)
+            break
+        }
         default: {
             composed = compose(
                 LayoutItem(),
@@ -182,6 +186,24 @@ function screenConnect() {
         if (ownProps.id && state.router.screens[ownProps.id]) {
             return {
                 ...state.router.screens[ownProps.id],
+                ...state.session,
+                size: state.app.sessionsize,
+            }
+        }
+        return {}
+    })
+}
+
+function popupConnect() {
+    return connect((state, ownProps) => {
+        if (
+            ownProps.screenId &&
+            state.router.screens[ownProps.screenId] &&
+            ownProps.id &&
+            state.router.screens[ownProps.screenId].popups[ownProps.id]
+        ) {
+            return {
+                ...state.router.screens[ownProps.screenId].popups[ownProps.id],
                 ...state.session,
                 size: state.app.sessionsize,
             }
