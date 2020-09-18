@@ -4,31 +4,25 @@ import HashList from '../../lib/hashlist'
 import { getPathes } from '../../lib/object-path'
 import { getScreenIdFromPath, getComponentIdFromPath } from '../remix/util/util'
 import { postMessage, getPathByComponentId } from '../remix'
+import { event } from '../../actions'
 
 const defaultSettings = {
+    enablePopupsByDefault: false,
     componentFiltersCapableOfTriggeringEvents: ['displayName=TextOption'],
 }
 
 const defaultPopup = { displayName: 'Popup', backgroundColor: 'white' }
 
-const initPopupManager = ({ remix, settings = defaultSettings }) => {
+const initPopupManager = ({ remix, settings = {} }) => {
+    settings = { ...defaultSettings, ...settings }
     // common popup settings
     remix.extendSchema({
         'app.popups.enable': {
             type: 'boolean',
             default: false,
         },
-        // 'router.[screens HashList]./^[0-9a-z]+$/.popups': {
-        //     type: 'hashlist',
-        //     default: new HashList([
-        //         //no popups in app by default
-        //         //{ displayName: 'Popup', backgroundColor: 'yellow' }
-        //     ]),
-        //     minLength: 0,
-        //     maxLength: 32,
-        //     // prototypes: [{ id: 'default_prototype', data: { displayName: 'Popup', backgroundColor: 'green' } }],
-        // },
     })
+    remix.setData({ 'app.popups.enable': settings.enablePopupsByDefault }, false, true)
 
     declareDynamicContent({ remix, filters: settings.componentFiltersCapableOfTriggeringEvents })
 
@@ -146,6 +140,9 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
         const updatePopups = (state, mode, popupsIsEnbale, components) => {
             components.forEach(({ screenId, componentId }) => {
                 let popupId = remix.getProperty(`router.screens.${screenId}.components.${componentId}.data.popupId`)
+                let copyPopupId = remix.getProperty(
+                    `router.screens.${screenId}.components.${componentId}.data.copyPopupId`,
+                )
 
                 let popups = remix.getProperty(`router.screens.${screenId}.popups`)
                 if (popups === void 0) {
@@ -155,7 +152,8 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
                 }
 
                 if (typeof popupId !== 'string' || popupId.length === 0) {
-                    popupId = popups.addElement({ ...defaultPopup }).getLast().hashlistId
+                    let newPopup = (copyPopupId && popups[copyPopupId]) || defaultPopup
+                    popupId = popups.addElement({ ...newPopup }).getLast().hashlistId
 
                     remix.setData(
                         {
@@ -206,8 +204,13 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
         remix.registerTriggerAction(`update_popups_by_${filter}_1`, event => {
             const state = event.remix.getState()
             if (!state) return
+
             const mode = state.session.mode
+            if (mode !== 'edit') return
+
             const popupsIsEnbale = remix.getProperty('popups.enable', state.app) || false
+            postMessage('request_popups_edit_mode', { enable: popupsIsEnbale })
+            if (!popupsIsEnbale) return
 
             const components = getPathes(state, BASE_SELECTOR).map(path => {
                 const screenId = getScreenIdFromPath(path)
@@ -216,9 +219,7 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
                 return { screenId, componentId }
             })
 
-            updatePopups(state, mode, popupsIsEnbale, components)
-
-            postMessage('request_popups_edit_mode', { enable: popupsIsEnbale })
+            if (components.length) updatePopups(state, mode, popupsIsEnbale, components)
         })
 
         remix.addTrigger({
@@ -234,11 +235,12 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
             const state = event.remix.getState()
             if (!state) return
             const mode = state.session.mode
+            if (mode !== 'edit') return
             const popupsIsEnbale = remix.getProperty('popups.enable', state.app) || false
-
+            if (!popupsIsEnbale) return
             const components = filterDiffBySelector(state, event.eventData.diff.added, displayNameSelector)
 
-            updatePopups(state, mode, popupsIsEnbale, components)
+            if (components.length) updatePopups(state, mode, popupsIsEnbale, components)
         })
 
         remix.addTrigger({
@@ -257,49 +259,55 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
         remix.registerTriggerAction(`update_popups_by_${filter}_3`, event => {
             const state = event.remix.getState()
             if (!state) return
+
             const mode = state.session.mode
+            if (mode !== 'edit') return
+
             const popupsIsEnbale = remix.getProperty('popups.enable', state.app) || false
+            if (!popupsIsEnbale) return
 
             const screens = state.router.screens
 
             const components = screens
                 .toArray()
-                .filter(screen => {
-                    const popups = screen.popups || {}
-
-                    let idCount = 0
-                    const isError = screen.components.toArray().some(component => {
-                        const popupId = component.data && component.data.popupId
-                        if (typeof popupId === 'string' && popupId.length) {
-                            idCount++
-                            if (popupId in popups) return false
-                            else return true
-                        }
-
-                        return false
-                    })
-
-                    return isError || idCount !== popups.length
-                })
                 .map(screen => {
-                    remix.setData({ [`router.screens.${screen.hashlistId}.popups`]: new HashList() }, false, true)
                     const components = screen.components
                         .toArray()
                         .filter(component => {
-                            const path = `router.screens.${screen.hashlistId}.components.${component.hashlistId}`
+                            const popupId = component.data && component.data.popupId
+                            if (typeof popupId !== 'string' || !popupId.length) return true
+
+                            if (popupId in screen.popups) {
+                                return false
+                            } else {
+                                const index = screens
+                                    .toArray()
+                                    .map(screen => screen.popups.getIndex(popupId))
+                                    .filter(index => index !== -1)[0]
+
+                                if (index !== void 0) {
+                                    const newId = screen.popups.getId(index)
+                                    if (typeof newId === 'string' && newId.length) {
+                                        event.remix.setData({
+                                            [`router.screens.${screen.hashlistId}.components.${component.hashlistId}.data.popupId`]: screen.popups.getId(
+                                                index,
+                                            ),
+                                        })
+
+                                        return false
+                                    }
+                                }
+
+                                console.log('should be unreachable code! this case needs to be handle')
+                            }
+
+                            return true
+                        })
+                        .map(component => ({ screenId: screen.hashlistId, componentId: component.hashlistId }))
+                        .filter(({ screenId, componentId }) => {
+                            const path = `router.screens.${screenId}.components.${componentId}`
 
                             return baseSelector.match(path, state)
-                        })
-                        .map(component => {
-                            remix.setData(
-                                {
-                                    [`router.screens.${screen.hashlistId}.components.${component.hashlistId}.data.popupId`]: '',
-                                },
-                                false,
-                                true,
-                            )
-
-                            return { screenId: screen.hashlistId, componentId: component.hashlistId }
                         })
 
                     return components
@@ -310,7 +318,55 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
                     return acc
                 }, [])
 
-            updatePopups(state, mode, popupsIsEnbale, components)
+            // const components = screens
+            //     .toArray()
+            //     .filter(screen => {
+            //         const popups = screen.popups || {}
+
+            //         let idCount = 0
+            //         const isError = screen.components.toArray().some(component => {
+            //             const popupId = component.data && component.data.popupId
+            //             if (typeof popupId === 'string' && popupId.length) {
+            //                 idCount++
+            //                 if (popupId in popups) return false
+            //                 else return true
+            //             }
+
+            //             return false
+            //         })
+
+            //         return isError || idCount !== popups.length
+            //     })
+            //     .map(screen => {
+            //         remix.setData({ [`router.screens.${screen.hashlistId}.popups`]: new HashList() }, false, true)
+            //         const components = screen.components
+            //             .toArray()
+            //             .filter(component => {
+            //                 const path = `router.screens.${screen.hashlistId}.components.${component.hashlistId}`
+
+            //                 return baseSelector.match(path, state)
+            //             })
+            //             .map(component => {
+            //                 remix.setData(
+            //                     {
+            //                         [`router.screens.${screen.hashlistId}.components.${component.hashlistId}.data.popupId`]: '',
+            //                     },
+            //                     false,
+            //                     true,
+            //                 )
+
+            //                 return { screenId: screen.hashlistId, componentId: component.hashlistId }
+            //             })
+
+            //         return components
+            //     })
+            //      .reduce((acc, components) => {
+            // acc.push(...components)
+
+            // return acc
+            // }, [])
+
+            if (components.length) updatePopups(state, mode, popupsIsEnbale, components)
         })
 
         remix.addTrigger({
@@ -327,20 +383,66 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
             },
         })
 
-        remix.registerTriggerAction(`delete_popupId_${filter}`, event => {
-            event.eventData.diff.deleted
-                .filter(({ path }) => path.includes('.data.popupId'))
-                .map(({ path, value }) => {
-                    const screenId = getScreenIdFromPath(path)
+        // remix.registerTriggerAction(`handler_${filter}_screen_clone`, event => {
+        //     debugger
+        //     const { hashlistPropPath, result, source } = event.eventData
 
-                    return { screenId, popupId: value }
-                })
-                .forEach(({ screenId, popupId }) => {
-                    if (typeof popupId === 'string' && popupId.length) {
-                        const popups = remix.getProperty(`router.screens.${screenId}.popups`)
-                        popups.deleteElementById(popupId)
-                    }
-                })
+        //     const resultHashlistId = event.remix
+        //         .getProperty(hashlistPropPath)
+        //         .filter(obj => JSON.stringify(obj) === JSON.stringify(result))
+        //         .toArray()
+        //         .map(({ hashlistId }) => hashlistId)[0]
+
+        //     if (resultHashlistId === void 0) {
+        //         throw 'ERROR: cloned screen id not found'
+        //     }
+
+        //     result.components.toArray().forEach(({ hashlistId, data }) => {
+        //         if (typeof data.popupId === 'string' && data.popupId.length) {
+        //             const index = source.popups.getIndex(data.popupId)
+
+        //             event.remix.setData(
+        //                 {
+        //                     [`${hashlistPropPath}.${resultHashlistId}.components.${hashlistId}.data.popupId`]: result.popups.getId(
+        //                         index,
+        //                     ),
+        //                 },
+        //                 false,
+        //                 true,
+        //             )
+        //         }
+        //     })
+        // })
+
+        // remix.addTrigger({
+        //     when: {
+        //         eventType: 'hashlist_element_cloned',
+        //         condition: {
+        //             prop: 'hashlistPropPath',
+        //             clause: 'EQUALS',
+        //             value: 'router.screens',
+        //         },
+        //     },
+        //     then: { actionType: `handler_${filter}_screen_clone` },
+        // })
+
+        remix.registerTriggerAction(`delete_popupId_${filter}`, event => {
+            // debugger
+            if (event.eventData.diff.deleted.length) {
+                event.eventData.diff.deleted
+                    .filter(({ path }) => path.includes('.data.popupId'))
+                    .map(({ path, value }) => {
+                        const screenId = getScreenIdFromPath(path)
+
+                        return { screenId, popupId: value }
+                    })
+                    .forEach(({ screenId, popupId }) => {
+                        if (typeof popupId === 'string' && popupId.length) {
+                            const popups = remix.getProperty(`router.screens.${screenId}.popups`)
+                            if (popups && popups.length) popups.deleteElementById(popupId)
+                        }
+                    })
+            }
         })
 
         remix.addTrigger({

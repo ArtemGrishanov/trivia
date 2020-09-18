@@ -65,6 +65,7 @@ export function updateWindowSize(root) {
 }
 
 let adaptationNeededForScreens = {}
+let adaptationNeededForPopups = {}
 export function checkScreensAdaptation(width, originWidth) {
     const store = getStore(),
         state = store.getState()
@@ -83,6 +84,22 @@ export function checkScreensAdaptation(width, originWidth) {
                 originWidth,
             }).props
         }
+
+        scr.popups.toArray().forEach(popup => {
+            if (!getAdaptationProps(popup, width)) {
+                adaptationNeededForPopups[popup.hashlistId] = true
+                calcAdaptedProps({
+                    screen: popup,
+                    screenId: scr.hashlistId,
+                    actualWidth: width,
+                    originWidth,
+                    getComponentPath: ({ screenId, componentId }) =>
+                        `router.screens.${screenId}.popups.${popup.hashlistId}.components.${componentId}`,
+                    getAdapteduiPath: ({ screenId, actualWidth, componentId }) =>
+                        `router.screens.${screenId}.popups.${popup.hashlistId}.adaptedui.${actualWidth}.props.${componentId}`,
+                })
+            }
+        })
     })
 
     if (Object.values(adaptationNeededForScreens).includes(true)) {
@@ -110,6 +127,14 @@ function getAdaptationProps(scr, width) {
         : null
 }
 
+function getScreenComponentPath({ screenId, componentId }) {
+    return `router.screens.${screenId}.components.${componentId}`
+}
+
+function getScreenAdapteduiPath({ screenId, actualWidth, componentId }) {
+    return `router.screens.${screenId}.adaptedui.${actualWidth}.props.${componentId}`
+}
+
 /**
  * Получить адаптированные свойства компонентов для ширины и с вычисленными размерами компонентов boundingRects
  *
@@ -118,7 +143,15 @@ function getAdaptationProps(scr, width) {
  * @param {number} width ширина для которой рассчитать новые свойства
  * @param {object} boundingRects (опционально) рассчитанные размеры компонентов width,height
  */
-function calcAdaptedProps({ screen, screenId, originWidth, actualWidth, boundingRects }) {
+function calcAdaptedProps({
+    screen,
+    screenId,
+    originWidth,
+    actualWidth,
+    boundingRects,
+    getComponentPath = getScreenComponentPath,
+    getAdapteduiPath = getScreenAdapteduiPath,
+}) {
     // console.log(`calcAdaptedProps: adaptation running for ${screenId} on width ${width}`)
 
     let props = {},
@@ -167,10 +200,10 @@ function calcAdaptedProps({ screen, screenId, originWidth, actualWidth, bounding
     Object.keys(props).forEach(componentId => {
         filteredProps[componentId] = Object.keys(props[componentId])
             .filter(key => {
-                const path = `router.screens.${screenId}.components.${componentId}.${key}`
+                const path = `${getComponentPath({ screenId, componentId })}.${key}`
                 const d = schema.getDescription(path)
                 if (d && d.adaptedForCustomWidth) {
-                    adata[`router.screens.${screenId}.adaptedui.${actualWidth}.props.${componentId}.${key}`] =
+                    adata[`${getAdapteduiPath({ screenId, actualWidth, componentId })}.${key}`] =
                         props[componentId][key]
                 }
             })
@@ -238,6 +271,23 @@ export const setComponentsRects = debounce(boundingRects => {
             })
             adaptationNeededForScreens[scr.hashlistId] = false
         }
+
+        scr.popups.toArray().forEach(popup => {
+            if (adaptationNeededForPopups[popup.hashlistId]) {
+                calcAdaptedProps({
+                    screen: popup,
+                    screenId: scr.hashlistId,
+                    originWidth: width,
+                    actualWidth: width,
+                    boundingRects,
+                    getComponentPath: ({ screenId, componentId }) =>
+                        `router.screens.${screenId}.popups.${popup.hashlistId}.components.${componentId}`,
+                    getAdapteduiPath: ({ screenId, actualWidth, componentId }) =>
+                        `router.screens.${screenId}.popups.${popup.hashlistId}.adaptedui.${actualWidth}.props.${componentId}`,
+                })
+                adaptationNeededForPopups[popup.hashlistId] = false
+            }
+        })
     })
 
     updateAppHeight()

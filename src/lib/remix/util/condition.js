@@ -15,6 +15,10 @@ export function getConditionConfig(propName) {
             return `router.screens.${screenId}.adaptedui.${key}.props.${componentId}.${propName}`
         },
 
+        popupConditionPath: ({ screenId, popupId, popupComponentId, key = '/^[0-9]+$/' }) => {
+            return `router.screens.${screenId}.popups.${popupId}.adaptedui.${key}.props.${popupComponentId}.${propName}`
+        },
+
         /**
          * Из условной строки типа "router.screens.123.adaptedui.800.props.456.left"
          * взять ключ 800
@@ -22,6 +26,11 @@ export function getConditionConfig(propName) {
         parseKey: condPath => {
             const a = condPath ? condPath.split('.') : []
             return a.length > 5 ? a[4] : undefined
+        },
+
+        parseKeyInPopup: condPath => {
+            const a = condPath ? condPath.split('.') : []
+            return a.length > 7 ? a[6] : undefined
         },
 
         /**

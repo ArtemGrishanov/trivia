@@ -1,9 +1,9 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import DataSchema from '../schema'
 import HashList from '../hashlist'
 import RemixWrapper from './RemixWrapper'
 import { getComponentClass } from './RemixWrapper'
-import { setData } from '../remix'
 import BasicImage from './bricks/BasicImage'
 
 import LayoutContainer from './layout/LayoutContainer'
@@ -13,7 +13,7 @@ import './style/remix-popup.css'
 class Popup extends React.Component {
     render() {
         const {
-            // adaptedui,
+            adaptedui,
             width,
             height,
             editable = false,
@@ -25,15 +25,17 @@ class Popup extends React.Component {
             backgroundColor,
             backgroundImage,
             margin,
+            screen,
         } = this.props
+        const adaptiveMargin = screen === 'desktop' ? margin : 20
 
         const s = {
             backgroundColor: backgroundColor,
-            margin: `${margin}px`,
+            margin: `${adaptiveMargin}px`,
             ...(size
                 ? {
-                      width: `${size.width - margin * 2}px`,
-                      height: `${size.height - margin * 2}px`,
+                      width: `${size.width - adaptiveMargin * 2}px`,
+                      height: `${size.height - adaptiveMargin * 2}px`,
                   }
                 : {}),
             overflow: overflowHidden ? 'hidden' : 'initial',
@@ -69,13 +71,24 @@ class Popup extends React.Component {
                 // }
             >
                 <div className="rmx-popup__container" style={s}>
+                    {/* {this.props.backgroundImage && (
+                        <div className="rmx-screen_back_wr" style={{ margin: `${adaptiveMargin}px` }}>
+                            <BasicImage
+                                borderWidth={0}
+                                width={size.width - adaptiveMargin * 2}
+                                height={size.height - adaptiveMargin * 2}
+                                src={this.props.backgroundImage}
+                                backgroundSize="cover"
+                            ></BasicImage>
+                        </div>
+                    )} */}
                     {size ? (
                         <LayoutContainer
                             editable={editable}
                             id={'__lc_of_popup_' + id}
                             width={size.width}
                             height={size.height}
-                            adaptedui={{}}
+                            adaptedui={adaptedui}
                             screenId={screenId}
                         >
                             {renderComponents}
@@ -154,6 +167,14 @@ export const Schema = new DataSchema({
         default: '',
         serialize: false,
     },
+    adaptedui: {
+        type: 'object',
+        default: {},
+    },
 })
 
-export default RemixWrapper(Popup, Schema, 'Popup')
+const mapStateToProps = state => {
+    return { screen: state.app.screen }
+}
+
+export default RemixWrapper(connect(mapStateToProps, null)(Popup), Schema, 'Popup')

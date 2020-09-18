@@ -71,18 +71,6 @@ const schemaData = {
     'router.[screens HashList]./^[0-9a-z]+$/.tags': ScreenComponentsSchema.getDescription('tags'),
     'router.[screens HashList]./^[0-9a-z]+$/.staticMarkup': ScreenComponentsSchema.getDescription('staticMarkup'),
     'router.[screens HashList]./^[0-9a-z]+$/.disabled': ScreenComponentsSchema.getDescription('disabled'),
-    'router.[screens HashList]./^[0-9a-z]+$/.popups': ScreenComponentsSchema.getDescription('popups'),
-    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.margin': PopupSchema.getDescription('margin'),
-    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.backgroundColor': PopupSchema.getDescription(
-        'backgroundColor',
-    ),
-    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.backgroundImage': PopupSchema.getDescription(
-        'backgroundImage',
-    ),
-    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.components': PopupSchema.getDescription('components'),
-    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.staticMarkup': PopupSchema.getDescription(
-        'staticMarkup',
-    ),
     // Условные свойства компонентов
     // например 'router.screens.u2xt9e.__c.800.fjxjnr.top'
     'router.[screens HashList]./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
@@ -152,6 +140,89 @@ const schemaData = {
         canBeUndefined: true,
         conditionOf: ({ screenId, componentId, propName }) =>
             `router.screens.${screenId}.components.${componentId}.${propName}`,
+    },
+    // Popups
+    'router.[screens HashList]./^[0-9a-z]+$/.popups': ScreenComponentsSchema.getDescription('popups'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.margin': PopupSchema.getDescription('margin'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.backgroundColor': PopupSchema.getDescription(
+        'backgroundColor',
+    ),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.backgroundImage': PopupSchema.getDescription(
+        'backgroundImage',
+    ),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.components': PopupSchema.getDescription('components'),
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.staticMarkup': PopupSchema.getDescription(
+        'staticMarkup',
+    ),
+    // Условные свойства компонентов
+    // например 'router.screens.u2xt9e.__c.800.fjxjnr.top'
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.top': {
+        type: 'number',
+        min: -9999,
+        max: 9999,
+        default: 0,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.left': {
+        type: 'number',
+        min: -9999,
+        max: 9999,
+        default: 0,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.width': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 100,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.height': {
+        type: 'number',
+        min: 0,
+        max: 9999,
+        default: 100,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szTop': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szLeft': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szRight': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
+    },
+    'router.[screens HashList]./^[0-9a-z]+$/.popups./^[0-9a-z]+$/.adaptedui./^[0-9]+$/.props./^[0-9a-z]+$/.szBottom': {
+        type: 'number',
+        min: 0,
+        max: 1024,
+        default: 10,
+        canBeUndefined: true,
+        conditionOf: ({ screenId, popupId, popupComponentId, propName }) =>
+            `router.screens.${screenId}.popups.${popupId}.components.${popupComponentId}.${propName}`,
     },
 }
 
