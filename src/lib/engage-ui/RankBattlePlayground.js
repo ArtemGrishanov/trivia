@@ -185,7 +185,7 @@ const useWaveAnimation = ({ color }) => {
     return [render, () => setCount(count + 1)]
 }
 
-const RankBattleCard = ({ className = '', imageUrl, value, leading, highlightColor, color, onClick }) => {
+const RankBattleCard = ({ className = '', imageUrl, value, leading, highlightColor, color, onClick, editable }) => {
     const [LikeAnimation, isAnimate, animateLike] = useLikeAnimation(false)
     const [waveAnimation, addWave] = useWaveAnimation({ color: highlightColor })
 
@@ -229,7 +229,7 @@ const RankBattleCard = ({ className = '', imageUrl, value, leading, highlightCol
                     </div>
                 ) : null}
                 {waveAnimation}
-                <div className="rank-battle-card__vote-icon-wrapper">
+                <div className="rank-battle-card__vote-icon-wrapper" style={editable ? { animation: 'none' } : {}}>
                     <LikeAnimation className="rank-battle-card__vote-icon" color={highlightColor} />
                 </div>
                 <div style={{ zIndex: '10' }}>
@@ -358,7 +358,7 @@ class RankBattlePlayground extends React.Component {
     }
 
     render() {
-        const { numberOfCards, baseColor, highlightColor, imageLinks, screen } = this.props
+        const { numberOfCards, baseColor, highlightColor, imageLinks, screen, editable } = this.props
         const { votes } = this.state
 
         if (Object.entries(votes).length === 0) {
@@ -369,7 +369,10 @@ class RankBattlePlayground extends React.Component {
         const leadingValue = this.getLeadingValue(sortedVotes.map(([, v]) => v))
 
         return (
-            <div className={`${screen} rank-battle-playground rank-battle-playground_${numberOfCards}`}>
+            <div
+                className={`${screen} rank-battle-playground rank-battle-playground_${numberOfCards}`}
+                style={editable ? { pointerEvents: 'none' } : {}}
+            >
                 {Object.entries(votes).map(([cardId, votes]) => {
                     return (
                         <RankBattleCard
@@ -381,6 +384,7 @@ class RankBattlePlayground extends React.Component {
                             highlightColor={highlightColor}
                             color={baseColor}
                             onClick={this.toVote(cardId)}
+                            editable={editable}
                         />
                     )
                 })}
