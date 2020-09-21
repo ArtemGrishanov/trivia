@@ -50,23 +50,40 @@ function getScreenHTMLPreview({ screen, defaultTitle }) {
     const FB_SHARE_WIDTH = 1200, // поддерживаем пока один фикс размер шаринг картинки
         FB_SHARE_HEIGHT = 630,
         backStyle = `width:${FB_SHARE_WIDTH}px;
-        height:${FB_SHARE_HEIGHT}px;
-        padding:100px;
-        box-sizing:border-box;
-        text-align:center;
-        background-image:url(${screen.backgroundImage});
-        background-size:cover;
-        background-position:center;
-        background-color:#C86445;
-        font-family:Arial,sans-serif;
-        color:#fff;
-        font-size:48px;
-        display:flex;
-        justify-content:center;
-        align-items:center;`
+        height:${FB_SHARE_HEIGHT}px;`
+
+    const playground = screen.components.toArray().find(c => c.displayName === 'BeforeAfter')
+
+    if (!playground) {
+        return `<div style="${backStyle}${`
+                        padding:100px;
+                        box-sizing:border-box;
+                        text-align:center;
+                        background-image:url(${screen.backgroundImage});
+                        background-size:cover;
+                        background-position:center;
+                        background-color:#C86445;
+                        font-family:Arial,sans-serif;
+                        color:#fff;
+                        font-size:48px;
+                        display:flex;
+                        justify-content:center;
+                        align-items:center;`}">
+            ${defaultTitle}
+        </div>`
+    }
 
     return `<div style="${backStyle}">
-                ${defaultTitle}
+                <div style="background-image: url(&quot;${playground.leftImage}&quot;); position: absolute; width: 100%; height: 100%; background-size: cover;">
+                </div>
+                <div style="position: relative; width: inherit; height: inherit;">
+                    <div style="position: absolute; width: inherit; height: inherit; left: 50%; top: 0px; overflow: hidden;">
+                        <div style="position: absolute; width: inherit; height: inherit; left: -50%; top: 0px;"><div style="background-image: url(&quot;${playground.rightImage}&quot;); position: absolute; width: 100%; height: 100%; background-size: cover;">
+                        </div>
+                    </div>
+                </div>
+                <div style="background-color: ${playground.dividerColor}; opacity: 1; position: absolute; top: 0; left: 50%; width: 4px; height: 100%; margin-left: -2px;">
+                </div>
             </div>`
 }
 
