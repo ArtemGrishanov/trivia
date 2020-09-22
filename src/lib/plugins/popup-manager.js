@@ -22,7 +22,7 @@ const initPopupManager = ({ remix, settings = {} }) => {
             default: false,
         },
     })
-    remix.setData({ 'app.popups.enable': settings.enablePopupsByDefault }, false, true)
+    remix.setData({ 'app.popups.enable': settings.enablePopupsByDefault }, false, false)
 
     declareDynamicContent({ remix, filters: settings.componentFiltersCapableOfTriggeringEvents })
 

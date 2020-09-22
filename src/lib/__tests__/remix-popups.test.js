@@ -9,7 +9,7 @@ import { getDiv } from '../__tests__utils/ui-mocks.js'
 Remix.setStore(store)
 
 const waitT = ms => new Promise(resolve => setTimeout(resolve, ms))
-const wait = () => waitT(400)
+const wait = () => waitT(600)
 const getPopupIdFromComponentData = (screenId, componentId) => {
     return Remix.getProperty(`router.screens.${screenId}.components.${componentId}.data.popupId`)
 }
@@ -91,6 +91,8 @@ describe('Remix', () => {
             })
 
             initPopupManager({ remix: Remix, settings: { enablePopupsByDefault: true } })
+
+            await wait()
 
             const popupsIsEnbale = Remix.getProperty('app.popups.enable')
             expect(popupsIsEnbale).toBeTruthy()
