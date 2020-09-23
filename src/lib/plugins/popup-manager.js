@@ -98,6 +98,7 @@ const defaultPopup = {
             szBottom: 10,
         },
     ]),
+    displayName: 'Popup',
 }
 
 const initPopupManager = ({ remix, settings = {} }) => {
