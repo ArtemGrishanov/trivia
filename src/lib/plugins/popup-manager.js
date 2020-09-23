@@ -4,14 +4,101 @@ import HashList from '../../lib/hashlist'
 import { getPathes } from '../../lib/object-path'
 import { getScreenIdFromPath, getComponentIdFromPath } from '../remix/util/util'
 import { postMessage, getPathByComponentId } from '../remix'
-import { event } from '../../actions'
 
 const defaultSettings = {
     enablePopupsByDefault: false,
     componentFiltersCapableOfTriggeringEvents: ['displayName=TextOption'],
 }
 
-const defaultPopup = { displayName: 'Popup', backgroundColor: 'white' }
+const defaultPopup = {
+    margin: 100,
+    backgroundColor: 'white',
+    backgroundImage: '',
+    components: new HashList([
+        {
+            text: '<p class="ql-align-center"><span class="ql-size-large ql-font-Roboto">Ok, next</span></p>',
+            styleVariant: 'primary',
+            sizeMod: 'normal',
+            borderRadius: 34,
+            borderWidth: 0,
+            borderColor: '',
+            dropShadow: false,
+            backgroundColor: '#2990FB',
+            isArrow: false,
+            arrowType: 'default',
+            arrowDirection: 'right',
+            arrowPosition: 'center',
+            arrowColor: '#fff',
+            iconName: '',
+            iconColor: '',
+            iconColorHover: '',
+            iconPosition: 'left',
+            iconGap: 10,
+            openUrl: '',
+            imageSrc: '',
+            id: '00ml7o',
+            tags: 'close_popup',
+            displayName: 'Button',
+            widthStrategy: 'fixed',
+            leftStrategy: 'dynamic',
+            displayType: 'flow',
+
+            top: 417,
+            left: 335.5,
+            width: 129,
+            height: 44,
+            szTop: 10,
+            szLeft: 10,
+            szRight: 10,
+            szBottom: 10,
+        },
+        {
+            text: '<p class="ql-align-center"><strong class="ql-font-Roboto ql-size-huge">Your feedback</strong></p>',
+            fontShadow: false,
+            fontShadowColor: 'rgba(0,0,0,0.2)',
+            fontShadowDistance: 3,
+            animationOnAppearance: 'none',
+            id: '8y58o1',
+            tags: 'remixcomponent',
+            displayName: 'Text',
+            widthStrategy: 'fixed',
+            leftStrategy: 'dynamic',
+            displayType: 'flow',
+
+            top: 163.5,
+            left: 272,
+            width: 256,
+            height: 63,
+            szTop: 10,
+            szLeft: 10,
+            szRight: 10,
+            szBottom: 10,
+        },
+        {
+            text:
+                '<p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">Description</span></p><p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">No, of course this is Italy.</span></p><p class="ql-align-center"><br></p>',
+            fontShadow: false,
+            fontShadowColor: 'rgba(0,0,0,0.2)',
+            fontShadowDistance: 3,
+            animationOnAppearance: 'none',
+            id: 'uwmgl9',
+            tags: 'remixcomponent',
+            displayName: 'Text',
+            widthStrategy: 'fixed',
+            leftStrategy: 'dynamic',
+            displayType: 'flow',
+
+            top: 238.5,
+            left: 260.5,
+            width: 279,
+            height: 102,
+            szTop: 10,
+            szLeft: 10,
+            szRight: 10,
+            szBottom: 10,
+        },
+    ]),
+}
 
 const initPopupManager = ({ remix, settings = {} }) => {
     settings = { ...defaultSettings, ...settings }
@@ -206,7 +293,7 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
             if (!state) return
 
             const mode = state.session.mode
-            if (mode !== 'edit') return
+            // if (mode !== 'edit') return
 
             const popupsIsEnbale = remix.getProperty('popups.enable', state.app) || false
             postMessage('request_popups_edit_mode', { enable: popupsIsEnbale })
@@ -235,7 +322,7 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
             const state = event.remix.getState()
             if (!state) return
             const mode = state.session.mode
-            if (mode !== 'edit') return
+            // if (mode !== 'edit') return
             const popupsIsEnbale = remix.getProperty('popups.enable', state.app) || false
             if (!popupsIsEnbale) return
             const components = filterDiffBySelector(state, event.eventData.diff.added, displayNameSelector)
@@ -261,7 +348,7 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
             if (!state) return
 
             const mode = state.session.mode
-            if (mode !== 'edit') return
+            // if (mode !== 'edit') return
 
             const popupsIsEnbale = remix.getProperty('popups.enable', state.app) || false
             if (!popupsIsEnbale) return
