@@ -76,7 +76,7 @@ const defaultPopup = {
         },
         {
             text:
-                '<p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">Description</span></p><p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">No, of course this is Italy.</span></p><p class="ql-align-center"><br></p>',
+                '<p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">Description</span></p><p class="ql-align-center"><span class="ql-font-Roboto ql-size-large"></span></p><p class="ql-align-center"><br></p>',
             fontShadow: false,
             fontShadowColor: 'rgba(0,0,0,0.2)',
             fontShadowDistance: 3,
