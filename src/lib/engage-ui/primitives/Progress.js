@@ -1,3 +1,4 @@
+/*IFTRUE_useProgress*/
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
@@ -258,3 +259,4 @@ export const Schema = new DataSchema({
 })
 
 export default RemixWrapper(Progress, Schema, 'Progress')
+/*FITRUE_useProgress */

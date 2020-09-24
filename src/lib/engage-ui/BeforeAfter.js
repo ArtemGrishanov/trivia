@@ -1,3 +1,4 @@
+/*IFTRUE_isBeforeAfter*/
 import React, { createRef, useEffect, useState } from 'react'
 
 import DataSchema from '../schema'
@@ -176,3 +177,4 @@ export const Schema = new DataSchema({
 })
 
 export default RemixWrapper(BeforeAfter, Schema, 'BeforeAfter')
+/*FITRUE_isBeforeAfter */

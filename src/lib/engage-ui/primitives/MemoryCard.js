@@ -1,3 +1,4 @@
+/*IFTRUE_isMemory*/
 import React from 'react'
 
 const mainStyleClass = 'rmx-memory'
@@ -43,3 +44,4 @@ function FlipCard({ isActive, src, backCoverSrc }) {
         </div>
     )
 }
+/*FITRUE_isMemory */
