@@ -19,6 +19,10 @@ const translations = {
         en: 'Next',
         ru: 'Дальше',
     },
+    okNext: {
+        en: 'Ok, next',
+        ru: 'Ок, дальше',
+    },
     privacy_policy: {
         en: 'Privacy Policy',
         ru: 'Политикой конфиденциальности',
@@ -42,6 +46,14 @@ const translations = {
     leading: {
         en: 'leading',
         ru: 'лидирует',
+    },
+    popupHeading: {
+        en: 'True or False heading',
+        ru: 'Верно / Неверно',
+    },
+    popupDescription: {
+        en: 'Here you can tell why this answer is or is not correct and why',
+        ru: 'Здесь вы можете рассказать, почему этот ответ является или не является верным и почему',
     },
 }
 

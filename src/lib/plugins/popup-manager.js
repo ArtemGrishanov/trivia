@@ -4,19 +4,22 @@ import HashList from '../../lib/hashlist'
 import { getPathes } from '../../lib/object-path'
 import { getScreenIdFromPath, getComponentIdFromPath } from '../remix/util/util'
 import { postMessage, getPathByComponentId } from '../remix'
+import { getTranslation } from '../engage-ui/translations'
 
 const defaultSettings = {
     enablePopupsByDefault: false,
     componentFiltersCapableOfTriggeringEvents: ['displayName=TextOption'],
 }
 
-const defaultPopup = {
+const getDefaultPopup = () => ({
     margin: 100,
     backgroundColor: 'white',
     backgroundImage: '',
     components: new HashList([
         {
-            text: '<p class="ql-align-center"><span class="ql-size-large ql-font-Roboto">Ok, next</span></p>',
+            text: `<p class="ql-align-center"><span class="ql-size-large ql-font-Roboto">${getTranslation(
+                'okNext',
+            )}</span></p>`,
             styleVariant: 'primary',
             sizeMod: 'normal',
             borderRadius: 34,
@@ -53,7 +56,9 @@ const defaultPopup = {
             szBottom: 10,
         },
         {
-            text: '<p class="ql-align-center"><strong class="ql-font-Roboto ql-size-huge">Your feedback</strong></p>',
+            text: `<p class="ql-align-center"><strong class="ql-font-Roboto ql-size-huge">${getTranslation(
+                'popupHeading',
+            )}</strong></p>`,
             fontShadow: false,
             fontShadowColor: 'rgba(0,0,0,0.2)',
             fontShadowDistance: 3,
@@ -75,8 +80,9 @@ const defaultPopup = {
             szBottom: 10,
         },
         {
-            text:
-                '<p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">Description</span></p><p class="ql-align-center"><span class="ql-font-Roboto ql-size-large"></span></p><p class="ql-align-center"><br></p>',
+            text: `<p class="ql-align-center"><span class="ql-font-Roboto ql-size-large">${getTranslation(
+                'popupDescription',
+            )}</span></p><p class="ql-align-center"><span class="ql-font-Roboto ql-size-large"></span></p><p class="ql-align-center"><br></p>`,
             fontShadow: false,
             fontShadowColor: 'rgba(0,0,0,0.2)',
             fontShadowDistance: 3,
@@ -91,7 +97,7 @@ const defaultPopup = {
             top: 238.5,
             left: 260.5,
             width: 279,
-            height: 102,
+            height: 122,
             szTop: 10,
             szLeft: 10,
             szRight: 10,
@@ -99,7 +105,7 @@ const defaultPopup = {
         },
     ]),
     displayName: 'Popup',
-}
+})
 
 const initPopupManager = ({ remix, settings = {} }) => {
     settings = { ...defaultSettings, ...settings }
@@ -240,7 +246,7 @@ const declareDynamicContent = ({ remix, filters = [], iconSettings = void 0 }) =
                 }
 
                 if (typeof popupId !== 'string' || popupId.length === 0) {
-                    let newPopup = (copyPopupId && popups[copyPopupId]) || defaultPopup
+                    let newPopup = (copyPopupId && popups[copyPopupId]) || getDefaultPopup()
                     popupId = popups.addElement({ ...newPopup }).getLast().hashlistId
 
                     remix.setData(
