@@ -3,7 +3,7 @@ import { DYNAMIC_CONTENT_PROP, ContentPropsList, Schemas } from '../engage-ui/Dy
 import HashList from '../../lib/hashlist'
 import { getPathes } from '../../lib/object-path'
 import { getScreenIdFromPath, getComponentIdFromPath } from '../remix/util/util'
-import { postMessage, getPathByComponentId } from '../remix'
+import { postMessage } from '../remix'
 import { getTranslation } from '../engage-ui/translations'
 
 const defaultSettings = {
@@ -557,11 +557,6 @@ const initPopupManager = ({ remix, settings = {} }) => {
     remix.addTrigger({
         when: {
             eventType: 'onclick',
-            // condition: {
-            //     prop: 'path',
-            //     clause: 'MATCH',
-            //     value: `router.[screens HashList]./^[0-9a-z]+$/.components.[/^[0-9a-z]+$/ ${filter}]`,
-            // },
             condition: {
                 prop: 'tags',
                 clause: 'CONTAINS',

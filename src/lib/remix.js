@@ -16,7 +16,7 @@ import {
     parseComponentAdapteduiPath,
     getPopupIdFromPath,
     getPopupComponentIdFromPath,
-    containsPopupComponent,
+    isPathToPopupComponent,
     parsePopupComponentPath,
     parsePopupComponentAdapteduiPath,
 } from './remix/util/util.js'
@@ -273,7 +273,7 @@ function calcConditionalProperties(state, data) {
                 const slaveProperties = getPropertiesBySelector(state, mp.selector)
 
                 slaveProperties.forEach(slave => {
-                    if (containsPopupComponent(slave.path)) {
+                    if (isPathToPopupComponent(slave.path)) {
                         const { screenId, popupId, popupComponentId, propName } = parsePopupComponentPath(slave.path),
                             condSlaveSelector = mp.condition.popupConditionPath({
                                 screenId,
@@ -351,7 +351,7 @@ function calcConditionalProperties(state, data) {
                 throw new Error(`You must set "onSave" and "onMasterChanged" function for conditonal property ${path}`)
             }
 
-            if (containsPopupComponent(path)) {
+            if (isPathToPopupComponent(path)) {
                 const { screenId, popupId, popupComponentId, propName } = parsePopupComponentPath(path)
 
                 if (!screenId || !popupId || !popupComponentId || !propName) {
@@ -479,7 +479,7 @@ function normalizeConditionalProperties() {
             pathes.forEach(prop => {
                 try {
                     const path = prop.path
-                    if (containsPopupComponent(path)) {
+                    if (isPathToPopupComponent(path)) {
                         const { screenId, popupId, popupComponentId, propName } = parsePopupComponentPath(path)
 
                         if (!screenId || !popupId || !popupComponentId || !propName) {

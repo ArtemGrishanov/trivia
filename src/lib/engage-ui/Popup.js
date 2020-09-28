@@ -62,13 +62,6 @@ class Popup extends React.Component {
                               backgroundColor: 'rgba(13, 13, 13, 0.2)',
                           }
                 }
-                // onClick={
-                //     editable
-                //         ? void 0
-                //         : () => {
-                //               setData({ 'router.showPopup': false }, false, true)
-                //           }
-                // }
             >
                 <div className="rmx-popup__container" style={s}>
                     {/* {this.props.backgroundImage && (

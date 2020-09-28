@@ -15,7 +15,7 @@ export function isHashlistInstance(obj) {
  *
  * @param {string} path
  */
-export function containsPopupComponent(path) {
+export function isPathToPopupComponent(path) {
     return path.includes('.popup') && path.includes('.components.')
 }
 
