@@ -90,7 +90,8 @@ describe('Remix', () => {
                 container: getDiv(),
             })
 
-            initPopupManager({ remix: Remix, settings: { enablePopupsByDefault: true } })
+            initPopupManager({ remix: Remix })
+            Remix.setData({ 'app.popups.enable': true }, false, false)
 
             await wait()
 
@@ -130,7 +131,10 @@ describe('Remix', () => {
                 container: getDiv(),
             })
 
-            initPopupManager({ remix: Remix, settings: { enablePopupsByDefault: true } })
+            initPopupManager({ remix: Remix })
+            Remix.setData({ 'app.popups.enable': true }, false, false)
+
+            await wait()
 
             const screenId = addScreen([getTextOption(), getTextOption(), getTextOption(), getTextOption()])
             await wait()
@@ -151,8 +155,10 @@ describe('Remix', () => {
                 container: getDiv(),
             })
 
-            initPopupManager({ remix: Remix, settings: { enablePopupsByDefault: true } })
+            initPopupManager({ remix: Remix })
+            Remix.setData({ 'app.popups.enable': true }, false, false)
 
+            await wait()
             const screenId = addScreen([getTextOption(), getTextOption(), getTextOption(), getTextOption()])
 
             Remix.cloneHashlistElement('router.screens', screenId)
@@ -180,6 +186,9 @@ describe('Remix', () => {
             })
 
             initPopupManager({ remix: Remix, settings: { enablePopupsByDefault: true } })
+            Remix.setData({ 'app.popups.enable': true }, false, false)
+
+            await wait()
 
             const screenId = addScreen([getTextOption(), getTextOption(), getTextOption(), getTextOption()])
 
@@ -202,4 +211,4 @@ describe('Remix', () => {
     })
 })
 
-// jest.setTimeout(1000 * 60 * 2)
+jest.setTimeout(1000 * 60 * 2)
