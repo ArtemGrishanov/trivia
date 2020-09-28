@@ -1,3 +1,4 @@
+/*IFTRUE_useUserDataForm*/
 import React from 'react'
 import { setComponentProps } from '../remix'
 import DataSchema from '../schema'
@@ -225,3 +226,4 @@ const schema = {
 export const Schema = new DataSchema(schema)
 
 export default RemixWrapper(UserDataForm, Schema, 'UserDataForm')
+/*FITRUE_useUserDataForm */

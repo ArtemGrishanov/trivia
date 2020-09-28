@@ -1,3 +1,4 @@
+/*IFTRUE_isRankBattle*/
 import React, { useState, useEffect } from 'react'
 import { connect } from 'react-redux'
 
@@ -431,3 +432,4 @@ const mapStateToProps = state => {
 }
 
 export default RemixWrapper(connect(mapStateToProps, null)(RankBattlePlayground), Schema, 'RankBattlePlayground')
+/*FITRUE_isRankBattle */

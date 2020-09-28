@@ -1,3 +1,4 @@
+/*IFTRUE_useTextOption*/
 import '../style/rmx-options.css'
 import React, { useState } from 'react'
 import DataSchema from '../../schema'
@@ -259,3 +260,4 @@ export const Schema = new DataSchema({
 })
 
 export default RemixWrapper(TextOption, Schema, 'TextOption')
+/*FITRUE_useTextOption */

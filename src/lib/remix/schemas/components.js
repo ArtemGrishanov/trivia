@@ -2,33 +2,62 @@ import DataSchema from '../../schema.js'
 import { Schema as ScreenComponentsSchema } from '../../engage-ui/Screen.js'
 import { Schema as RouterScreensSchema } from '../../engage-ui/router.js'
 import { Schema as TextSchema } from '../../engage-ui/primitives/Text.js'
-import { Schema as ProgressSchema } from '../../engage-ui/primitives/Progress.js'
-import { Schema as TextOptionSchema } from '../../engage-ui/primitives/TextOption.js'
 import { Schema as ButtonSchema } from '../../engage-ui/primitives/Button.js'
-import { Schema as CollageSchema } from '../../engage-ui/primitives/Collage.js'
-import { Schema as MemoryPlaygroundSchema } from '../../engage-ui/primitives/MemoryPlayground.js'
 import { Schema as FbButton } from '../../engage-ui/primitives/social/FbButton.js'
 import { Schema as ProgressiveImageSchema } from '../../engage-ui/primitives/ProgressiveImage.js'
+/*IFTRUE_useCollage*/
+import { Schema as CollageSchema } from '../../engage-ui/primitives/Collage.js'
+/*FITRUE_useCollage*/
+/*IFTRUE_useProgress*/
+import { Schema as ProgressSchema } from '../../engage-ui/primitives/Progress.js'
+/*FITRUE_useProgress*/
+/*IFTRUE_useTextOption*/
+import { Schema as TextOptionSchema } from '../../engage-ui/primitives/TextOption.js'
+/*FITRUE_useTextOption*/
+/*IFTRUE_isMemory*/
+import { Schema as MemoryPlaygroundSchema } from '../../engage-ui/primitives/MemoryPlayground.js'
+/*FITRUE_isMemory*/
+/*IFTRUE_useUserDataForm*/
 import { Schema as InputSchema } from '../../engage-ui/primitives/Input'
 import { Schema as UserDataFormSchema } from '../../engage-ui/UserDataForm'
+/*FITRUE_useUserDataForm*/
+/*IFTRUE_isRankBattle*/
 import { Schema as RankBattlePlaygroundSchema } from '../../engage-ui/RankBattlePlayground'
+/*FITRUE_isRankBattle*/
+/*IFTRUE_isBeforeAfter*/
 import { Schema as BeforeAfterSchema } from '../../engage-ui/BeforeAfter'
+/*FITRUE_isBeforeAfter*/
+
 //INSTRUCTION 1: add your new component schema before this line with name ComponentName+'Schema'
 
 //INSTRUCTION 2: add your new component schema to this object:
 const componentSchemas = {
     TextSchema,
-    ProgressSchema,
-    TextOptionSchema,
     ButtonSchema,
-    CollageSchema,
-    MemoryPlaygroundSchema,
     FbButton,
     ProgressiveImageSchema,
+    /*IFTRUE_useCollage*/
+    CollageSchema,
+    /*FITRUE_useCollage*/
+    /*IFTRUE_useProgress*/
+    ProgressSchema,
+    /*FITRUE_useProgress*/
+    /*IFTRUE_useTextOption*/
+    TextOptionSchema,
+    /*FITRUE_useTextOption */
+    /*IFTRUE_isMemory*/
+    MemoryPlaygroundSchema,
+    /*FITRUE_isMemory */
+    /*IFTRUE_useUserDataForm*/
     InputSchema,
     UserDataFormSchema,
+    /*FITRUE_useUserDataForm */
+    /*IFTRUE_isRankBattle*/
     RankBattlePlaygroundSchema,
+    /*FITRUE_isRankBattle*/
+    /*IFTRUE_isBeforeAfter*/
     BeforeAfterSchema,
+    /*FITRUE_isBeforeAfter*/
     // put new schema here before just this line
 }
 

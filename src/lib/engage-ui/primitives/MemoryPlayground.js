@@ -1,3 +1,4 @@
+/*IFTRUE_isMemory*/
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
@@ -209,3 +210,4 @@ export const Schema = new DataSchema({
 })
 
 export default RemixWrapper(MemoryPlayground, Schema, 'MemoryPlayground')
+/*FITRUE_isMemory */

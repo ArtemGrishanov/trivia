@@ -1,3 +1,4 @@
+/*IFTRUE_useCollage*/
 import React from 'react'
 import DataSchema from '../../schema'
 import RemixWrapper from '../RemixWrapper'
@@ -110,3 +111,4 @@ export const Schema = new DataSchema({
 })
 
 export default RemixWrapper(Collage, Schema, 'Collage')
+/*FITRUE_useCollage*/
