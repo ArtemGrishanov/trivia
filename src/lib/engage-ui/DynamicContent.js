@@ -24,21 +24,6 @@ const dynamicComponents = {
             style[vAlign] = '0'
         }
 
-        // function onClick(iconName, payload) {
-        //     if (iconName === 'chainOption') {
-        //         postMessage('request_data_layer', {
-        //             layer_type: 'personality_chain',
-        //             screen_id: payload.screen_id,
-        //             option_id: payload.option_id,
-        //         })
-        //     }
-
-        //     if (iconName === 'feedback') {
-        //         console.log('click on feedback')
-        //         postMessage('request_popup_edit_mode', payload)
-        //     }
-        // }
-
         return (
             <div className="rmx-option-icons" style={style}>
                 {Object.entries(icons).map(([key, icon], i) => {

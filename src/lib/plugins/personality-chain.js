@@ -1,6 +1,9 @@
 import { Selector } from '../object-path'
 import { DYNAMIC_CONTENT_PROP, ContentPropsList, Schemas } from '../engage-ui/DynamicContent'
 
+import { getScreenIdFromPath } from '../remix/util/util'
+import { postMessage, getPathByComponentId } from '../remix'
+
 /**
  *
  * @param {{remix: *}} param0
@@ -11,12 +14,13 @@ const initPersonalityChain = ({ remix, optionTag = 'option' }) => {
     const DYNAMIC_CONTENT_SELECTOR = `${BASE_SELECTOR}.${DYNAMIC_CONTENT_PROP}`
 
     let ICON_STYLES = {
-        icons: [
-            {
+        icons: {
+            personalityChain: {
                 name: 'chainOption',
                 clickable: true,
+                onClickEvent: 'event_personalityChain',
             },
-        ],
+        },
         hAlign: 'right',
         vAlign: 'top',
         vPadding: 5,
@@ -91,6 +95,20 @@ const initPersonalityChain = ({ remix, optionTag = 'option' }) => {
             },
         },
         then: { actionType: CHAIN_MARKER },
+    })
+
+    remix.registerTriggerAction('handle_personalityChain', event => {
+        const option_id = event.eventData.parentProps.id
+        const screen_id = getScreenIdFromPath(getPathByComponentId(option_id))
+
+        postMessage('request_data_layer', { layer_type: 'personality_chain', screen_id, option_id })
+    })
+
+    remix.addTrigger({
+        when: {
+            eventType: `event_personalityChain`,
+        },
+        then: { actionType: `handle_personalityChain` },
     })
 }
 
