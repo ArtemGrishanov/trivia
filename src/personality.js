@@ -19,6 +19,8 @@ import HashList from './lib/hashlist'
 import initPersonalityChain from './lib/plugins/personality-chain'
 import initUserDataForm from './lib/plugins/user-data-form'
 
+import { htmlDecode } from './lib/remix/util/util'
+
 Remix.setStore(store)
 
 initButtonBehavior({ remix: Remix })
@@ -46,14 +48,6 @@ function extendPersonalitySchema() {
             default: 1,
         },
     })
-}
-
-const getPlainTextFromHtml = str => {
-    ;[`\n`, `\r`, `\``, `'`, `"`, `<`, `>`].forEach(char => {
-        const reg = new RegExp(`U\\+${char.charCodeAt(0)};`, 'g')
-        str = str.replace(reg, char).replace(/(<([^>]+)>)/gi, '')
-    })
-    return str
 }
 
 initUserDataForm({ remix: Remix })
@@ -137,18 +131,26 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         _probability: {},
     }
 
-    const distributionData = JSON.parse(JSON.stringify(Remix.getState().app.personality.links.toArray()))
+    const distributionData = JSON.parse(
+        JSON.stringify(
+            data.payload ? new HashList(data.payload).toArray() : Remix.getState().app.personality.links.toArray(),
+        ),
+    )
 
     const questionScreens = Remix.getScreens({ tag: 'question' })
     const resultScreens = Remix.getScreens({ tag: 'result' })
 
     // Find and format options
+    let questionScreensCounter = 0
     for (const screen of questionScreens) {
+        questionScreensCounter++
+        let optionCounter = 0
         for (const component of screen.components.toArray()) {
             if (typeof component.tags !== 'undefined') {
                 const isOption = component.tags.indexOf('option') !== -1 && component.displayName === 'TextOption'
 
                 if (isOption) {
+                    optionCounter++
                     const linked = distributionData.findIndex(item => item.optionId === component.hashlistId) !== -1
                     let links = []
                     if (linked) {
@@ -164,6 +166,7 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
                     let obj = {
                         screenId: screen.hashlistId,
                         componentId: component.hashlistId,
+                        counter: optionCounter,
                         linked,
                         links,
                         image: null,
@@ -174,7 +177,12 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
                     if (image) {
                         obj.image = image
                     }
-                    obj.text = getPlainTextFromHtml(component.text)
+                    if (component.text && component.text.length) {
+                        obj.text = htmlDecode(component.text)
+                    } else {
+                        obj.text = 'Answer ' + optionCounter
+                    }
+
                     response.options.push(obj)
                 }
             }
@@ -182,9 +190,13 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
     }
 
     // Find and format results
+    let resultScreensCounter = 0
     for (const screen of resultScreens) {
+        resultScreensCounter++
+
         let obj = {
             screenId: screen.hashlistId,
+            counter: resultScreensCounter,
             neverShow: true,
             linked: false,
             links: [],
@@ -202,6 +214,8 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         const textComponent = screen.components.toArray().find(c => c.displayName === 'Text')
         if (textComponent) {
             obj.text = textComponent.text.replace(/<[^>]+>/g, '')
+        } else {
+            obj.text = 'Result ' + resultScreensCounter
         }
 
         response.options.forEach(option => {
