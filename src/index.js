@@ -18,8 +18,11 @@ import { getScreenHTMLPreview } from './lib/remix/util/util'
 import initButtonBehavior from './lib/plugins/button-behavior'
 import initQuizPoints from './lib/plugins/quiz-points'
 import initUserDataForm from './lib/plugins/user-data-form'
+import initPopupManager from './lib/plugins/popup-manager'
 
 Remix.setStore(store)
+
+initPopupManager({ remix: Remix })
 
 initUserDataForm({ remix: Remix })
 

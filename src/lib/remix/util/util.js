@@ -12,6 +12,14 @@ export function isHashlistInstance(obj) {
 }
 
 /**
+ *
+ * @param {string} path
+ */
+export function isPathToPopupComponent(path) {
+    return path.includes('.popup') && path.includes('.components.')
+}
+
+/**
  * Parses property path and returns screen id
  *
  * @param {string} path, property path, example 'router.screens.8wruuz.components.zbnkhy.fontShadow'
@@ -31,6 +39,24 @@ export function getScreenIdFromPath(path) {
  */
 export function getComponentIdFromPath(path) {
     const regex = /^router\.screens\.[A-z0-9]+\.components\.([A-z0-9]+)/g,
+        m = regex.exec(path)
+    return m && m[0] && m[1] ? m[1] : null
+}
+
+/**
+ * Parses property path and returns popup id
+ *
+ * @param {string} path, property path, example 'router.screens.8wruuz.components.zbnkhy.fontShadow'
+ * @return {string} screenId, example 8wruuz
+ */
+export function getPopupIdFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+\.popups\.([A-z0-9]+)/g,
+        m = regex.exec(path)
+    return m && m[0] && m[1] ? m[1] : null
+}
+
+export function getPopupComponentIdFromPath(path) {
+    const regex = /^router\.screens\.[A-z0-9]+\.popups\.[A-z0-9]+\.components\.([A-z0-9]+)/g,
         m = regex.exec(path)
     return m && m[0] && m[1] ? m[1] : null
 }
@@ -81,6 +107,44 @@ export function parseComponentAdapteduiPath(path) {
             propName: m[4],
         }
         return _parsedCondPathes[path]
+    }
+}
+
+const _parsedPopupPathes = {}
+export function parsePopupComponentPath(path) {
+    if (path in _parsedPopupPathes) return _parsedPopupPathes[path]
+
+    const regex = /^router\.screens\.([A-z0-9]+)\.popups\.([A-z0-9]+)\.components\.([A-z0-9]+)\.([A-z0-9]+)$/g,
+        m = regex.exec(path)
+
+    if (m && m[1] && m[2] && m[3] && m[4]) {
+        _parsedPopupPathes[path] = {
+            screenId: m[1],
+            popupId: m[2],
+            popupComponentId: m[3],
+            propName: m[4],
+        }
+
+        return _parsedPopupPathes[path]
+    }
+}
+
+const _parsedPopupCondPathes = {}
+export function parsePopupComponentAdapteduiPath(path) {
+    if (_parsedPopupCondPathes[path]) {
+        return _parsedPopupCondPathes[path]
+    }
+    const regex = /^router\.screens\.([A-z0-9]+)\.popups\.([A-z0-9]+)\.adaptedui\.([A-z0-9]+)\.props.([A-z0-9]+).([A-z0-9]+)$/g,
+        m = regex.exec(path)
+    if (m && m[1] && m[2] && m[3] && m[4] && m[5]) {
+        _parsedPopupCondPathes[path] = {
+            screenId: m[1],
+            popupId: m[2],
+            masterKey: m[3],
+            popupComponentId: m[4],
+            propName: m[5],
+        }
+        return _parsedPopupCondPathes[path]
     }
 }
 

@@ -94,7 +94,7 @@ class TextOption extends React.Component {
                     {doubleClicked ? null : <Icon name={correctIndicator} align={align} />}
                     <TextEditor parentId={id} readOnly={!doubleClicked} text={text} />
                     {this.props[DYNAMIC_CONTENT_PROP] ? (
-                        <DynamicContent structure={this.props[DYNAMIC_CONTENT_PROP]} />
+                        <DynamicContent structure={this.props[DYNAMIC_CONTENT_PROP]} parentProps={this.props} />
                     ) : null}
                 </div>
                 {/* </div> */}

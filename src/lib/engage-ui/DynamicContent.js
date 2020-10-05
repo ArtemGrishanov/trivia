@@ -3,7 +3,7 @@ import React from 'react'
 import DataSchema from '../schema'
 import * as defaultIcons from './icons'
 
-import { postMessage } from '../../lib/remix'
+import { fireEvent } from '../../lib/remix'
 
 export const DYNAMIC_CONTENT_PROP = 'dynamicContent'
 export const ContentPropsList = {
@@ -11,7 +11,7 @@ export const ContentPropsList = {
 }
 
 const dynamicComponents = {
-    [ContentPropsList.ICON_LIST]: ({ icons, vAlign, hAlign, vPadding, hPadding, gap, payload }) => {
+    [ContentPropsList.ICON_LIST]: ({ icons, vAlign, hAlign, vPadding, hPadding, gap, parentProps }) => {
         const style = {
             padding: `${hPadding}px ${vPadding}px`,
         }
@@ -24,19 +24,9 @@ const dynamicComponents = {
             style[vAlign] = '0'
         }
 
-        function onClick(iconName, payload) {
-            if (iconName === 'chainOption') {
-                postMessage('request_data_layer', {
-                    layer_type: 'personality_chain',
-                    screen_id: payload.screen_id,
-                    option_id: payload.option_id,
-                })
-            }
-        }
-
         return (
             <div className="rmx-option-icons" style={style}>
-                {icons.map((icon, i) => {
+                {Object.entries(icons).map(([key, icon], i) => {
                     if (typeof icon.name !== 'string') {
                         return null
                     }
@@ -46,7 +36,9 @@ const dynamicComponents = {
                     return Icon ? (
                         <div
                             className={`rmx-option-icons--item${icon.clickable ? ' clickable' : ''}`}
-                            onClick={evt => (icon.clickable ? onClick(icon.name, payload) : evt.preventDefault())}
+                            onClick={evt =>
+                                icon.clickable ? fireEvent(icon.onClickEvent, { parentProps }) : evt.preventDefault()
+                            }
                             key={i}
                         >
                             <Icon style={i > 0 ? { marginLeft: `${gap}px` } : {}} />
@@ -58,13 +50,13 @@ const dynamicComponents = {
     },
 }
 
-const DynamicContent = ({ structure = {} }) => (
+const DynamicContent = ({ structure = {}, parentProps }) => (
     <>
         {Object.entries(structure).map(([component, props]) => {
             const Component = dynamicComponents[component]
 
             if (Component) {
-                return <Component {...props} key={component} />
+                return <Component {...props} key={component} parentProps={parentProps} />
             } else {
                 return null
             }
@@ -75,8 +67,8 @@ const DynamicContent = ({ structure = {} }) => (
 export const Schemas = {
     [ContentPropsList.ICON_LIST]: new DataSchema({
         icons: {
-            type: 'array',
-            default: [],
+            type: 'object',
+            default: {},
         },
         vAlign: {
             type: 'string',

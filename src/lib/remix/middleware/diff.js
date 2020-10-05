@@ -6,6 +6,8 @@ import {
     getPropNameFromPath,
     isObject,
     objectEquals,
+    getPopupIdFromPath,
+    getPopupComponentIdFromPath,
 } from '../util/util.js'
 import { getPropertiesBySelector, deserialize } from '../../object-path.js'
 
@@ -138,7 +140,9 @@ function diff(schema = null, prevState = {}, nextState = {}) {
             const nsProp = nsRes[i]
             const psProp = psRes.length > 0 ? getPropAndDelete(psRes, nsProp.path) : null
             const screenId = getScreenIdFromPath(nsProp.path),
-                componentId = getComponentIdFromPath(nsProp.path)
+                componentId = getComponentIdFromPath(nsProp.path),
+                popupId = getPopupIdFromPath(nsProp.path),
+                popupComponentId = getPopupComponentIdFromPath(nsProp.path)
             if (psProp) {
                 // this property exists in both states, check for modification
                 if (isHashlistInstance(psProp.value) && isHashlistInstance(nsProp.value)) {
@@ -170,6 +174,8 @@ function diff(schema = null, prevState = {}, nextState = {}) {
                     ...nsProp,
                     componentId,
                     screenId,
+                    popupId,
+                    popupComponentId,
                 })
                 if (isRouterScreens) result.routerScreensUpdates = true
                 if (screenId && !result.updatedScreens[screenId])

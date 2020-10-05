@@ -1,8 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Remix, { setComponentProps } from '../../../lib/remix'
+import Remix, { setComponentProps, getPathByComponentId } from '../../../lib/remix'
 import { getActiveScreenId, getActiveScreen } from '../../../lib/remix'
-import { tryToMagnet } from '../../remix/util/util'
+import { tryToMagnet, getPopupIdFromPath, getPopupComponentIdFromPath } from '../../remix/util/util'
 
 const MIN_WIDTH = 20, // px
     MIN_HEIGHT = 20, // px
@@ -293,6 +293,16 @@ export default function LayoutItem() {
                 selectThisComponent(doubleClicked = false, dragging = false) {
                     // use selection mode for external services (like Editor)
                     // and keep element selected (show selection border)
+                    let popup = {}
+                    const pathToComponent = getPathByComponentId(this.props.id)
+                    if (typeof pathToComponent === 'string') {
+                        const path = `${pathToComponent}.${this.props.id}`
+                        const popupId = getPopupIdFromPath(path)
+                        const componentPopupId = getPopupComponentIdFromPath(path)
+
+                        popup = { popupId, componentPopupId }
+                    }
+
                     this.props.requestSelection([this.props.id], {
                         componentProps: { [this.props.id]: { ...this.props } },
                         clientRect: this.thisRef.current ? this.thisRef.current.getBoundingClientRect() : {},
@@ -300,6 +310,7 @@ export default function LayoutItem() {
                         screenId: getActiveScreenId(),
                         doubleClicked,
                         dragging,
+                        ...popup,
                     })
                 }
 

@@ -3,9 +3,12 @@ import RemixWrapper from './RemixWrapper'
 import DataSchema from '../schema'
 import HashList from '../hashlist'
 import Screen from './Screen'
+import Popup from './Popup'
 import { removeUnnecessaryItemsFromScreen, debounce } from '../remix/util/util'
 
 let refs = {}
+let popupRefs = {}
+let popupIdToScreenId = {}
 
 /**
  *
@@ -24,6 +27,7 @@ class Router extends React.Component {
             visibilityScrPrev: 'hidden',
         }
         this.prevMarkUpList = {}
+        this.prevPopupMarkUpList = {}
     }
 
     componentDidUpdate(prevProps, prevState) {
@@ -33,6 +37,7 @@ class Router extends React.Component {
                 this.setState({ prevScreenId: prevProps.currentScreenId })
             }
             this.renderStaticMarkup()
+            this.renderStaticPopupMarkup()
         } else {
             if (prevProps.currentScreenId && this.props.currentScreenId !== prevProps.currentScreenId) {
                 if (this.props.switchEffect === 'moveleft') {
@@ -123,7 +128,7 @@ class Router extends React.Component {
         }
 
         const refsTmp = {}
-        this.props.screens.toArray().forEach(s => {
+        screens.forEach(s => {
             if (refs[s.hashlistId]) {
                 refsTmp[s.hashlistId] = refs[s.hashlistId]
             } else {
@@ -131,6 +136,69 @@ class Router extends React.Component {
             }
         })
         refs = refsTmp
+    }
+
+    resetPrevPopupMarkUpList() {
+        const refKeys = Object.keys(popupRefs)
+        const prevMarkUpListKeys = Object.keys(this.prevPopupMarkUpList)
+        if (prevMarkUpListKeys.length > refKeys.length) {
+            const prevMarkUpListTmp = {}
+            refKeys.forEach(k => (prevMarkUpListTmp[k] = this.prevPopupMarkUpList[k]))
+            this.prevPopupMarkUpList = prevMarkUpListTmp
+        }
+    }
+
+    renderStaticPopupMarkup = debounce(() => {
+        this.resetPrevPopupMarkUpList()
+        const markupData = {}
+        Object.keys(popupRefs).forEach(popupId => {
+            if (popupRefs[popupId].current) {
+                if (!this.prevPopupMarkUpList[popupId]) {
+                    this.prevPopupMarkUpList[popupId] = ''
+                }
+                const sm = removeUnnecessaryItemsFromScreen(popupRefs[popupId].current).innerHTML
+
+                if (this.prevPopupMarkUpList[popupId] !== sm) {
+                    this.prevPopupMarkUpList[popupId] = sm
+                    markupData[`router.screens.${popupIdToScreenId[popupId]}.popups.${popupId}.staticMarkup`] = sm
+                }
+            }
+        })
+        if (Object.keys(markupData).length > 0) {
+            this.props.setData(markupData)
+        }
+    }, 1500)
+
+    updatePopupRefs() {
+        const popups = this.props.screens
+            .toArray()
+            .filter(screen => screen.popups && screen.popups.length)
+            .map(screen => {
+                const screenId = screen.hashlistId
+                const popups = screen.popups.toArray()
+
+                popups.forEach(popup => (popupIdToScreenId[popup.hashlistId] = screenId))
+
+                return popups
+            })
+            .reduce((acc, popups) => {
+                acc.push(...popups)
+
+                return acc
+            }, [])
+
+        if (popups.length === Object.keys(popupRefs).length) return
+
+        const refsTmp = {}
+        popups.forEach(popup => {
+            if (refs[popup.hashlistId]) {
+                refsTmp[popup.hashlistId] = refs[popup.hashlistId]
+            } else {
+                refsTmp[popup.hashlistId] = React.createRef()
+            }
+        })
+
+        popupRefs = refsTmp
     }
 
     render() {
@@ -145,6 +213,21 @@ class Router extends React.Component {
 
         if (editable) {
             this.updateRefs()
+            this.updatePopupRefs()
+        }
+
+        if (this.props.showPopup && editable) {
+            return (
+                <div className="rmx-scr_container" style={st}>
+                    <div className="rmx-scr_container_item" ref={popupRefs[this.props.activePopupId]}>
+                        <Popup
+                            screenId={this.props.currentScreenId}
+                            id={this.props.activePopupId}
+                            editable={editable}
+                        />
+                    </div>
+                </div>
+            )
         }
 
         const switchEffectStyle = {
@@ -179,6 +262,30 @@ class Router extends React.Component {
                             </div>
                         )
                     })}
+                {editable &&
+                    this.props.screens.toArray().map(s => {
+                        return (
+                            s.popups &&
+                            s.popups.toArray().map(popup => {
+                                return (
+                                    <div
+                                        className="rmx-scr_container_item"
+                                        ref={popupRefs[popup.hashlistId]}
+                                        style={{ visibility: 'hidden' }}
+                                        key={popup.hashlistId}
+                                    >
+                                        <Popup
+                                            {...popup}
+                                            screenId={s.hashlistId}
+                                            id={popup.hashlistId}
+                                            editable={false}
+                                            overflowHidden={true}
+                                        />
+                                    </div>
+                                )
+                            })
+                        )
+                    })}
 
                 {/* Render previous screen */}
                 {!editable && this.state.showPrevScreen && prevScr && (
@@ -194,6 +301,13 @@ class Router extends React.Component {
                         style={switchEffectStylePrevScreen[this.props.switchEffect]}
                     >
                         <Screen {...prevScr} id={this.state.prevScreenId}></Screen>
+                        {this.props.showPopup ? (
+                            <Popup
+                                screenId={this.props.currentScreenId}
+                                id={this.props.activePopupId}
+                                editable={editable}
+                            />
+                        ) : null}
                     </div>
                 )}
 
@@ -212,6 +326,13 @@ class Router extends React.Component {
                         style={switchEffectStyle[this.props.switchEffect]}
                     >
                         <Screen {...scr} id={this.props.currentScreenId} editable={editable}></Screen>
+                        {this.props.showPopup ? (
+                            <Popup
+                                screenId={this.props.currentScreenId}
+                                id={this.props.activePopupId}
+                                editable={editable}
+                            />
+                        ) : null}
                     </div>
                 )}
             </div>
@@ -249,6 +370,16 @@ export const Schema = new DataSchema({
         prototypes: [{ id: 'default_prototype', data: { displayName: 'Screen', backgroundColor: 'green' } }],
     },
     currentScreenId: {
+        type: 'string',
+        default: null,
+        serialize: false,
+    },
+    showPopup: {
+        type: 'boolean',
+        default: false,
+        serialize: false,
+    },
+    activePopupId: {
         type: 'string',
         default: null,
         serialize: false,
