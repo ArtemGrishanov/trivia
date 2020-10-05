@@ -88,6 +88,110 @@ initFacebookAnalytics({ remix: Remix })
 initQuizAnalytics({ remix: Remix })
 
 /**
+ * Trivia quiz distribution info
+ *
+ */
+
+Remix.addMessageListener('gettriviadistribution', data => {
+    let response = {
+        questionsLength: 0,
+        correctQuestionsLength: 0,
+        resultsLength: 0,
+        _collision: {
+            questions: {
+                noCorrect: [],
+                allIncorrect: false,
+            },
+        },
+        _probability: [],
+    }
+
+    const questionScreens = Remix.getScreens({ tag: 'question' }),
+        resultScreens = Remix.getScreens({ tag: 'result' })
+
+    response.questionsLength = questionScreens.length
+    response.resultsLength = resultScreens.length
+
+    //  Check questions
+    let questionScreensCounter = 0
+    for (const screen of questionScreens) {
+        questionScreensCounter++
+        let optionCounter = 0
+        let hasCorrect = false
+        for (const component of screen.components.toArray()) {
+            if (typeof component.tags !== 'undefined') {
+                const isOption = component.tags.indexOf('option') !== -1
+                if (isOption) {
+                    optionCounter++
+                    if (component.data && component.data.points) {
+                        hasCorrect = true
+                    }
+                }
+            }
+        }
+        if (!hasCorrect) {
+            response._collision.questions.noCorrect.push(screen.hashlistId)
+        }
+    }
+
+    const correctQuestionsLength = questionScreens.length - response._collision.questions.noCorrect.length
+    response.correctQuestionsLength = correctQuestionsLength
+    if (!correctQuestionsLength) {
+        response._collision.questions.allIncorrect = true
+    } else {
+        // Calculate probability
+        let resGap = Math.floor(questionScreens.length / resultScreens.length)
+        if (resGap < 1) {
+            resGap = 1
+        }
+
+        let resultPointsAllocation = {},
+            g = 1,
+            resIndex = resultScreens.length - 1
+        if (resGap < 1) {
+            resGap = 1
+        }
+        if (resIndex >= 0) {
+            let currentResultId = resultScreens[resIndex].hashlistId
+            for (let i = questionScreens.length; i >= 0; i--) {
+                // >= важно!
+                resultPointsAllocation[i] = currentResultId
+                g++
+                if (g > resGap) {
+                    g = 1
+                    if (resIndex) {
+                        resIndex--
+                        currentResultId = resultScreens[resIndex].hashlistId
+                    }
+                }
+            }
+        }
+        const test = Object.values(resultPointsAllocation).reduce((acc, el) => {
+            acc[el] = (acc[el] || 0) + 1
+            return acc
+        }, {})
+
+        let tmpMin = 0
+        for (const [key, value] of Object.entries(test)) {
+            response._probability.push({
+                screenId: key,
+                min: tmpMin,
+                max: tmpMin + value - 1,
+                range: value,
+            })
+            tmpMin = tmpMin + value
+        }
+    }
+
+    return {
+        message: 'trivia_distribution',
+        data: {
+            result: response,
+        },
+    }
+})
+
+/**
  * Trivia quiz custom result calculation
  *
  */

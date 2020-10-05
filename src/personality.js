@@ -19,6 +19,8 @@ import HashList from './lib/hashlist'
 import initPersonalityChain from './lib/plugins/personality-chain'
 import initUserDataForm from './lib/plugins/user-data-form'
 
+import { htmlDecode } from './lib/remix/util/util'
+
 Remix.setStore(store)
 
 initButtonBehavior({ remix: Remix })
@@ -109,6 +111,226 @@ initGoogleAnalytics({ remix: Remix })
 initQuizAnalytics({ remix: Remix })
 
 /**
+ * Personality quiz distribution info
+ *
+ */
+
+Remix.addMessageListener('getpersonalitydistribution', data => {
+    let response = {
+        options: [],
+        results: [],
+        _collision: {
+            options: {
+                unlinked: [],
+            },
+            results: {
+                unlinked: [],
+                neverShow: [],
+            },
+        },
+        _probability: {},
+    }
+
+    const distributionData = JSON.parse(
+        JSON.stringify(
+            data.payload ? new HashList(data.payload).toArray() : Remix.getState().app.personality.links.toArray(),
+        ),
+    )
+
+    const questionScreens = Remix.getScreens({ tag: 'question' })
+    const resultScreens = Remix.getScreens({ tag: 'result' })
+
+    // Find and format options
+    let questionScreensCounter = 0
+    for (const screen of questionScreens) {
+        questionScreensCounter++
+        let optionCounter = 0
+        for (const component of screen.components.toArray()) {
+            if (typeof component.tags !== 'undefined') {
+                const isOption = component.tags.indexOf('option') !== -1 && component.displayName === 'TextOption'
+
+                if (isOption) {
+                    optionCounter++
+                    const linked = distributionData.findIndex(item => item.optionId === component.hashlistId) !== -1
+                    let links = []
+                    if (linked) {
+                        const arr = distributionData.filter(item => item.optionId === component.hashlistId)
+                        arr.forEach(el => {
+                            links.push({
+                                screenId: el.resultId,
+                                weight: el.weight,
+                            })
+                        })
+                    }
+
+                    let obj = {
+                        screenId: screen.hashlistId,
+                        componentId: component.hashlistId,
+                        counter: optionCounter,
+                        linked,
+                        links,
+                        image: null,
+                        text: null,
+                    }
+
+                    const image = component.imageSrc.length
+                    if (image) {
+                        obj.image = image
+                    }
+                    if (component.text && component.text.length) {
+                        obj.text = htmlDecode(component.text)
+                    } else {
+                        obj.text = 'Answer ' + optionCounter
+                    }
+
+                    response.options.push(obj)
+                }
+            }
+        }
+    }
+
+    // Find and format results
+    let resultScreensCounter = 0
+    for (const screen of resultScreens) {
+        resultScreensCounter++
+
+        let obj = {
+            screenId: screen.hashlistId,
+            counter: resultScreensCounter,
+            neverShow: true,
+            linked: false,
+            links: [],
+            questionScreenDistribution: {},
+            scoresMax: 0,
+            scoresMin: 0,
+            image: null,
+            text: null,
+        }
+
+        const image = screen.backgroundImage
+        if (image) {
+            obj.image = screen.backgroundImage
+        }
+        const textComponent = screen.components.toArray().find(c => c.displayName === 'Text')
+        if (textComponent) {
+            obj.text = textComponent.text.replace(/<[^>]+>/g, '')
+        } else {
+            obj.text = 'Result ' + resultScreensCounter
+        }
+
+        response.options.forEach(option => {
+            if (!obj.questionScreenDistribution[option.screenId]) {
+                obj.questionScreenDistribution[option.screenId] = {
+                    screenId: option.screenId,
+                    hasUnlinkedOption: false,
+                    weightMin: 0,
+                    weightMax: 0,
+                    optionsLength: 0,
+                    optionsScores: [],
+                }
+            }
+            let questionScreenDistribution = obj.questionScreenDistribution[option.screenId]
+
+            questionScreenDistribution.optionsLength++
+
+            const linkIndex = option.links.findIndex(item => item.screenId === screen.hashlistId)
+
+            if (linkIndex !== -1) {
+                const optionWeight = option.links[linkIndex].weight
+
+                obj.linked = true
+                obj.links.push({
+                    screenId: option.screenId,
+                    componentId: option.componentId,
+                    weight: optionWeight,
+                })
+
+                questionScreenDistribution.optionsScores.push(optionWeight)
+
+                if (!questionScreenDistribution.hasUnlinkedOption) {
+                    if (!questionScreenDistribution.weightMin || questionScreenDistribution.weightMin > optionWeight) {
+                        questionScreenDistribution.weightMin = optionWeight
+                    }
+                }
+                if (questionScreenDistribution.weightMax < optionWeight) {
+                    questionScreenDistribution.weightMax = optionWeight
+                }
+            } else {
+                questionScreenDistribution.hasUnlinkedOption = true
+                questionScreenDistribution.weightMin = 0
+            }
+
+            obj.questionScreenDistribution[option.screenId] = questionScreenDistribution
+        })
+
+        obj.scoresMax = Object.values(obj.questionScreenDistribution).reduce((a, b) => a + b.weightMax, 0)
+        obj.scoresMin = Object.values(obj.questionScreenDistribution).reduce((a, b) => a + b.weightMin, 0)
+
+        response.results.push(obj)
+    }
+
+    // Find distribution collision and result probability
+    for (const option of response.options) {
+        if (!option.linked) {
+            response._collision.options.unlinked.push({
+                screenId: option.screenId,
+                componentId: option.componentId,
+            })
+        }
+    }
+    for (const [index, result] of response.results.entries()) {
+        // for (const result of response.results) {
+        if (!result.linked) {
+            response._collision.results.unlinked.push(result.screenId)
+        } else {
+            const isNewerShow = response.results.findIndex(item => item.scoresMin > result.scoresMax) !== -1
+            if (isNewerShow) {
+                response._collision.results.neverShow.push(result.screenId)
+            } else {
+                response.results[index].neverShow = false
+                response._probability[result.screenId] = {
+                    screenId: result.screenId,
+                    scoresAvgSum: 0,
+                    screens: {},
+                }
+                Object.values(result.questionScreenDistribution).forEach(item => {
+                    const clickProbability = (100 / item.optionsLength) * item.optionsScores.length
+                    const scoresAvg =
+                        Math.round(
+                            (item.optionsScores.reduce((a, b) => a + b, 0) / item.optionsLength) *
+                                (clickProbability / 100) *
+                                100,
+                        ) / 100
+                    response._probability[result.screenId].scoresAvgSum =
+                        Math.round((response._probability[result.screenId].scoresAvgSum + scoresAvg) * 100) / 100
+                    response._probability[result.screenId].screens[item.screenId] = scoresAvg
+                })
+            }
+        }
+    }
+
+    const avgResultPercentage = Math.round((100 / Object.values(response._probability).length) * 100) / 100
+    for (const [key, value] of Object.entries(response._probability)) {
+        const percentage =
+            Math.round(
+                (100 / Object.values(response._probability).reduce((a, b) => a + b.scoresAvgSum, 0)) *
+                    value.scoresAvgSum *
+                    100,
+            ) / 100
+        response._probability[key].percentage = percentage
+        response._probability[key].deviationAvgResultPercentage =
+            Math.round(((percentage * 100) / avgResultPercentage - 100) * 100) / 100
+    }
+
+    return {
+        message: 'personality_distribution',
+        data: {
+            result: response,
+        },
+    }
+})
+
+/**
  * Personality quiz custom result calculation
  *
  */
@@ -135,7 +357,7 @@ Remix.addCustomFunction('calcPersonalityRes', () => {
         if (evt.eventType === 'onclick' && evt.eventData.tags.indexOf('option') > 0) {
             q++
             const option_id = evt.eventData.id
-            const opt_arr = personality_data.links.toArray().filter(el => el.optionId === option_id)
+            const opt_arr = personality_data.links.toArray().filter(item => item.optionId === option_id)
             if (opt_arr.length) {
                 for (const item of opt_arr) {
                     if (res[item.resultId]) {
