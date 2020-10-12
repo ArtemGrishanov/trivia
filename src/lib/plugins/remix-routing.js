@@ -133,7 +133,7 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
             }
         }
         if (nsId) {
-            if (state.app.popups.enable) {
+            if (state.app.popups?.enable) {
                 const popupId = remix.getProperty('data.popupId', event.eventData)
 
                 if (typeof popupId === 'string' && popupId.length) {
