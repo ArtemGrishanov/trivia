@@ -65,6 +65,13 @@ let logging = LOG_BY_DEFAULT,
     _componentIdToPath = {},
     _externalListeners = {}
 
+let copyPasteData = {
+    selectedComponentIds: [],
+    screenId: void 0,
+    popupId: void 0,
+    copyFromPopup: false,
+}
+
 export const getScreenIdByComponentId = (componentId, state) => {
     state = state || store.getState()
 
@@ -104,6 +111,66 @@ function onKeyDown(e) {
                 redo()
             } else if (k === 'Z') {
                 undo()
+            } else if (e.ctrlKey) {
+                if (k === 'C') {
+                    const state = store.getState()
+                    const selectedComponentIds = state.session.selectedComponentIds
+
+                    if (Array.isArray(selectedComponentIds) && selectedComponentIds.length) {
+                        copyPasteData = {
+                            selectedComponentIds,
+                            screenId: state.router.currentScreenId,
+                            popupId: state.router.activePopupId,
+                            copyFromPopup: state.router.showPopup,
+                        }
+                    }
+                }
+
+                if (k === 'V') {
+                    const { selectedComponentIds, screenId, popupId, copyFromPopup } = copyPasteData
+
+                    if (selectedComponentIds.length) {
+                        const state = store.getState()
+
+                        const toScreenId = state.router.currentScreenId
+                        const copyToPopup = state.router.showPopup
+                        const toPopupId = state.router.activePopupId
+
+                        const pathToComponentsSource = `router.screens.${screenId}${
+                            copyFromPopup ? `.popups.${popupId}` : ''
+                        }.components`
+                        const sourceHashlist = getProperty(pathToComponentsSource, state)
+                        if (!sourceHashlist) {
+                            throw new Error('could not get hashlist components')
+                        }
+
+                        const pathToComponentsDist = `router.screens.${toScreenId}${
+                            copyToPopup ? `.popups.${toPopupId}` : ''
+                        }.components`
+
+                        const needShift = copyFromPopup && copyToPopup ? popupId === toPopupId : screenId === toScreenId
+
+                        selectedComponentIds.forEach(componentId => {
+                            const index = sourceHashlist.getIndex(componentId)
+                            const newElement = sourceHashlist.getElementCopy(index, {
+                                cloneChildHashlists: true,
+                                replaceObjectIds: true,
+                            })
+
+                            if (newElement.data) {
+                                newElement.data.copyPopupId = newElement.data.popupId
+                                newElement.data.popupId = ''
+                            }
+
+                            if (needShift) {
+                                newElement.top += 15
+                                newElement.left += 15
+                            }
+
+                            addHashlistElement(pathToComponentsDist, void 0, { newElement })
+                        })
+                    }
+                }
             }
         }
     }
