@@ -48,7 +48,6 @@ p {
     min-height: 100%;
     background-color: #eee;
     color: #333;
-    z-index: 15;
 }
 
 .rmx-screen_back_wr {

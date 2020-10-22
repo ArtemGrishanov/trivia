@@ -1,8 +1,3 @@
-.ql-toolbar.ql-snow {
-    position: relative;
-    z-index: 11;
-}
-
 .rmx-layout_container {
     position: absolute;
     left: 0;
@@ -15,10 +10,6 @@
 .rmx-layout_item {
     display: block;
     position: absolute;
-}
-
-.rmx-layout_item:hover {
-    z-index: 1;
 }
 
 .rmx-layout_item_selection_cnt {
@@ -35,13 +26,13 @@
 .rmx-layout_item_selection_cnt.__selected,
 .rmx-layout_item:hover .rmx-layout_item_selection_cnt {
     display: block;
-    z-index: 2;
 }
 
 .rmx-l-sel-m {
     position: absolute;
     width: 10px;
     height: 10px;
+    border: 99px;
     border: 1px solid #59d2f7;
     background-color: rgba(89, 210, 247, 0.5);
 }

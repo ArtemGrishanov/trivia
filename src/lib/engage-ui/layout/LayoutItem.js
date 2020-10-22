@@ -182,6 +182,11 @@ export default function LayoutItem() {
                 }
 
                 onMouseDown(e) {
+                    if (e.target.classList.contains('prevent-layout-click')) {
+                        e.stopPropagation()
+                        return
+                    }
+
                     if (this.state.doubleClicked) {
                         // компонент находится в режиме двойного нажатия (для текстовых компонентов это редактирование текста)
                         // ничего не делать и не давать родительским компонентам сбрасывать селект LayoutContainer.onMouseDown()
@@ -411,7 +416,7 @@ export default function LayoutItem() {
                         <div
                             ref={this.thisRef}
                             dataid={this.props.id}
-                            className="rmx-layout_item"
+                            className={`rmx-layout_item${this.props.selected ? ' __selected' : ''}`}
                             style={st}
                             datamarker="9"
                             onMouseDown={this.onMouseDown}

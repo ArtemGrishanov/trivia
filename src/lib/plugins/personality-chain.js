@@ -18,14 +18,10 @@ const initPersonalityChain = ({ remix, optionTag = 'option' }) => {
             personalityChain: {
                 name: 'chainOption',
                 clickable: true,
+                title: 'Set link',
                 onClickEvent: 'event_personalityChain',
             },
         },
-        hAlign: 'right',
-        vAlign: 'top',
-        vPadding: 5,
-        hPadding: 5,
-        gap: 5,
     }
 
     remix.extendSchema({

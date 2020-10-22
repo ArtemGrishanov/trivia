@@ -11,41 +11,39 @@ export const ContentPropsList = {
 }
 
 const dynamicComponents = {
-    [ContentPropsList.ICON_LIST]: ({ icons, vAlign, hAlign, vPadding, hPadding, gap, parentProps }) => {
-        const style = {
-            padding: `${hPadding}px ${vPadding}px`,
-        }
-
-        if (hAlign === 'left' || hAlign === 'right') {
-            style[hAlign] = '0'
-        }
-
-        if (vAlign === 'top' || hAlign === 'bottom') {
-            style[vAlign] = '0'
-        }
+    [ContentPropsList.ICON_LIST]: ({ icons, parentProps }) => {
+        const filteredIcons = Object.values(icons).filter(el => typeof el.name === 'string')
+        const clickableIcons = filteredIcons.filter(el => el.clickable)
+        const simpleIcons = filteredIcons.filter(el => !el.clickable)
 
         return (
-            <div className="rmx-option-icons" style={style}>
-                {Object.entries(icons).map(([key, icon], i) => {
-                    if (typeof icon.name !== 'string') {
-                        return null
-                    }
-
-                    const Icon = defaultIcons[icon.name]
-
-                    return Icon ? (
-                        <div
-                            className={`rmx-option-icons--item${icon.clickable ? ' clickable' : ''}`}
-                            onClick={evt =>
-                                icon.clickable ? fireEvent(icon.onClickEvent, { parentProps }) : evt.preventDefault()
-                            }
-                            key={i}
-                        >
-                            <Icon style={i > 0 ? { marginLeft: `${gap}px` } : {}} />
-                        </div>
-                    ) : null
-                })}
-            </div>
+            <>
+                <ul className="rmx-option-icons">
+                    {simpleIcons.map((icon, index) => {
+                        const Img = defaultIcons[icon.name]
+                        return (
+                            <li key={index}>
+                                <Img />
+                            </li>
+                        )
+                    })}
+                </ul>
+                <ul className="rmx-option-icons-clickable">
+                    {clickableIcons.map((icon, index) => {
+                        const Img = defaultIcons[icon.name]
+                        return (
+                            <li
+                                key={index}
+                                title={icon.title}
+                                onClick={evt => fireEvent(icon.onClickEvent, { parentProps }) && evt.preventDefault()}
+                            >
+                                <div className="prevent-layout-click icon-clickable-zone"></div>
+                                <Img />
+                            </li>
+                        )
+                    })}
+                </ul>
+            </>
         )
     },
 }

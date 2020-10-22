@@ -238,14 +238,10 @@ const initPopupManager = ({ remix, settings = {} }) => {
                 feedbackScreenEditMode: {
                     name: 'feedback',
                     clickable: true,
+                    title: 'Set feedback',
                     onClickEvent: `event_feedbackScreenEditMode_for_${filter}`,
                 },
             },
-            hAlign: 'right',
-            vAlign: 'top',
-            vPadding: 5,
-            hPadding: 5,
-            gap: 5,
         }
 
         remix.extendSchema({

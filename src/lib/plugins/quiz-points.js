@@ -18,11 +18,6 @@ const initQuizPoints = ({ remix, optionTag = 'option' }) => {
                 clickable: false,
             },
         },
-        hAlign: 'right',
-        vAlign: 'top',
-        vPadding: 5,
-        hPadding: 5,
-        gap: 5,
     }
 
     remix.extendSchema({

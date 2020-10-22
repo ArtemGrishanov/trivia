@@ -19,8 +19,6 @@ import HashList from './lib/hashlist'
 import initPersonalityChain from './lib/plugins/personality-chain'
 import initUserDataForm from './lib/plugins/user-data-form'
 
-import { htmlDecode } from './lib/remix/util/util'
-
 Remix.setStore(store)
 
 initButtonBehavior({ remix: Remix })
@@ -117,6 +115,7 @@ initQuizAnalytics({ remix: Remix })
 
 Remix.addMessageListener('getpersonalitydistribution', data => {
     let response = {
+        questions: [],
         options: [],
         results: [],
         _collision: {
@@ -124,7 +123,6 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
                 unlinked: [],
             },
             results: {
-                unlinked: [],
                 neverShow: [],
             },
         },
@@ -133,17 +131,30 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
 
     const distributionData = JSON.parse(
         JSON.stringify(
-            data.payload ? new HashList(data.payload).toArray() : Remix.getState().app.personality.links.toArray(),
+            data.payload.links
+                ? new HashList(data.payload.links).toArray()
+                : Remix.getState().app.personality.links.toArray(),
         ),
     )
+    const probabilityOnly = data.payload.probabilityOnly
 
     const questionScreens = Remix.getScreens({ tag: 'question' })
     const resultScreens = Remix.getScreens({ tag: 'result' })
 
-    // Find and format options
+    // Find and format questions / options
     let questionScreensCounter = 0
     for (const screen of questionScreens) {
         questionScreensCounter++
+
+        const screenFirstTextComponent = screen.components.toArray().find(c => c.displayName === 'Text')
+        response.questions.push({
+            screenId: screen.hashlistId,
+            image: screen.backgroundImage ? screen.backgroundImage : null,
+            text: screenFirstTextComponent
+                ? screenFirstTextComponent.text.replace(/<[^>]+>/g, '')
+                : 'Question ' + questionScreensCounter,
+            bgColor: screen.backgroundColor,
+        })
         let optionCounter = 0
         for (const component of screen.components.toArray()) {
             if (typeof component.tags !== 'undefined') {
@@ -151,34 +162,46 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
 
                 if (isOption) {
                     optionCounter++
-                    const linked = distributionData.findIndex(item => item.optionId === component.hashlistId) !== -1
                     let links = []
-                    if (linked) {
-                        const arr = distributionData.filter(item => item.optionId === component.hashlistId)
-                        arr.forEach(el => {
+                    let usedResults = []
+                    const linksArr = distributionData.filter(
+                        item =>
+                            item.optionId === component.hashlistId &&
+                            resultScreens.findIndex(item2 => item2.hashlistId === item.resultId) !== -1,
+                    )
+                    if (linksArr.length) {
+                        usedResults = linksArr.map(item => item.resultId)
+                        linksArr.forEach(el => {
                             links.push({
                                 screenId: el.resultId,
                                 weight: el.weight,
                             })
                         })
                     }
+                    const unusedResults = resultScreens
+                        .filter(result => usedResults.indexOf(result.hashlistId) === -1)
+                        .map(item => item.hashlistId)
+                    unusedResults.forEach(hashlistId => {
+                        links.push({
+                            screenId: hashlistId,
+                            weight: 0,
+                        })
+                    })
 
                     let obj = {
                         screenId: screen.hashlistId,
                         componentId: component.hashlistId,
                         counter: optionCounter,
-                        linked,
+                        linked: linksArr.length !== 0,
                         links,
                         image: null,
                         text: null,
                     }
 
                     const image = component.imageSrc.length
-                    if (image) {
-                        obj.image = image
-                    }
+                    obj.image = image ? component.imageSrc : null
                     if (component.text && component.text.length) {
-                        obj.text = htmlDecode(component.text)
+                        obj.text = component.text.replace(/<[^>]+>/g, '')
                     } else {
                         obj.text = 'Answer ' + optionCounter
                     }
@@ -197,23 +220,18 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         let obj = {
             screenId: screen.hashlistId,
             counter: resultScreensCounter,
-            neverShow: true,
-            linked: false,
             links: [],
             questionScreenDistribution: {},
-            scoresMax: 0,
-            scoresMin: 0,
+            bgColor: screen.backgroundColor,
             image: null,
             text: null,
         }
 
         const image = screen.backgroundImage
-        if (image) {
-            obj.image = screen.backgroundImage
-        }
-        const textComponent = screen.components.toArray().find(c => c.displayName === 'Text')
-        if (textComponent) {
-            obj.text = textComponent.text.replace(/<[^>]+>/g, '')
+        obj.image = image ? screen.backgroundImage : null
+        const screenFirstTextComponent = screen.components.toArray().find(c => c.displayName === 'Text')
+        if (screenFirstTextComponent) {
+            obj.text = screenFirstTextComponent.text.replace(/<[^>]+>/g, '')
         } else {
             obj.text = 'Result ' + resultScreensCounter
         }
@@ -222,23 +240,16 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
             if (!obj.questionScreenDistribution[option.screenId]) {
                 obj.questionScreenDistribution[option.screenId] = {
                     screenId: option.screenId,
-                    hasUnlinkedOption: false,
-                    weightMin: 0,
-                    weightMax: 0,
-                    optionsLength: 0,
                     optionsScores: [],
                 }
             }
             let questionScreenDistribution = obj.questionScreenDistribution[option.screenId]
-
-            questionScreenDistribution.optionsLength++
 
             const linkIndex = option.links.findIndex(item => item.screenId === screen.hashlistId)
 
             if (linkIndex !== -1) {
                 const optionWeight = option.links[linkIndex].weight
 
-                obj.linked = true
                 obj.links.push({
                     screenId: option.screenId,
                     componentId: option.componentId,
@@ -246,30 +257,14 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
                 })
 
                 questionScreenDistribution.optionsScores.push(optionWeight)
-
-                if (!questionScreenDistribution.hasUnlinkedOption) {
-                    if (!questionScreenDistribution.weightMin || questionScreenDistribution.weightMin > optionWeight) {
-                        questionScreenDistribution.weightMin = optionWeight
-                    }
-                }
-                if (questionScreenDistribution.weightMax < optionWeight) {
-                    questionScreenDistribution.weightMax = optionWeight
-                }
-            } else {
-                questionScreenDistribution.hasUnlinkedOption = true
-                questionScreenDistribution.weightMin = 0
             }
 
             obj.questionScreenDistribution[option.screenId] = questionScreenDistribution
         })
 
-        obj.scoresMax = Object.values(obj.questionScreenDistribution).reduce((a, b) => a + b.weightMax, 0)
-        obj.scoresMin = Object.values(obj.questionScreenDistribution).reduce((a, b) => a + b.weightMin, 0)
-
         response.results.push(obj)
     }
 
-    // Find distribution collision and result probability
     for (const option of response.options) {
         if (!option.linked) {
             response._collision.options.unlinked.push({
@@ -278,54 +273,85 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
             })
         }
     }
-    for (const [index, result] of response.results.entries()) {
-        // for (const result of response.results) {
-        if (!result.linked) {
-            response._collision.results.unlinked.push(result.screenId)
-        } else {
-            const isNewerShow = response.results.findIndex(item => item.scoresMin > result.scoresMax) !== -1
-            if (isNewerShow) {
-                response._collision.results.neverShow.push(result.screenId)
-            } else {
-                response.results[index].neverShow = false
-                response._probability[result.screenId] = {
-                    screenId: result.screenId,
-                    scoresAvgSum: 0,
-                    screens: {},
-                }
-                Object.values(result.questionScreenDistribution).forEach(item => {
-                    const clickProbability = (100 / item.optionsLength) * item.optionsScores.length
-                    const scoresAvg =
-                        Math.round(
-                            (item.optionsScores.reduce((a, b) => a + b, 0) / item.optionsLength) *
-                                (clickProbability / 100) *
-                                100,
-                        ) / 100
-                    response._probability[result.screenId].scoresAvgSum =
-                        Math.round((response._probability[result.screenId].scoresAvgSum + scoresAvg) * 100) / 100
-                    response._probability[result.screenId].screens[item.screenId] = scoresAvg
-                })
-            }
+    let distributionHelper = {}
+    for (const result of response.results) {
+        response._probability[result.screenId] = {
+            screenId: result.screenId,
+            screens: {},
         }
+
+        Object.values(result.questionScreenDistribution).forEach(item => {
+            response._probability[result.screenId].screens[item.screenId] = {
+                scores: item.optionsScores,
+            }
+
+            if (!distributionHelper[item.screenId]) {
+                distributionHelper[item.screenId] = {
+                    optionsLength: item.optionsScores.length,
+                    resultsLength: 0,
+                    results: {},
+                }
+            }
+            distributionHelper[item.screenId].resultsLength++
+            distributionHelper[item.screenId].results[result.screenId] = item.optionsScores
+        })
     }
 
-    const avgResultPercentage = Math.round((100 / Object.values(response._probability).length) * 100) / 100
-    for (const [key, value] of Object.entries(response._probability)) {
-        const percentage =
-            Math.round(
-                (100 / Object.values(response._probability).reduce((a, b) => a + b.scoresAvgSum, 0)) *
-                    value.scoresAvgSum *
-                    100,
-            ) / 100
-        response._probability[key].percentage = percentage
-        response._probability[key].deviationAvgResultPercentage =
-            Math.round(((percentage * 100) / avgResultPercentage - 100) * 100) / 100
+    let weightDistribution = []
+
+    let questionScreensDistribution = {}
+    for (const [qId, q] of Object.entries(distributionHelper)) {
+        questionScreensDistribution[qId] = {}
+        let arr = new Array(q.optionsLength).fill([])
+        Object.values(q.results).forEach(el1 => {
+            el1.forEach((el2, index2) => {
+                arr[index2] = [...arr[index2], el2]
+            })
+        })
+
+        weightDistribution.push(arr)
     }
+
+    const allPossibleChains = weightDistribution.reduce((a, b) =>
+        a.reduce((r, v) => r.concat(b.map(w => [].concat(v.length && Array.isArray(v[0]) ? v : [v], [w]))), []),
+    )
+
+    const resultsIds = response.results.map(result => result.screenId)
+    let check = new Array(allPossibleChains.length)
+    allPossibleChains.forEach((chain, index) => {
+        let chainWeightSum = new Array(resultsIds.length).fill(0)
+        chain.forEach(weights => {
+            for (let i = 0; i < resultsIds.length; i++) {
+                chainWeightSum[i] = chainWeightSum[i] + weights[i]
+            }
+        })
+        check[index] = chainWeightSum
+    })
+    let scores = new Array(resultsIds.length).fill(0)
+    check.forEach(el1 => {
+        const max = Math.max.apply(null, el1)
+        const maxLength = el1.filter(w => w === max).length
+        el1.forEach((el2, index2) => {
+            if (maxLength === resultsIds.length || el2 === max) {
+                scores[index2] = Math.round((scores[index2] + 1 / maxLength) * 100) / 100
+            }
+        })
+    })
+
+    scores.forEach((el, i) => {
+        if (el === 0) {
+            response._collision.results.neverShow.push(resultsIds[i])
+            response._probability[resultsIds[i]].percentage = 0
+        } else {
+            response._probability[resultsIds[i]].percentage =
+                Math.round(((el * 100) / allPossibleChains.length) * 100) / 100
+        }
+    })
 
     return {
         message: 'personality_distribution',
         data: {
-            result: response,
+            result: probabilityOnly ? response._probability : response,
         },
     }
 })
@@ -385,13 +411,28 @@ Remix.addCustomFunction('calcPersonalityRes', () => {
         .sort((a, b) => (a.weight > b.weight ? -1 : 1))
 
     if (res_sorted_arr.length) {
-        return res_sorted_arr[0].result_id
+        const winRes = res_sorted_arr[0]
+
+        if (res_sorted_arr.length > 1) {
+            const winWeight = winRes.weight
+            const equalWeightResults = res_sorted_arr.filter(el => el.weight === winWeight)
+            if (equalWeightResults.length > 1) {
+                // если попали сюда - значит с одинаковым weight есть несколько результатов, берем случайный из них
+                const randomIndex = randomInteger(0, equalWeightResults.length - 1)
+                console.warn('Result is random [NORMAL]')
+                return equalWeightResults[randomIndex].result_id
+            }
+        }
+
+        return winRes.result_id
     }
     // если попали сюда - значит привязки заданы не корректно и путь ответов не привел ни к одному из результатов
     // но чтобы скрыть баг и сделать вид что все нормально - покажем рандомный результат (если они вообще есть)
+
     if (results.length) {
-        console.warn('Result is random')
+        console.warn('Result is random [DANGER]')
         const randomIndex = randomInteger(0, results.length - 1)
+
         return results[randomIndex].hashlistId
     }
     throw new Error('Results not found')
