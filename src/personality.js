@@ -312,9 +312,17 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         weightDistribution.push(arr)
     }
 
-    const allPossibleChains = weightDistribution.reduce((a, b) =>
-        a.reduce((r, v) => r.concat(b.map(w => [].concat(v.length && Array.isArray(v[0]) ? v : [v], [w]))), []),
-    )
+    const allPossibleChains =
+        weightDistribution.length > 1
+            ? weightDistribution.reduce((a, b) =>
+                  a.reduce(
+                      (r, v) => r.concat(b.map(w => [].concat(v.length && Array.isArray(v[0]) ? v : [v], [w]))),
+                      [],
+                  ),
+              )
+            : weightDistribution[0].map(el => {
+                  return [el]
+              })
 
     const resultsIds = response.results.map(result => result.screenId)
     let check = new Array(allPossibleChains.length)
@@ -327,6 +335,7 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         })
         check[index] = chainWeightSum
     })
+
     let scores = new Array(resultsIds.length).fill(0)
     check.forEach(el1 => {
         const max = Math.max.apply(null, el1)
