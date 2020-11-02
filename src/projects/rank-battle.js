@@ -2,20 +2,20 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 
-import App from './App'
+import App from '../App'
 
-import store from './store'
+import store from '../store'
 
-import Remix from './lib/remix'
+import Remix from '../lib/remix'
 
-import initRemixRouting from './lib/plugins/remix-routing'
-import initShare from './lib/plugins/share'
-import initGoogleAnalytics from './lib/plugins/googleAnalytics'
-import initFacebookAnalytics from './lib/plugins/facebook-pixel'
-import initQuizAnalytics from './lib/plugins/quiz-analytics'
-import initButtonBehavior from './lib/plugins/button-behavior'
+import initRemixRouting from '../lib/plugins/remix-routing'
+import initShare from '../lib/plugins/share'
+import initGoogleAnalytics from '../lib/plugins/googleAnalytics'
+import initFacebookAnalytics from '../lib/plugins/facebook-pixel'
+import initQuizAnalytics from '../lib/plugins/quiz-analytics'
+import initButtonBehavior from '../lib/plugins/button-behavior'
 
-import { getTranslation } from './lib/engage-ui/translations'
+import { getTranslation } from '../lib/engage-ui/translations'
 
 import './index.css'
 

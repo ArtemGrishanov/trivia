@@ -1,21 +1,87 @@
-const webpack = require('webpack')
-const merge = require('webpack-merge')
-const common = require('./webpack.common.js')
+const path = require('path')
+const fs = require('fs')
 
-module.exports = env => {
-    const { PROJECT_TYPE } = env || { PROJECT_TYPE: 'index' }
-    const buildMode = 'development'
-    return merge(common(PROJECT_TYPE), {
-        mode: buildMode,
-        devtool: 'inline-source-map',
-        devServer: {
-            contentBase: './dist',
-        },
-        plugins: [
-            new webpack.DefinePlugin({
-                'process.env.NODE_ENV': JSON.stringify('development'),
-                'process.env.PROJECT_TYPE': JSON.stringify(PROJECT_TYPE === 'index' ? 'trivia' : PROJECT_TYPE),
+const webpack = require('webpack')
+const HtmlWebPackPlugin = require('html-webpack-plugin')
+const TerserJSPlugin = require('terser-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
+
+const PROJECTS_PATH = path.resolve(__dirname, './src/projects')
+
+const getProjectEntries = () => {
+    const dir = fs.readdirSync(PROJECTS_PATH)
+
+    const entries = Object.fromEntries(
+        dir
+            .filter(entry => path.extname(entry) === '.js')
+            .map(entry => {
+                const ext = path.extname(entry)
+
+                return [entry.replace(ext, ''), `${PROJECTS_PATH}/${entry}`]
             }),
+    )
+
+    return entries
+}
+
+module.exports = {
+    mode: 'development',
+    devtool: 'inline-source-map',
+    entry: getProjectEntries(),
+    devServer: {
+        contentBase: './dist',
+        filename: '[name].js',
+    },
+    module: {
+        rules: [
+            {
+                test: /\.(js|jsx|json|node)$/,
+                exclude: /node_modules/,
+                use: ['babel-loader'],
+            },
+            {
+                test: /\.css$/i,
+                sideEffects: true,
+                use: [
+                    {
+                        loader: MiniCssExtractPlugin.loader,
+                    },
+                    'css-loader',
+                ],
+            },
+            {
+                test: /\.(html)$/,
+                use: {
+                    loader: 'html-loader',
+                },
+            },
         ],
-    })
+    },
+    optimization: {
+        minimizer: [new OptimizeCSSAssetsPlugin({})],
+        splitChunks: {
+            // include all types of chunks
+            chunks: 'all',
+            name: 'remix',
+            cacheGroups: {
+                styles: {
+                    name: 'remix',
+                    test: /\.css$/,
+                    chunks: 'all',
+                    enforce: true,
+                },
+            },
+        },
+        concatenateModules: true,
+        noEmitOnErrors: true,
+    },
+    plugins: [
+        new MiniCssExtractPlugin(),
+        new HtmlWebPackPlugin({
+            template: './src/projects/index.html',
+            filename: './index.html',
+            inject: false,
+        }),
+    ],
 }

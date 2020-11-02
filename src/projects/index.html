@@ -58,6 +58,15 @@
                 return;
             }
             if (data.method === 'embed') {
+                if (data.commonjs) {
+                    loadStuff++;
+                    // add additional script into loaded app iframe
+                    var commonjs = document.createElement('script');
+                    commonjs.onload = checkAndReply.bind(this, true);
+                    commonjs.setAttribute('src', data.commonjs);
+                    document.body.appendChild(commonjs);
+                }
+
                 if (data.script) {
                     loadStuff++;
                     // add additional script into loaded app iframe
@@ -68,9 +77,9 @@
                 }
                 if (data.css) {
                     loadStuff++;
-                    var st = document.createElement('style');
+                    var st = document.createElement('link');
                     st.onload = checkAndReply.bind(this, true);
-                    st.type = 'text/css';
+                    st.rel = 'stylesheet';
                     st.setAttribute('href', data.css);
                     document.head.appendChild(st);
                 }
