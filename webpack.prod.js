@@ -38,7 +38,12 @@ module.exports = {
                 test: /\.(js|jsx|json|node)$/,
                 exclude: /node_modules/,
                 use: [
-                    'babel-loader',
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            plugins: ['@babel/plugin-proposal-optional-chaining'],
+                        },
+                    },
                     // {
                     //     loader: 'js-conditional-compile-loader',
                     //     options: {

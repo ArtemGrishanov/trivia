@@ -133,7 +133,7 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
             }
         }
         if (nsId) {
-            if (state.app.popups?.enable) {
+            if (state.app.popups && state.app.popups.enable) {
                 const popupId = remix.getProperty('data.popupId', event.eventData)
 
                 if (typeof popupId === 'string' && popupId.length) {
@@ -143,7 +143,7 @@ export default function initRemixRouting(options = { remix: null, screenRoute: [
 
             const resultScreenIds = event.remix.getScreens({ tag: resultScreenTag }).map(({ hashlistId }) => hashlistId)
 
-            if (resultScreenIds.includes(nsId) && state.app.userForm?.enable) {
+            if (resultScreenIds.includes(nsId) && state.app.userForm && state.app.userForm.enable) {
                 const userFormScreen = remix.getScreens({ tag: userFormScreenTag, includeDisabled: true })[0]
 
                 if (userFormScreen && state.router.currentScreenId !== userFormScreen.hashlistId) {
