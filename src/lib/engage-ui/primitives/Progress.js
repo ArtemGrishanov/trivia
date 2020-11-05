@@ -159,6 +159,7 @@ export class Progress extends React.Component {
                     alignItems: 'center',
                     width: '100%',
                     height: '100%',
+                    whiteSpace: 'nowrap',
                 }
                 const text = this.props.step + '/' + this.props.max
                 return (

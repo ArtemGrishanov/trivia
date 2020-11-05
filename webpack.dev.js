@@ -12,7 +12,7 @@ const PROJECTS_PATH = path.resolve(__dirname, './src/projects')
 const getProjectEntries = () => {
     const dir = fs.readdirSync(PROJECTS_PATH)
 
-    const entries = Object.fromEntries(
+    return Object.fromEntries(
         dir
             .filter(entry => path.extname(entry) === '.js')
             .map(entry => {
@@ -21,8 +21,6 @@ const getProjectEntries = () => {
                 return [entry.replace(ext, ''), `${PROJECTS_PATH}/${entry}`]
             }),
     )
-
-    return entries
 }
 
 module.exports = {
