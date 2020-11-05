@@ -161,10 +161,9 @@ export class Progress extends React.Component {
                     height: '100%',
                     whiteSpace: 'nowrap',
                 }
-                const text = this.props.step + '/' + this.props.max
                 return (
                     <div className="rmx-text" style={st}>
-                        <span>{text}</span>
+                        <span>{`${step}/${max}`}</span>
                     </div>
                 )
             }
@@ -172,8 +171,7 @@ export class Progress extends React.Component {
     }
 
     render() {
-        let template = this.getTemplate()
-        return template
+        return this.getTemplate()
     }
 }
 
