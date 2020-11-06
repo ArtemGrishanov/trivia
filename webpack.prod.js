@@ -118,7 +118,9 @@ module.exports = {
         noEmitOnErrors: true,
     },
     plugins: [
-        new MiniCssExtractPlugin(),
+        new MiniCssExtractPlugin({
+            ignoreOrder: true,
+        }),
         new HtmlWebPackPlugin({
             template: './src/projects/index.html',
             filename: './index.html',

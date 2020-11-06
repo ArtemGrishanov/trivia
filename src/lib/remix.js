@@ -265,7 +265,6 @@ function receiveMessage({ origin = null, data = {}, source = null }) {
         }
     }
     if (data.method === 'set_remix_container_size') {
-        // console.log(`set_remix_container_size ${data.size.width} ${data.size.height}`)
         if (data.size.width > 0) {
             root.style.width = data.size.width + 'px'
         }
