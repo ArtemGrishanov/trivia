@@ -19,6 +19,8 @@ import HashList from '../lib/hashlist'
 import initPersonalityChain from '../lib/plugins/personality-chain'
 import initUserDataForm from '../lib/plugins/user-data-form'
 
+import getCartesianProduct from '../lib/utils/cartesianProduct'
+
 Remix.setStore(store)
 
 initButtonBehavior({ remix: Remix })
@@ -299,9 +301,7 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
 
     let weightDistribution = []
 
-    let questionScreensDistribution = {}
-    for (const [qId, q] of Object.entries(distributionHelper)) {
-        questionScreensDistribution[qId] = {}
+    for (const q of Object.values(distributionHelper)) {
         let arr = new Array(q.optionsLength).fill([])
         Object.values(q.results).forEach(el1 => {
             el1.forEach((el2, index2) => {
@@ -312,48 +312,33 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         weightDistribution.push(arr)
     }
 
-    const allPossibleChains =
-        weightDistribution.length > 1
-            ? weightDistribution.reduce((a, b) =>
-                  a.reduce(
-                      (r, v) => r.concat(b.map(w => [].concat(v.length && Array.isArray(v[0]) ? v : [v], [w]))),
-                      [],
-                  ),
-              )
-            : weightDistribution[0].map(el => {
-                  return [el]
-              })
-
     const resultsIds = response.results.map(result => result.screenId)
-    let check = new Array(allPossibleChains.length)
-    allPossibleChains.forEach((chain, index) => {
-        let chainWeightSum = new Array(resultsIds.length).fill(0)
-        chain.forEach(weights => {
-            for (let i = 0; i < resultsIds.length; i++) {
-                chainWeightSum[i] = chainWeightSum[i] + weights[i]
+    const resultsLength = resultsIds.length
+    let scores = new Array(resultsLength).fill(0)
+    let possibleChainsCount = 0
+    for (const values of getCartesianProduct(weightDistribution)) {
+        possibleChainsCount += 1
+        let tmp = new Array(resultsLength).fill(0)
+        values.forEach(el => {
+            for (let i = 0; i < resultsLength; i++) {
+                tmp[i] += el[i]
             }
         })
-        check[index] = chainWeightSum
-    })
-
-    let scores = new Array(resultsIds.length).fill(0)
-    check.forEach(el1 => {
-        const max = Math.max.apply(null, el1)
-        const maxLength = el1.filter(w => w === max).length
-        el1.forEach((el2, index2) => {
-            if (maxLength === resultsIds.length || el2 === max) {
-                scores[index2] = Math.round((scores[index2] + 1 / maxLength) * 100) / 100
+        const max = Math.max.apply(null, tmp)
+        const maxLength = tmp.filter(el => el === max).length
+        tmp.forEach((el, i) => {
+            if (maxLength === resultsLength || el === max) {
+                scores[i] = Math.round((scores[i] + 1 / maxLength) * 100) / 100
             }
         })
-    })
+    }
 
     scores.forEach((el, i) => {
         if (el === 0) {
             response._collision.results.neverShow.push(resultsIds[i])
             response._probability[resultsIds[i]].percentage = 0
         } else {
-            response._probability[resultsIds[i]].percentage =
-                Math.round(((el * 100) / allPossibleChains.length) * 100) / 100
+            response._probability[resultsIds[i]].percentage = Math.round(((el * 100) / possibleChainsCount) * 100) / 100
         }
     })
 
