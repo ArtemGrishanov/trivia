@@ -115,6 +115,10 @@ initQuizAnalytics({ remix: Remix })
  *
  */
 
+function isDefined(value) {
+    return typeof value !== 'undefined'
+}
+
 Remix.addMessageListener('getpersonalitydistribution', data => {
     let response = {
         questions: [],
@@ -129,6 +133,7 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
             },
         },
         _probability: {},
+        _probabilityType: null,
     }
 
     const distributionData = JSON.parse(
@@ -138,7 +143,15 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
                 : Remix.getState().app.personality.links.toArray(),
         ),
     )
-    const probabilityOnly = data.payload.probabilityOnly
+    // payload/probabilityOnly
+    const probabilityOnly = isDefined(data.payload.probabilityOnly) ? data.payload.probabilityOnly : false
+    // payload/probabilityType
+    const availableProbabilityTypes = ['auto', '1', '2']
+    const probabilityType =
+        isDefined(data.payload.probabilityType) &&
+        availableProbabilityTypes.indexOf(data.payload.probabilityType) !== -1
+            ? data.payload.probabilityType
+            : 'auto'
 
     const questionScreens = Remix.getScreens({ tag: 'question' })
     const resultScreens = Remix.getScreens({ tag: 'result' })
@@ -299,53 +312,87 @@ Remix.addMessageListener('getpersonalitydistribution', data => {
         })
     }
 
-    let weightDistribution = []
-
-    for (const q of Object.values(distributionHelper)) {
-        let arr = new Array(q.optionsLength).fill([])
-        Object.values(q.results).forEach(el1 => {
-            el1.forEach((el2, index2) => {
-                arr[index2] = [...arr[index2], el2]
-            })
-        })
-
-        weightDistribution.push(arr)
+    let possibleChainsCount = 1
+    for (const value of Object.values(distributionHelper)) {
+        possibleChainsCount *= value.optionsLength
     }
 
-    const resultsIds = response.results.map(result => result.screenId)
-    const resultsLength = resultsIds.length
-    let scores = new Array(resultsLength).fill(0)
-    let possibleChainsCount = 0
-    for (const values of getCartesianProduct(weightDistribution)) {
-        possibleChainsCount += 1
-        let tmp = new Array(resultsLength).fill(0)
-        values.forEach(el => {
-            for (let i = 0; i < resultsLength; i++) {
-                tmp[i] += el[i]
-            }
-        })
-        const max = Math.max.apply(null, tmp)
-        const maxLength = tmp.filter(el => el === max).length
-        tmp.forEach((el, i) => {
-            if (maxLength === resultsLength || el === max) {
-                scores[i] = Math.round((scores[i] + 1 / maxLength) * 100) / 100
-            }
-        })
-    }
+    // Probability magic
+    function setProbability(type) {
+        switch (type) {
+            case '1': {
+                let weightDistribution = []
+                for (const q of Object.values(distributionHelper)) {
+                    let arr = new Array(q.optionsLength).fill([])
+                    Object.values(q.results).forEach(el1 => {
+                        el1.forEach((el2, index2) => {
+                            arr[index2] = [...arr[index2], el2]
+                        })
+                    })
 
-    scores.forEach((el, i) => {
-        if (el === 0) {
-            response._collision.results.neverShow.push(resultsIds[i])
-            response._probability[resultsIds[i]].percentage = 0
-        } else {
-            response._probability[resultsIds[i]].percentage = Math.round(((el * 100) / possibleChainsCount) * 100) / 100
+                    weightDistribution.push(arr)
+                }
+
+                const resultsIds = response.results.map(result => result.screenId)
+                const resultsLength = resultsIds.length
+                let scores = new Array(resultsLength).fill(0)
+                for (const values of getCartesianProduct(weightDistribution)) {
+                    let tmp = new Array(resultsLength).fill(0)
+                    values.forEach(el => {
+                        for (let i = 0; i < resultsLength; i++) {
+                            tmp[i] += el[i]
+                        }
+                    })
+                    const max = Math.max.apply(null, tmp)
+                    const maxLength = tmp.filter(el => el === max).length
+                    tmp.forEach((el, i) => {
+                        if (maxLength === resultsLength || el === max) {
+                            scores[i] = Math.round((scores[i] + 1 / maxLength) * 100) / 100
+                        }
+                    })
+                }
+
+                scores.forEach((el, i) => {
+                    if (el === 0) {
+                        response._collision.results.neverShow.push(resultsIds[i])
+                        response._probability[resultsIds[i]].percentage = 0
+                    } else {
+                        response._probability[resultsIds[i]].percentage =
+                            Math.round(((el * 100) / possibleChainsCount) * 100) / 100
+                    }
+                })
+                break
+            }
+            case '2': {
+                // Функция рассчета от Олега
+                break
+            }
         }
-    })
+    }
+
+    if (probabilityType === 'auto') {
+        if (possibleChainsCount <= Math.pow(3, 10)) {
+            // equivalent - 10q and 3o for every q
+            response._probabilityType = '1'
+            setProbability('1')
+        } else {
+            response._probabilityType = '1' // change to 2
+            setProbability('1') // change to 2
+        }
+    } else {
+        response._probabilityType = probabilityType
+        setProbability(probabilityType)
+    }
 
     return {
         message: 'personality_distribution',
         data: {
-            result: probabilityOnly ? response._probability : response,
+            result: probabilityOnly
+                ? {
+                      probability: response._probability,
+                      probabilityType,
+                  }
+                : response,
         },
     }
 })
