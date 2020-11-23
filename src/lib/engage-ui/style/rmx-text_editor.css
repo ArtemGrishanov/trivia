@@ -251,3 +251,30 @@
     font-family: 'Rubik Mono One';
 }
 /* /quill custom fonts */
+
+/* SIZES */
+/*.ql-editor .ql-size-small {*/
+/*    font-size: .75em;*/
+/*}*/
+/*.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="12px"]::before {*/
+/*    content: 'Small';*/
+/*    font-size: 12px !important;*/
+/*}*/
+/*.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="14px"]::before {*/
+/*    content: 'Normal';*/
+/*    font-size: 14px !important;*/
+/*}*/
+/*.ql-editor .ql-size-large {*/
+/*    font-size: 1.5em;*/
+/*}*/
+/*.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="16px"]::before {*/
+/*    content: 'Large';*/
+/*    font-size: 16px !important;*/
+/*}*/
+/*.ql-editor .ql-size-huge {*/
+/*    font-size: 2.5em;*/
+/*}*/
+/*.ql-snow .ql-picker.ql-size .ql-picker-item[data-value="18px"]::before {*/
+/*    content: 'Huge';*/
+/*    font-size: 18px !important;*/
+/*}*/

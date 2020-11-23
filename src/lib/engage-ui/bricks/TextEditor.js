@@ -3,8 +3,13 @@ import { setComponentProps } from '../../remix'
 
 // https://github.com/zenoamaro/react-quill
 import ReactQuill from 'react-quill'
+// import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import '../style/rmx-text_editor.css'
+
+// var Size = Quill.import('attributors/style/size');
+// Size.whitelist = ['12px', '14px', '16px', '18px', '20px'];
+// Quill.register(Size, true);
 
 const // To add a new font:
     // 1. Add font into this array
@@ -81,6 +86,7 @@ export class TextEditor extends React.Component {
     modules = {
         toolbar: [
             ['bold', 'italic', 'underline'], // toggled buttons
+            // [{ 'size': Size.whitelist }],
             [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
             [{ color: [] }, { background: [] }], // dropdown with defaults from theme
             [{ font: Font.whitelist }],
