@@ -3,13 +3,29 @@ import { setComponentProps } from '../../remix'
 
 // https://github.com/zenoamaro/react-quill
 import ReactQuill from 'react-quill'
-// import ReactQuill, { Quill } from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import '../style/rmx-text_editor.css'
 
-// var Size = Quill.import('attributors/style/size');
-// Size.whitelist = ['12px', '14px', '16px', '18px', '20px'];
-// Quill.register(Size, true);
+// INLINE
+const Parchment = ReactQuill.Quill.import('parchment')
+// line-height
+const lineHeightConfig = {
+    scope: Parchment.Scope.INLINE,
+    whitelist: ['1.0', '1.2', '1.5', '1.6', '1.8', '2.0', '2.4', '2.8', '3.0', '4.0', '5.0'],
+}
+const lineHeightClass = new Parchment.Attributor.Class('lineheight', 'ql-line-height', lineHeightConfig)
+const lineHeightStyle = new Parchment.Attributor.Style('lineheight', 'line-height', lineHeightConfig)
+Parchment.register(lineHeightClass)
+Parchment.register(lineHeightStyle)
+// font-size
+const fontSizeConfig = {
+    scope: Parchment.Scope.INLINE,
+    whitelist: ['10px', '12px', '14px', '16px', '18px', '20px', '22px', '24px'],
+}
+const fontSizeClass = new Parchment.Attributor.Class('fontsize', 'ql-font-size', fontSizeConfig)
+const fontSizeStyle = new Parchment.Attributor.Style('fontsize', 'font-size', fontSizeConfig)
+Parchment.register(fontSizeClass)
+Parchment.register(fontSizeStyle)
 
 const // To add a new font:
     // 1. Add font into this array
@@ -86,8 +102,9 @@ export class TextEditor extends React.Component {
     modules = {
         toolbar: [
             ['bold', 'italic', 'underline'], // toggled buttons
-            // [{ 'size': Size.whitelist }],
-            [{ size: ['small', false, 'large', 'huge'] }], // custom dropdown
+            // [{ size: ['small', false, 'large', 'huge'] }],
+            [{ fontsize: fontSizeConfig.whitelist }],
+            [{ lineheight: lineHeightConfig.whitelist }],
             [{ color: [] }, { background: [] }], // dropdown with defaults from theme
             [{ font: Font.whitelist }],
             [{ align: [] }],
