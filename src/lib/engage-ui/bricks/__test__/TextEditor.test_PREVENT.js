@@ -31,7 +31,7 @@ describe('<TextEditor />', () => {
         expect(wrapper).toMatchSnapshot()
     })
 
-    it('should change font familly', () => {
+    it('should change font family', () => {
         const newText = `
             <p class="ql-align-center">
                 <strong class="ql-size-huge ql-font-Yeseva-One" style="color: rgb(255, 255, 255);">ARE YOU GOOD AT GEOGRAPHY?</strong>

@@ -40,221 +40,306 @@
 }
 /* /quill text editor */
 
-/* quill custom fonts */
-/* @import url('https://fonts.googleapis.com/css2?family=Roboto'); */
-/* text=Roboto */
+/*
+ *** Quill hacks ***
+*/
+.ql-toolbar.ql-snow .ql-picker-options {
+    max-height: 500px;
+    overflow-y: auto;
+    text-align: left;
+}
+.ql-snow .ql-picker-label::before {
+    display: block !important;
+    max-width: calc(100% - 18px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.ql-snow .ql-picker,
+.ql-snow .ql-picker-label {
+    outline: none !important;
+}
+
+/* * Fonts * */
+.ql-snow .ql-picker.ql-font {
+    width: 140px !important;
+}
+/* Roboto */
 .ql-font span[data-value='Roboto']::before {
-    font-family: 'Roboto';
+    font-family: 'Roboto', sans-serif;
     content: 'Roboto' !important;
 }
 .ql-font-Roboto {
-    font-family: 'Roboto';
+    font-family: 'Roboto', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Roboto Condensed'); */
-/* text=Roboto Condensed */
+/* Roboto Condensed */
 .ql-font span[data-value='RobotoCondensed']::before {
-    font-family: 'Roboto Condensed';
+    font-family: 'Roboto Condensed', sans-serif;
     content: 'Roboto Condensed' !important;
 }
 .ql-font-RobotoCondensed {
-    font-family: 'Roboto Condensed';
+    font-family: 'Roboto Condensed', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Open Sans'); */
-/* text=Open Sans */
+/* Open Sans */
 .ql-font span[data-value='OpenSans']::before {
-    font-family: 'Open Sans';
+    font-family: 'Open Sans', sans-serif;
     content: 'Open Sans' !important;
 }
 .ql-font-OpenSans {
-    font-family: 'Open Sans';
+    font-family: 'Open Sans', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Lato'); */
-/* text=Lato */
+/* Open Sans Condensed */
+.ql-font span[data-value='OpenSansCondensed']::before {
+    font-family: 'Open Sans Condensed', sans-serif;
+    content: 'Open Sans Condensed' !important;
+}
+.ql-font-OpenSansCondensed {
+    font-family: 'Open Sans Condensed', sans-serif;
+}
+/* Lato */
 .ql-font span[data-value='Lato']::before {
-    font-family: 'Lato';
+    font-family: 'Lato', sans-serif;
     content: 'Lato' !important;
 }
 .ql-font-Lato {
-    font-family: 'Lato';
+    font-family: 'Lato', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Montserrat'); */
-/* text=Montserrat */
+/* Montserrat */
 .ql-font span[data-value='Montserrat']::before {
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
     content: 'Montserrat' !important;
 }
 .ql-font-Montserrat {
-    font-family: 'Montserrat';
+    font-family: 'Montserrat', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Oswald'); */
-/* text=Oswald */
+/* Oswald */
 .ql-font span[data-value='Oswald']::before {
-    font-family: 'Oswald';
+    font-family: 'Oswald', sans-serif;
     content: 'Oswald' !important;
 }
 .ql-font-Oswald {
-    font-family: 'Oswald';
+    font-family: 'Oswald', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Merriweather'); */
-/* text=Merriweather */
+/* Merriweather */
 .ql-font span[data-value='Merriweather']::before {
-    font-family: 'Merriweather';
+    font-family: 'Merriweather', sans-serif;
     content: 'Merriweather' !important;
 }
 .ql-font-Merriweather {
-    font-family: 'Merriweather';
+    font-family: 'Merriweather', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Ubuntu'); */
-/* text=Ubuntu */
+/* Ubuntu */
 .ql-font span[data-value='Ubuntu']::before {
-    font-family: 'Ubuntu';
+    font-family: 'Ubuntu', sans-serif;
     content: 'Ubuntu' !important;
 }
 .ql-font-Ubuntu {
-    font-family: 'Ubuntu';
+    font-family: 'Ubuntu', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Lobster'); */
-/* text=Lobster */
+/* Lobster */
 .ql-font span[data-value='Lobster']::before {
-    font-family: 'Lobster';
+    font-family: 'Lobster', sans-serif;
     content: 'Lobster' !important;
 }
 .ql-font-Lobster {
-    font-family: 'Lobster';
+    font-family: 'Lobster', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Pacifico'); */
-/* text=Pacifico */
+/* Pacifico */
 .ql-font span[data-value='Pacifico']::before {
-    font-family: 'Pacifico';
+    font-family: 'Pacifico', sans-serif;
     content: 'Pacifico' !important;
 }
 .ql-font-Pacifico {
-    font-family: 'Pacifico';
+    font-family: 'Pacifico', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Vollkorn'); */
-/* text=Vollkorn */
+/* Vollkorn */
 .ql-font span[data-value='Vollkorn']::before {
-    font-family: 'Vollkorn';
+    font-family: 'Vollkorn', sans-serif;
     content: 'Vollkorn' !important;
 }
 .ql-font-Vollkorn {
-    font-family: 'Vollkorn';
+    font-family: 'Vollkorn', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Cuprum'); */
-/* text=Cuprum */
+/* Cuprum */
 .ql-font span[data-value='Cuprum']::before {
-    font-family: 'Cuprum';
+    font-family: 'Cuprum', sans-serif;
     content: 'Cuprum' !important;
 }
 .ql-font-Cuprum {
-    font-family: 'Cuprum';
+    font-family: 'Cuprum', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Alegreya Sans'); */
-/* text=Alegreya Sans */
+/* Alegreya Sans */
 .ql-font span[data-value='AlegreyaSans']::before {
-    font-family: 'Alegreya Sans';
+    font-family: 'Alegreya Sans', sans-serif;
     content: 'Alegreya Sans' !important;
 }
 .ql-font-AlegreyaSans {
-    font-family: 'Alegreya Sans';
+    font-family: 'Alegreya Sans', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Russo One'); */
-/* text=Russo One */
+/* Russo One */
 .ql-font span[data-value='RussoOne']::before {
-    font-family: 'Russo One';
+    font-family: 'Russo One', sans-serif;
     content: 'Russo One' !important;
 }
 .ql-font-RussoOne {
-    font-family: 'Russo One';
+    font-family: 'Russo One', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Playfair Display SC'); */
-/* text=Playfair Display SC */
+/* Playfair Display SC */
 .ql-font span[data-value='PlayfairDisplaySC']::before {
-    font-family: 'Playfair Display SC';
+    font-family: 'Playfair Display SC', sans-serif;
     content: 'Playfair Display SC' !important;
 }
 .ql-font-PlayfairDisplaySC {
-    font-family: 'Playfair Display SC';
+    font-family: 'Playfair Display SC', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Alice'); */
-/* text=Alice */
+/* Alice */
 .ql-font span[data-value='Alice']::before {
-    font-family: 'Alice';
+    font-family: 'Alice', sans-serif;
     content: 'Alice' !important;
 }
 .ql-font-Alice {
-    font-family: 'Alice';
+    font-family: 'Alice', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Press Start 2P'); */
-/* text=Press Start 2P */
+/* Press Start 2P */
 .ql-font span[data-value='PressStart2P']::before {
-    font-family: 'Press Start 2P';
+    font-family: 'Press Start 2P', sans-serif;
     content: 'Press Start 2P' !important;
 }
 .ql-font-PressStart2P {
-    font-family: 'Press Start 2P';
+    font-family: 'Press Start 2P', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Bad Script'); */
-/* text=Bad Script */
+/* Bad Script */
 .ql-font span[data-value='BadScript']::before {
-    font-family: 'Bad Script';
+    font-family: 'Bad Script', sans-serif;
     content: 'Bad Script' !important;
 }
 .ql-font-BadScript {
-    font-family: 'Bad Script';
+    font-family: 'Bad Script', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Yeseva One'); */
-/* text=Yeseva One */
+/* Yeseva One */
 .ql-font span[data-value='YesevaOne']::before {
-    font-family: 'Yeseva One';
+    font-family: 'Yeseva One', sans-serif;
     content: 'Yeseva One' !important;
 }
 .ql-font-YesevaOne {
-    font-family: 'Yeseva One';
+    font-family: 'Yeseva One', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Marmelad'); */
-/* text=Marmelad */
+/* Marmelad */
 .ql-font span[data-value='Marmelad']::before {
-    font-family: 'Marmelad';
+    font-family: 'Marmelad', sans-serif;
     content: 'Marmelad' !important;
 }
 .ql-font-Marmelad {
-    font-family: 'Marmelad';
+    font-family: 'Marmelad', sans-serif;
 }
-
-/* @import url('https://fonts.googleapis.com/css2?family=Rubik Mono One'); */
-/* text=Rubik Mono One */
+/* Rubik Mono One */
 .ql-font span[data-value='RubikMonoOne']::before {
-    font-family: 'Rubik Mono One';
+    font-family: 'Rubik Mono One', sans-serif;
     content: 'Rubik Mono One' !important;
 }
 .ql-font-RubikMonoOne {
-    font-family: 'Rubik Mono One';
+    font-family: 'Rubik Mono One', sans-serif;
 }
-/* /quill custom fonts */
+/* Raleway */
+.ql-font span[data-value='Raleway']::before {
+    font-family: 'Raleway', sans-serif;
+    content: 'Raleway' !important;
+}
+.ql-font-Raleway {
+    font-family: 'Raleway', sans-serif;
+}
+/* Roboto Slab */
+.ql-font span[data-value='RobotoSlab']::before {
+    font-family: 'Roboto Slab', sans-serif;
+    content: 'Roboto Slab' !important;
+}
+.ql-font-RobotoSlab {
+    font-family: 'Roboto Slab', sans-serif;
+}
+/* Lora */
+.ql-font span[data-value='Lora']::before {
+    font-family: 'Lora', sans-serif;
+    content: 'Lora' !important;
+}
+.ql-font-Lora {
+    font-family: 'Lora', sans-serif;
+}
+/* Seymour One */
+.ql-font span[data-value='SeymourOne']::before {
+    font-family: 'Seymour One', sans-serif;
+    content: 'Seymour One' !important;
+}
+.ql-font-SeymourOne {
+    font-family: 'Seymour One', sans-serif;
+}
+/* Cormorant SC */
+.ql-font span[data-value='CormorantSC']::before {
+    font-family: 'Cormorant SC', sans-serif;
+    content: 'Cormorant SC' !important;
+}
+.ql-font-CormorantSC {
+    font-family: 'Cormorant SC', sans-serif;
+}
+/* Literata */
+.ql-font span[data-value='Literata']::before {
+    font-family: 'Literata', sans-serif;
+    content: 'Literata' !important;
+}
+.ql-font-Literata {
+    font-family: 'Literata', sans-serif;
+}
+/* Spectral */
+.ql-font span[data-value='Spectral']::before {
+    font-family: 'Spectral', sans-serif;
+    content: 'Spectral' !important;
+}
+.ql-font-Spectral {
+    font-family: 'Spectral', sans-serif;
+}
+/* Alegreya */
+.ql-font span[data-value='Alegreya']::before {
+    font-family: 'Alegreya', sans-serif;
+    content: 'Alegreya' !important;
+}
+.ql-font-Alegreya {
+    font-family: 'Alegreya', sans-serif;
+}
+/* EB Garamond */
+.ql-font span[data-value='EBGaramond']::before {
+    font-family: 'EB Garamond', sans-serif;
+    content: 'EB Garamond' !important;
+}
+.ql-font-EBGaramond {
+    font-family: 'EB Garamond', sans-serif;
+}
+/* Bitter */
+.ql-font span[data-value='Bitter']::before {
+    font-family: 'Bitter', sans-serif;
+    content: 'Bitter' !important;
+}
+.ql-font-Bitter {
+    font-family: 'Bitter', sans-serif;
+}
+/* PT Serif */
+.ql-font span[data-value='PTSerif']::before {
+    font-family: 'PT Serif', sans-serif;
+    content: 'PT Serif' !important;
+}
+.ql-font-PTSerif {
+    font-family: 'PT Serif', sans-serif;
+}
+/* Noto Sans */
+.ql-font span[data-value='NotoSans']::before {
+    font-family: 'Noto Sans', sans-serif;
+    content: 'Noto Sans' !important;
+}
+.ql-font-NotoSans {
+    font-family: 'Noto Sans', sans-serif;
+}
 
-/* Line height */
+/* * Line height * */
 .ql-snow .ql-picker.ql-lineheight {
-    width: 58px;
+    width: 64px !important;
 }
 .ql-snow .ql-picker.ql-lineheight .ql-picker-item[data-value='1.0']::before {
     content: '1.0';
@@ -323,63 +408,91 @@
     content: '5.0' !important;
 }
 
-/* Font size */
+/* * Font size * */
 .ql-snow .ql-picker.ql-fontsize {
-    width: 58px;
+    width: 64px !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='8px']::before {
+    content: '8px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='8px']::before {
+    content: '8px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='9px']::before {
+    content: '9px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='9px']::before {
+    content: '9px' !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='10px']::before {
     content: '10px';
-    font-size: 10px !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='10px']::before {
     content: '10px' !important;
 }
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='11px']::before {
+    content: '11px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='11px']::before {
+    content: '11px' !important;
+}
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='12px']::before {
     content: '12px';
-    font-size: 12px !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='12px']::before {
     content: '12px' !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='14px']::before {
     content: '14px';
-    font-size: 14px !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='14px']::before {
     content: '14px' !important;
 }
-.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='16px']::before {
-    content: '16px';
-    font-size: 16px !important;
-}
-.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='16px']::before {
-    content: '16px' !important;
-}
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='18px']::before {
     content: '18px';
-    font-size: 18px !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='18px']::before {
     content: '18px' !important;
 }
-.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='20px']::before {
-    content: '20px';
-    font-size: 20px !important;
-}
-.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='20px']::before {
-    content: '20px' !important;
-}
-.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='22px']::before {
-    content: '22px';
-    font-size: 22px !important;
-}
-.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='22px']::before {
-    content: '22px' !important;
-}
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='24px']::before {
     content: '24px';
-    font-size: 24px !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='24px']::before {
     content: '24px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='30px']::before {
+    content: '30px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='30px']::before {
+    content: '30px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='36px']::before {
+    content: '36px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='36px']::before {
+    content: '36px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='48px']::before {
+    content: '48px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='48px']::before {
+    content: '48px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='60px']::before {
+    content: '60px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='60px']::before {
+    content: '60px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='72px']::before {
+    content: '72px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='72px']::before {
+    content: '72px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='96px']::before {
+    content: '96px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='96px']::before {
+    content: '96px' !important;
 }

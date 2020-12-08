@@ -6,7 +6,6 @@ import ReactQuill from 'react-quill'
 import 'react-quill/dist/quill.snow.css'
 import '../style/rmx-text_editor.css'
 
-// INLINE
 const Parchment = ReactQuill.Quill.import('parchment')
 // line-height
 const lineHeightConfig = {
@@ -20,7 +19,22 @@ Parchment.register(lineHeightStyle)
 // font-size
 const fontSizeConfig = {
     scope: Parchment.Scope.INLINE,
-    whitelist: ['10px', '12px', '14px', '16px', '18px', '20px', '22px', '24px'],
+    whitelist: [
+        '8px',
+        '9px',
+        '10px',
+        '11px',
+        '12px',
+        '14px',
+        '18px',
+        '24px',
+        '30px',
+        '36px',
+        '48px',
+        '60px',
+        '72px',
+        '96px',
+    ],
 }
 const fontSizeClass = new Parchment.Attributor.Class('fontsize', 'ql-font-size', fontSizeConfig)
 const fontSizeStyle = new Parchment.Attributor.Style('fontsize', 'font-size', fontSizeConfig)
@@ -34,6 +48,7 @@ const // To add a new font:
         'Roboto',
         'Roboto Condensed',
         'Open Sans',
+        'Open Sans Condensed',
         'Lato',
         'Montserrat',
         'Oswald',
@@ -52,6 +67,18 @@ const // To add a new font:
         'Yeseva One',
         'Marmelad',
         'Rubik Mono One',
+        'Raleway',
+        'Roboto Slab',
+        'Lora',
+        'Seymour One',
+        'Cormorant SC',
+        'Literata',
+        'Spectral',
+        'Alegreya',
+        'EB Garamond',
+        'Bitter',
+        'PT Serif',
+        'Noto Sans',
     ],
     importedFonts = {
         // 'Ubuntu': true | false
@@ -101,13 +128,9 @@ export class TextEditor extends React.Component {
 
     modules = {
         toolbar: [
-            ['bold', 'italic', 'underline'], // toggled buttons
-            // [{ size: ['small', false, 'large', 'huge'] }],
-            [{ fontsize: fontSizeConfig.whitelist }],
-            [{ lineheight: lineHeightConfig.whitelist }],
-            [{ color: [] }, { background: [] }], // dropdown with defaults from theme
-            [{ font: Font.whitelist }],
-            [{ align: [] }],
+            [{ font: Font.whitelist }, { fontsize: fontSizeConfig.whitelist }],
+            ['bold', 'italic', 'underline', { color: [] }, { background: [] }],
+            [{ align: [] }, { lineheight: lineHeightConfig.whitelist }],
             ['link', 'clean'],
         ],
     }
