@@ -44,7 +44,7 @@
  *** Quill hacks ***
 */
 .ql-toolbar.ql-snow .ql-picker-options {
-    max-height: 500px;
+    max-height: 400px;
     overflow-y: auto;
     text-align: left;
 }
@@ -448,11 +448,23 @@
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='14px']::before {
     content: '14px' !important;
 }
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='16px']::before {
+    content: '16px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='16px']::before {
+    content: '16px' !important;
+}
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='18px']::before {
     content: '18px';
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='18px']::before {
     content: '18px' !important;
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='20px']::before {
+    content: '20px';
+}
+.ql-snow .ql-picker.ql-fontsize .ql-picker-label[data-value='20px']::before {
+    content: '20px' !important;
 }
 .ql-snow .ql-picker.ql-fontsize .ql-picker-item[data-value='24px']::before {
     content: '24px';
