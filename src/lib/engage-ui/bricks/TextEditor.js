@@ -10,7 +10,7 @@ const Parchment = ReactQuill.Quill.import('parchment')
 // line-height
 const lineHeightConfig = {
     scope: Parchment.Scope.INLINE,
-    whitelist: ['1.0', '1.2', '1.5', '1.6', '1.8', '2.0', '2.4', '2.8'],
+    whitelist: ['1', '1.2', '1.5', '1.6', '1.8', '2', '2.4', '2.8'],
 }
 const lineHeightClass = new Parchment.Attributor.Class('lineheight', 'ql-line-height', lineHeightConfig)
 const lineHeightStyle = new Parchment.Attributor.Style('lineheight', 'line-height', lineHeightConfig)
